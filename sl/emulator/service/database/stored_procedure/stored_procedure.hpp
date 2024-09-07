@@ -1,0 +1,7 @@
+#pragma once
+#include "sl/emulator/service/database/stored_procedure/impl/account_add.h"
+#include "sl/emulator/service/database/stored_procedure/impl/account_get.h"
+#include "sl/emulator/service/database/stored_procedure/impl/lobby_characters_get.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_create.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_delete_soft.h"
+#include "sl/emulator/service/database/stored_procedure/impl/characters_name_get.h"
