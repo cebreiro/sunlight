@@ -33,7 +33,7 @@ namespace sunlight
         return "database_service";
     }
 
-    auto DatabaseService::CreateAccount(std::string account, std::string password, int8_t gmLevel) -> Future<std::optional<dto::Account>>
+    auto DatabaseService::CreateAccount(std::string account, std::string password, int8_t gmLevel) -> Future<std::optional<db::dto::Account>>
     {
         [[maybe_unused]]
         const auto self = shared_from_this();
@@ -54,7 +54,7 @@ namespace sunlight
         co_return accountAdd.GetResult();
     }
 
-    auto DatabaseService::FindAccount(std::string account) -> Future<std::optional<dto::Account>>
+    auto DatabaseService::FindAccount(std::string account) -> Future<std::optional<db::dto::Account>>
     {
         [[maybe_unused]]
         const auto self = shared_from_this();
@@ -96,7 +96,7 @@ namespace sunlight
         co_return charactersNameGet.GetResult();
     }
 
-    auto DatabaseService::GetLobbyCharacters(int64_t aid, int8_t sid) -> Future<std::optional<std::vector<dto::LobbyCharacter>>>
+    auto DatabaseService::GetLobbyCharacters(int64_t aid, int8_t sid) -> Future<std::optional<std::vector<db::dto::LobbyCharacter>>>
     {
         [[maybe_unused]]
         const auto self = shared_from_this();
@@ -163,7 +163,7 @@ namespace sunlight
         co_return true;
     }
 
-    auto DatabaseService::GetCharacter(int64_t cid) -> Future<std::optional<dto::Character>>
+    auto DatabaseService::GetCharacter(int64_t cid) -> Future<std::optional<db::dto::Character>>
     {
         [[maybe_unused]]
         const auto self = shared_from_this();

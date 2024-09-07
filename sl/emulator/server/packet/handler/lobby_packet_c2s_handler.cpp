@@ -25,7 +25,7 @@
 
 namespace sunlight
 {
-    using lobby_characters_type = std::vector<dto::LobbyCharacter>;
+    using lobby_characters_type = std::vector<db::dto::LobbyCharacter>;
 
     LobbyPacketC2SHandler::LobbyPacketC2SHandler(const ServiceLocator& serviceLocator, LobbyServer& lobbyServer)
         : _serviceLocator(serviceLocator)
@@ -178,7 +178,7 @@ namespace sunlight
 
         std::any& storage = connection.GetStorage();
 
-        std::optional<std::vector<dto::LobbyCharacter>> lobbyCharacters =
+        std::optional<std::vector<db::dto::LobbyCharacter>> lobbyCharacters =
             co_await _serviceLocator.Get<DatabaseService>().GetLobbyCharacters(authToken->GetAccountId(), authToken->GetSid());
         if (!lobbyCharacters.has_value())
         {
@@ -383,7 +383,7 @@ namespace sunlight
 
         lobby_characters_type& characters = std::any_cast<lobby_characters_type&>(storage);
 
-        const auto iter = std::ranges::find_if(characters, [slot](const dto::LobbyCharacter& character) -> bool
+        const auto iter = std::ranges::find_if(characters, [slot](const db::dto::LobbyCharacter& character) -> bool
             {
                 return character.slot == slot;
             });
@@ -449,7 +449,7 @@ namespace sunlight
 
         lobby_characters_type& characters = std::any_cast<lobby_characters_type&>(storage);
 
-        const auto iter = std::ranges::find_if(characters, [slot](const dto::LobbyCharacter& character) -> bool
+        const auto iter = std::ranges::find_if(characters, [slot](const db::dto::LobbyCharacter& character) -> bool
             {
                 return character.slot == slot;
             });

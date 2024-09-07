@@ -1,6 +1,6 @@
 #pragma once
 
-namespace sunlight::dto
+namespace sunlight::db::dto
 {
     struct LobbyCharacter
     {

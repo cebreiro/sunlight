@@ -82,7 +82,7 @@ namespace sunlight
         DatabaseService& databaseService = _serviceLocator.Get<DatabaseService>();
         SafeHashService& safeHashService = _serviceLocator.Get<SafeHashService>();
 
-        std::optional<dto::Account> dto = co_await databaseService.FindAccount(account);
+        std::optional<db::dto::Account> dto = co_await databaseService.FindAccount(account);
 
         if (!dto.has_value())
         {

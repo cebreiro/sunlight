@@ -124,7 +124,7 @@ namespace sunlight
 
         connection.SetGameClient(client.get());
 
-        std::optional<dto::Character> dto = co_await _serviceLocator.Get<DatabaseService>().GetCharacter(client->GetCid());
+        std::optional<db::dto::Character> dto = co_await _serviceLocator.Get<DatabaseService>().GetCharacter(client->GetCid());
         if (!dto.has_value())
         {
             SUNLIGHT_LOG_ERROR(_serviceLocator,

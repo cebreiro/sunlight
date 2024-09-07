@@ -1,7 +1,7 @@
 #pragma once
 #include "sl/emulator/service/database/enum/item_pos_type.h"
 
-namespace sunlight::dto
+namespace sunlight::db::dto
 {
     struct Character
     {

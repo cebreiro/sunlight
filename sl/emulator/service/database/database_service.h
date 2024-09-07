@@ -31,16 +31,16 @@ namespace sunlight
         auto GetName() const->std::string_view override;
 
     public:
-        auto CreateAccount(std::string account, std::string password, int8_t gmLevel) -> Future<std::optional<dto::Account>>;
-        auto FindAccount(std::string account) -> Future<std::optional<dto::Account>>;
+        auto CreateAccount(std::string account, std::string password, int8_t gmLevel) -> Future<std::optional<db::dto::Account>>;
+        auto FindAccount(std::string account) -> Future<std::optional<db::dto::Account>>;
 
         auto GetCharacterNamesAll() -> Future<std::vector<std::string>>;
 
-        auto GetLobbyCharacters(int64_t aid, int8_t sid) -> Future<std::optional<std::vector<dto::LobbyCharacter>>>;
+        auto GetLobbyCharacters(int64_t aid, int8_t sid) -> Future<std::optional<std::vector<db::dto::LobbyCharacter>>>;
         auto CreateCharacter(req::CharacterCreate request) -> Future<bool>;
         auto DeleteCharacterSoft(int64_t cid) -> Future<bool>;
 
-        auto GetCharacter(int64_t cid) -> Future<std::optional<dto::Character>>;
+        auto GetCharacter(int64_t cid) -> Future<std::optional<db::dto::Character>>;
 
     private:
         void LogError(std::string_view function, const DatabaseError& error, const std::optional<std::string>& additionalLog = std::nullopt);

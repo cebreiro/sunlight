@@ -29,7 +29,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto LobbyPacketS2CCreator::CreateCharacterList(const ItemDataProvider& itemDataProvider, const std::vector<dto::LobbyCharacter>& characters) -> Buffer
+    auto LobbyPacketS2CCreator::CreateCharacterList(const ItemDataProvider& itemDataProvider, const std::vector<db::dto::LobbyCharacter>& characters) -> Buffer
     {
         SlPacketWriter writer;
 
@@ -54,7 +54,7 @@ namespace sunlight
                 return itemData->GetModelId();
             };
 
-        for (const dto::LobbyCharacter& character : characters)
+        for (const db::dto::LobbyCharacter& character : characters)
         {
             {
                 PacketWriter objectWriter;
