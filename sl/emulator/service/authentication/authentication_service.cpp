@@ -57,7 +57,7 @@ namespace sunlight
             co_return std::shared_ptr<AuthenticationToken>{};
         }
 
-        std::uniform_int_distribution<int32_t> dist;
+        std::uniform_int_distribution<uint32_t> dist;
 
         while (true)
         {

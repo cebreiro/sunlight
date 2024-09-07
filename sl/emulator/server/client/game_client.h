@@ -34,10 +34,12 @@ namespace sunlight
         auto GetId() const -> game_client_id_type;
         auto GetState() const -> GameClientState;
         auto GetAuthenticationToken() const -> const std::shared_ptr<AuthenticationToken>&;
+        auto GetCid() const -> int64_t;
 
         void SetState(GameClientState state);
         void SetConnection(ServerType type, std::shared_ptr<ServerConnection> conn);
         void SetAuthenticationToken(std::shared_ptr<AuthenticationToken> token);
+        void SetCid(int64_t id);
 
     private:
         auto GetConnection(ServerType type) -> std::shared_ptr<ServerConnection>&;
@@ -48,6 +50,7 @@ namespace sunlight
         game_client_id_type _id = game_client_id_type::Default();
         GameClientState _state = GameClientState::LoginConnected;
         std::shared_ptr<AuthenticationToken> _authenticationToken;
+        int64_t _cid = -1;
 
         mutable std::shared_mutex _connectionMutex;
         std::array<std::shared_ptr<ServerConnection>, static_cast<int32_t>(ServerType::Count)> _connections = {};

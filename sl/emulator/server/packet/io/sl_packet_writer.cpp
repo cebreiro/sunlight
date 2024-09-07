@@ -58,12 +58,17 @@ namespace sunlight
 
     void SlPacketWriter::WriteObject(PacketWriter& objectWriter)
     {
+        Buffer buffer = objectWriter.Flush();
+
+        WriteObject(buffer);
+    }
+
+    void SlPacketWriter::WriteObject(const Buffer& buffer)
+    {
         block_t& block = _blocks.emplace_back();
 
-        const int64_t bufferSize = objectWriter.GetWriteSize();
+        const int64_t bufferSize = buffer.GetSize();
         ThrowIfOverflow(bufferSize);
-
-        Buffer buffer = objectWriter.Flush();
 
         const uint16_t size = static_cast<uint16_t>(bufferSize);
 

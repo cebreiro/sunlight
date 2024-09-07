@@ -3,16 +3,17 @@
 
 namespace sunlight
 {
-    class LoginPacketCodec final : public IPacketCodec
+    class ZonePacketCodec final : public IPacketCodec
     {
     public:
-        LoginPacketCodec(uint32_t key1, uint32_t key2);
-
         void Decode(Buffer::iterator begin, Buffer::iterator end) override;
         void Encode(Buffer::iterator begin, Buffer::iterator end) override;
 
     private:
-        std::array<uint32_t, 2> _encodeKeys = {};
-        std::array<uint32_t, 2> _decodeKeys = {};
+        int32_t _decodeSN = 0;
+        int32_t _encodeSN = 0;
+
+        int8_t _decodeLastValue = 0;
+        int8_t _encodeLastValue = 0;
     };
 }

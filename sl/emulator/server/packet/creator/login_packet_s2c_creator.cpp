@@ -23,16 +23,6 @@ namespace
 
 namespace sunlight
 {
-    LoginPacketS2CCreator::LoginPacketS2CCreator(const ServiceLocator& serviceLocator)
-        : _serviceLocator(serviceLocator)
-    {
-    }
-
-    auto LoginPacketS2CCreator::GetName() const -> std::string_view
-    {
-        return "login_packet_s2c_creator";
-    }
-
     auto LoginPacketS2CCreator::CreateHello(uint32_t key1, uint32_t key2) -> Buffer
     {
         PacketWriter writer;

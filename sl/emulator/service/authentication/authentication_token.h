@@ -9,19 +9,21 @@ namespace sunlight
         class Key
         {
         public:
-            Key(int32_t low, int32_t high);
+            Key(uint32_t low, uint32_t high);
 
-            auto GetLow() const -> int32_t;
-            auto GetHigh() const -> int32_t;
+            auto GetLow() const -> uint32_t;
+            auto GetHigh() const -> uint32_t;
 
             auto ToString() const -> std::string;
+
+            static auto From(const std::string& str) -> std::optional<Key>;
 
             friend bool operator==(const Key& lhs, const Key& rhs);
             friend bool operator!=(const Key& lhs, const Key& rhs);
 
         private:
-            int32_t _low = 0;
-            int32_t _high = 0;
+            uint32_t _low = 0;
+            uint32_t _high = 0;
         };
 
     public:

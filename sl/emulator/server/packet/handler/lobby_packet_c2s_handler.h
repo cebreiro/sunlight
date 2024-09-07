@@ -5,8 +5,8 @@
 
 namespace sunlight
 {
-    class SlPacketReader;
     class LobbyServer;
+    class SlPacketReader;
 }
 
 namespace sunlight
@@ -33,6 +33,7 @@ namespace sunlight
         auto HandleCharacterNameCheck(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>;
         auto HandleCharacterCreate(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>;
         auto HandleCharacterDelete(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>;
+        auto HandleCharacterSelect(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>;
 
     private:
         ServiceLocator _serviceLocator;

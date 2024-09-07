@@ -5,3 +5,4 @@
 #include "sl/emulator/service/database/stored_procedure/impl/character_create.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_delete_soft.h"
 #include "sl/emulator/service/database/stored_procedure/impl/characters_name_get.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_get.h"

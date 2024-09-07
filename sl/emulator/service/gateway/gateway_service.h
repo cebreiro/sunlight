@@ -18,6 +18,9 @@ namespace sunlight
 
     public:
         auto AddLobby(int8_t serverId, std::string address) -> Future<void>;
+        auto AddZone(int8_t serverId, std::string address, uint16_t port, int32_t zoneId) -> Future<void>;
+
+        auto FindZone(int8_t serverId, int32_t zoneId) const -> Future<std::optional<std::pair<std::string, uint16_t>>>;
 
         auto GetLobbies() const -> Future<std::vector<std::pair<int8_t, std::string>>>;
 
@@ -26,5 +29,6 @@ namespace sunlight
         SharedPtrNotNull<Strand> _strand;
 
         std::vector<std::pair<int8_t, std::string>> _lobbies;
+        std::unordered_map<int8_t, std::unordered_map<int32_t, std::pair<std::string, uint16_t>>> _zones;
     };
 }

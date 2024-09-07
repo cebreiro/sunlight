@@ -7,23 +7,25 @@ namespace sunlight::dto
 
 namespace sunlight
 {
-    class LobbyPacketS2CCreator final : public IService
+    class ItemDataProvider;
+    struct LobbyS2CEndpoint;
+}
+
+namespace sunlight
+{
+    class LobbyPacketS2CCreator
     {
     public:
-        explicit LobbyPacketS2CCreator(const ServiceLocator& serviceLocator);
+        LobbyPacketS2CCreator() = delete;
+    
+        static auto CreateClientVersionCheckResult(bool success)  -> Buffer;
+        static auto CreateAuthenticationResult(bool success, const std::string& unk)  -> Buffer;
 
-        auto GetName() const -> std::string_view override;
-
-    public:
-        auto CreateClientVersionCheckResult(bool success) const -> Buffer;
-        auto CreateAuthenticationResult(bool success, const std::string& unk) const -> Buffer;
-
-        auto CreateCharacterList(const std::vector<dto::LobbyCharacter>& characters) const -> Buffer;
-        auto CreateCharacterNameCheckResult(bool success, const std::string& name) const -> Buffer;
-        auto CreateCharacterCreateResult(bool success) -> Buffer;
-        auto CreateCharacterDeleteResult(bool success) -> Buffer;
-
-    private:
-        const ServiceLocator& _serviceLocator;
+        static auto CreateCharacterList(const ItemDataProvider& itemDataProvider, const std::vector<dto::LobbyCharacter>& characters)  -> Buffer;
+        static auto CreateCharacterNameCheckResult(bool success, const std::string& name)  -> Buffer;
+        static auto CreateCharacterCreateResult(bool success) -> Buffer;
+        static auto CreateCharacterDeleteResult(bool success) -> Buffer;
+        static auto CreateCharacterSelectSuccess(int32_t unused, const std::string& key, const LobbyS2CEndpoint& endpoint) -> Buffer;
+        static auto CreateCharacterSelectFail() -> Buffer;
     };
 }

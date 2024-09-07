@@ -1,6 +1,7 @@
 #pragma once
 #include "sl/emulator/service/emulation_service_interface.h"
 #include "sl/emulator/service/database/dto/account.h"
+#include "sl/emulator/service/database/dto/character.h"
 #include "sl/emulator/service/database/dto/lobby_character.h"
 #include "sl/emulator/service/database/request/character_create.h"
 
@@ -38,6 +39,8 @@ namespace sunlight
         auto GetLobbyCharacters(int64_t aid, int8_t sid) -> Future<std::optional<std::vector<dto::LobbyCharacter>>>;
         auto CreateCharacter(req::CharacterCreate request) -> Future<bool>;
         auto DeleteCharacterSoft(int64_t cid) -> Future<bool>;
+
+        auto GetCharacter(int64_t cid) -> Future<std::optional<dto::Character>>;
 
     private:
         void LogError(std::string_view function, const DatabaseError& error, const std::optional<std::string>& additionalLog = std::nullopt);

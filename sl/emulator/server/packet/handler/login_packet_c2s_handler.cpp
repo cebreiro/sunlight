@@ -95,7 +95,7 @@ namespace sunlight
         if (!dto.has_value() || dto->banned || dto->deleted ||
             !co_await safeHashService.Compare(dto->password, password))
         {
-            client.Send(ServerType::Login, _serviceLocator.Get<LoginPacketS2CCreator>().CreateLoginFail(LoginResult::InvalidIDPassword));
+            client.Send(ServerType::Login, LoginPacketS2CCreator::CreateLoginFail(LoginResult::InvalidIDPassword));
 
             co_return;
         }
@@ -115,7 +115,7 @@ namespace sunlight
                 }
             }
 
-            client.Send(ServerType::Login, _serviceLocator.Get<LoginPacketS2CCreator>().CreateLoginFail(LoginResult::ReleaseExistingConnection));
+            client.Send(ServerType::Login, LoginPacketS2CCreator::CreateLoginFail(LoginResult::ReleaseExistingConnection));
 
             co_return;
         }
@@ -125,7 +125,7 @@ namespace sunlight
         client.SetState(GameClientState::LoginAuthenticated);
         client.SetAuthenticationToken(std::move(token));
 
-        client.Send(ServerType::Login, _serviceLocator.Get<LoginPacketS2CCreator>().CreateServerList(lobbyList));
+        client.Send(ServerType::Login, LoginPacketS2CCreator::CreateServerList(lobbyList));
     }
 
     auto LoginPacketC2SHandler::HandleWorldSelect(GameClient& client, BufferReader& reader) const -> Future<void>
@@ -145,7 +145,7 @@ namespace sunlight
 
         client.SetState(GameClientState::LoginToLobby);
 
-        client.Send(ServerType::Login, _serviceLocator.Get<LoginPacketS2CCreator>().CreateLobbyPass(key1, key2, sid));
+        client.Send(ServerType::Login, LoginPacketS2CCreator::CreateLobbyPass(key1, key2, sid));
 
         co_return;
     }

@@ -16,22 +16,16 @@ namespace sunlight
 
 namespace sunlight
 {
-    class LoginPacketS2CCreator final : public IService
+    class LoginPacketS2CCreator
     {
     public:
-        explicit LoginPacketS2CCreator(const ServiceLocator& serviceLocator);
+        LoginPacketS2CCreator() = delete;
 
-        auto GetName() const -> std::string_view override;
+        static auto CreateHello(uint32_t key1, uint32_t key2) -> Buffer;
 
-    public:
-        auto CreateHello(uint32_t key1, uint32_t key2) -> Buffer;
+        static auto CreateServerList(const std::vector<std::pair<int8_t, std::string>>& list) -> Buffer;
+        static auto CreateLobbyPass(int32_t key1, int32_t key2, int8_t unk) -> Buffer;
 
-        auto CreateServerList(const std::vector<std::pair<int8_t, std::string>>& list) -> Buffer;
-        auto CreateLobbyPass(int32_t key1, int32_t key2, int8_t unk) -> Buffer;
-
-        auto CreateLoginFail(LoginResult result) -> Buffer;
-
-    private:
-        const ServiceLocator& _serviceLocator;
+        static auto CreateLoginFail(LoginResult result) -> Buffer;
     };
 }

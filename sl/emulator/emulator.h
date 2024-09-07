@@ -11,8 +11,6 @@ namespace sunlight
 {
     class GameDataProvideService;
     class GameClientStorage;
-    class LoginPacketS2CCreator;
-    class LobbyPacketS2CCreator;
     class SafeHashService;
     class Sha256HashService;
     class SnowflakeService;
@@ -32,6 +30,7 @@ namespace sunlight
 {
     class LoginServer;
     class LobbyServer;
+    class ZoneServer;
 }
 
 namespace sunlight
@@ -71,8 +70,6 @@ namespace sunlight
 
         SharedPtrNotNull<GameDataProvideService> _gameDataProvideService;
         SharedPtrNotNull<GameClientStorage> _gameClientStorage;
-        SharedPtrNotNull<LoginPacketS2CCreator> _loginPacketS2CCreator;
-        SharedPtrNotNull<LobbyPacketS2CCreator> _lobbyPacketS2CCreator;
         SharedPtrNotNull<SafeHashService> _safeHashService;
         SharedPtrNotNull<Sha256HashService> _sha256HashService;
         SharedPtrNotNull<SnowflakeService> _snowflakeService;
@@ -85,5 +82,6 @@ namespace sunlight
 
         SharedPtrNotNull<LoginServer> _loginServer;
         SharedPtrNotNull<LobbyServer> _lobbyServer;
+        std::unordered_map<int8_t, std::unordered_map<int32_t, SharedPtrNotNull<ZoneServer>>> _zoneServers;
     };
 }

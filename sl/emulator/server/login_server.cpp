@@ -29,6 +29,10 @@ namespace sunlight
 
     void LoginServer::OnAccept(Session& session)
     {
+        SUNLIGHT_LOG_INFO(_serviceLocator,
+            fmt::format("[{}] accept session. session: {}",
+                GetName(), session));
+
         auto connection = std::make_shared<ServerConnection>(_serviceLocator, TYPE,
             session.shared_from_this(),
             std::make_shared<Strand>(GetExecutor().SharedFromThis()),
@@ -65,7 +69,7 @@ namespace sunlight
 
         connection->Start();
 
-        Buffer body = _serviceLocator.Get<LoginPacketS2CCreator>().CreateHello(ServerConstant::LOGIN_FIRST_KEY, ServerConstant::LOGIN_SECOND_KEY);
+        Buffer body = LoginPacketS2CCreator::CreateHello(ServerConstant::LOGIN_FIRST_KEY, ServerConstant::LOGIN_SECOND_KEY);
         Buffer head = connection->MakePacketHeader(body);
 
         head.MergeBack(std::move(body));

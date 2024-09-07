@@ -63,6 +63,11 @@ namespace sunlight
         return _authenticationToken;
     }
 
+    auto GameClient::GetCid() const -> int64_t
+    {
+        return _cid;
+    }
+
     void GameClient::SetState(GameClientState state)
     {
         _state = state;
@@ -78,6 +83,11 @@ namespace sunlight
     void GameClient::SetAuthenticationToken(std::shared_ptr<AuthenticationToken> token)
     {
         _authenticationToken = std::move(token);
+    }
+
+    void GameClient::SetCid(int64_t id)
+    {
+        _cid = id;
     }
 
     auto GameClient::GetConnection(ServerType type) -> std::shared_ptr<ServerConnection>&

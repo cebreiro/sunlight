@@ -11,7 +11,7 @@ namespace sunlight
 
         for (auto iter = begin; iter != end; ++iter, ++i)
         {
-            *iter = (*iter ^ static_cast<char>(ServerConstant::CRYPTO_KEYS[(i + _decodeSN) & 0xFF])) - prev;
+            *iter = (*iter ^ static_cast<char>(ServerConstant::CRYPTO_VALUES[(i + _decodeSN) & 0xFF])) - prev;
             prev = *iter;
         }
 
@@ -25,7 +25,7 @@ namespace sunlight
         char CL = 0;
         char BL = *iter;
 
-        *iter = BL ^ static_cast<char>(ServerConstant::CRYPTO_KEYS[(_encodeSN & 0xFF)]);
+        *iter = BL ^ static_cast<char>(ServerConstant::CRYPTO_VALUES[(_encodeSN & 0xFF)]);
 
         ++iter;
         int32_t i = 1;
@@ -37,7 +37,7 @@ namespace sunlight
             CL = c;
             CL = CL + BL;
             BL = c;
-            c = CL ^ static_cast<char>(ServerConstant::CRYPTO_KEYS[(i + _encodeSN) & 0xFF]);
+            c = CL ^ static_cast<char>(ServerConstant::CRYPTO_VALUES[(i + _encodeSN) & 0xFF]);
         }
 
         _encodeSN += i & 0xFF;

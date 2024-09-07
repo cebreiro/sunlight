@@ -1,24 +1,14 @@
 #include "lobby_packet_s2c_creator.h"
 
 #include "sl/emulator/server/packet/lobby_packet_s2c.h"
+#include "sl/emulator/server/packet/dto/lobby_s2c_endpoint.h"
 #include "sl/emulator/server/packet/io/sl_packet_writer.h"
 #include "sl/emulator/service/database/dto/lobby_character.h"
-#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
 namespace sunlight
 {
-    LobbyPacketS2CCreator::LobbyPacketS2CCreator(const ServiceLocator& serviceLocator)
-        : _serviceLocator(serviceLocator)
-    {
-    }
-
-    auto LobbyPacketS2CCreator::GetName() const -> std::string_view
-    {
-        return "lobby_packet_s2c_creator";
-    }
-
-    auto LobbyPacketS2CCreator::CreateClientVersionCheckResult(bool success) const -> Buffer
+    auto LobbyPacketS2CCreator::CreateClientVersionCheckResult(bool success) -> Buffer
     {
         SlPacketWriter writer;
 
@@ -28,7 +18,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto LobbyPacketS2CCreator::CreateAuthenticationResult(bool success, const std::string& unk) const -> Buffer
+    auto LobbyPacketS2CCreator::CreateAuthenticationResult(bool success, const std::string& unk) -> Buffer
     {
         SlPacketWriter writer;
 
@@ -39,7 +29,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto LobbyPacketS2CCreator::CreateCharacterList(const std::vector<dto::LobbyCharacter>& characters) const -> Buffer
+    auto LobbyPacketS2CCreator::CreateCharacterList(const ItemDataProvider& itemDataProvider, const std::vector<dto::LobbyCharacter>& characters) -> Buffer
     {
         SlPacketWriter writer;
 
@@ -47,8 +37,6 @@ namespace sunlight
         writer.Write<int32_t>(0); // unk. but it must be 0. v4[92]
         writer.Write<int32_t>(static_cast<int32_t>(std::ssize(characters)));
         writer.Write<int32_t>(0); // unk. it is used as branch.
-
-        const ItemDataProvider& itemDataProvider = _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider();
 
         const auto getModelId = [&itemDataProvider](int32_t itemId) -> int32_t
             {
@@ -159,7 +147,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto LobbyPacketS2CCreator::CreateCharacterNameCheckResult(bool success, const std::string& name) const -> Buffer
+    auto LobbyPacketS2CCreator::CreateCharacterNameCheckResult(bool success, const std::string& name) -> Buffer
     {
         SlPacketWriter writer;
 
@@ -185,6 +173,33 @@ namespace sunlight
         SlPacketWriter writer;
 
         writer.Write(LobbyPacketS2C::CharacterDelete);
+        writer.Write<int32_t>(!success);
+
+        return writer.Flush();
+    }
+
+    auto LobbyPacketS2CCreator::CreateCharacterSelectSuccess(int32_t unused, const std::string& key, const LobbyS2CEndpoint& endpoint) -> Buffer
+    {
+        constexpr bool success = true;
+
+        SlPacketWriter writer;
+
+        writer.Write(LobbyPacketS2C::CharacterSelect);
+        writer.Write<int32_t>(!success);
+        writer.Write<int32_t>(unused);
+        writer.WriteString(key);
+        writer.WriteObject(endpoint.Serialize());
+
+        return writer.Flush();
+    }
+
+    auto LobbyPacketS2CCreator::CreateCharacterSelectFail() -> Buffer
+    {
+        constexpr bool success = false;
+
+        SlPacketWriter writer;
+
+        writer.Write(LobbyPacketS2C::CharacterSelect);
         writer.Write<int32_t>(!success);
 
         return writer.Flush();

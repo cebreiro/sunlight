@@ -1,58 +1,39 @@
-#include "lobby_server.h"
+#include "zone_server.h"
 
 #include "shared/execution/executor/impl/asio_executor.h"
 #include "shared/execution/executor/impl/asio_strand.h"
 #include "shared/network/session/session.h"
-#include "sl/emulator/emulator.h"
 #include "sl/emulator/server/server_connection.h"
 #include "sl/emulator/server/client/game_client.h"
+#include "sl/emulator/server/client/game_client_state.h"
 #include "sl/emulator/server/client/game_client_storage.h"
-#include "sl/emulator/server/packet/codec/lobby_packet_codec.h"
-#include "sl/emulator/server/packet/handler/lobby_packet_c2s_handler.h"
+#include "sl/emulator/server/packet/codec/zone_packet_codec.h"
+#include "sl/emulator/server/packet/handler/zone_packet_c2s_handler.h"
 #include "sl/emulator/service/authentication/authentication_service.h"
-#include "sl/emulator/service/snowflake/snowflake_service.h"
 
 namespace sunlight
 {
-    LobbyServer::LobbyServer(execution::AsioExecutor& executor)
+    ZoneServer::ZoneServer(execution::AsioExecutor& executor, execution::IExecutor& gameExecutor, int32_t zoneId)
         : Server(std::string(GetName()), executor)
+        , _gameExecutor(gameExecutor.SharedFromThis())
+        , _zoneId(zoneId)
     {
     }
 
-    void LobbyServer::Initialize(ServiceLocator& serviceLocator)
+    void ZoneServer::Initialize(ServiceLocator& serviceLocator)
     {
         Server::Initialize(serviceLocator);
 
         _serviceLocator = serviceLocator;
-        _handler = std::make_shared<LobbyPacketC2SHandler>(serviceLocator, *this);
-
-        SnowflakeService& snowflakeService = _serviceLocator.Get<SnowflakeService>();
-
-        const std::optional<int32_t> characterKey = snowflakeService.Publish(SnowflakeCategory::Character).Get();
-        assert(characterKey);
-
-        const std::optional<int32_t> itemKey = snowflakeService.Publish(SnowflakeCategory::Item).Get();
-        assert(itemKey);
-
-        _characterIdPublisher.emplace(*characterKey);
-        _itemIdPublisher.emplace(*itemKey);
+        _handler = std::make_shared<ZonePacketC2SHandler>(serviceLocator, *this);
     }
 
-    auto LobbyServer::PublishCharacterId() -> int64_t
+    auto ZoneServer::GetZoneId() const -> int32_t
     {
-        assert(_characterIdPublisher.has_value());
-
-        return static_cast<int64_t>(_characterIdPublisher->Generate());
+        return _zoneId;
     }
 
-    auto LobbyServer::PublishItemId() -> int64_t
-    {
-        assert(_itemIdPublisher.has_value());
-
-        return static_cast<int64_t>(_itemIdPublisher->Generate());
-    }
-
-    void LobbyServer::OnAccept(Session& session)
+    void ZoneServer::OnAccept(Session& session)
     {
         SUNLIGHT_LOG_INFO(_serviceLocator,
             fmt::format("[{}] accept session. session: {}",
@@ -61,7 +42,7 @@ namespace sunlight
         auto connection = std::make_shared<ServerConnection>(_serviceLocator, TYPE,
             session.shared_from_this(),
             std::make_shared<Strand>(GetExecutor().SharedFromThis()),
-            std::make_shared<LobbyPacketCodec>(),
+            std::make_shared<ZonePacketCodec>(),
             _handler);
         {
             decltype(_connections)::accessor accessor;
@@ -83,7 +64,7 @@ namespace sunlight
         connection->Start();
     }
 
-    void LobbyServer::OnReceive(Session& session, Buffer buffer)
+    void ZoneServer::OnReceive(Session& session, Buffer buffer)
     {
         assert(ExecutionContext::IsEqualTo(session.GetStrand()));
 
@@ -113,7 +94,7 @@ namespace sunlight
         connection->Receive(std::move(buffer));
     }
 
-    void LobbyServer::OnError(Session& session, const boost::system::error_code& error)
+    void ZoneServer::OnError(Session& session, const boost::system::error_code& error)
     {
         assert(ExecutionContext::IsEqualTo(session.GetStrand()));
 
@@ -142,8 +123,6 @@ namespace sunlight
         {
             switch (client->GetState())
             {
-            case GameClientState::LobbyAuthenticated:
-            case GameClientState::LobbyAndZoneConnecting:
             case GameClientState::LobbyAndZoneAuthenticated:
             {
                 (void)_serviceLocator.Get<GameClientStorage>().Remove(client->GetId());
@@ -164,8 +143,8 @@ namespace sunlight
         }
     }
 
-    auto LobbyServer::GetName() -> std::string_view
+    auto ZoneServer::GetName() -> std::string_view
     {
-        return "lobby_server";
+        return "zone_server";
     }
 }

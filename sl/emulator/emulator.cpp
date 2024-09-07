@@ -7,9 +7,8 @@
 #include "sl/emulator/server/login_server.h"
 #include "sl/emulator/server/lobby_server.h"
 #include "sl/emulator/server/server_constant.h"
+#include "sl/emulator/server/zone_server.h"
 #include "sl/emulator/server/client/game_client_storage.h"
-#include "sl/emulator/server/packet/creator/login_packet_s2c_creator.h"
-#include "sl/emulator/server/packet/creator/lobby_packet_s2c_creator.h"
 #include "sl/emulator/service/authentication/authentication_service.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -29,8 +28,6 @@ namespace sunlight
         , _connectionPool(std::make_shared<db::ConnectionPool>(_ioExecutor))
         , _gameDataProvideService(std::make_shared<GameDataProvideService>(GetServiceLocator()))
         , _gameClientStorage(std::make_shared<GameClientStorage>())
-        , _loginPacketS2CCreator(std::make_shared<LoginPacketS2CCreator>(GetServiceLocator()))
-        , _lobbyPacketS2CCreator(std::make_shared<LobbyPacketS2CCreator>(GetServiceLocator()))
         , _safeHashService(std::make_shared<SafeHashService>(GetServiceLocator(), *_ioExecutor))
         , _sha256HashService(std::make_shared<Sha256HashService>(GetServiceLocator(), *_ioExecutor))
         , _snowflakeService(std::make_shared<SnowflakeService>(GetServiceLocator(), *_ioExecutor))
@@ -43,8 +40,6 @@ namespace sunlight
     {
         RegisterService(_gameDataProvideService);
         RegisterService(_gameClientStorage);
-        RegisterService(_loginPacketS2CCreator);
-        RegisterService(_lobbyPacketS2CCreator);
         RegisterService(_safeHashService);
         RegisterService(_sha256HashService);
         RegisterService(_snowflakeService);
@@ -211,6 +206,11 @@ namespace sunlight
         for (const sl::emulator::WorldConfig& worldConfig : _config.worldConfig)
         {
             _gatewayService->AddLobby(worldConfig.id, _config.publicAddress);
+
+            for (const sl::emulator::ZoneConfig& zoneConfig : worldConfig.zoneConfig)
+            {
+                _gatewayService->AddZone(worldConfig.id, _config.publicAddress, zoneConfig.port, zoneConfig.zoneId);
+            }
         }
 
         for (const SharedPtrNotNull<IEmulationService>& service : _services)
@@ -228,6 +228,21 @@ namespace sunlight
     {
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize server", GetName()));
+
+        for (const sl::emulator::WorldConfig& worldConfig : _config.worldConfig)
+        {
+            auto& zoneServers = _zoneServers[worldConfig.id];
+
+            for (const sl::emulator::ZoneConfig& zoneConfig : worldConfig.zoneConfig)
+            {
+                auto zoneServer = std::make_shared<ZoneServer>(*_ioExecutor, *_gameExecutor, zoneConfig.zoneId);
+
+                zoneServer->Initialize(GetServiceLocator());
+                zoneServer->StartUp(zoneConfig.port);
+
+                zoneServers[zoneConfig.zoneId] = std::move(zoneServer);
+            }
+        }
 
         _lobbyServer->Initialize(GetServiceLocator());
         _lobbyServer->StartUp(ServerConstant::LOBBY_PORT);

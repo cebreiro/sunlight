@@ -1,28 +1,27 @@
 #pragma once
 #include "shared/network/server/server.h"
-#include "shared/snowflake/snowflake.h"
 #include "sl/emulator/server/server_type.h"
 
 namespace sunlight
 {
     class ServerConnection;
-    class LobbyPacketC2SHandler;
+    class ZonePacketC2SHandler;
 }
 
 namespace sunlight
 {
-    class LobbyServer final : public Server
+    class ZoneServer final : public Server
     {
     public:
-        static constexpr ServerType TYPE = ServerType::Lobby;
+        static constexpr ServerType TYPE = ServerType::Zone;
 
     public:
-        explicit LobbyServer(execution::AsioExecutor& executor);
+        ZoneServer(execution::AsioExecutor& executor, execution::IExecutor& gameExecutor, int32_t zoneId);
 
         void Initialize(ServiceLocator& serviceLocator) override;
 
-        auto PublishCharacterId() -> int64_t;
-        auto PublishItemId() -> int64_t;
+    public:
+        auto GetZoneId() const -> int32_t;
 
     private:
         void OnAccept(Session& session) override;
@@ -33,11 +32,10 @@ namespace sunlight
 
     private:
         ServiceLocator _serviceLocator;
+        SharedPtrNotNull<execution::IExecutor> _gameExecutor;
+        int32_t _zoneId = 0;
 
-        SharedPtrNotNull<LobbyPacketC2SHandler> _handler;
+        SharedPtrNotNull<ZonePacketC2SHandler> _handler;
         tbb::concurrent_hash_map<session::id_type, SharedPtrNotNull<ServerConnection>> _connections;
-
-        std::optional<SharedSnowflake<>> _characterIdPublisher;
-        std::optional<SharedSnowflake<>> _itemIdPublisher;
     };
 }

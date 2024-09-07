@@ -10,7 +10,7 @@ namespace sunlight::db
         Pick,
     };
 
-    static inline auto ToString(ItemPosType type) -> const char*
+    inline auto ToString(ItemPosType type) -> const char*
     {
         switch (type)
         {
@@ -27,5 +27,27 @@ namespace sunlight::db
         assert(false);
 
         return nullptr;
+    }
+
+    inline auto CreateItemPosTypeFrom(const std::string& str) -> ItemPosType
+    {
+        if (str == "inventory")
+        {
+            return ItemPosType::Inventory;
+        }
+        else if (str == "equipment")
+        {
+            return ItemPosType::Equipment;
+        }
+        else if (str == "quick_slot")
+        {
+            return ItemPosType::QuickSlot;
+        }
+        else if (str == "pick")
+        {
+            return ItemPosType::Pick;
+        }
+
+        throw std::runtime_error(__FUNCTION__);
     }
 }

@@ -17,6 +17,7 @@ namespace sunlight
 
         void WriteObject(std::span<const char> buffer);
         void WriteObject(PacketWriter& objectWriter);
+        void WriteObject(const Buffer& buffer);
         void WriteZeroBytes(int64_t size);
 
         auto Flush() const -> Buffer;

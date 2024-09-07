@@ -5,6 +5,8 @@
 #include <boost/scope/scope_exit.hpp>
 
 #include "shared/network/session/session.h"
+#include "sl/emulator/game/game_constant.h"
+#include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/server/lobby_server.h"
 #include "sl/emulator/server/server_connection.h"
 #include "sl/emulator/server/server_constant.h"
@@ -12,12 +14,13 @@
 #include "sl/emulator/server/client/game_client_storage.h"
 #include "sl/emulator/server/packet/creator/lobby_packet_s2c_creator.h"
 #include "sl/emulator/server/packet/dto/lobby_c2s_character_create.h"
+#include "sl/emulator/server/packet/dto/lobby_s2c_endpoint.h"
 #include "sl/emulator/server/packet/io/sl_packet_reader.h"
 #include "sl/emulator/service/authentication/authentication_service.h"
 #include "sl/emulator/service/authentication/authentication_token.h"
 #include "sl/emulator/service/database/database_service.h"
-#include "sl/emulator/game/game_constant.h"
-#include "sl/emulator/game/contants/item/equipment_position.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gateway/gateway_service.h"
 #include "sl/emulator/service/unique_name/unique_name_service.h"
 
 namespace sunlight
@@ -34,6 +37,7 @@ namespace sunlight
         Bind(GameClientState::LobbyAuthenticated, LobbyPacketC2S::CharacterNameCheck, &LobbyPacketC2SHandler::HandleCharacterNameCheck);
         Bind(GameClientState::LobbyAuthenticated, LobbyPacketC2S::CharacterCreate, &LobbyPacketC2SHandler::HandleCharacterCreate);
         Bind(GameClientState::LobbyAuthenticated, LobbyPacketC2S::CharacterDelete, &LobbyPacketC2SHandler::HandleCharacterDelete);
+        Bind(GameClientState::LobbyAuthenticated, LobbyPacketC2S::CharacterSelect, &LobbyPacketC2SHandler::HandleCharacterSelect);
     }
 
     auto LobbyPacketC2SHandler::HandlePacket(ServerConnection& connection, Buffer packet) const -> Future<void>
@@ -95,15 +99,15 @@ namespace sunlight
         const int32_t version = reader.Read<int32_t>();
         const bool success = version == ServerConstant::GAME_VERSION;
 
-        connection.Send(_serviceLocator.Get<LobbyPacketS2CCreator>().CreateClientVersionCheckResult(success));
+        connection.Send(LobbyPacketS2CCreator::CreateClientVersionCheckResult(success));
 
         co_return;
     }
 
     auto LobbyPacketC2SHandler::HandleAuthentication(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
     {
-        const int32_t high = reader.Read<int32_t>();
-        const int32_t low = reader.Read<int32_t>();
+        const uint32_t high = reader.Read<uint32_t>();
+        const uint32_t low = reader.Read<uint32_t>();
 
         [[maybe_unused]]
         const auto unk = reader.ReadInt64();
@@ -129,7 +133,7 @@ namespace sunlight
                 break;
             }
 
-            client->SetConnection(ServerType::Lobby, connection.shared_from_this());
+            client->SetConnection(LobbyServer::TYPE, connection.shared_from_this());
             client->SetState(GameClientState::LobbyAuthenticated);
 
             connection.SetGameClient(client.get());
@@ -138,7 +142,7 @@ namespace sunlight
 
         } while (false);
 
-        connection.Send(_serviceLocator.Get<LobbyPacketS2CCreator>().CreateAuthenticationResult(success, "unknown_string..."));
+        connection.Send(LobbyPacketS2CCreator::CreateAuthenticationResult(success, "unknown_string..."));
 
         if (!success)
         {
@@ -189,7 +193,8 @@ namespace sunlight
 
         storage = std::move(*lobbyCharacters);
 
-        connection.Send(_serviceLocator.Get<LobbyPacketS2CCreator>().CreateCharacterList(
+        connection.Send(LobbyPacketS2CCreator::CreateCharacterList(
+            _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider(),
             std::any_cast<const lobby_characters_type&>(storage)));
     }
 
@@ -216,7 +221,7 @@ namespace sunlight
         const bool usable = !co_await _serviceLocator.Get<UniqueNameService>().Has(
             boost::locale::conv::to_utf<wchar_t>(name, ServerConstant::TEXT_ENCODING));
 
-        connection.Send(_serviceLocator.Get<LobbyPacketS2CCreator>().CreateCharacterNameCheckResult(usable, name));
+        connection.Send(LobbyPacketS2CCreator::CreateCharacterNameCheckResult(usable, name));
     }
 
     auto LobbyPacketC2SHandler::HandleCharacterCreate(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
@@ -250,7 +255,7 @@ namespace sunlight
 
         if (!uniqueNameReserveKey.has_value())
         {
-            connection.Send(_serviceLocator.Get<LobbyPacketS2CCreator>().CreateCharacterCreateResult(false));
+            connection.Send(LobbyPacketS2CCreator::CreateCharacterCreateResult(false));
 
             co_return;
         }
@@ -334,10 +339,83 @@ namespace sunlight
                     GetName(), *client, j.dump()));
         }
 
-        connection.Send(_serviceLocator.Get<LobbyPacketS2CCreator>().CreateCharacterCreateResult(success));
+        connection.Send(LobbyPacketS2CCreator::CreateCharacterCreateResult(success));
     }
 
     auto LobbyPacketC2SHandler::HandleCharacterDelete(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
+    {
+        bool success = false;
+
+        boost::scope::scope_exit exit([&success, &connection]()
+            {
+                connection.Send(LobbyPacketS2CCreator::CreateCharacterDeleteResult(success));
+            });
+
+        GameClient* client = connection.GetGameClient();
+        if (!client)
+        {
+            assert(false);
+
+            co_return;
+        }
+
+        const std::shared_ptr<AuthenticationToken>& authToken = client->GetAuthenticationToken();
+        if (!authToken)
+        {
+            assert(false);
+
+            co_return;
+        }
+
+        std::any& storage = connection.GetStorage();
+        if (!storage.has_value())
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] invalid request. session: {}, auth_token: {}",
+                    GetName(), connection.GetSession().GetId(), authToken->GetKey().ToString()));
+
+            connection.Stop();
+
+            co_return;
+        }
+
+        const int32_t slot = reader.Read<int32_t>();
+
+        lobby_characters_type& characters = std::any_cast<lobby_characters_type&>(storage);
+
+        const auto iter = std::ranges::find_if(characters, [slot](const dto::LobbyCharacter& character) -> bool
+            {
+                return character.slot == slot;
+            });
+        if (iter == characters.end())
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] invalid request. fail to find target character. session: {}, auth_token: {}, slot: {}",
+                    GetName(), connection.GetSession().GetId(), authToken->GetKey().ToString(), slot));
+
+            connection.Stop();
+
+            co_return;
+        }
+
+        success = co_await _serviceLocator.Get<DatabaseService>().DeleteCharacterSoft(iter->cid);
+        if (success)
+        {
+            characters.erase(iter);
+        }
+        else
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] invalid request. fail to delete target character. session: {}, auth_token: {}, slot: {}",
+                    GetName(), connection.GetSession().GetId(), authToken->GetKey().ToString(), slot));
+
+            connection.Stop();
+        }
+
+        connection.Send(LobbyPacketS2CCreator::CreateCharacterDeleteResult(success));
+    }
+
+    auto LobbyPacketC2SHandler::HandleCharacterSelect(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
     {
         GameClient* client = connection.GetGameClient();
         if (!client)
@@ -386,20 +464,20 @@ namespace sunlight
             co_return;
         }
 
-        const bool success = co_await _serviceLocator.Get<DatabaseService>().DeleteCharacterSoft(iter->cid);
-        if (success)
+        const auto& opt = co_await _serviceLocator.Get<GatewayService>().FindZone(authToken->GetSid(), iter->zone);
+        if (!opt.has_value())
         {
-            characters.erase(iter);
-        }
-        else
-        {
-            SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] invalid request. fail to delete target character. session: {}, auth_token: {}, slot: {}",
-                    GetName(), connection.GetSession().GetId(), authToken->GetKey().ToString(), slot));
+            connection.Send(LobbyPacketS2CCreator::CreateCharacterSelectFail());
 
-            connection.Stop();
+            co_return;
         }
 
-        connection.Send(_serviceLocator.Get<LobbyPacketS2CCreator>().CreateCharacterDeleteResult(success));
+        constexpr int32_t unused = 0;
+        const std::string& key = authToken->GetKey().ToString();
+
+        client->SetState(GameClientState::LobbyAndZoneConnecting);
+        client->SetCid(iter->cid);
+
+        connection.Send(LobbyPacketS2CCreator::CreateCharacterSelectSuccess(unused, key, LobbyS2CEndpoint(opt->first, opt->second)));
     }
 }

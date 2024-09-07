@@ -163,6 +163,27 @@ namespace sunlight
         co_return true;
     }
 
+    auto DatabaseService::GetCharacter(int64_t cid) -> Future<std::optional<dto::Character>>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterGet characterGet(conn, cid);
+
+        if (const DatabaseError error = co_await characterGet.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return std::nullopt;
+        }
+
+        co_return characterGet.Release();
+    }
+
     void DatabaseService::LogError(std::string_view function, const DatabaseError& error, const std::optional<std::string>& additionalLog)
     {
         if (additionalLog.has_value())
