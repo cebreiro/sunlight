@@ -79,6 +79,11 @@ namespace sunlight
 
     auto AuthenticationService::Remove(SharedPtrNotNull<AuthenticationToken> token) -> Future<void>
     {
+        if (!token)
+        {
+            co_return;
+        }
+
         [[maybe_unused]]
         const auto self = shared_from_this();
 

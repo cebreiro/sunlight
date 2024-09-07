@@ -9,6 +9,7 @@
 #include "sl/emulator/server/client/game_client_storage.h"
 #include "sl/emulator/server/packet/codec/lobby_packet_codec.h"
 #include "sl/emulator/server/packet/handler/lobby_packet_c2s_handler.h"
+#include "sl/emulator/service/authentication/authentication_service.h"
 #include "sl/emulator/service/snowflake/snowflake_service.h"
 
 namespace sunlight
@@ -130,6 +131,11 @@ namespace sunlight
                 [[maybe_unused]]
                 const bool removed = _serviceLocator.Get<GameClientStorage>().Remove(client->GetId());
                 assert(removed);
+
+                if (auto token = client->GetAuthenticationToken(); token)
+                {
+                    _serviceLocator.Get<AuthenticationService>().Remove(std::move(token));
+                }
             }
             break;
             default:

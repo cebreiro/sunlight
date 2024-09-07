@@ -10,6 +10,7 @@
 #include "sl/emulator/server/packet/creator/login_packet_s2c_creator.h"
 #include "sl/emulator/server/packet/codec/login_packet_codec.h"
 #include "sl/emulator/server/packet/handler/login_packet_c2s_handler.h"
+#include "sl/emulator/service/authentication/authentication_service.h"
 
 namespace sunlight
 {
@@ -127,6 +128,11 @@ namespace sunlight
                 [[maybe_unused]]
                 const bool removed = _serviceLocator.Get<GameClientStorage>().Remove(client->GetId());
                 assert(removed);
+
+                if (auto token = client->GetAuthenticationToken(); token)
+                {
+                    _serviceLocator.Get<AuthenticationService>().Remove(std::move(token));
+                }
             }
             break;
             case GameClientState::LoginToLobby:
