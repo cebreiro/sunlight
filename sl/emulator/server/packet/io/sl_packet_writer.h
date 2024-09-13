@@ -13,6 +13,8 @@ namespace sunlight
         template <typename T> requires std::is_enum_v<T>
         void Write(T value);
 
+        void WriteInt64(int32_t low, int32_t high);
+
         void WriteString(const std::string& str);
 
         void WriteObject(std::span<const char> buffer);

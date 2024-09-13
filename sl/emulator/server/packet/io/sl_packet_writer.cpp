@@ -2,6 +2,13 @@
 
 namespace sunlight
 {
+    void SlPacketWriter::WriteInt64(int32_t low, int32_t high)
+    {
+        const std::array<int32_t, 2> buffer{ low, high };
+
+        WriteObject(std::span(reinterpret_cast<const char*>(buffer.data()), sizeof(int64_t)));
+    }
+
     void SlPacketWriter::WriteString(const std::string& str)
     {
         block_t& block = _blocks.emplace_back();

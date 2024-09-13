@@ -44,7 +44,7 @@ namespace sunlight
     {
         assert(ExecutionContext::IsEqualTo(connection.GetStrand()));
 
-        SlPacketReader reader(packet);
+        SlPacketReader reader(std::move(packet));
 
         const LobbyPacketC2S opcode = reader.Read<LobbyPacketC2S>();
 
@@ -53,7 +53,7 @@ namespace sunlight
         {
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}] fail to find handler. session: {}, opcode: {}, packet: {}",
-                    GetName(), connection.GetSession().GetId(), ToString(opcode), packet.ToString()));
+                    GetName(), connection.GetSession().GetId(), ToString(opcode), reader.GetBuffer().ToString()));
 
             co_return;
         }
@@ -68,7 +68,7 @@ namespace sunlight
         {
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}] fail to handle packet. not allowed handler. session: {}, client_state: {}, packet: {}",
-                    GetName(), connection.GetSession().GetId(), ToString(opcode), packet.ToString()));
+                    GetName(), connection.GetSession().GetId(), ToString(opcode), reader.GetBuffer().ToString()));
 
             co_return;
         }

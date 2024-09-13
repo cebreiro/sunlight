@@ -6,7 +6,15 @@ namespace sunlight
     class SlPacketReader
     {
     public:
-        explicit SlPacketReader(const Buffer& buffer);
+        SlPacketReader(const SlPacketReader& other) = delete;
+        SlPacketReader(SlPacketReader&& other) noexcept = delete;
+        SlPacketReader& operator=(const SlPacketReader& other) = delete;
+        SlPacketReader& operator=(SlPacketReader&& other) noexcept = delete;
+
+    public:
+        SlPacketReader() = default;
+        explicit SlPacketReader(Buffer buffer);
+        ~SlPacketReader();
 
         template <typename T> requires ((std::integral<T> || std::same_as<T, float>) && sizeof(T) <= 4)
         auto Read() -> T;
@@ -24,12 +32,15 @@ namespace sunlight
         auto ReadObject() -> BufferReader;
         void ReadObject(std::vector<char>& result);
 
+        auto GetBuffer() const -> const Buffer&;
+
     private:
         void Initialize(const Buffer& buffer);
 
         static void ThrowIfInvalidRead(uint8_t expected, uint8_t result);
 
     private:
+        Buffer _buffer;
         int64_t _index = 0;
         boost::container::small_vector<BufferReader, 16> _readers;
     };

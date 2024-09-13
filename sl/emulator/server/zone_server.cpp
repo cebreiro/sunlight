@@ -3,6 +3,7 @@
 #include "shared/execution/executor/impl/asio_executor.h"
 #include "shared/execution/executor/impl/asio_strand.h"
 #include "shared/network/session/session.h"
+#include "sl/emulator/game/zone/zone.h"
 #include "sl/emulator/server/server_connection.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/server/client/game_client_state.h"
@@ -20,17 +21,36 @@ namespace sunlight
     {
     }
 
+    ZoneServer::~ZoneServer()
+    {
+    }
+
     void ZoneServer::Initialize(ServiceLocator& serviceLocator)
     {
         Server::Initialize(serviceLocator);
 
         _serviceLocator = serviceLocator;
         _handler = std::make_shared<ZonePacketC2SHandler>(serviceLocator, *this);
+        _zone = (std::make_shared<Zone>(serviceLocator, *_gameExecutor, _zoneId));
     }
 
     auto ZoneServer::GetZoneId() const -> int32_t
     {
         return _zoneId;
+    }
+
+    auto ZoneServer::GetZone() -> Zone&
+    {
+        assert(_zone);
+
+        return *_zone;
+    }
+
+    auto ZoneServer::GetZone() const -> const Zone&
+    {
+        assert(_zone);
+
+        return *_zone;
     }
 
     void ZoneServer::OnAccept(Session& session)

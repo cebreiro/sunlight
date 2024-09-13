@@ -6,6 +6,7 @@ namespace sunlight
 {
     class ServerConnection;
     class ZonePacketC2SHandler;
+    class Zone;
 }
 
 namespace sunlight
@@ -17,11 +18,14 @@ namespace sunlight
 
     public:
         ZoneServer(execution::AsioExecutor& executor, execution::IExecutor& gameExecutor, int32_t zoneId);
+        ~ZoneServer();
 
         void Initialize(ServiceLocator& serviceLocator) override;
 
     public:
         auto GetZoneId() const -> int32_t;
+        auto GetZone() -> Zone&;
+        auto GetZone() const -> const Zone&;
 
     private:
         void OnAccept(Session& session) override;
@@ -34,6 +38,7 @@ namespace sunlight
         ServiceLocator _serviceLocator;
         SharedPtrNotNull<execution::IExecutor> _gameExecutor;
         int32_t _zoneId = 0;
+        SharedPtrNotNull<Zone> _zone;
 
         SharedPtrNotNull<ZonePacketC2SHandler> _handler;
         tbb::concurrent_hash_map<session::id_type, SharedPtrNotNull<ServerConnection>> _connections;

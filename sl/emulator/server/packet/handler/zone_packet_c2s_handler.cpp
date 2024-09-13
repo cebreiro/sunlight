@@ -1,6 +1,7 @@
 #include "zone_packet_c2s_handler.h"
 
 #include "shared/network/session/session.h"
+#include "sl/emulator/game/zone/zone.h"
 #include "sl/emulator/server/zone_server.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/server/client/game_client_storage.h"
@@ -15,46 +16,48 @@ namespace sunlight
         , _zoneServer(zoneServer)
         , _name(fmt::format("zone_packet_handler_{}", _zoneServer.GetZoneId()))
     {
-        Bind(GameClientState::None, ZonePacketC2S::NMC_LOGIN, &ZonePacketC2SHandler::HandleLogin);
     }
 
     auto ZonePacketC2SHandler::HandlePacket(ServerConnection& connection, Buffer packet) const -> Future<void>
     {
         assert(ExecutionContext::IsEqualTo(connection.GetStrand()));
 
-        SlPacketReader reader(packet);
+        auto reader = std::make_unique<SlPacketReader>(std::move(packet));
 
-        const ZonePacketC2S opcode = reader.Read<ZonePacketC2S>();
-
-        const auto iter = _handlers.find(opcode);
-        if (iter == _handlers.end())
-        {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] fail to find handler. session: {}, opcode: {}, packet: {}",
-                    GetName(), connection.GetSession().GetId(), ToString(opcode), packet.ToString()));
-
-            co_return;
-        }
+        const ZonePacketC2S opcode = reader->Read<ZonePacketC2S>();
 
         const GameClient* client = connection.GetGameClient();
         const GameClientState state = client ? client->GetState() : GameClientState::None;
 
-        const auto [begin, end] = _allows.equal_range(state);
-        auto range = std::ranges::subrange(begin, end) | std::views::values;
+        bool handled = false;
 
-        if (!std::ranges::contains(range, opcode))
+        switch (state)
         {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] fail to handle packet. not allowed handler. session: {}, client_state: {}, packet: {}",
-                    GetName(), connection.GetSession().GetId(), ToString(opcode), packet.ToString()));
+        case GameClientState::None:
+        {
+            if (opcode == ZonePacketC2S::NMC_LOGIN)
+            {
+                handled = true;
 
-            co_return;
+                co_await HandleLogin(connection, *reader);
+            }
+        }
+        break;
+        case GameClientState::LobbyAndZoneAuthenticated:
+        {
+            handled = true;
+
+            Delegate(connection, opcode, std::move(reader));
+        }
+        break;
         }
 
-        [[maybe_unused]]
-        const auto self = shared_from_this();
-
-        co_await iter->second(connection, reader);
+        if (!handled)
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] fail to handle packet. session: {}, client_state: {}, opcode: {}",
+                    GetName(), connection.GetSession().GetId(), ToString(state), ToString(opcode)));
+        }
 
         co_return;
     }
@@ -64,14 +67,6 @@ namespace sunlight
         return _name;
     }
 
-    void ZonePacketC2SHandler::Bind(GameClientState state, ZonePacketC2S opcode,
-        Future<void>(ZonePacketC2SHandler::* handler)(ServerConnection&, SlPacketReader&) const)
-    {
-        _handlers[opcode] = std::bind_front(handler, this);
-
-        _allows.emplace(state, opcode);
-    }
-
     auto ZonePacketC2SHandler::HandleLogin(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
     {
         // unk
@@ -79,7 +74,6 @@ namespace sunlight
 
         BufferReader bufferReader = reader.ReadObject();
         bufferReader.Skip(5); // maybe... some object serialize/deserialize protocol
-
 
         const std::string str = bufferReader.ReadString();
 
@@ -119,6 +113,17 @@ namespace sunlight
             co_return;
         }
 
+        if (client->GetState() != GameClientState::LobbyAndZoneConnecting)
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] invalid request. session: {}, key: {}, client_id: {}, state: {}",
+                    GetName(), connection.GetSession().GetId(), opt->ToString(), token->GetClientId(), ToString(client->GetState())));
+
+            connection.Stop();
+
+            co_return;
+        }
+
         client->SetConnection(ZoneServer::TYPE, connection.shared_from_this());
         client->SetState(GameClientState::LobbyAndZoneAuthenticated);
 
@@ -136,6 +141,28 @@ namespace sunlight
             co_return;
         }
 
-        ::system("pause");
+        const bool result = co_await _zoneServer.GetZone().SpawnPlayer(client, *dto);
+        (void)result;
+    }
+
+    void ZonePacketC2SHandler::Delegate(ServerConnection& connection, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader) const
+    {
+        GameClient* client = connection.GetGameClient();
+        if (!client)
+        {
+            assert(false);
+
+            return;
+        }
+
+        const std::shared_ptr<AuthenticationToken>& authToken = client->GetAuthenticationToken();
+        if (!authToken)
+        {
+            assert(false);
+
+            return;
+        }
+
+        _zoneServer.GetZone().HandleNetworkMessage(client->GetId(), opcode, std::move(reader));
     }
 }

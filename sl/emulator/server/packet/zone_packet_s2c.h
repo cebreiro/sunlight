@@ -6,7 +6,7 @@ namespace sunlight
         (NMS_LOGIN_ACCEPT, 0x10)
         (NMS_LOGIN_REJECT, 0x11)
         (NMS_DISCONNECT, 0x12)
-        (UNKNOWN_0x13, 0x13) // result -> socket opt change
+        (NMS_TCP_NODELAY_CHANGE, 0x13)
         (NMS_OBJECT_LEAVE, 0x21)
         (NMS_OBJECT_MOVE, 0x22)
         (UNKNOWN_0x23, 0x23) // result -> NMS_OBJECT_MOVE

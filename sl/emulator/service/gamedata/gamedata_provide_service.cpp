@@ -2,6 +2,7 @@
 
 #include "sl/emulator/game/data/sox_table_set.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
+#include "sl/emulator/service/gamedata/skill/skill_data_provider.h"
 
 namespace sunlight
 {
@@ -22,7 +23,9 @@ namespace sunlight
     void GameDataProvideService::Initialize(const std::filesystem::path& assetPath)
     {
         _soxTableSet = std::make_shared<SoxTableSet>(assetPath / "Misc");
+
         _itemDataProvider = std::make_shared<ItemDataProvider>(_serviceLocator, *_soxTableSet);
+        _skillDataProvider = std::make_shared<SkillDataProvider>(_serviceLocator, *_soxTableSet);
     }
 
     auto GameDataProvideService::GetItemDataProvider() const -> const ItemDataProvider&
@@ -30,5 +33,12 @@ namespace sunlight
         assert(_itemDataProvider);
 
         return *_itemDataProvider;
+    }
+
+    auto GameDataProvideService::GetSkillDataProvider() const -> const SkillDataProvider&
+    {
+        assert(_skillDataProvider);
+
+        return *_skillDataProvider;
     }
 }

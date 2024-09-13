@@ -11,6 +11,7 @@ namespace sunlight
 
 namespace sunlight
 {
+    // 0x5904D0
     class ZonePacketC2SHandler final
         : public IPacketC2SHandler
         , public std::enable_shared_from_this<ZonePacketC2SHandler>
@@ -23,18 +24,13 @@ namespace sunlight
         auto GetName() const -> const std::string&;
 
     private:
-        void Bind(GameClientState state, ZonePacketC2S opcode,
-            Future<void>(ZonePacketC2SHandler::* handler)(ServerConnection&, SlPacketReader&) const);
-
         auto HandleLogin(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>;
+        void Delegate(ServerConnection& connection, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader) const;
 
     private:
         const ServiceLocator& _serviceLocator;
         ZoneServer& _zoneServer;
 
         std::string _name;
-
-        std::unordered_map<ZonePacketC2S, std::function<Future<void>(ServerConnection&, SlPacketReader&)>> _handlers;
-        std::unordered_multimap<GameClientState, ZonePacketC2S> _allows;
     };
 }

@@ -2,9 +2,14 @@
 
 namespace sunlight
 {
-    SlPacketReader::SlPacketReader(const Buffer& buffer)
+    SlPacketReader::SlPacketReader(Buffer buffer)
+        : _buffer(std::move(buffer))
     {
-        Initialize(buffer);
+        Initialize(_buffer);
+    }
+
+    SlPacketReader::~SlPacketReader()
+    {
     }
 
     auto SlPacketReader::ReadInt64() -> std::pair<int32_t, int32_t>
@@ -71,6 +76,11 @@ namespace sunlight
 
         result.reserve(std::distance(begin, end));
         std::copy(begin, end, std::back_inserter(result));
+    }
+
+    auto SlPacketReader::GetBuffer() const -> const Buffer&
+    {
+        return _buffer;
     }
 
     void SlPacketReader::Initialize(const Buffer& buffer)
