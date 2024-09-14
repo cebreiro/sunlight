@@ -16,6 +16,8 @@ namespace sunlight
     public:
         RecoveryStat() = default;
 
+        bool IsDisabled() const;
+
         void Update(game_time_point_type timePoint);
         void ChangeRegenValue(game_time_point_type timePoint, StatValue value);
 
@@ -27,13 +29,18 @@ namespace sunlight
         void SetRegenValue(StatValue value);
         void SetMinValue(StatValue value);
         void SetMaxValue(StatValue value);
+        void SetRegenTickCount(int32_t value);
+        void SetUpdateTimePoint(game_time_point_type timePoint);
+        void SetDisable(bool value);
 
     private:
         StatValue _value = {};
         StatValue _minValue = {};
         StatValue _maxValue = {};
         StatValue _regenValue = {};
+        int32_t _regenTickCount = 1;
 
         game_time_point_type _lastUpdateTimePoint = game_clock_type::now();
+        bool _disabled = true;
     };
 }

@@ -1,0 +1,29 @@
+#pragma once
+#include "sl/emulator/game/entity/game_entity.h"
+
+namespace sunlight
+{
+    class ItemData;
+}
+
+namespace sunlight
+{
+    class GameItem final : public GameEntity
+    {
+    public:
+        GameItem(game_entity_id_type id, const ItemData& data, int32_t quantity);
+
+        auto GetData() const -> const ItemData&;
+        auto GetUId() const -> const std::optional<int64_t>&;
+        auto GetQuantity() const -> int32_t;
+
+        void SetUId(int64_t id);
+        void SetQuantity(int32_t quantity);
+
+    private:
+        const ItemData& _data;
+
+        std::optional<int64_t> _uid = std::nullopt;
+        int32_t _quantity = 0;
+    };
+}

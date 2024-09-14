@@ -9,24 +9,29 @@ namespace sunlight
         (Skill)
         (StatusEffect)
         (StatusEffectPercentage)
+        (JobReference)
         (Count)
     )
 
     class Stat
     {
     public:
+        bool HasChanges() const;
+
         auto Get(StatOriginType type) const -> StatValue;
+        auto GetStatSum() const -> StatValue;
         auto GetFinalValue() const -> StatValue;
 
         void Set(StatOriginType type, StatValue value);
-
-    private:
-        void Update();
+        void SetStatSum(StatValue value);
+        void SetFinalValue(StatValue value);
+        void SetChanges(bool value);
 
     private:
         std::array<StatValue, static_cast<int32_t>(StatOriginType::Count)> _values = {};
 
-        bool _dirty = false;
+        bool _changes = false;
+        StatValue _statSum = {};
         StatValue _finalValue = {};
     };
 }

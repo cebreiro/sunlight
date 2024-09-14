@@ -19,6 +19,7 @@ namespace sunlight
         bool HasJob(JobType type) const;
 
         auto GetIf(JobType type) const -> const Job*;
+        auto GetMainJob() const -> const Job&;
 
     private:
         std::array<std::optional<Job>, static_cast<int32_t>(JobType::Count)> _jobs;

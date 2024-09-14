@@ -49,4 +49,21 @@ namespace sunlight
 
         return job.has_value() ? &(*job) : nullptr;
     }
+
+    auto PlayerJobComponent::GetMainJob() const -> const Job&
+    {
+        const Job* advanced = GetIf(JobType::Advanced);
+        if (advanced)
+        {
+            return *advanced;
+        }
+
+        const Job* novice = GetIf(JobType::Novice);
+        if (novice)
+        {
+            return *novice;
+        }
+
+        throw std::runtime_error("player has no job");
+    }
 }

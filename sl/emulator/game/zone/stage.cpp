@@ -4,6 +4,9 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/zone_message_type.h"
+#include "sl/emulator/game/system/entity_intialization_system.h"
+#include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/player_stat_update_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 
 namespace sunlight
@@ -35,7 +38,7 @@ namespace sunlight
 
         SharedPtrNotNull<GamePlayer> player = iter->second;
 
-        GameTimeService::Set(game_clock_type::now());
+        GameTimeService::SetNow(game_clock_type::now());
 
         switch (opcode)
         {
@@ -81,7 +84,7 @@ namespace sunlight
                 {
                     SUNLIGHT_LOG_WARN(_serviceLocator,
                         fmt::format("[{}] unhanlded zone message. player: {}, target: [{}, {}], type: {}",
-                            GetName(), player->GetCid(), message.targetId, ToString(message.targetType), ToString(message.type)));
+                            GetName(), player->GetCId(), message.targetId, ToString(message.targetType), ToString(message.type)));
                 }
             }
             break;
@@ -116,6 +119,10 @@ namespace sunlight
 
         player->SetStage(this);
         player->GetSceneObjectComponent().SetStageId(GetId());
+
+        GameTimeService::SetNow(game_clock_type::now());
+
+        Get<EntityInitializationSystem>().Initialize(*player);
     }
 
     bool Stage::AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneMessage&)>& subscriber)
@@ -143,7 +150,7 @@ namespace sunlight
         const auto& [iter, inserted] = _systems.try_emplace(id, nullptr);
         if (inserted)
         {
-            iter->second = std::move(_systems);
+            iter->second = std::move(system);
         }
 
         return inserted;
@@ -151,6 +158,10 @@ namespace sunlight
 
     void Stage::InitializeSystem()
     {
+        Add(std::make_shared<EntityInitializationSystem>());
+        Add(std::make_shared<ItemArchiveSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerStatUpdateSystem>(_serviceLocator));
+
         const auto range = _systems | std::views::values;
 
         for (const SharedPtrNotNull<GameSystem>& system : range)

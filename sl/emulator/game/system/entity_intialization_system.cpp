@@ -3,10 +3,16 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/system/player_stat_update_system.h"
 #include "sl/emulator/game/zone/stage.h"
 
 namespace sunlight
 {
+    void EntityInitializationSystem::InitializeSubSystem(Stage& stage)
+    {
+        Add(stage.Get<PlayerStatUpdateSystem>());
+    }
+
     bool EntityInitializationSystem::Subscribe(Stage& stage)
     {
         if (!stage.AddSubscriber(ZoneMessageType::REQUEST_ALL_STATE,
@@ -24,9 +30,19 @@ namespace sunlight
         return true;
     }
 
+    auto EntityInitializationSystem::GetName() const -> std::string_view
+    {
+        return "entity_initialization_system";
+    }
+
     auto EntityInitializationSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<EntityInitializationSystem>();
+    }
+
+    void EntityInitializationSystem::Initialize(GamePlayer& player)
+    {
+        Get<PlayerStatUpdateSystem>().OnInitialize(player);
     }
 
     void EntityInitializationSystem::HandlePlayerAllState(const ZoneMessage& message)
@@ -36,6 +52,10 @@ namespace sunlight
 
     void EntityInitializationSystem::HandlePlayerActivate(const ZoneMessage& message)
     {
-        message.player.SetActive(true);
+        GamePlayer& player = message.player;
+
+        player.SetActive(true);
+
+        Get<PlayerStatUpdateSystem>().OnLocalActivate(player);
     }
 }

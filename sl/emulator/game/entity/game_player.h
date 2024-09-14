@@ -38,8 +38,8 @@ namespace sunlight
 
         void Send(Buffer buffer);
 
-        auto GetCid() const -> int64_t;
-        auto GetAid() const -> int64_t;
+        auto GetCId() const -> int64_t;
+        auto GetAId() const -> int64_t;
         auto GetName() const -> const std::string&;
         auto GetZoneId() const -> int32_t;
         auto GetGmLevel() const -> int8_t;

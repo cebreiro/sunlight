@@ -65,7 +65,7 @@ namespace sunlight::db::dto
             int64_t id = 0;
             int32_t dataId = 0;
             int32_t quantity = 0;
-            db::ItemPosType posType = {};
+            ItemPosType posType = {};
             int8_t page = 0;
             int8_t x = 0;
             int8_t y = 0;

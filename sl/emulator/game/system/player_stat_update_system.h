@@ -1,0 +1,43 @@
+#pragma once
+#include "sl/emulator/game/contants/stat/stat_value.h"
+#include "sl/emulator/game/system/game_system.h"
+
+namespace sunlight::sox
+{
+    struct JobReference;
+}
+
+namespace sunlight
+{
+    class GamePlayer;
+    class PlayerStatComponent;
+}
+
+namespace sunlight
+{
+    class PlayerStatUpdateSystem final : public GameSystem
+    {
+    public:
+        explicit PlayerStatUpdateSystem(const ServiceLocator& serviceLocator);
+
+        auto GetName() const -> std::string_view override;
+        auto GetClassId() const -> game_system_id_type override;
+
+    public:
+        void OnInitialize(GamePlayer& player);
+        void OnLocalActivate(GamePlayer& player);
+
+    private:
+        static auto CalculateJobMaxHP(const sox::JobReference& data, int32_t jobLevel,
+            const PlayerStatComponent& statComponent) -> StatValue;
+        static auto CalculateJobMaxSP(const sox::JobReference& data, int32_t jobLevel,
+            const PlayerStatComponent& statComponent) -> StatValue;
+        static auto CalculateJobRecoveryHP(const sox::JobReference& data,
+            const PlayerStatComponent& statComponent) -> StatValue;
+        static auto CalculateJobRecoverySP(const sox::JobReference& data,
+            const PlayerStatComponent& statComponent) -> StatValue;
+
+    private:
+        const ServiceLocator& _serviceLocator;
+    };
+}

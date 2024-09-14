@@ -2,6 +2,11 @@
 
 namespace sunlight
 {
+    bool Stat::HasChanges() const
+    {
+        return _changes;
+    }
+
     auto Stat::Get(StatOriginType type) const -> StatValue
     {
         const int64_t index = static_cast<int64_t>(type);
@@ -10,12 +15,14 @@ namespace sunlight
         return _values[index];
     }
 
+    auto Stat::GetStatSum() const -> StatValue
+    {
+        return _statSum;
+    }
+
     auto Stat::GetFinalValue() const -> StatValue
     {
-        if (_dirty)
-        {
-            const_cast<Stat*>(this)->Update();
-        }
+        assert(!_changes);
 
         return _finalValue;
     }
@@ -28,20 +35,18 @@ namespace sunlight
         _values[index] = value;
     }
 
-    void Stat::Update()
+    void Stat::SetStatSum(StatValue value)
     {
-        if (_dirty)
-        {
-            return;
-        }
+        _statSum = value;
+    }
 
-        _dirty = false;
+    void Stat::SetFinalValue(StatValue value)
+    {
+        _finalValue = value;
+    }
 
-        const StatValue base = Get(StatOriginType::Base);
-
-        const StatValue sum = base + Get(StatOriginType::Item) + Get(StatOriginType::Skill) + Get(StatOriginType::StatusEffect);
-        const StatValue percentage = base + Get(StatOriginType::StatusEffectPercentage);
-
-        _finalValue = sum + percentage;
+    void Stat::SetChanges(bool value)
+    {
+        _changes = value;
     }
 }

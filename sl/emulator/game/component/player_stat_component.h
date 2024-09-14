@@ -10,6 +10,11 @@ namespace sunlight::db::dto
     struct Character;
 }
 
+namespace sunlight::sox
+{
+    struct JobReference;
+}
+
 namespace sunlight
 {
     class PlayerStatComponent final : public GameComponent
@@ -19,19 +24,34 @@ namespace sunlight
 
         bool IsDead() const;
 
+        void Suspend(RecoveryStatType type);
+        void Resume(RecoveryStatType type);
+
+        void OnChangeMaxHP();
+        void OnChangeMaxSP();
+        void OnChangeRecoveryHP();
+        void OnChangeRecoverySP();
+
         auto GetGender() const -> int8_t;
         auto GetLevel() const -> int32_t;
         auto GetExp() const -> int32_t;
         auto GetStatPoint() const -> int32_t;
 
-        auto GetStatValue(RecoveryStatType type, game_time_point_type current = GameTimeService::Get()) const -> StatValue;
+        auto GetFinalStat(RecoveryStatType type) const -> StatValue;
+        auto GetFinalStat(PlayerStatType type) const -> StatValue;
 
-        auto GetStat(PlayerStatType type) const -> const Stat&;
+        auto Get(PlayerStatType type) const -> const Stat&;
 
         void SetDead(bool value);
-        void SetRegenValue(RecoveryStatType type, float value);
+        void SetRecoveryTimePoint(RecoveryStatType type, game_time_point_type timePoint);
+        void SetJobReferenceStat(PlayerStatType type, StatValue value);
+        void SetRecoveryStat(RecoveryStatType type, StatValue value);
 
     private:
+        void UpdateFinalStat(PlayerStatType type);
+
+        auto CalculateStatSum(PlayerStatType type) const -> StatValue;
+
         auto Mutable(RecoveryStatType type) -> RecoveryStat&;
         auto Mutable(PlayerStatType type) -> Stat&;
 

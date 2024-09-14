@@ -32,6 +32,9 @@ namespace sunlight
         auto GetId() const -> int32_t;
         auto GetName() const -> const std::string&;
 
+        template <typename T> requires std::derived_from<T, GameSystem>
+        auto Get() -> T&;
+
     private:
         template <typename T> requires std::derived_from<T, GameSystem>
         bool Add(SharedPtrNotNull<T> system);
@@ -53,4 +56,23 @@ namespace sunlight
         std::unordered_map<GameEntityType,
             boost::unordered::unordered_flat_map<game_entity_id_type, SharedPtrNotNull<GameEntity>>> _entities;
     };
+
+    template <typename T> requires std::derived_from<T, GameSystem>
+    auto Stage::Get() -> T&
+    {
+        const auto& id = GameSystem::GetClassId<T>();
+
+        const auto iter = _systems.find(id);
+        if (iter == _systems.end())
+        {
+            assert(false);
+
+            throw std::runtime_error("fail to find system");
+        }
+
+        T* result = static_cast<T*>(iter->second.get());
+        assert(result == dynamic_cast<T*>(iter->second.get()));
+
+        return *result;
+    }
 }

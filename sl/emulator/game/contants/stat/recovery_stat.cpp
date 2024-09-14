@@ -2,9 +2,19 @@
 
 namespace sunlight
 {
+    bool RecoveryStat::IsDisabled() const
+    {
+        return _disabled;
+    }
+
     void RecoveryStat::Update(game_time_point_type timePoint)
     {
         assert(timePoint >= _lastUpdateTimePoint);
+
+        if (_disabled)
+        {
+            return;
+        }
 
         if (_lastUpdateTimePoint == timePoint)
         {
@@ -13,7 +23,8 @@ namespace sunlight
 
         _lastUpdateTimePoint = timePoint;
 
-        const double count = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(timePoint - _lastUpdateTimePoint).count());
+        const double tickCount = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(timePoint - _lastUpdateTimePoint).count());
+        const double count = tickCount / _regenTickCount;
 
         _value =  std::clamp(_value + _regenValue * count, _minValue, _maxValue);
     }
@@ -44,7 +55,7 @@ namespace sunlight
 
     void RecoveryStat::SetValue(StatValue value)
     {
-        _value = value;
+        _value = std::clamp(value, _minValue, _maxValue);
     }
 
     void RecoveryStat::SetRegenValue(StatValue value)
@@ -60,5 +71,20 @@ namespace sunlight
     void RecoveryStat::SetMaxValue(StatValue value)
     {
         _maxValue = value;
+    }
+
+    void RecoveryStat::SetRegenTickCount(int32_t value)
+    {
+        _regenTickCount = value;
+    }
+
+    void RecoveryStat::SetUpdateTimePoint(game_time_point_type timePoint)
+    {
+        _lastUpdateTimePoint = timePoint;
+    }
+
+    void RecoveryStat::SetDisable(bool value)
+    {
+        _disabled = value;
     }
 }

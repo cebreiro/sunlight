@@ -147,7 +147,7 @@ namespace sunlight
         , _client(std::move(client))
     {
         (void)AddComponent(CreatePlayerAppearanceComponent(dataProvider.GetItemDataProvider(), dto));
-        // item
+        (void)AddComponent(std::make_unique<PlayerItemComponent>(idPool, dataProvider.GetItemDataProvider(), dto));
         (void)AddComponent(std::make_unique<PlayerJobComponent>(dataProvider, dto.jobs));
         (void)AddComponent(CreateSkillComponent(dataProvider.GetSkillDataProvider(), dto));
         (void)AddComponent(std::make_unique<PlayerStatComponent>(dto));
@@ -171,12 +171,12 @@ namespace sunlight
         _client->Send(ServerType::Zone, std::move(buffer));
     }
 
-    auto GamePlayer::GetCid() const -> int64_t
+    auto GamePlayer::GetCId() const -> int64_t
     {
         return _cid;
     }
 
-    auto GamePlayer::GetAid() const -> int64_t
+    auto GamePlayer::GetAId() const -> int64_t
     {
         return _aid;
     }

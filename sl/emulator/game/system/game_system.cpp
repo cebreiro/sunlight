@@ -5,18 +5,14 @@ namespace sunlight
     bool GameSystem::HasCyclicSystemDependency() const
     {
         const game_system_id_type selfId = this->GetClassId();
-        const auto range = _systems | std::views::values
-            | std::views::transform([](const SharedPtrNotNull<GameSystem>& system) -> PtrNotNull<const GameSystem>
-                {
-                    return system.get();
-                });
+        const auto range = _systems | std::views::values;
 
-        std::vector<PtrNotNull<const GameSystem>> stack = std::ranges::to<std::vector>(range);
-        std::unordered_set<PtrNotNull<const GameSystem>> visits;
+        std::vector<PtrNotNull<GameSystem>> stack = std::ranges::to<std::vector>(range);
+        std::unordered_set<PtrNotNull<GameSystem>> visits;
 
         while (!stack.empty())
         {
-            PtrNotNull<const GameSystem> current = stack.back();
+            PtrNotNull<GameSystem> current = stack.back();
             stack.pop_back();
 
             if (!visits.emplace(current).second)
@@ -29,9 +25,9 @@ namespace sunlight
                 return true;
             }
 
-            for (const SharedPtrNotNull<GameSystem>& child : current->_systems | std::views::values)
+            for (const PtrNotNull<GameSystem>& child : current->_systems | std::views::values)
             {
-                stack.push_back(child.get());
+                stack.push_back(child);
             }
         }
 

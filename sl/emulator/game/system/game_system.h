@@ -19,11 +19,12 @@ namespace sunlight
         virtual void InitializeSubSystem(Stage& stage);
         virtual bool Subscribe(Stage& stage);
 
+        virtual auto GetName() const -> std::string_view = 0;
         virtual auto GetClassId() const -> game_system_id_type = 0;
 
     public:
         template <typename T> requires std::derived_from<T, GameSystem>
-        bool Add(SharedPtrNotNull<T> system);
+        bool Add(T& system);
 
         template <typename T> requires std::derived_from<T, GameSystem>
         auto Find() -> T*;
@@ -42,20 +43,18 @@ namespace sunlight
         static auto GetClassId() -> game_system_id_type;
 
     private:
-        std::unordered_map<game_system_id_type, SharedPtrNotNull<GameSystem>> _systems;
+        std::unordered_map<game_system_id_type, PtrNotNull<GameSystem>> _systems;
     };
 
     template <typename T> requires std::derived_from<T, GameSystem>
-    bool GameSystem::Add(SharedPtrNotNull<T> system)
+    bool GameSystem::Add(T& system)
     {
-        assert(system);
-
         const auto& id = GameSystem::GetClassId<T>();
 
         const auto& [iter, inserted] = _systems.try_emplace(id, nullptr);
         if (inserted)
         {
-            iter->second = std::move(_systems);
+            iter->second = &system;
         }
 
         return inserted;
@@ -71,8 +70,8 @@ namespace sunlight
         {
             assert(iter->second);
 
-            T* result = static_cast<T*>(iter->second.get());
-            assert(result == dynamic_cast<T*>(iter->second.get()));
+            T* result = static_cast<T*>(iter->second);
+            assert(result == dynamic_cast<T*>(iter->second));
 
             return result;
         }
@@ -90,8 +89,8 @@ namespace sunlight
         {
             assert(iter->second);
 
-            const T* result = static_cast<const T*>(iter->second.get());
-            assert(result == dynamic_cast<const T*>(iter->second.get()));
+            const T* result = static_cast<const T*>(iter->second);
+            assert(result == dynamic_cast<const T*>(iter->second));
 
             return result;
         }

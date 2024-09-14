@@ -2,6 +2,7 @@
 
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
+#include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/zone/stage.h"
 
 namespace sunlight
@@ -27,6 +28,11 @@ namespace sunlight
         return true;
     }
 
+    auto ItemArchiveSystem::GetName() const -> std::string_view
+    {
+        return "item_archive_system";
+    }
+
     auto ItemArchiveSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<ItemArchiveSystem>();
@@ -41,6 +47,11 @@ namespace sunlight
 
         switch (const auto subType = reader.Read<ZoneMessageType>(); subType)
         {
+        case ZoneMessageType::ITEMARCHIVE_INIT:
+        {
+            player.Send(ItemArchiveMessageCreator::CreateInit(player));
+        }
+        break;
         case ZoneMessageType::ITEMARCHIVE_ADDITEM:
         case ZoneMessageType::ITEMARCHIVE_LIFTITEM:
         case ZoneMessageType::ITEMARCHIVE_LOWERITEM:
@@ -53,7 +64,6 @@ namespace sunlight
         case ZoneMessageType::ITEMARCHIVE_RESULT:
         case ZoneMessageType::ITEMARCHIVE_LORDITEM:
         case ZoneMessageType::ITEMARCHIVE_ALLINVEN:
-        case ZoneMessageType::ITEMARCHIVE_INIT:
         case ZoneMessageType::ITEMARCHIVE_DROPMONEY:
         case ZoneMessageType::ITEMARCHIVE_DECREASEITEM:
         case ZoneMessageType::ITEMARCHIVE_ADDINVENITEM:
@@ -62,7 +72,7 @@ namespace sunlight
         default:
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}] unhandled zone message. player: {}, type: {}, target: [{}, {}]",
-                    __FUNCTION__, player.GetCid(), ToString(subType), targetId, ToString(targetType)));
+                    GetName(), player.GetCId(), ToString(subType), targetId, ToString(targetType)));
 
         }
     }

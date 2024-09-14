@@ -4,12 +4,12 @@ namespace sunlight
 {
     thread_local game_time_point_type GameTimeService::_timePoint;
 
-    auto GameTimeService::Get() -> game_time_point_type
+    auto GameTimeService::Now() -> game_time_point_type
     {
         return _timePoint;
     }
 
-    void GameTimeService::Set(game_time_point_type timePoint)
+    void GameTimeService::SetNow(game_time_point_type timePoint)
     {
         _timePoint = timePoint;
     }
