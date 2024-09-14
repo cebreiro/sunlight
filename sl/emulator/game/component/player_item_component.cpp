@@ -126,6 +126,207 @@ namespace sunlight
     {
     }
 
+    bool PlayerItemComponent::IsEquipped(EquipmentPosition position) const
+    {
+        return GetEquipmentItem(position) != nullptr;
+    }
+
+    bool PlayerItemComponent::LiftEquipItem(EquipmentPosition position)
+    {
+        if (_pickItem)
+        {
+            return false;
+        }
+
+        GameItem*& equipItem = Mutable(position);
+        if (!equipItem)
+        {
+            return false;
+        }
+
+        ItemPositionComponent& itemPositionComponent = equipItem->GetComponent<ItemPositionComponent>();
+        itemPositionComponent.SetPositionType(ItemPositionType::Pick);
+        itemPositionComponent.ResetPosition();
+
+        std::swap(_pickItem, equipItem);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::LowerPickedItemTo(EquipmentPosition position)
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        if (IsEquipped(position))
+        {
+            return false;
+        }
+
+        ItemPositionComponent& itemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        itemPositionComponent.SetPositionType(ItemPositionType::Equipment);
+        itemPositionComponent.SetPage(static_cast<int8_t>(position));
+
+        std::swap(_pickItem, Mutable(position));
+
+        return true;
+    }
+
+    bool PlayerItemComponent::SwapPickedItemTo(EquipmentPosition position)
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        GameItem*& equipItem = Mutable(position);
+        if (!equipItem)
+        {
+            return false;
+        }
+
+        _pickItem->GetComponent<ItemPositionComponent>().SwapPosition(
+            equipItem->GetComponent<ItemPositionComponent>());
+
+        std::swap(_pickItem, equipItem);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::LiftInventoryItem(game_entity_id_type itemId)
+    {
+        if (_pickItem)
+        {
+            return false;
+        }
+
+        const auto iter = _items.find(itemId);
+        if (iter == _items.end())
+        {
+            return false;
+        }
+
+        GameItem* item = iter->second.get();
+        assert(item);
+
+        ItemPositionComponent& itemPositionComponent = item->GetComponent<ItemPositionComponent>();
+        if (itemPositionComponent.GetPositionType() != ItemPositionType::Inventory)
+        {
+            return false;
+        }
+
+        const ItemSlotRange slotRange{
+            .x = itemPositionComponent.GetX(),
+            .y = itemPositionComponent.GetY(),
+            .xSize = item->GetData().GetWidth(),
+            .ySize = item->GetData().GetHeight(),
+        };
+
+        GetInventorySlotStorage(itemPositionComponent.GetPage())->Set(nullptr, slotRange);
+
+        itemPositionComponent.SetPositionType(ItemPositionType::Pick);
+        itemPositionComponent.ResetPosition();
+
+        _pickItem = item;
+
+        return true;
+    }
+
+    bool PlayerItemComponent::LowerPickedItemTo(int8_t page, int8_t x, int8_t y)
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        ItemSlotStorage* storage = GetInventorySlotStorage(page);
+        if (!storage)
+        {
+            return false;
+        }
+
+        const ItemSlotRange slotRange{
+            .x = x,
+            .y = y,
+            .xSize = _pickItem->GetData().GetWidth(),
+            .ySize = _pickItem->GetData().GetHeight(),
+        };
+
+        if (!storage->Contains(slotRange))
+        {
+            return false;
+        }
+
+        _inventoryQueryResult.clear();
+        storage->Get(_inventoryQueryResult, slotRange);
+
+        if (!_inventoryQueryResult.empty())
+        {
+            return false;
+        }
+
+        ItemPositionComponent& itemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        itemPositionComponent.SetPositionType(ItemPositionType::Inventory);
+        itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
+
+        storage->Set(_pickItem, slotRange);
+        _pickItem = nullptr;
+
+        return true;
+    }
+
+    bool PlayerItemComponent::SwapPickedItemTo(int8_t page, int8_t x, int8_t y)
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        ItemSlotStorage* storage = GetInventorySlotStorage(page);
+        if (!storage)
+        {
+            return false;
+        }
+
+        const ItemSlotRange slotRange{
+            .x = x,
+            .y = y,
+            .xSize = _pickItem->GetData().GetWidth(),
+            .ySize = _pickItem->GetData().GetHeight(),
+        };
+
+        if (!storage->Contains(slotRange))
+        {
+            return false;
+        }
+
+        _inventoryQueryResult.clear();
+        storage->Get(_inventoryQueryResult, slotRange);
+
+        if (_inventoryQueryResult.size() != 1)
+        {
+            return false;
+        }
+
+        GameItem* inventoryItem = *_inventoryQueryResult.begin();
+        ItemPositionComponent& inventoryItemPositionComponent = inventoryItem->GetComponent<ItemPositionComponent>();
+
+        storage->Set(nullptr, ItemSlotRange{
+            .x = inventoryItemPositionComponent.GetX(),
+            .y = inventoryItemPositionComponent.GetY(),
+            .xSize = inventoryItem->GetData().GetWidth(),
+            .ySize = inventoryItem->GetData().GetHeight(),
+            });
+        storage->Set(_pickItem, slotRange);
+
+        _pickItem->GetComponent<ItemPositionComponent>().SwapPosition(inventoryItemPositionComponent);
+        _pickItem = inventoryItem;
+
+        return true;
+    }
+
     auto PlayerItemComponent::GetGold() const -> int32_t
     {
         return _gold;
@@ -139,5 +340,25 @@ namespace sunlight
     auto PlayerItemComponent::GetPickedItem() const -> const GameItem*
     {
         return _pickItem;
+    }
+
+    auto PlayerItemComponent::GetEquipmentItem(EquipmentPosition position) const -> const GameItem*
+    {
+        return _equipments[static_cast<int32_t>(position)];
+    }
+
+    auto PlayerItemComponent::Mutable(EquipmentPosition position) -> GameItem*&
+    {
+        return _equipments[static_cast<int32_t>(position)];
+    }
+
+    auto PlayerItemComponent::GetInventorySlotStorage(int8_t page) -> ItemSlotStorage*
+    {
+        if (page < 0 || page >= std::ssize(_inventory))
+        {
+            return nullptr;
+        }
+
+        return _inventory[page].get();
     }
 }

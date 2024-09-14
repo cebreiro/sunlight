@@ -19,6 +19,11 @@ namespace sunlight
         void SetX(int8_t value);
         void SetY(int8_t value);
 
+        void SetPosition(int8_t page, int8_t x, int8_t y);
+        void ResetPosition();
+
+        void SwapPosition(ItemPositionComponent& other);
+
     private:
         ItemPositionType _positionType = {};
 

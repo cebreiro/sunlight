@@ -93,4 +93,19 @@ namespace sunlight
 
         return writer.Flush();
     }
+
+    auto ItemArchiveMessageCreator::CreateArchiveResult(const GamePlayer& player, bool result, ZoneMessageType archiveMessage) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_RESULT);
+        writer.Write<int32_t>(result);
+        writer.Write(archiveMessage);
+
+        return writer.Flush();
+    }
 }

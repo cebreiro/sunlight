@@ -46,4 +46,26 @@ namespace sunlight
     {
         _y = value;
     }
+
+    void ItemPositionComponent::SetPosition(int8_t page, int8_t x, int8_t y)
+    {
+        _page = page;
+        _x = x;
+        _y = y;
+    }
+
+    void ItemPositionComponent::ResetPosition()
+    {
+        _page = -1;
+        _x = -1;
+        _y = -1;
+    }
+
+    void ItemPositionComponent::SwapPosition(ItemPositionComponent& other)
+    {
+        std::swap(_positionType, other._positionType);
+        std::swap(_page, other._page);
+        std::swap(_x, other._x);
+        std::swap(_y, other._y);
+    }
 }

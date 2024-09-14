@@ -1,8 +1,10 @@
 #include "player_stat_update_system.h"
 
+#include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/data/sox/job_reference.h"
+#include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 
 namespace sunlight
@@ -20,6 +22,18 @@ namespace sunlight
     auto PlayerStatUpdateSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<PlayerStatUpdateSystem>();
+    }
+
+    void PlayerStatUpdateSystem::AddItemStat(GamePlayer& player, const GameItem& item)
+    {
+        (void)player;
+        (void)item;
+    }
+
+    void PlayerStatUpdateSystem::RemoveItemStat(GamePlayer& player, const GameItem& item)
+    {
+        (void)player;
+        (void)item;
     }
 
     void PlayerStatUpdateSystem::OnInitialize(GamePlayer& player)
