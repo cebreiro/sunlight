@@ -4,6 +4,7 @@
 
 namespace sunlight
 {
+    class AssetDataProvider;
     class ItemDataProvider;
     class SkillDataProvider;
 }
@@ -26,12 +27,14 @@ namespace sunlight
         template <typename T> requires std::derived_from<T, sox::ISoxTable>
         auto Get() const -> const T&;
 
+        auto GetAssetDataProvider() const -> const AssetDataProvider&;
         auto GetItemDataProvider() const -> const ItemDataProvider&;
         auto GetSkillDataProvider() const -> const SkillDataProvider&;
 
     private:
         const ServiceLocator& _serviceLocator;
 
+        SharedPtrNotNull<AssetDataProvider> _assetDataProvider;
         SharedPtrNotNull<SoxTableSet> _soxTableSet;
         SharedPtrNotNull<ItemDataProvider> _itemDataProvider;
         SharedPtrNotNull<SkillDataProvider> _skillDataProvider;
