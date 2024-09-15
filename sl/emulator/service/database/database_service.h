@@ -4,6 +4,7 @@
 #include "sl/emulator/service/database/dto/character.h"
 #include "sl/emulator/service/database/dto/lobby_character.h"
 #include "sl/emulator/service/database/request/character_create.h"
+#include "sl/emulator/service/database/transaction/transaction.hpp"
 
 namespace sunlight
 {
@@ -41,6 +42,8 @@ namespace sunlight
         auto DeleteCharacterSoft(int64_t cid) -> Future<bool>;
 
         auto GetCharacter(int64_t cid) -> Future<std::optional<db::dto::Character>>;
+
+        auto StartTransaction(db::ItemTransaction transaction) -> Future<bool>;
 
     private:
         void LogError(std::string_view function, const DatabaseError& error, const std::optional<std::string>& additionalLog = std::nullopt);

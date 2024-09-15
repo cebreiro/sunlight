@@ -9,6 +9,7 @@
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/system/player_stat_update_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
 
 namespace sunlight
@@ -160,7 +161,29 @@ namespace sunlight
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}] unhandled zone message. player: {}, type: {}, target: [{}, {}]",
                     GetName(), player.GetCId(), ToString(subType), targetId, ToString(targetType)));
+        }
 
+        if (success)
+        {
+            PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+
+            if (playerItemComponent.HasItemLog())
+            {
+                db::ItemTransaction transaction;
+                playerItemComponent.FlushItemLogTo(transaction.logs);
+
+                execution::IExecutor* current = ExecutionContext::GetExecutor();
+                assert(current);
+
+                _serviceLocator.Get<DatabaseService>().StartTransaction(std::move(transaction))
+                    .Then(*current, [self = shared_from_this(), cid = player.GetCId()](bool success)
+                        {
+                            if (!success)
+                            {
+                                self->HandleDatabaseError(cid);
+                            }
+                        });
+            }
         }
     }
 
@@ -308,6 +331,13 @@ namespace sunlight
         }
 
         return true;
+    }
+
+    void ItemArchiveSystem::HandleDatabaseError(int64_t cid)
+    {
+        (void)cid;
+
+        // TODO: disconnect player from server
     }
 
     void ItemArchiveSystem::LogHandleItemError(const char* func, const std::string& message) const

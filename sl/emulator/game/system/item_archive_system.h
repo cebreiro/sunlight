@@ -13,7 +13,9 @@ namespace sunlight
 
 namespace sunlight
 {
-    class ItemArchiveSystem final : public GameSystem
+    class ItemArchiveSystem final
+        : public GameSystem
+        , public std::enable_shared_from_this<ItemArchiveSystem>
     {
     public:
         explicit ItemArchiveSystem(const ServiceLocator& serviceLocator);
@@ -36,6 +38,9 @@ namespace sunlight
 
         bool HandleLiftEquipment(GamePlayer& player, EquipmentPosition position);
         bool HandleLowerEquipment(GamePlayer& player, game_entity_id_type equipItemId, EquipmentPosition position);
+
+    private:
+        void HandleDatabaseError(int64_t cid);
 
     private:
         void LogHandleItemError(const char* func, const std::string& message) const;

@@ -184,6 +184,27 @@ namespace sunlight
         co_return characterGet.Release();
     }
 
+    auto DatabaseService::StartTransaction(db::ItemTransaction transaction) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::ItemTransactionExecute itemTransactionExecute(conn, transaction);
+
+        if (const DatabaseError error = co_await itemTransactionExecute.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
     void DatabaseService::LogError(std::string_view function, const DatabaseError& error, const std::optional<std::string>& additionalLog)
     {
         if (additionalLog.has_value())

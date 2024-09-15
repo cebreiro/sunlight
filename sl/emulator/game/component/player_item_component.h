@@ -3,8 +3,10 @@
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/game_component.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
+#include "sl/emulator/game/contants/item/item_position.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/service/database/dto/character.h"
+#include "sl/emulator/service/database/transaction/item/item_log.h"
 
 namespace sunlight
 {
@@ -21,6 +23,10 @@ namespace sunlight
     public:
         PlayerItemComponent(GameEntityIdPool& idPool, const ItemDataProvider& itemDataProvider, const db::dto::Character& dto);
         ~PlayerItemComponent();
+
+        bool HasItemLog() const;
+
+        void FlushItemLogTo(std::vector<db::ItemLog>& dest);
 
         bool IsEquipped(EquipmentPosition position) const;
 
@@ -46,6 +52,13 @@ namespace sunlight
         auto GetInventorySlotStorage(int8_t page) -> ItemSlotStorage*;
 
     private:
+        static auto ConvertToItemPosType(ItemPositionType position) -> db::ItemPosType;
+
+        void AddItemUpdatePositionLog(const GameItem& item);
+
+    private:
+        std::vector<db::ItemLog> _itemLogs;
+
         int32_t _gold = 0;
 
         std::unordered_map<game_entity_id_type, SharedPtrNotNull<GameItem>> _items;
@@ -57,7 +70,6 @@ namespace sunlight
         std::array<GameItem*, static_cast<int32_t>(EquipmentPosition::Count)> _equipments = {};
 
         GameItem* _pickItem = nullptr;
-
     };
 
     inline auto PlayerItemComponent::GetItemRange() const

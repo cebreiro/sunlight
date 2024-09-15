@@ -126,6 +126,22 @@ namespace sunlight
     {
     }
 
+    bool PlayerItemComponent::HasItemLog() const
+    {
+        return !_itemLogs.empty();
+    }
+
+    void PlayerItemComponent::FlushItemLogTo(std::vector<db::ItemLog>& dest)
+    {
+        if (_itemLogs.empty())
+        {
+            return;
+        }
+
+        dest.insert_range(dest.end(), _itemLogs);
+        _itemLogs.clear();
+    }
+
     bool PlayerItemComponent::IsEquipped(EquipmentPosition position) const
     {
         return GetEquipmentItem(position) != nullptr;
@@ -150,6 +166,8 @@ namespace sunlight
 
         std::swap(_pickItem, equipItem);
 
+        AddItemUpdatePositionLog(*_pickItem);
+
         return true;
     }
 
@@ -168,6 +186,8 @@ namespace sunlight
         ItemPositionComponent& itemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
         itemPositionComponent.SetPositionType(ItemPositionType::Equipment);
         itemPositionComponent.SetPage(static_cast<int8_t>(position));
+
+        AddItemUpdatePositionLog(*_pickItem);
 
         std::swap(_pickItem, Mutable(position));
 
@@ -191,6 +211,9 @@ namespace sunlight
             equipItem->GetComponent<ItemPositionComponent>());
 
         std::swap(_pickItem, equipItem);
+
+        AddItemUpdatePositionLog(*_pickItem);
+        AddItemUpdatePositionLog(*equipItem);
 
         return true;
     }
@@ -230,6 +253,8 @@ namespace sunlight
         itemPositionComponent.ResetPosition();
 
         _pickItem = item;
+
+        AddItemUpdatePositionLog(*_pickItem);
 
         return true;
     }
@@ -272,6 +297,9 @@ namespace sunlight
         itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
 
         storage->Set(_pickItem, slotRange);
+
+        AddItemUpdatePositionLog(*_pickItem);
+
         _pickItem = nullptr;
 
         return true;
@@ -322,6 +350,10 @@ namespace sunlight
         storage->Set(_pickItem, slotRange);
 
         _pickItem->GetComponent<ItemPositionComponent>().SwapPosition(inventoryItemPositionComponent);
+
+        AddItemUpdatePositionLog(*_pickItem);
+        AddItemUpdatePositionLog(*inventoryItem);
+
         _pickItem = inventoryItem;
 
         return true;
@@ -360,5 +392,40 @@ namespace sunlight
         }
 
         return _inventory[page].get();
+    }
+
+    auto PlayerItemComponent::ConvertToItemPosType(ItemPositionType position) -> db::ItemPosType
+    {
+        switch (position)
+        {
+        case ItemPositionType::Inventory:
+            return db::ItemPosType::Inventory;
+        case ItemPositionType::Equipment:
+            return db::ItemPosType::Equipment;
+        case ItemPositionType::QuickSlot:
+            return db::ItemPosType::QuickSlot;
+        case ItemPositionType::Pick:
+            return db::ItemPosType::Pick;
+        default:;
+        }
+
+        assert(false);
+
+        return db::ItemPosType::Inventory;
+    }
+
+    void PlayerItemComponent::AddItemUpdatePositionLog(const GameItem& item)
+    {
+        assert(item.GetUId().has_value());
+
+        const ItemPositionComponent& itemPositionComponent = item.GetComponent<ItemPositionComponent>();
+
+        _itemLogs.emplace_back(db::ItemLogUpdatePosition{
+            .id = item.GetUId().value(),
+            .posType = ConvertToItemPosType(itemPositionComponent.GetPositionType()),
+            .page = itemPositionComponent.GetPage(),
+            .x = itemPositionComponent.GetX(),
+            .y = itemPositionComponent.GetY()
+        });
     }
 }
