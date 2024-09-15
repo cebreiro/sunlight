@@ -1,0 +1,102 @@
+#include "server_command_system.h"
+
+#include <boost/algorithm/string.hpp>
+
+#include "sl/emulator/game/contants/server_command/server_command_interface.h"
+#include "sl/emulator/game/contants/server_command/server_command_register.h"
+#include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/zone_community_message.h"
+#include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/zone/stage.h"
+
+namespace sunlight
+{
+    ServerCommandSystem::ServerCommandSystem(const ServiceLocator& serviceLocator)
+        : _serviceLocator(serviceLocator)
+    {
+    }
+
+    void ServerCommandSystem::InitializeSubSystem(Stage& stage)
+    {
+        Add(stage.Get<ItemArchiveSystem>());
+
+        ServerCommandRegister::Register(*this);
+    }
+
+    bool ServerCommandSystem::Subscribe(Stage& stage)
+    {
+        // example) "//item_add 1234 1"
+        if (!stage.AddSubscriber(ZoneMessageType::SERVERCOMMAND_STRING,
+            std::bind_front(&ServerCommandSystem::HandleCommand, this)))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    auto ServerCommandSystem::GetName() const -> std::string_view
+    {
+        return "gm_command_system";
+    }
+
+    auto ServerCommandSystem::GetClassId() const -> game_system_id_type
+    {
+        return GameSystem::GetClassId<ServerCommandSystem>();
+    }
+
+    void ServerCommandSystem::AddCommand(SharedPtrNotNull<IServerCommand> command)
+    {
+        std::string name(command->GetName());
+
+        [[maybe_unused]]
+        const bool inserted = _commands.try_emplace(std::move(name), std::move(command)).second;
+        assert(inserted);
+    }
+
+    auto ServerCommandSystem::GetServiceLocator() const -> const ServiceLocator&
+    {
+        return _serviceLocator;
+    }
+
+    void ServerCommandSystem::HandleCommand(const ZoneCommunityMessage& message)
+    {
+        const std::string& command = message.reader.ReadString();
+
+        LogRequest(message.player, command);
+
+        _splitStringBuffer.clear();
+        boost::algorithm::split(_splitStringBuffer, command, boost::is_any_of(" "));
+
+        if (_splitStringBuffer.empty())
+        {
+            return;
+        }
+
+        const auto iter = _commands.find(_splitStringBuffer[0]);
+        if (iter == _commands.end())
+        {
+            return;
+        }
+
+        ServerCommandParamReader reader(std::span(_splitStringBuffer.begin() + 1, _splitStringBuffer.end()));
+
+        const bool result = iter->second->HandleCommand(message.player, reader);
+
+        LogResult(message.player, command, result);
+    }
+
+    void ServerCommandSystem::LogRequest(const GamePlayer& player, const std::string& command)
+    {
+        SUNLIGHT_LOG_INFO(_serviceLocator,
+            fmt::format("[{}] gm_command request. player: {}, command: {}",
+                GetName(), player.GetCId(), command));
+    }
+
+    void ServerCommandSystem::LogResult(const GamePlayer& player, const std::string& command, bool result)
+    {
+        SUNLIGHT_LOG_INFO(_serviceLocator,
+            fmt::format("[{}] gm_command result. player: {}, result: {}, command: {}",
+                GetName(), player.GetCId(), result, command));
+    }
+}

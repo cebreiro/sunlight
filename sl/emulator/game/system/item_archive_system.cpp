@@ -45,6 +45,15 @@ namespace sunlight
         return GameSystem::GetClassId<ItemArchiveSystem>();
     }
 
+    bool ItemArchiveSystem::AddItem(GamePlayer& target, int32_t itemId, int32_t quantity)
+    {
+        (void)target;
+        (void)itemId;
+        (void)quantity;
+
+        return true;
+    }
+
     bool ItemArchiveSystem::IsValid(EquipmentPosition position, sox::EquipmentType soxType)
     {
         switch (position)

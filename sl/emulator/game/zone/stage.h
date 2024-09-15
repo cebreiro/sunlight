@@ -13,6 +13,7 @@ namespace sunlight
     class GameEntity;
     class GamePlayer;
     struct ZoneMessage;
+    struct ZoneCommunityMessage;
 }
 
 namespace sunlight
@@ -28,6 +29,7 @@ namespace sunlight
         void SpawnPlayer(SharedPtrNotNull<GamePlayer> player);
 
         bool AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneMessage&)>& subscriber);
+        bool AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneCommunityMessage&)>& subscriber);
 
         auto GetId() const -> int32_t;
         auto GetName() const -> const std::string&;
@@ -42,6 +44,7 @@ namespace sunlight
         void InitializeSystem();
 
         bool Publish(const ZoneMessage& message);
+        bool Publish(const ZoneCommunityMessage& message);
 
     private:
         const ServiceLocator& _serviceLocator;
@@ -50,7 +53,8 @@ namespace sunlight
         std::string _name;
 
         std::unordered_map<game_system_id_type, SharedPtrNotNull<GameSystem>> _systems;
-        std::unordered_map<ZoneMessageType, std::function<void(const ZoneMessage&)>> _subscribers;
+        std::unordered_map<ZoneMessageType, std::function<void(const ZoneMessage&)>> _zoneMessageSubscribers;
+        std::unordered_map<ZoneMessageType, std::function<void(const ZoneCommunityMessage&)>> _zoneCommunityMessageSubscribers;
 
         std::unordered_map<game_client_id_type, SharedPtrNotNull<GamePlayer>> _players;
         std::unordered_map<GameEntityType,

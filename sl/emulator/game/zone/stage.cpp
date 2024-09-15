@@ -2,9 +2,11 @@
 
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/system/entity_intialization_system.h"
+#include "sl/emulator/game/system/server_command_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/player_stat_update_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -61,7 +63,20 @@ namespace sunlight
             {
             case 0:
             {
-                // community message
+                const int32_t msgType = reader->Read<int32_t>();
+
+                ZoneCommunityMessage message{
+                    .player = *player,
+                    .type = static_cast<ZoneMessageType>(msgType),
+                    .reader = *reader,
+                };
+
+                if (!Publish(message))
+                {
+                    SUNLIGHT_LOG_WARN(_serviceLocator,
+                        fmt::format("[{}] unhanlded zone community message. player: {}, type: {}",
+                            GetName(), player->GetCId(), ToString(message.type)));
+                }
             }
             break;
             case 1:
@@ -127,7 +142,12 @@ namespace sunlight
 
     bool Stage::AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneMessage&)>& subscriber)
     {
-        return _subscribers.try_emplace(type, subscriber).second;
+        return _zoneMessageSubscribers.try_emplace(type, subscriber).second;
+    }
+
+    bool Stage::AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneCommunityMessage&)>& subscriber)
+    {
+        return _zoneCommunityMessageSubscribers.try_emplace(type, subscriber).second;
     }
 
     auto Stage::GetId() const -> int32_t
@@ -159,6 +179,7 @@ namespace sunlight
     void Stage::InitializeSystem()
     {
         Add(std::make_shared<EntityInitializationSystem>());
+        Add(std::make_shared<ServerCommandSystem>(_serviceLocator));
         Add(std::make_shared<ItemArchiveSystem>(_serviceLocator));
         Add(std::make_shared<PlayerStatUpdateSystem>(_serviceLocator));
 
@@ -187,8 +208,21 @@ namespace sunlight
 
     bool Stage::Publish(const ZoneMessage& message)
     {
-        const auto iter = _subscribers.find(message.type);
-        if (iter == _subscribers.end())
+        const auto iter = _zoneMessageSubscribers.find(message.type);
+        if (iter == _zoneMessageSubscribers.end())
+        {
+            return false;
+        }
+
+        iter->second(message);
+
+        return true;
+    }
+
+    bool Stage::Publish(const ZoneCommunityMessage& message)
+    {
+        const auto iter = _zoneCommunityMessageSubscribers.find(message.type);
+        if (iter == _zoneCommunityMessageSubscribers.end())
         {
             return false;
         }

@@ -27,6 +27,9 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
+        bool AddItem(GamePlayer& target, int32_t itemId, int32_t quantity);
+
+    public:
         static bool IsValid(EquipmentPosition position, sox::EquipmentType soxType);
 
     private:
