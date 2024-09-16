@@ -19,6 +19,8 @@ namespace sunlight
 
         static auto CreateNewPickedItemAdd(const GamePlayer& player, const GameItem& item) -> Buffer;
         static auto CreateInventoryItemAdd(const GamePlayer& player, const GameItem& item) -> Buffer;
+        static auto CreateItemDecrease(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer;
+        static auto CreateItemRemove(const GamePlayer& player, const GameItem& item) -> Buffer;
 
         static auto CreateArchiveResult(const GamePlayer& player, bool result, ZoneMessageType archiveMessage) -> Buffer;
 

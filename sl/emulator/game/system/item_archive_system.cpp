@@ -59,10 +59,7 @@ namespace sunlight
             return false;
         }
 
-        auto item = std::make_shared<GameItem>(_serviceLocator.Get<GameEntityIdPublisher>(), *itemData, quantity);
-        item->AddComponent(std::make_unique<ItemPositionComponent>());
-
-        return AddItem(player, std::move(item), addedQuantity);
+        return AddItem(player, CreateNewGameItem(*itemData, quantity), addedQuantity);
     }
 
     bool ItemArchiveSystem::AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity)
@@ -209,9 +206,9 @@ namespace sunlight
             const int32_t y = reader.Read<int32_t>();
 
             const auto [pickedItemId, pickedItemType] = reader.ReadInt64();
-            const auto [liftItemId, liftItemType] = reader.ReadInt64();
+            const auto [invenItemId, invenItemType] = reader.ReadInt64();
 
-            success = HandleLowerItem(player, game_entity_id_type(pickedItemId), game_entity_id_type(liftItemId),
+            success = HandleLowerItem(player, game_entity_id_type(pickedItemId), game_entity_id_type(invenItemId),
                 static_cast<int8_t>(page), static_cast<int8_t>(x), static_cast<int8_t>(y));
         }
         break;
@@ -258,10 +255,6 @@ namespace sunlight
 
     bool ItemArchiveSystem::HandleLiftItem(GamePlayer& player, game_entity_id_type targetItemId, int32_t quantity)
     {
-        (void)player;
-        (void)targetItemId;
-        (void)quantity;
-
         PlayerItemComponent& itemComponent = player.GetItemComponent();
 
         if (itemComponent.GetPickedItem())
@@ -271,25 +264,45 @@ namespace sunlight
             return false;
         }
 
-        if (quantity < 0)
+        const GameItem* targetItem = itemComponent.FindInventoryItem(targetItemId);
+        if (!targetItem)
+        {
+            LogHandleItemError(__FUNCTION__, fmt::format("invalid request. player: {}, item_id: {}, quantity: {}",
+                player.GetCId(), targetItemId, quantity));
+
+            return false;
+        }
+
+        if (quantity < 0 || targetItem->GetQuantity() == quantity)
         {
             if (!itemComponent.LiftInventoryItem(targetItemId))
             {
                 LogHandleItemError(__FUNCTION__, fmt::format("fail to lift inventory item. item_id: {}, quantity: {}",
                     targetItemId, quantity));
+
+                return false;
             }
         }
         else
         {
-            // TODO: split and create new Item
-        }
+            auto newPickedItem = CreateNewGameItem(targetItem->GetData(), quantity);
+            newPickedItem->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
 
+            bool success = itemComponent.DecreaseItemQuantity(targetItemId, quantity);
+            assert(success);
+
+            success = itemComponent.AddNewPickedItem(std::move(newPickedItem));
+            assert(success);
+
+            player.Send(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *itemComponent.GetPickedItem()));
+            player.Send(ItemArchiveMessageCreator::CreateItemDecrease(player, *targetItem, quantity));
+        }
 
         return true;
     }
 
     bool ItemArchiveSystem::HandleLowerItem(GamePlayer& player, game_entity_id_type lowerItemId,
-        game_entity_id_type liftItemId, int8_t page, int8_t x, int8_t y)
+        game_entity_id_type invenItemId, int8_t page, int8_t x, int8_t y)
     {
         PlayerItemComponent& itemComponent = player.GetItemComponent();
 
@@ -308,7 +321,7 @@ namespace sunlight
             return false;
         }
 
-        if (liftItemId.Unwrap() == 0)
+        if (invenItemId.Unwrap() == 0)
         {
             if (!itemComponent.LowerPickedItemTo(page, x, y))
             {
@@ -320,12 +333,52 @@ namespace sunlight
         }
         else
         {
-            if (!itemComponent.SwapPickedItemTo(page, x, y))
+            const GameItem* invenItem = itemComponent.FindInventoryItem(invenItemId);
+            if (!invenItem)
             {
-                LogHandleItemError(__FUNCTION__, fmt::format("fail to swap picked item. pos: [{}, {}, {}]",
-                    page, x, y));
+                LogHandleItemError(__FUNCTION__, fmt::format("fail to find lift item. id: {}, pos: [{}, {}, {}]",
+                    invenItemId, page, x, y));
 
                 return false;
+            }
+
+            const int32_t maxOverlapCount = picked->GetData().GetMaxOverlapCount();
+
+            if (picked->GetData().GetId() == invenItem->GetData().GetId() && maxOverlapCount > 1)
+            {
+                if (invenItem->GetQuantity() >= maxOverlapCount)
+                {
+                    return true;
+                }
+
+                const int32_t sum = picked->GetQuantity() + invenItem->GetQuantity();
+
+                if (sum > maxOverlapCount)
+                {
+                    bool result = itemComponent.SetItemQuantity(invenItemId, maxOverlapCount);
+                    assert(result);
+
+                    result = itemComponent.SetItemQuantity(picked->GetId(), sum - maxOverlapCount);
+                    assert(result);
+                }
+                else
+                {
+                    bool result = itemComponent.SetItemQuantity(invenItemId, sum);
+                    assert(result);
+
+                    result = itemComponent.RemoveItem(picked->GetId());
+                    assert(result);
+                }
+            }
+            else
+            {
+                if (!itemComponent.SwapPickedItemTo(page, x, y))
+                {
+                    LogHandleItemError(__FUNCTION__, fmt::format("fail to swap picked item. pos: [{}, {}, {}]",
+                        page, x, y));
+
+                    return false;
+                }
             }
         }
 
@@ -400,6 +453,16 @@ namespace sunlight
         }
 
         return true;
+    }
+
+    auto ItemArchiveSystem::CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>
+    {
+        assert(quantity > 0);
+
+        auto item = std::make_shared<GameItem>(_serviceLocator.Get<GameEntityIdPublisher>(), itemData, quantity);
+        item->AddComponent(std::make_unique<ItemPositionComponent>());
+
+        return item;
     }
 
     void ItemArchiveSystem::SaveChanges(GamePlayer& player)

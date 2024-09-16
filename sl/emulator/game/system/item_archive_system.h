@@ -6,6 +6,7 @@
 
 namespace sunlight
 {
+    class ItemData;
     class GameEntityIdPool;
     class GameItem;
     class GamePlayer;
@@ -38,11 +39,14 @@ namespace sunlight
         void HandleMessage(const ZoneMessage& message);
 
         bool HandleLiftItem(GamePlayer& player, game_entity_id_type pick, int32_t quantity);
-        bool HandleLowerItem(GamePlayer& player, game_entity_id_type lowerItemId, game_entity_id_type liftItemId,
+        bool HandleLowerItem(GamePlayer& player, game_entity_id_type lowerItemId, game_entity_id_type invenItemId,
             int8_t page, int8_t x, int8_t y);
 
         bool HandleLiftEquipment(GamePlayer& player, EquipmentPosition position);
         bool HandleLowerEquipment(GamePlayer& player, game_entity_id_type equipItemId, EquipmentPosition position);
+
+    private:
+        auto CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>;
 
     private:
         void SaveChanges(GamePlayer& player);

@@ -132,6 +132,35 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto ItemArchiveMessageCreator::CreateItemDecrease(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_DECREASEITEM);
+        writer.WriteObject(GameEntityNetworkId(item).ToBuffer());
+        writer.Write<int32_t>(quantity);
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateItemRemove(const GamePlayer& player, const GameItem& item) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_REMOVEITEM);
+        writer.WriteObject(GameEntityNetworkId(item).ToBuffer());
+
+        return writer.Flush();
+    }
+
     auto ItemArchiveMessageCreator::CreateArchiveResult(const GamePlayer& player, bool result, ZoneMessageType archiveMessage) -> Buffer
     {
         SlPacketWriter writer;
@@ -155,6 +184,7 @@ namespace sunlight
 
         StreamWriter writer(result);
 
+        // client 0x459BE0
         writer.Write<int16_t>(positionComponent.IsInQuickSlot());
         writer.Write<int16_t>(positionComponent.GetPage());
         writer.Write<int16_t>(positionComponent.GetX());

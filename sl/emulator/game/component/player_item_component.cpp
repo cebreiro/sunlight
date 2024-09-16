@@ -458,6 +458,155 @@ namespace sunlight
         return true;
     }
 
+    bool PlayerItemComponent::SetItemQuantity(game_entity_id_type id, int32_t quantity)
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return false;
+        }
+
+        if (iter->second->GetQuantity() != quantity)
+        {
+            iter->second->SetQuantity(quantity);
+
+            AddItemUpdateQuantityLog(*iter->second);
+        }
+
+        return true;
+    }
+
+    bool PlayerItemComponent::IncreaseItemQuantity(game_entity_id_type id, int32_t quantity)
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return false;
+        }
+
+        iter->second->SetQuantity(iter->second->GetQuantity() + quantity);
+
+        AddItemUpdateQuantityLog(*iter->second);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::DecreaseItemQuantity(game_entity_id_type id, int32_t quantity)
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return false;
+        }
+
+        const int32_t itemQuantity = iter->second->GetQuantity();
+        if (itemQuantity <= quantity)
+        {
+            return false;
+        }
+
+        iter->second->SetQuantity(itemQuantity - quantity);
+        assert(iter->second->GetQuantity() > 0);
+
+        AddItemUpdateQuantityLog(*iter->second);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::AddNewPickedItem(SharedPtrNotNull<GameItem> item)
+    {
+        assert(item->GetUId().has_value());
+        assert(item->HasComponent<ItemPositionComponent>());
+        assert(!_items.contains(item->GetId()));
+
+        if (_pickItem)
+        {
+            return false;
+        }
+
+        _pickItem = item.get();
+        _items[_pickItem->GetId()] = std::move(item);
+
+        ItemPositionComponent& positionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        positionComponent.SetPositionType(ItemPositionType::Pick);
+        positionComponent.ResetPosition();
+
+        AddItemAddLog(*_pickItem);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::RemoveItem(game_entity_id_type id)
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return false;
+        }
+
+        ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
+        switch (positionComponent.GetPositionType())
+        {
+        case ItemPositionType::Inventory:
+        {
+            GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr,
+                ItemSlotRange{
+                .x = positionComponent.GetX(),
+                .y = positionComponent.GetY(),
+                .xSize = iter->second->GetData().GetWidth(),
+                .ySize = iter->second->GetData().GetHeight(),
+            });
+        }
+        break;
+        case ItemPositionType::Equipment:
+        {
+            GameItem*& equipItem = Mutable(static_cast<EquipmentPosition>(positionComponent.GetPage()));
+            assert(equipItem && equipItem == iter->second.get());
+
+            equipItem = nullptr;
+        }
+        break;
+        case ItemPositionType::Pick:
+        {
+            assert(_pickItem == iter->second.get());
+
+            _pickItem = nullptr;
+        }
+        break;
+        case ItemPositionType::QuickSlot:
+        {
+
+        }
+        break;
+        case ItemPositionType::Count:
+        default:
+            assert(false);
+        }
+
+        AddItemRemoveLog(*iter->second);
+
+        _items.erase(iter);
+
+        return true;
+    }
+
+    auto PlayerItemComponent::FindInventoryItem(game_entity_id_type id) const -> const GameItem*
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return nullptr;
+        }
+
+        const ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
+        if (positionComponent.GetPositionType() != ItemPositionType::Inventory)
+        {
+            return nullptr;
+        }
+
+        return iter->second.get();
+    }
+
     auto PlayerItemComponent::FindEmptyInventoryPosition(int32_t width, int32_t height) const -> std::optional<InventoryPosition>
     {
         for (int32_t i = 0; i < _inventoryPage; ++i)
@@ -576,6 +725,13 @@ namespace sunlight
             .page = itemPositionComponent.GetPage(),
             .x = itemPositionComponent.GetX(),
             .y = itemPositionComponent.GetY()
+            });
+    }
+
+    void PlayerItemComponent::AddItemRemoveLog(const GameItem& item)
+    {
+        _itemLogs.emplace_back(db::ItemLogRemove{
+            .id = item.GetUId().value(),
             });
     }
 }

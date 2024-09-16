@@ -48,6 +48,15 @@ namespace sunlight
         bool SwapPickedItemTo(int8_t page, int8_t x, int8_t y);
 
     public:
+        bool SetItemQuantity(game_entity_id_type id, int32_t quantity);
+        bool IncreaseItemQuantity(game_entity_id_type id, int32_t quantity);
+        bool DecreaseItemQuantity(game_entity_id_type id, int32_t quantity);
+
+        bool AddNewPickedItem(SharedPtrNotNull<GameItem> item);
+        bool RemoveItem(game_entity_id_type id);
+
+    public:
+        auto FindInventoryItem(game_entity_id_type id) const -> const GameItem*;
         auto FindEmptyInventoryPosition(int32_t width, int32_t height) const -> std::optional<InventoryPosition>;
 
     public:
@@ -70,6 +79,7 @@ namespace sunlight
         void AddItemUpdatePositionLog(const GameItem& item);
         void AddItemUpdateQuantityLog(const GameItem& item);
         void AddItemAddLog(const GameItem& item);
+        void AddItemRemoveLog(const GameItem& item);
 
     private:
         int64_t _cid = 0;
