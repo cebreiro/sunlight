@@ -1,8 +1,18 @@
-#include "game_entity_id_pool.h"
+#include "game_entity_id_publisher.h"
 
 namespace sunlight
 {
-    auto GameEntityIdPool::Pop(GameEntityType type) -> game_entity_id_type
+    GameEntityIdPublisher::GameEntityIdPublisher(int32_t zoneId)
+        : _name(fmt::format("game_entity_id_publisher_{}", zoneId))
+    {
+    }
+
+    auto GameEntityIdPublisher::GetName() const -> std::string_view
+    {
+        return _name;
+    }
+
+    auto GameEntityIdPublisher::Publish(GameEntityType type) -> game_entity_id_type
     {
         (void)type;
 
@@ -24,7 +34,7 @@ namespace sunlight
         return result;
     }
 
-    auto GameEntityIdPool::Push(GameEntityType type, game_entity_id_type id)
+    void GameEntityIdPublisher::Return(GameEntityType type, game_entity_id_type id)
     {
         (void)type;
 

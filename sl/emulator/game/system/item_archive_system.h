@@ -2,11 +2,12 @@
 #include "sl/data/sox/item/equipment_type.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
-#include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/system/game_system.h"
 
 namespace sunlight
 {
+    class GameEntityIdPool;
+    class GameItem;
     class GamePlayer;
     struct ZoneMessage;
 }
@@ -27,7 +28,8 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        bool AddItem(GamePlayer& target, int32_t itemId, int32_t quantity);
+        bool AddItem(GamePlayer& player, int32_t itemId, int32_t quantity, int32_t& addedQuantity);
+        bool AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity);
 
     public:
         static bool IsValid(EquipmentPosition position, sox::EquipmentType soxType);
@@ -43,6 +45,8 @@ namespace sunlight
         bool HandleLowerEquipment(GamePlayer& player, game_entity_id_type equipItemId, EquipmentPosition position);
 
     private:
+        void SaveChanges(GamePlayer& player);
+
         void HandleDatabaseError(int64_t cid);
 
     private:

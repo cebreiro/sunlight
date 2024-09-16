@@ -94,6 +94,44 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto ItemArchiveMessageCreator::CreateNewPickedItemAdd(const GamePlayer& player, const GameItem& item) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_ADDITEM);
+
+        const item_object_buffer_type buffer = CreateItemObject(item);
+        writer.Write<int32_t>(static_cast<int32_t>(buffer.size()));
+        writer.WriteObject(buffer);
+
+        // 0: unk.. item quantity add?
+        // // 1: create new pick item
+        writer.Write<int32_t>(1);
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateInventoryItemAdd(const GamePlayer& player, const GameItem& item) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_ADDINVENITEM);
+
+        const item_object_buffer_type buffer = CreateItemObject(item);
+        writer.Write<int32_t>(static_cast<int32_t>(buffer.size()));
+        writer.WriteObject(buffer);
+
+        return writer.Flush();
+    }
+
     auto ItemArchiveMessageCreator::CreateArchiveResult(const GamePlayer& player, bool result, ZoneMessageType archiveMessage) -> Buffer
     {
         SlPacketWriter writer;
@@ -107,5 +145,26 @@ namespace sunlight
         writer.Write(archiveMessage);
 
         return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateItemObject(const GameItem& item) -> item_object_buffer_type
+    {
+        item_object_buffer_type result = {};
+
+        const ItemPositionComponent& positionComponent = item.GetComponent<ItemPositionComponent>();
+
+        StreamWriter writer(result);
+
+        writer.Write<int16_t>(positionComponent.IsInQuickSlot());
+        writer.Write<int16_t>(positionComponent.GetPage());
+        writer.Write<int16_t>(positionComponent.GetX());
+        writer.Write<int16_t>(positionComponent.GetY());
+        writer.Write<int16_t>(static_cast<uint16_t>(item.GetQuantity()));
+        writer.Write<int32_t>(item.GetData().GetId());
+        writer.Write<int8_t>(0); // unk
+        writer.Write<int32_t>(item.GetId().Unwrap());
+        writer.Write<int32_t>(static_cast<uint32_t>(item.GetType()));
+
+        return result;
     }
 }

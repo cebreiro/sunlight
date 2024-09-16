@@ -1,11 +1,19 @@
 #include "game_entity.h"
 
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
+
 namespace sunlight
 {
-    GameEntity::GameEntity(game_entity_id_type id, GameEntityType type)
-        : _id(id)
+    GameEntity::GameEntity(GameEntityIdPublisher& idPublisher, GameEntityType type)
+        : _idPublisher(idPublisher)
+        , _id(idPublisher.Publish(type))
         , _type(type)
     {
+    }
+
+    GameEntity::~GameEntity()
+    {
+        _idPublisher.Return(_type, _id);
     }
 
     bool GameEntity::IsActive() const

@@ -5,6 +5,11 @@
 
 namespace sunlight
 {
+    class GameEntityIdPublisher;
+}
+
+namespace sunlight
+{
     class GameEntity
     {
     public:
@@ -15,8 +20,8 @@ namespace sunlight
         GameEntity& operator=(GameEntity&& other) noexcept = delete;
 
     public:
-        GameEntity(game_entity_id_type id, GameEntityType type);
-        virtual ~GameEntity() = default;
+        GameEntity(GameEntityIdPublisher& idPublisher, GameEntityType type);
+        virtual ~GameEntity();
 
         bool IsActive() const;
 
@@ -33,6 +38,9 @@ namespace sunlight
         auto Cast() const -> const T*;
 
     public:
+        template <typename T> requires std::derived_from<T, GameComponent>
+        bool HasComponent() const;
+
         template <typename T> requires std::derived_from<T, GameComponent>
         bool AddComponent(UniquePtrNotNull<T> component);
 
@@ -58,6 +66,8 @@ namespace sunlight
         auto GetComponent() const -> const T&;
 
     private:
+        GameEntityIdPublisher& _idPublisher;
+
         game_entity_id_type _id = {};
         GameEntityType _type = GameEntityType::None;
         bool _active = false;
@@ -91,6 +101,12 @@ namespace sunlight
         }
 
         return nullptr;
+    }
+
+    template <typename T> requires std::derived_from<T, GameComponent>
+    bool GameEntity::HasComponent() const
+    {
+        return FindComponent<T>() != nullptr;
     }
 
     template <typename T> requires std::derived_from<T, GameComponent>

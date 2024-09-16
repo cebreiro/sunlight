@@ -2,8 +2,8 @@
 
 namespace sunlight
 {
-    GameItem::GameItem(game_entity_id_type id, const ItemData& data, int32_t quantity)
-        : GameEntity(id, GameEntityType::Item)
+    GameItem::GameItem(GameEntityIdPublisher& idPublisher, const ItemData& data, int32_t quantity)
+        : GameEntity(idPublisher, GameEntityType::Item)
         , _data(data)
         , _quantity(quantity)
     {

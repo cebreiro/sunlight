@@ -11,7 +11,7 @@ namespace sunlight
     class GameItem final : public GameEntity
     {
     public:
-        GameItem(game_entity_id_type id, const ItemData& data, int32_t quantity);
+        GameItem(GameEntityIdPublisher& idPublisher, const ItemData& data, int32_t quantity);
 
         auto GetData() const -> const ItemData&;
         auto GetUId() const -> const std::optional<int64_t>&;

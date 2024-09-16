@@ -7,7 +7,6 @@
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
-#include "sl/emulator/game/entity/game_entity_id_pool.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
@@ -137,9 +136,9 @@ namespace sunlight
         return result;
     }
 
-    GamePlayer::GamePlayer(SharedPtrNotNull<GameClient> client, const db::dto::Character& dto, const GameDataProvideService& dataProvider,
-        GameEntityIdPool& idPool)
-        : GameEntity(idPool.Pop(TYPE), TYPE)
+    GamePlayer::GamePlayer(SharedPtrNotNull<GameClient> client, const db::dto::Character& dto,
+        const GameDataProvideService& dataProvider, GameEntityIdPublisher& idPublisher)
+        : GameEntity(idPublisher, TYPE)
         , _cid(dto.id)
         , _aid(dto.aid)
         , _name(dto.name)
@@ -147,7 +146,7 @@ namespace sunlight
         , _client(std::move(client))
     {
         (void)AddComponent(CreatePlayerAppearanceComponent(dataProvider.GetItemDataProvider(), dto));
-        (void)AddComponent(std::make_unique<PlayerItemComponent>(idPool, dataProvider.GetItemDataProvider(), dto));
+        (void)AddComponent(std::make_unique<PlayerItemComponent>(idPublisher, dataProvider.GetItemDataProvider(), dto));
         (void)AddComponent(std::make_unique<PlayerJobComponent>(dataProvider, dto.jobs));
         (void)AddComponent(CreateSkillComponent(dataProvider.GetSkillDataProvider(), dto));
         (void)AddComponent(std::make_unique<PlayerStatComponent>(dto));

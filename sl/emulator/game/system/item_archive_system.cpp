@@ -2,6 +2,7 @@
 
 #include <boost/scope/scope_exit.hpp>
 
+#include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -9,8 +10,12 @@
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/system/player_stat_update_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
+#include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
 #include "sl/emulator/service/database/database_service.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
+#include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
 namespace sunlight
 {
@@ -45,11 +50,85 @@ namespace sunlight
         return GameSystem::GetClassId<ItemArchiveSystem>();
     }
 
-    bool ItemArchiveSystem::AddItem(GamePlayer& target, int32_t itemId, int32_t quantity)
+    bool ItemArchiveSystem::AddItem(GamePlayer& player, int32_t itemId, int32_t quantity, int32_t& addedQuantity)
     {
-        (void)target;
-        (void)itemId;
-        (void)quantity;
+        const ItemDataProvider& itemDataProvider = _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider();
+        const ItemData* itemData = itemDataProvider.Find(itemId);
+        if (!itemData)
+        {
+            return false;
+        }
+
+        auto item = std::make_shared<GameItem>(_serviceLocator.Get<GameEntityIdPublisher>(), *itemData, quantity);
+        item->AddComponent(std::make_unique<ItemPositionComponent>());
+
+        return AddItem(player, std::move(item), addedQuantity);
+    }
+
+    bool ItemArchiveSystem::AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity)
+    {
+        if (!item->HasComponent<ItemPositionComponent>())
+        {
+            item->AddComponent<ItemPositionComponent>(std::make_unique<ItemPositionComponent>());
+        }
+
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+
+        int32_t resultAddedCount = 0;
+
+        boost::scope::scope_exit exit([&]()
+            {
+                addedQuantity = resultAddedCount;
+
+                SaveChanges(player);
+            });
+
+        const ItemData& itemData = item->GetData();
+
+        if (itemData.GetMaxOverlapCount() > 1)
+        {
+            while (item->GetQuantity() > 0)
+            {
+                int32_t usedCount = 0;
+
+                if (itemComponent.TryStackOverlapItem(itemData.GetId(), item->GetQuantity(), usedCount))
+                {
+                    assert(usedCount > 0 && usedCount <= item->GetQuantity());
+
+                    item->SetQuantity(item->GetQuantity() - usedCount);
+
+                    resultAddedCount += usedCount;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        if (item->GetQuantity() <= 0)
+        {
+            assert(item->GetQuantity() == 0);
+
+            return true;
+        }
+
+        const std::optional<InventoryPosition>& pos = itemComponent.FindEmptyInventoryPosition(itemData.GetWidth(), itemData.GetHeight());
+        if (!pos.has_value())
+        {
+            return false;
+        }
+
+        item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+
+        if (!itemComponent.AddInventoryItem(item, &pos.value()))
+        {
+            return false;
+        }
+
+        resultAddedCount += item->GetQuantity();
+
+        player.Send(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *item));
 
         return true;
     }
@@ -58,7 +137,6 @@ namespace sunlight
     {
         switch (position)
         {
-        
         case EquipmentPosition::Hat:
             return soxType == sox::EquipmentType::Hat;
         case EquipmentPosition::Jacket:
@@ -100,6 +178,11 @@ namespace sunlight
 
         boost::scope::scope_exit exit([&]()
             {
+                if (success)
+                {
+                    SaveChanges(player);
+                }
+
                 player.Send(ItemArchiveMessageCreator::CreateArchiveResult(player, success, subType));
             });
 
@@ -170,29 +253,6 @@ namespace sunlight
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}] unhandled zone message. player: {}, type: {}, target: [{}, {}]",
                     GetName(), player.GetCId(), ToString(subType), targetId, ToString(targetType)));
-        }
-
-        if (success)
-        {
-            PlayerItemComponent& playerItemComponent = player.GetItemComponent();
-
-            if (playerItemComponent.HasItemLog())
-            {
-                db::ItemTransaction transaction;
-                playerItemComponent.FlushItemLogTo(transaction.logs);
-
-                execution::IExecutor* current = ExecutionContext::GetExecutor();
-                assert(current);
-
-                _serviceLocator.Get<DatabaseService>().StartTransaction(std::move(transaction))
-                    .Then(*current, [self = shared_from_this(), cid = player.GetCId()](bool success)
-                        {
-                            if (!success)
-                            {
-                                self->HandleDatabaseError(cid);
-                            }
-                        });
-            }
         }
     }
 
@@ -340,6 +400,31 @@ namespace sunlight
         }
 
         return true;
+    }
+
+    void ItemArchiveSystem::SaveChanges(GamePlayer& player)
+    {
+        PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+
+        if (!playerItemComponent.HasItemLog())
+        {
+            return;
+        }
+            
+        db::ItemTransaction transaction;
+        playerItemComponent.FlushItemLogTo(transaction.logs);
+
+        execution::IExecutor* current = ExecutionContext::GetExecutor();
+        assert(current);
+
+        _serviceLocator.Get<DatabaseService>().StartTransaction(std::move(transaction))
+            .Then(*current, [self = shared_from_this(), cid = player.GetCId()](bool success)
+                {
+                    if (!success)
+                    {
+                        self->HandleDatabaseError(cid);
+                    }
+                });
     }
 
     void ItemArchiveSystem::HandleDatabaseError(int64_t cid)

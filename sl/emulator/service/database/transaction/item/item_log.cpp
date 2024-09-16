@@ -34,7 +34,7 @@ namespace sunlight::db
             { "cid", log.cid },
             { "itemId", log.itemId },
             { "quantity", log.quantity },
-            { "posType", log.posType },
+            { "posType", ToString(log.posType)},
             { "page", log.page },
             { "x", log.x },
             { "y", log.y },

@@ -9,7 +9,6 @@ namespace sunlight
     class Stage;
     class GameClient;
     class GamePlayer;
-    class GameEntityIdPool;
 }
 
 namespace sunlight
@@ -32,19 +31,15 @@ namespace sunlight
         auto GetStrand() const -> const Strand&;
         auto GetId() const -> int32_t;
 
-        auto GetGameEntityIdPool() -> GameEntityIdPool&;
-
     private:
         void HandleNetworkMessageImpl(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader);
 
     private:
-        const ServiceLocator& _serviceLocator;
+        ServiceLocator _serviceLocator;
         SharedPtrNotNull<Strand> _strand;
 
         int32_t _id = 0;
         std::vector<UniquePtrNotNull<Stage>> _stags;
         std::unordered_map<game_client_id_type, PtrNotNull<Stage>> _playerStages;
-
-        UniquePtrNotNull<GameEntityIdPool> _gameEntityIdPool;
     };
 }

@@ -4,16 +4,23 @@
 
 namespace sunlight
 {
-    class GameEntityIdPool
+    class GameEntityIdPublisher final : public IService
     {
     public:
         static constexpr game_entity_id_type::value_type NULL_ID = 0;
 
     public:
-        auto Pop(GameEntityType type) -> game_entity_id_type;
-        auto Push(GameEntityType type, game_entity_id_type id);
+        explicit GameEntityIdPublisher(int32_t zoneId);
+
+        auto GetName() const -> std::string_view override;
+
+    public:
+        auto Publish(GameEntityType type) -> game_entity_id_type;
+        void Return(GameEntityType type, game_entity_id_type id);
 
     private:
+        std::string _name;
+
         game_entity_id_type::value_type _nextValue = {};
         std::queue<game_entity_id_type> _recycleQueue;
     };

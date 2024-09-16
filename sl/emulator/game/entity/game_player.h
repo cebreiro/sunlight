@@ -12,7 +12,6 @@ namespace sunlight
     class Stage;
     class GameClient;
     class GameDataProvideService;
-    class GameEntityIdPool;
 
     class PlayerAppearanceComponent;
     class PlayerItemComponent;
@@ -31,7 +30,7 @@ namespace sunlight
 
     public:
         GamePlayer(SharedPtrNotNull<GameClient> client, const db::dto::Character& dto,
-            const GameDataProvideService& dataProvider, GameEntityIdPool& idPool);
+            const GameDataProvideService& dataProvider, GameEntityIdPublisher& idPublisher);
 
         bool IsArmed() const;
         bool IsRunning() const;

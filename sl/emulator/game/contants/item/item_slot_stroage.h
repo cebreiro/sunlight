@@ -25,6 +25,8 @@ namespace sunlight
         bool Contains(const ItemSlotRange& range) const;
         bool HasEmptySlot(const ItemSlotRange& range) const;
 
+        auto FindEmpty(int32_t width, int32_t height) const -> std::optional<std::pair<int32_t, int32_t>>;
+
         void Get(boost::unordered::unordered_flat_set<PtrNotNull<GameItem>>& result, const ItemSlotRange& range);
         void Set(GameItem* item, const ItemSlotRange& range);
 
@@ -38,5 +40,7 @@ namespace sunlight
         int32_t _height = 0;
 
         std::vector<std::vector<GameItem*>> _slots;
+
+        mutable std::vector<ItemSlotRange> _emptySlotFindBufferCache;
     };
 }

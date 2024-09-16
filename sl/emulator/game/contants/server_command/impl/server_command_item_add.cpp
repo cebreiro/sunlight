@@ -18,6 +18,8 @@ namespace sunlight
 
     bool ServerCommandItemAdd::Execute(GamePlayer& player, int32_t itemId, int32_t quantity) const
     {
-        return _system.Get<ItemArchiveSystem>().AddItem(player, itemId, quantity);
+        int32_t addQuantity = 0;
+
+        return _system.Get<ItemArchiveSystem>().AddItem(player, itemId, quantity, addQuantity);
     }
 }
