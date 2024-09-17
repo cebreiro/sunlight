@@ -262,10 +262,21 @@ namespace sunlight
             BufferWriter writer(result);
 
             const uint32_t size = static_cast<uint32_t>(packetHeaderSize + body.GetSize());
+            const int8_t sum = [](uint32_t size)
+                {
+                    // client 0x518C19
+                    int8_t result = 0;
+                    for (int32_t i = 0; i < 4; ++i)
+                    {
+                        result += *(reinterpret_cast<const int8_t*>(&size) + i);
+                    }
+
+                    return result;
+                }(size);
 
             writer.Write<uint32_t>(size);
             writer.Write<uint32_t>(size - 9);
-            writer.Write<uint8_t>(static_cast<uint8_t>((size & 0xFF) + (size / 0xFF)));
+            writer.Write<int8_t>(sum);
             writer.Write<uint16_t>(static_cast<uint16_t>((size - 9) & 0xFFFF));
         }
         break;
