@@ -8,5 +8,6 @@ namespace sunlight
     void ServerCommandRegister::Register(ServerCommandSystem& system)
     {
         system.AddCommand(std::make_shared<ServerCommandItemAdd>(system));
+        system.AddCommand(std::make_shared<ServerCommandItemGain>(system));
     }
 }

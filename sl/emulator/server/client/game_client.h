@@ -28,6 +28,7 @@ namespace sunlight
         bool IsConnectedTo(ServerType type) const;
 
         void Send(ServerType type, Buffer buffer);
+        void Send(ServerType type, std::vector<Buffer> buffers);
 
         void Disconnect();
 

@@ -29,8 +29,11 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        bool AddItem(GamePlayer& player, int32_t itemId, int32_t quantity, int32_t& addedQuantity);
-        bool AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity);
+        bool AddItem(GamePlayer& player, int32_t itemId, int32_t quantity);
+        bool AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item);
+
+        bool GainItem(GamePlayer& player, int32_t itemId, int32_t quantity, int32_t& addedQuantity);
+        bool GainItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity);
 
     public:
         static bool IsValid(EquipmentPosition position, sox::EquipmentType soxType);
@@ -41,9 +44,13 @@ namespace sunlight
         bool HandleLiftItem(GamePlayer& player, game_entity_id_type pick, int32_t quantity);
         bool HandleLowerItem(GamePlayer& player, game_entity_id_type lowerItemId, game_entity_id_type invenItemId,
             int8_t page, int8_t x, int8_t y);
+        bool HandleLowerItemToQuickSlot(GamePlayer& player, game_entity_id_type lowerItemId, game_entity_id_type quickSlotItemId,
+            int8_t page, int8_t x, int8_t y);
 
         bool HandleLiftEquipment(GamePlayer& player, EquipmentPosition position);
         bool HandleLowerEquipment(GamePlayer& player, game_entity_id_type equipItemId, EquipmentPosition position);
+
+        bool HandleDestroyPickedItem(GamePlayer& player, game_entity_id_type pickedItemId);
 
     private:
         auto CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>;

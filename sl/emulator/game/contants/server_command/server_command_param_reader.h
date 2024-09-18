@@ -36,7 +36,12 @@ namespace sunlight
     template <typename T> requires std::is_arithmetic_v<T>
     bool ServerCommandParamReader::TryParse(int64_t index, T& result) const
     {
-        assert(index >= 0 && index < std::ssize(_params));
+        assert(index >= 0);
+
+        if (index >= std::ssize(_params))
+        {
+            return false;
+        }
 
         try
         {

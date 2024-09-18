@@ -1,5 +1,8 @@
 #pragma once
 #include <boost/container/static_vector.hpp>
+
+#include "sl/emulator/game/entity/game_entity_id_type.h"
+#include "sl/emulator/game/entity/game_entity_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 
 namespace sunlight
@@ -18,9 +21,13 @@ namespace sunlight
         static auto CreateInit(const GamePlayer& player) -> Buffer;
 
         static auto CreateNewPickedItemAdd(const GamePlayer& player, const GameItem& item) -> Buffer;
+        static auto CreateItemLift(const GamePlayer& player, const GameItem& pickedItem) -> Buffer;
+        static auto CreateItemLift(const GamePlayer& player, const GameItem& pickedItem, const GameItem& origin, int32_t decreaseQuantity) -> Buffer;
+
         static auto CreateInventoryItemAdd(const GamePlayer& player, const GameItem& item) -> Buffer;
+        static auto CreateItemAdd(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer;
         static auto CreateItemDecrease(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer;
-        static auto CreateItemRemove(const GamePlayer& player, const GameItem& item) -> Buffer;
+        static auto CreateItemRemove(const GamePlayer& player, game_entity_id_type removed, GameEntityType removedType) -> Buffer;
 
         static auto CreateArchiveResult(const GamePlayer& player, bool result, ZoneMessageType archiveMessage) -> Buffer;
 

@@ -61,19 +61,25 @@ namespace sunlight
 
     void ServerCommandSystem::HandleCommand(const ZoneCommunityMessage& message)
     {
-        const std::string& command = message.reader.ReadString();
+        const std::string& request = message.reader.ReadString();
 
-        LogRequest(message.player, command);
+        LogRequest(message.player, request);
 
         _splitStringBuffer.clear();
-        boost::algorithm::split(_splitStringBuffer, command, boost::is_any_of(" "));
+        boost::algorithm::split(_splitStringBuffer, request, boost::is_any_of(" "));
 
         if (_splitStringBuffer.empty())
         {
             return;
         }
 
-        const auto iter = _commands.find(_splitStringBuffer[0]);
+        std::string command(_splitStringBuffer[0]);
+        std::ranges::transform(command, command.begin(), [](char c) -> char
+            {
+                return static_cast<char>(tolower(c));
+            });
+
+        const auto iter = _commands.find(command);
         if (iter == _commands.end())
         {
             return;
@@ -83,7 +89,7 @@ namespace sunlight
 
         const bool result = iter->second->HandleCommand(message.player, reader);
 
-        LogResult(message.player, command, result);
+        LogResult(message.player, request, result);
     }
 
     void ServerCommandSystem::LogRequest(const GamePlayer& player, const std::string& command)

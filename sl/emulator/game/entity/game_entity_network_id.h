@@ -1,4 +1,6 @@
 #pragma once
+#include "sl/emulator/game/entity/game_entity_id_type.h"
+#include "sl/emulator/game/entity/game_entity_type.h"
 
 namespace sunlight
 {
@@ -12,6 +14,8 @@ namespace sunlight
     public:
         GameEntityNetworkId() = default;
         explicit GameEntityNetworkId(const GameEntity& entity);
+
+        GameEntityNetworkId(game_entity_id_type id, GameEntityType type);
 
         auto ToBuffer() -> std::span<const char>;
 

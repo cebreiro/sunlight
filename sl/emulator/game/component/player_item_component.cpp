@@ -19,6 +19,11 @@ namespace sunlight
             _inventorySlot[i] = std::make_unique<ItemSlotStorage>(GameConstant::INVENTORY_WIDTH, GameConstant::INVENTORY_HEIGHT);
         }
 
+        for (int64_t i = 0; i < std::ssize(_quickSlotStorages); ++i)
+        {
+            _quickSlotStorages[i] = std::make_unique<ItemSlotStorage>(GameConstant::QUICK_SLOT_WIDTH, GameConstant::QUICK_SLOT_HEIGHT);
+        }
+
         for (const db::dto::Character::Item& dtoItem : dto.items)
         {
             const ItemData* data = itemDataProvider.Find(dtoItem.dataId);
@@ -46,7 +51,7 @@ namespace sunlight
             {
                 positionComponent->SetPositionType(ItemPositionType::Inventory);
 
-                if (positionComponent->GetPage() >= std::ssize(_inventorySlot))
+                if (positionComponent->GetPage() < 0 || positionComponent->GetPage() >= std::ssize(_inventorySlot))
                 {
                     assert(false);
 
@@ -101,6 +106,36 @@ namespace sunlight
             case db::ItemPosType::QuickSlot:
             {
                 positionComponent->SetPositionType(ItemPositionType::QuickSlot);
+
+                if (positionComponent->GetPage() < 0 || positionComponent->GetPage() >= std::ssize(_quickSlotStorages))
+                {
+                    assert(false);
+
+                    continue;
+                }
+
+                ItemSlotStorage& storage = *_quickSlotStorages[positionComponent->GetPage()];
+
+                const ItemSlotRange range{
+                    .x = positionComponent->GetX(),
+                    .y = positionComponent->GetY(),
+                    .xSize = 1,
+                    .ySize = 1,
+                };
+
+                if (!storage.Contains(range))
+                {
+                    throw std::runtime_error(fmt::format("invalid quick slot. cid: {}, item_id: {}, range: [X: {}, y: {}]",
+                        dto.id, dtoItem.id, range.x, range.y));
+                }
+
+                if (!storage.HasEmptySlot(range))
+                {
+                    throw std::runtime_error(fmt::format("quick slot overlapped. cid: {}, item_id: {}, range: [X: {}, y: {}]",
+                        dto.id, dtoItem.id, range.x, range.y));
+                }
+
+                storage.Set(itemEntity.get(), range);
             }
             break;
             case db::ItemPosType::Pick:
@@ -200,7 +235,59 @@ namespace sunlight
         return true;
     }
 
-    bool PlayerItemComponent::TryStackOverlapItem(int32_t itemId, int32_t quantity, int32_t& usedQuantity)
+    bool PlayerItemComponent::AddQuickSlotItem(SharedPtrNotNull<GameItem> item, const QuickSlotPosition* hint)
+    {
+        assert(item->GetUId().has_value());
+        assert(item->FindComponent<ItemPositionComponent>());
+
+        const auto position = [&]() -> std::optional<QuickSlotPosition>
+            {
+                if (hint)
+                {
+                    return *hint;
+                }
+
+                return FindEmptyQuickSlotPosition();
+            }();
+
+        if (!position.has_value())
+        {
+            return false;
+        }
+
+        ItemPositionComponent& positionComponent = item->GetComponent<ItemPositionComponent>();
+        positionComponent.SetPositionType(ItemPositionType::QuickSlot);
+        positionComponent.SetPage(position->page);
+        positionComponent.SetX(position->x);
+        positionComponent.SetY(position->y);
+
+        ItemSlotStorage* slotStorage = GetQuickSlotStorage(position->page);
+        assert(slotStorage);
+
+        const ItemSlotRange range{
+            .x = position->x,
+            .y = position->y,
+            .xSize = 1,
+            .ySize = 1
+        };
+
+        assert(slotStorage->HasEmptySlot(range));
+
+        slotStorage->Set(item.get(), range);
+
+        AddItemAddLog(*item);
+
+        const game_entity_id_type id = item->GetId();
+
+        [[maybe_unused]]
+        const bool inserted = _items.try_emplace(id, std::move(item)).second;
+        assert(inserted);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::TryStackItem(int32_t itemId, int32_t quantity, int32_t& usedQuantity,
+        std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result)
     {
         if (quantity <= 0)
         {
@@ -234,6 +321,73 @@ namespace sunlight
             assert(item.GetQuantity() <= maxOverlapCount);
 
             AddItemUpdateQuantityLog(item);
+
+            if (result)
+            {
+                result->emplace_back(&item, addQuantity);
+            }
+
+            if (remainQuantity <= 0)
+            {
+                break;
+            }
+        }
+
+        usedQuantity = (quantity - remainQuantity);
+
+        return remainQuantity != quantity;
+    }
+
+    bool PlayerItemComponent::TryStackQuickSlotItem(const ItemData& itemData, int32_t quantity, int32_t& usedQuantity,
+        std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result)
+    {
+        if (quantity <= 0)
+        {
+            assert(false);
+
+            return false;
+        }
+
+        if (!itemData.IsAbleToUseQuickSlot())
+        {
+            return false;
+        }
+
+        int32_t remainQuantity = quantity;
+
+        for (GameItem& item : _items | std::views::values | notnull::reference)
+        {
+            if (item.GetData().GetId() != itemData.GetId())
+            {
+                continue;
+            }
+
+            if (!item.GetComponent<ItemPositionComponent>().IsInQuickSlot())
+            {
+                continue;
+            }
+
+            const int32_t maxOverlapCount = item.GetData().GetMaxOverlapCount();
+            if (maxOverlapCount <= 1 || item.GetQuantity() >= maxOverlapCount)
+            {
+                continue;
+            }
+
+            const int32_t possibleCount = maxOverlapCount - item.GetQuantity();
+            const int32_t addQuantity = possibleCount > remainQuantity ? remainQuantity : possibleCount;
+
+            remainQuantity -= addQuantity;
+            assert(remainQuantity >= 0);
+
+            item.SetQuantity(item.GetQuantity() + addQuantity);
+            assert(item.GetQuantity() <= maxOverlapCount);
+
+            AddItemUpdateQuantityLog(item);
+
+            if (result)
+            {
+                result->emplace_back(&item, addQuantity);
+            }
 
             if (remainQuantity <= 0)
             {
@@ -317,7 +471,7 @@ namespace sunlight
         return true;
     }
 
-    bool PlayerItemComponent::LiftInventoryItem(game_entity_id_type itemId)
+    bool PlayerItemComponent::LiftItem(game_entity_id_type itemId)
     {
         if (_pickItem)
         {
@@ -333,23 +487,50 @@ namespace sunlight
         GameItem* item = iter->second.get();
         assert(item);
 
-        ItemPositionComponent& itemPositionComponent = item->GetComponent<ItemPositionComponent>();
-        if (itemPositionComponent.GetPositionType() != ItemPositionType::Inventory)
+        ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
+        switch (positionComponent.GetPositionType())
+        {
+        case ItemPositionType::Inventory:
+        {
+            GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr,
+                ItemSlotRange{
+                .x = positionComponent.GetX(),
+                .y = positionComponent.GetY(),
+                .xSize = iter->second->GetData().GetWidth(),
+                .ySize = iter->second->GetData().GetHeight(),
+                });
+        }
+        break;
+        case ItemPositionType::Equipment:
+        {
+            GameItem*& equipItem = Mutable(static_cast<EquipmentPosition>(positionComponent.GetPage()));
+            assert(equipItem && equipItem == iter->second.get());
+
+            equipItem = nullptr;
+        }
+        break;
+        case ItemPositionType::Pick:
         {
             return false;
         }
+        case ItemPositionType::QuickSlot:
+        {
+            GetQuickSlotStorage(positionComponent.GetPage())->Set(nullptr,
+                ItemSlotRange{
+                .x = positionComponent.GetX(),
+                .y = positionComponent.GetY(),
+                .xSize = 1,
+                .ySize = 1,
+                });
+        }
+        break;
+        case ItemPositionType::Count:
+        default:
+            assert(false);
+        }
 
-        const ItemSlotRange slotRange{
-            .x = itemPositionComponent.GetX(),
-            .y = itemPositionComponent.GetY(),
-            .xSize = item->GetData().GetWidth(),
-            .ySize = item->GetData().GetHeight(),
-        };
-
-        GetInventorySlotStorage(itemPositionComponent.GetPage())->Set(nullptr, slotRange);
-
-        itemPositionComponent.SetPositionType(ItemPositionType::Pick);
-        itemPositionComponent.ResetPosition();
+        positionComponent.SetPositionType(ItemPositionType::Pick);
+        positionComponent.ResetPosition();
 
         _pickItem = item;
 
@@ -383,10 +564,10 @@ namespace sunlight
             return false;
         }
 
-        _inventorySlotQueryResult.clear();
-        storage->Get(_inventorySlotQueryResult, slotRange);
+        _itemStorageQueryResult.clear();
+        storage->Get(_itemStorageQueryResult, slotRange);
 
-        if (!_inventorySlotQueryResult.empty())
+        if (!_itemStorageQueryResult.empty())
         {
             return false;
         }
@@ -429,15 +610,15 @@ namespace sunlight
             return false;
         }
 
-        _inventorySlotQueryResult.clear();
-        storage->Get(_inventorySlotQueryResult, slotRange);
+        _itemStorageQueryResult.clear();
+        storage->Get(_itemStorageQueryResult, slotRange);
 
-        if (_inventorySlotQueryResult.size() != 1)
+        if (_itemStorageQueryResult.size() != 1)
         {
             return false;
         }
 
-        GameItem* inventoryItem = *_inventorySlotQueryResult.begin();
+        GameItem* inventoryItem = *_itemStorageQueryResult.begin();
         ItemPositionComponent& inventoryItemPositionComponent = inventoryItem->GetComponent<ItemPositionComponent>();
 
         storage->Set(nullptr, ItemSlotRange{
@@ -454,6 +635,52 @@ namespace sunlight
         AddItemUpdatePositionLog(*inventoryItem);
 
         _pickItem = inventoryItem;
+
+        return true;
+    }
+
+    bool PlayerItemComponent::LowerPickedItemToQuickSlot(int8_t page, int8_t x, int8_t y)
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        ItemSlotStorage* storage = GetQuickSlotStorage(page);
+        if (!storage)
+        {
+            return false;
+        }
+
+        const ItemSlotRange slotRange{
+            .x = x,
+            .y = y,
+            .xSize = 1,
+            .ySize = 1,
+        };
+
+        if (!storage->Contains(slotRange))
+        {
+            return false;
+        }
+
+        _itemStorageQueryResult.clear();
+        storage->Get(_itemStorageQueryResult, slotRange);
+
+        if (!_itemStorageQueryResult.empty())
+        {
+            return false;
+        }
+
+        ItemPositionComponent& itemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        itemPositionComponent.SetPositionType(ItemPositionType::QuickSlot);
+        itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
+
+        storage->Set(_pickItem, slotRange);
+
+        AddItemUpdatePositionLog(*_pickItem);
+
+        _pickItem = nullptr;
 
         return true;
     }
@@ -575,7 +802,13 @@ namespace sunlight
         break;
         case ItemPositionType::QuickSlot:
         {
-
+            GetQuickSlotStorage(positionComponent.GetPage())->Set(nullptr,
+                ItemSlotRange{
+                .x = positionComponent.GetX(),
+                .y = positionComponent.GetY(),
+                .xSize = 1,
+                .ySize = 1,
+                });
         }
         break;
         case ItemPositionType::Count:
@@ -590,6 +823,17 @@ namespace sunlight
         return true;
     }
 
+    auto PlayerItemComponent::FindItem(game_entity_id_type id) const -> const GameItem*
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return nullptr;
+        }
+
+        return iter->second.get();
+    }
+
     auto PlayerItemComponent::FindInventoryItem(game_entity_id_type id) const -> const GameItem*
     {
         const auto iter = _items.find(id);
@@ -600,6 +844,23 @@ namespace sunlight
 
         const ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
         if (positionComponent.GetPositionType() != ItemPositionType::Inventory)
+        {
+            return nullptr;
+        }
+
+        return iter->second.get();
+    }
+
+    auto PlayerItemComponent::FindQuickSlotItem(game_entity_id_type id) const -> const GameItem*
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return nullptr;
+        }
+
+        const ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
+        if (positionComponent.GetPositionType() != ItemPositionType::QuickSlot)
         {
             return nullptr;
         }
@@ -624,6 +885,25 @@ namespace sunlight
                     }));
 
                 return InventoryPosition{
+                    .page = static_cast<int8_t>(i),
+                    .x = static_cast<int8_t>(pos->first),
+                    .y = static_cast<int8_t>(pos->second),
+                };
+            }
+        }
+
+        return std::nullopt;
+    }
+
+    auto PlayerItemComponent::FindEmptyQuickSlotPosition() const -> std::optional<QuickSlotPosition>
+    {
+        for (int64_t i = 0; i < std::ssize(_quickSlotStorages); ++i)
+        {
+            constexpr int32_t size = 1;
+
+            if (const auto pos = _quickSlotStorages[i]->FindEmpty(size, size); pos)
+            {
+                return QuickSlotPosition{
                     .page = static_cast<int8_t>(i),
                     .x = static_cast<int8_t>(pos->first),
                     .y = static_cast<int8_t>(pos->second),
@@ -667,6 +947,16 @@ namespace sunlight
         }
 
         return _inventorySlot[page].get();
+    }
+
+    auto PlayerItemComponent::GetQuickSlotStorage(int8_t page) -> ItemSlotStorage*
+    {
+        if (page < 0 || page >= std::ssize(_quickSlotStorages))
+        {
+            return nullptr;
+        }
+
+        return _quickSlotStorages[page].get();
     }
 
     auto PlayerItemComponent::ConvertToItemPosType(ItemPositionType position) -> db::ItemPosType

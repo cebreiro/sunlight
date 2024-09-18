@@ -153,6 +153,33 @@ namespace sunlight
         (void)AddComponent(CreateSceneObjectComponent(dto));
     }
 
+    bool GamePlayer::HasDeferred() const
+    {
+        return _deferred.empty();
+    }
+
+    void GamePlayer::Defer(Buffer buffer)
+    {
+        _deferred.emplace_back(std::move(buffer));
+    }
+
+    void GamePlayer::FlushDeferred()
+    {
+        assert(_client);
+
+        _client->Send(ServerType::Zone, std::move(_deferred));
+
+        constexpr int64_t reservedMagicNumberSize = 8;
+        _deferred.reserve(reservedMagicNumberSize);
+    }
+
+    void GamePlayer::Send(Buffer buffer)
+    {
+        assert(_client);
+
+        _client->Send(ServerType::Zone, std::move(buffer));
+    }
+
     bool GamePlayer::IsArmed() const
     {
         return _armed;
@@ -161,13 +188,6 @@ namespace sunlight
     bool GamePlayer::IsRunning() const
     {
         return _running;
-    }
-
-    void GamePlayer::Send(Buffer buffer)
-    {
-        assert(_client);
-
-        _client->Send(ServerType::Zone, std::move(buffer));
     }
 
     auto GamePlayer::GetCId() const -> int64_t

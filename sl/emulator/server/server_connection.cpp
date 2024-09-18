@@ -65,6 +65,17 @@ namespace sunlight
             });
     }
 
+    void ServerConnection::Send(std::vector<Buffer> buffers)
+    {
+        Post(*_strand, [self = shared_from_this(), buffers = std::move(buffers)]() mutable
+            {
+                for (auto& buffer : buffers)
+                {
+                    self->SendImpl(std::move(buffer));
+                }
+            });
+    }
+
     auto ServerConnection::GetStrand() -> Strand&
     {
         assert(_strand);

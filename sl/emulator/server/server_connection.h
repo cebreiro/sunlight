@@ -34,6 +34,7 @@ namespace sunlight
 
         void Receive(Buffer buffer);
         void Send(Buffer buffer);
+        void Send(std::vector<Buffer> buffer);
 
         auto GetStrand() -> Strand&;
         auto GetStrand() const -> const Strand&;

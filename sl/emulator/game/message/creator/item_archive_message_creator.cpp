@@ -23,7 +23,7 @@ namespace sunlight
         writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
         writer.Write(ZoneMessageType::ITEMARCHIVE_INIT);
 
-        const PlayerItemComponent& itemComponent = player.GetItemComponent();;
+        const PlayerItemComponent& itemComponent = player.GetItemComponent();
 
         const auto itemRange = itemComponent.GetItemRange();
         const int64_t itemCount = std::ssize(itemRange);
@@ -108,9 +108,42 @@ namespace sunlight
         writer.Write<int32_t>(static_cast<int32_t>(buffer.size()));
         writer.WriteObject(buffer);
 
-        // 0: unk.. item quantity add?
-        // // 1: create new pick item
         writer.Write<int32_t>(1);
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateItemLift(const GamePlayer& player, const GameItem& pickedItem) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_LIFTITEM);
+
+        writer.WriteObject(GameEntityNetworkId(pickedItem).ToBuffer());
+        writer.WriteObject(GameEntityNetworkId(pickedItem).ToBuffer());
+        writer.Write<int32_t>(-1);
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateItemLift(const GamePlayer& player, const GameItem& pickedItem,
+        const GameItem& origin, int32_t decreaseQuantity) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_LIFTITEM);
+
+        writer.WriteObject(GameEntityNetworkId(pickedItem).ToBuffer());
+        writer.WriteObject(GameEntityNetworkId(origin).ToBuffer());
+        writer.Write<int32_t>(decreaseQuantity);
 
         return writer.Flush();
     }
@@ -132,6 +165,46 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto ItemArchiveMessageCreator::CreateItemAdd(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_ADDITEM);
+
+        {
+            const ItemPositionComponent& positionComponent = item.GetComponent<ItemPositionComponent>();
+
+            PacketWriter objectWriter;
+
+            // client 0x459BE0
+            objectWriter.Write<int16_t>(positionComponent.IsInQuickSlot());
+            objectWriter.Write<int16_t>(positionComponent.GetPage());
+            objectWriter.Write<int16_t>(positionComponent.GetX());
+            objectWriter.Write<int16_t>(positionComponent.GetY());
+            objectWriter.Write<int16_t>(static_cast<int16_t>(quantity));
+            objectWriter.Write<int32_t>(item.GetData().GetId());
+            objectWriter.Write<int8_t>(0); // unk
+            objectWriter.Write<int32_t>(item.GetId().Unwrap());
+            objectWriter.Write<int32_t>(static_cast<uint32_t>(item.GetType()));
+
+            writer.Write<int32_t>(static_cast<int32_t>(objectWriter.GetWriteSize()));
+            writer.WriteObject(objectWriter);
+        }
+
+        // client 45560B
+        // 0: inventory/quick_slot item quantity, 1: create new pick item
+        // client 450CEF
+        // if itemEdibleData.bUseQuickSlot is true, client priorly treats page, x, y as quick_slot position(if not empty)
+        // so, before create bUseQuickSlot item on inventory, must priorly fill all quick slots.
+        writer.Write<int32_t>(0);
+
+        return writer.Flush();
+    }
+
     auto ItemArchiveMessageCreator::CreateItemDecrease(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer
     {
         SlPacketWriter writer;
@@ -147,7 +220,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto ItemArchiveMessageCreator::CreateItemRemove(const GamePlayer& player, const GameItem& item) -> Buffer
+    auto ItemArchiveMessageCreator::CreateItemRemove(const GamePlayer& player, game_entity_id_type removed, GameEntityType removedType) -> Buffer
     {
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
@@ -156,7 +229,7 @@ namespace sunlight
         writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
         writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
         writer.Write(ZoneMessageType::ITEMARCHIVE_REMOVEITEM);
-        writer.WriteObject(GameEntityNetworkId(item).ToBuffer());
+        writer.WriteObject(GameEntityNetworkId(removed, removedType).ToBuffer());
 
         return writer.Flush();
     }
@@ -189,11 +262,11 @@ namespace sunlight
         writer.Write<int16_t>(positionComponent.GetPage());
         writer.Write<int16_t>(positionComponent.GetX());
         writer.Write<int16_t>(positionComponent.GetY());
-        writer.Write<int16_t>(static_cast<uint16_t>(item.GetQuantity()));
-        writer.Write<int32_t>(item.GetData().GetId());
-        writer.Write<int8_t>(0); // unk
-        writer.Write<int32_t>(item.GetId().Unwrap());
-        writer.Write<int32_t>(static_cast<uint32_t>(item.GetType()));
+        writer.Write<int16_t>(static_cast<uint16_t>(item.GetQuantity())); // 63
+        writer.Write<int32_t>(item.GetData().GetId()); // 65
+        writer.Write<int8_t>(0); // 69
+        writer.Write<int32_t>(item.GetId().Unwrap()); // 70
+        writer.Write<int32_t>(static_cast<uint32_t>(item.GetType())); // 74
 
         return result;
     }

@@ -36,6 +36,19 @@ namespace sunlight
         connection->Send(std::move(buffer));
     }
 
+    void GameClient::Send(ServerType type, std::vector<Buffer> buffers)
+    {
+        std::shared_lock lock(_connectionMutex);
+
+        const std::shared_ptr<ServerConnection>& connection = GetConnection(type);
+        if (!connection)
+        {
+            return;
+        }
+
+        connection->Send(std::move(buffers));
+    }
+
     void GameClient::Disconnect()
     {
         std::shared_lock lock(_connectionMutex);

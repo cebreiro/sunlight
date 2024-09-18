@@ -8,10 +8,10 @@ namespace sunlight
 
 namespace sunlight
 {
-    class ServerCommandItemAdd final : public ServerCommandT<int32_t, int32_t>
+    class ServerCommandItemGain final : public ServerCommandT<int32_t, int32_t>
     {
     public:
-        explicit ServerCommandItemAdd(ServerCommandSystem& system);
+        explicit ServerCommandItemGain(ServerCommandSystem& system);
 
         auto GetName() const -> std::string_view override;
 

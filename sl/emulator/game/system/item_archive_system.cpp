@@ -4,6 +4,7 @@
 
 #include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
+#include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
@@ -50,7 +51,7 @@ namespace sunlight
         return GameSystem::GetClassId<ItemArchiveSystem>();
     }
 
-    bool ItemArchiveSystem::AddItem(GamePlayer& player, int32_t itemId, int32_t quantity, int32_t& addedQuantity)
+    bool ItemArchiveSystem::AddItem(GamePlayer& player, int32_t itemId, int32_t quantity)
     {
         const ItemDataProvider& itemDataProvider = _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider();
         const ItemData* itemData = itemDataProvider.Find(itemId);
@@ -59,11 +60,64 @@ namespace sunlight
             return false;
         }
 
-        return AddItem(player, CreateNewGameItem(*itemData, quantity), addedQuantity);
+        const int32_t addQuantity = std::min(quantity, itemData->GetMaxOverlapCount());
+
+        return AddItem(player, CreateNewGameItem(*itemData, addQuantity));
     }
 
-    bool ItemArchiveSystem::AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity)
+    bool ItemArchiveSystem::AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item)
     {
+        assert(item->GetQuantity() <= item->GetData().GetMaxOverlapCount());
+
+        if (!item->HasComponent<ItemPositionComponent>())
+        {
+            item->AddComponent<ItemPositionComponent>(std::make_unique<ItemPositionComponent>());
+        }
+
+        boost::scope::scope_exit exit([&]()
+            {
+                SaveChanges(player);
+            });
+
+        const ItemData& itemData = item->GetData();
+        PlayerItemComponent& itemComponent = player.GetComponent<PlayerItemComponent>();
+
+        const std::optional<InventoryPosition>& pos = itemComponent.FindEmptyInventoryPosition(itemData.GetWidth(), itemData.GetHeight());
+        if (!pos.has_value())
+        {
+            return false;
+        }
+
+        item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+
+        if (!itemComponent.AddInventoryItem(item, &pos.value()))
+        {
+            return false;
+        }
+
+        player.Send(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *item));
+
+        return true;
+    }
+
+    bool ItemArchiveSystem::GainItem(GamePlayer& player, int32_t itemId, int32_t quantity, int32_t& addedQuantity)
+    {
+        const ItemDataProvider& itemDataProvider = _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider();
+        const ItemData* itemData = itemDataProvider.Find(itemId);
+        if (!itemData)
+        {
+            return false;
+        }
+
+        const int32_t addQuantity = std::min(quantity, itemData->GetMaxOverlapCount());
+
+        return GainItem(player, CreateNewGameItem(*itemData, addQuantity), addedQuantity);
+    }
+
+    bool ItemArchiveSystem::GainItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity)
+    {
+        assert(item->GetQuantity() <= item->GetData().GetMaxOverlapCount());
+
         if (!item->HasComponent<ItemPositionComponent>())
         {
             item->AddComponent<ItemPositionComponent>(std::make_unique<ItemPositionComponent>());
@@ -84,21 +138,93 @@ namespace sunlight
 
         if (itemData.GetMaxOverlapCount() > 1)
         {
-            while (item->GetQuantity() > 0)
+            bool fillItemQuantity = true;
+
+            // exceptional case, client rules
+            // if rules are not followed, client rejects to add overlap item quantity
+            // so server-client item quantity synchronization is break
+            // exceptional case 1
+            if (itemData.IsAbleToUseQuickSlot())
             {
-                int32_t usedCount = 0;
-
-                if (itemComponent.TryStackOverlapItem(itemData.GetId(), item->GetQuantity(), usedCount))
+                while (item->GetQuantity() > 0)
                 {
-                    assert(usedCount > 0 && usedCount <= item->GetQuantity());
+                    int32_t usedCount = 0;
+                    std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>> result;
 
-                    item->SetQuantity(item->GetQuantity() - usedCount);
+                    if (itemComponent.TryStackQuickSlotItem(itemData, item->GetQuantity(), usedCount, &result))
+                    {
+                        assert(usedCount > 0 && usedCount <= item->GetQuantity());
 
-                    resultAddedCount += usedCount;
+                        fillItemQuantity = false;
+
+                        item->SetQuantity(item->GetQuantity() - usedCount);
+
+                        resultAddedCount += usedCount;
+
+                        for (const auto& [overlappedItem, overlappedQuantity] : result)
+                        {
+                            player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *overlappedItem, overlappedQuantity));
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                else
+            }
+
+            // exceptional case 2
+            if (itemData.GetEtcData() && itemData.GetEtcData()->bulletType)
+            {
+                const GameItem* bulletItem = itemComponent.GetEquipmentItem(EquipmentPosition::Bullet);
+                if (bulletItem)
                 {
-                    break;
+                    if (bulletItem->GetData().GetId() == itemData.GetId() &&
+                        bulletItem->GetQuantity() < itemData.GetMaxOverlapCount())
+                    {
+                        fillItemQuantity = false;
+
+                        const int32_t newQuantity = std::min(itemData.GetMaxOverlapCount(), bulletItem->GetQuantity() + item->GetQuantity());
+                        const int32_t added = newQuantity - bulletItem->GetQuantity();
+
+                        resultAddedCount += added;
+
+                        item->SetQuantity(item->GetQuantity() - added);
+                        assert(item->GetQuantity() >= 0);
+
+                        [[maybe_unused]]
+                        const bool success = itemComponent.SetItemQuantity(bulletItem->GetId(), newQuantity);
+                        assert(success);
+
+                        player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *bulletItem, added));
+                    }
+                }
+            }
+
+            if (fillItemQuantity)
+            {
+                while (item->GetQuantity() > 0)
+                {
+                    int32_t usedCount = 0;
+                    std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>> result;
+
+                    if (itemComponent.TryStackItem(itemData.GetId(), item->GetQuantity(), usedCount, &result))
+                    {
+                        assert(usedCount > 0 && usedCount <= item->GetQuantity());
+
+                        item->SetQuantity(item->GetQuantity() - usedCount);
+
+                        resultAddedCount += usedCount;
+
+                        for (const auto& [overlappedItem, overlappedQuantity] : result)
+                        {
+                            player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *overlappedItem, overlappedQuantity));
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -110,22 +236,36 @@ namespace sunlight
             return true;
         }
 
+        item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+
+        if (itemData.IsAbleToUseQuickSlot())
+        {
+            const std::optional<QuickSlotPosition>& pos = itemComponent.FindEmptyQuickSlotPosition();
+            if (pos.has_value())
+            {
+                if (itemComponent.AddQuickSlotItem(item, &pos.value()))
+                {
+                    player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *item, item->GetQuantity()));
+
+                    return true;
+                }
+            }
+        }
+
         const std::optional<InventoryPosition>& pos = itemComponent.FindEmptyInventoryPosition(itemData.GetWidth(), itemData.GetHeight());
         if (!pos.has_value())
         {
             return false;
         }
 
-        item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
-
         if (!itemComponent.AddInventoryItem(item, &pos.value()))
         {
             return false;
         }
 
-        resultAddedCount += item->GetQuantity();
+        player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *item, item->GetQuantity()));
 
-        player.Send(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *item));
+        resultAddedCount += item->GetQuantity();
 
         return true;
     }
@@ -180,14 +320,20 @@ namespace sunlight
                     SaveChanges(player);
                 }
 
-                player.Send(ItemArchiveMessageCreator::CreateArchiveResult(player, success, subType));
+                player.Defer(ItemArchiveMessageCreator::CreateArchiveResult(player, success, subType));
+                player.FlushDeferred();
             });
 
         switch (subType)
         {
         case ZoneMessageType::ITEMARCHIVE_INIT:
         {
-            player.Send(ItemArchiveMessageCreator::CreateInit(player));
+            auto buffer = ItemArchiveMessageCreator::CreateInit(player);
+
+            [[maybe_unused]]
+            const auto size = buffer.GetSize();
+
+            player.Defer(std::move(buffer));
         }
         break;
         case ZoneMessageType::ITEMARCHIVE_LIFTITEM:
@@ -212,6 +358,20 @@ namespace sunlight
                 static_cast<int8_t>(page), static_cast<int8_t>(x), static_cast<int8_t>(y));
         }
         break;
+        case ZoneMessageType::ITEMARCHIVE_LOWERITEM_QI:
+        {
+            const int32_t page = reader.Read<int32_t>();
+            const int32_t x = reader.Read<int32_t>();
+            const int32_t y = reader.Read<int32_t>();
+
+            const auto [pickedItemId, pickedItemType] = reader.ReadInt64();
+            const auto [invenItemId, invenItemType] = reader.ReadInt64();
+
+            success = HandleLowerItemToQuickSlot(player, game_entity_id_type(pickedItemId), game_entity_id_type(invenItemId),
+                static_cast<int8_t>(page), static_cast<int8_t>(x), static_cast<int8_t>(y));
+
+            break;
+        }
         case ZoneMessageType::ITEMARCHIVE_LOWERWEAR:
         {
             const int32_t position = reader.Read<int32_t>();
@@ -231,9 +391,14 @@ namespace sunlight
             }
         }
         break;
+        case ZoneMessageType::SLV2_DESTROY_PICKED_ITEM:
+        {
+            const auto [pickedItemId, pickedItemType] = reader.ReadInt64();
+
+            success = HandleDestroyPickedItem(player, game_entity_id_type(pickedItemId));
+        }
+        break;
         case ZoneMessageType::ITEMARCHIVE_ADDITEM:
-        
-        case ZoneMessageType::ITEMARCHIVE_LOWERITEM_QI:
         case ZoneMessageType::ITEMARCHIVE_DROPITEM:
         case ZoneMessageType::ITEMARCHIVE_USEITEM:
         case ZoneMessageType::ITEMARCHIVE_ADD_SUB_GOLD:
@@ -264,7 +429,7 @@ namespace sunlight
             return false;
         }
 
-        const GameItem* targetItem = itemComponent.FindInventoryItem(targetItemId);
+        const GameItem* targetItem = itemComponent.FindItem(targetItemId);
         if (!targetItem)
         {
             LogHandleItemError(__FUNCTION__, fmt::format("invalid request. player: {}, item_id: {}, quantity: {}",
@@ -275,13 +440,15 @@ namespace sunlight
 
         if (quantity < 0 || targetItem->GetQuantity() == quantity)
         {
-            if (!itemComponent.LiftInventoryItem(targetItemId))
+            if (!itemComponent.LiftItem(targetItemId))
             {
                 LogHandleItemError(__FUNCTION__, fmt::format("fail to lift inventory item. item_id: {}, quantity: {}",
                     targetItemId, quantity));
 
                 return false;
             }
+
+            player.Defer(ItemArchiveMessageCreator::CreateItemLift(player, *itemComponent.GetPickedItem()));
         }
         else
         {
@@ -294,8 +461,8 @@ namespace sunlight
             success = itemComponent.AddNewPickedItem(std::move(newPickedItem));
             assert(success);
 
-            player.Send(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *itemComponent.GetPickedItem()));
-            player.Send(ItemArchiveMessageCreator::CreateItemDecrease(player, *targetItem, quantity));
+            player.Defer(ItemArchiveMessageCreator::CreateItemLift(player, *itemComponent.GetPickedItem(),
+                *targetItem, quantity));
         }
 
         return true;
@@ -385,6 +552,90 @@ namespace sunlight
         return true;
     }
 
+    bool ItemArchiveSystem::HandleLowerItemToQuickSlot(GamePlayer& player, game_entity_id_type lowerItemId,
+        game_entity_id_type quickSlotItemId, int8_t page, int8_t x, int8_t y)
+    {
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+
+        const GameItem* picked = itemComponent.GetPickedItem();
+        if (!picked)
+        {
+            LogHandleItemError(__FUNCTION__, "picked item is null");
+
+            return false;
+        }
+
+        if (picked->GetId() != lowerItemId)
+        {
+            LogHandleItemError(__FUNCTION__, "invalid request. requested item is not picked");
+
+            return false;
+        }
+
+        if (quickSlotItemId.Unwrap() == 0)
+        {
+            if (!itemComponent.LowerPickedItemToQuickSlot(page, x, y))
+            {
+                LogHandleItemError(__FUNCTION__, fmt::format("fail to lower item. pos: [{}, {}, {}]",
+                    page, x, y));
+
+                return false;
+            }
+        }
+        else
+        {
+            const GameItem* quickSlotItem = itemComponent.FindQuickSlotItem(quickSlotItemId);
+            if (!quickSlotItem)
+            {
+                LogHandleItemError(__FUNCTION__, fmt::format("fail to find lift item. id: {}, pos: [{}, {}, {}]",
+                    quickSlotItemId, page, x, y));
+
+                return false;
+            }
+
+            const int32_t maxOverlapCount = picked->GetData().GetMaxOverlapCount();
+
+            if (picked->GetData().GetId() == quickSlotItem->GetData().GetId() && maxOverlapCount > 1)
+            {
+                if (quickSlotItem->GetQuantity() >= maxOverlapCount)
+                {
+                    return true;
+                }
+
+                const int32_t sum = picked->GetQuantity() + quickSlotItem->GetQuantity();
+
+                if (sum > maxOverlapCount)
+                {
+                    bool result = itemComponent.SetItemQuantity(quickSlotItemId, maxOverlapCount);
+                    assert(result);
+
+                    result = itemComponent.SetItemQuantity(picked->GetId(), sum - maxOverlapCount);
+                    assert(result);
+                }
+                else
+                {
+                    bool result = itemComponent.SetItemQuantity(quickSlotItemId, sum);
+                    assert(result);
+
+                    result = itemComponent.RemoveItem(picked->GetId());
+                    assert(result);
+                }
+            }
+            else
+            {
+                if (!itemComponent.SwapPickedItemTo(page, x, y))
+                {
+                    LogHandleItemError(__FUNCTION__, fmt::format("fail to swap picked item. pos: [{}, {}, {}]",
+                        page, x, y));
+
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     bool ItemArchiveSystem::HandleLiftEquipment(GamePlayer& player, EquipmentPosition position)
     {
         PlayerItemComponent& itemComponent = player.GetItemComponent();
@@ -453,6 +704,31 @@ namespace sunlight
         }
 
         return true;
+    }
+
+    bool ItemArchiveSystem::HandleDestroyPickedItem(GamePlayer& player, game_entity_id_type pickedItemId)
+    {
+        PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+
+        const GameItem* pickedItem = playerItemComponent.GetPickedItem();
+        if (!pickedItem || pickedItem->GetId() != pickedItemId)
+        {
+            LogHandleItemError(__FUNCTION__, fmt::format("invalid request. player: {}, target_item: {}",
+                player.GetCId(), pickedItemId));
+
+            return false;
+        }
+
+        const GameEntityType type = pickedItem->GetType();
+
+        if (playerItemComponent.RemoveItem(pickedItemId))
+        {
+            player.Defer(ItemArchiveMessageCreator::CreateItemRemove(player, pickedItemId, type));
+
+            return true;
+        }
+
+        return false;
     }
 
     auto ItemArchiveSystem::CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>

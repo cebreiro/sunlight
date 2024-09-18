@@ -5,6 +5,7 @@
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/item/inventory_position.h"
 #include "sl/emulator/game/contants/item/item_position.h"
+#include "sl/emulator/game/contants/quick_slot/quick_slot_position.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/service/database/dto/character.h"
 #include "sl/emulator/service/database/transaction/item/item_log.h"
@@ -14,6 +15,7 @@ namespace sunlight
     class GameEntityIdPublisher;
     class GameItem;
     class GameEntityIdPool;
+    class ItemData;
     class ItemDataProvider;
     class ItemSlotStorage;
 }
@@ -36,16 +38,23 @@ namespace sunlight
 
     public:
         bool AddInventoryItem(SharedPtrNotNull<GameItem> item, const InventoryPosition* hint = nullptr);
-        bool TryStackOverlapItem(int32_t itemId, int32_t quantity, int32_t& usedQuantity);
+        bool AddQuickSlotItem(SharedPtrNotNull<GameItem> item, const QuickSlotPosition* hint = nullptr);
+
+        bool TryStackItem(int32_t itemId, int32_t quantity,
+            int32_t& usedQuantity, std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result = nullptr);
+        bool TryStackQuickSlotItem(const ItemData& itemData, int32_t quantity,
+            int32_t& usedQuantity, std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result = nullptr);
 
     public:
         bool LiftEquipItem(EquipmentPosition position);
         bool LowerPickedItemTo(EquipmentPosition position);
         bool SwapPickedItemTo(EquipmentPosition position);
 
-        bool LiftInventoryItem(game_entity_id_type itemId);
+        bool LiftItem(game_entity_id_type itemId);
         bool LowerPickedItemTo(int8_t page, int8_t x, int8_t y);
         bool SwapPickedItemTo(int8_t page, int8_t x, int8_t y);
+
+        bool LowerPickedItemToQuickSlot(int8_t page, int8_t x, int8_t y);
 
     public:
         bool SetItemQuantity(game_entity_id_type id, int32_t quantity);
@@ -56,8 +65,11 @@ namespace sunlight
         bool RemoveItem(game_entity_id_type id);
 
     public:
+        auto FindItem(game_entity_id_type id) const -> const GameItem*;
         auto FindInventoryItem(game_entity_id_type id) const -> const GameItem*;
+        auto FindQuickSlotItem(game_entity_id_type id) const -> const GameItem*;
         auto FindEmptyInventoryPosition(int32_t width, int32_t height) const -> std::optional<InventoryPosition>;
+        auto FindEmptyQuickSlotPosition() const -> std::optional<QuickSlotPosition>;
 
     public:
         auto GetGold() const -> int32_t;
@@ -72,6 +84,7 @@ namespace sunlight
         auto Mutable(EquipmentPosition position) -> GameItem*&;
 
         auto GetInventorySlotStorage(int8_t page) -> ItemSlotStorage*;
+        auto GetQuickSlotStorage(int8_t page) -> ItemSlotStorage*;
 
     private:
         static auto ConvertToItemPosType(ItemPositionType position) -> db::ItemPosType;
@@ -91,9 +104,11 @@ namespace sunlight
 
         int32_t _inventoryPage = 0;
         std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_INVENTORY_PAGE_SIZE> _inventorySlot;
-        boost::unordered::unordered_flat_set<PtrNotNull<GameItem>> _inventorySlotQueryResult;
+        boost::unordered::unordered_flat_set<PtrNotNull<GameItem>> _itemStorageQueryResult;
 
         std::array<GameItem*, static_cast<int32_t>(EquipmentPosition::Count)> _equipments = {};
+
+        std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_QUICK_SLOT_PAGE_SIZE> _quickSlotStorages;
 
         GameItem* _pickItem = nullptr;
     };

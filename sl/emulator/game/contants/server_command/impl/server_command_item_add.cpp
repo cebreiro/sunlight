@@ -7,7 +7,6 @@ namespace sunlight
 {
     ServerCommandItemAdd::ServerCommandItemAdd(ServerCommandSystem& system)
         : _system(system)
-        , _serviceLocator(_system.GetServiceLocator())
     {
     }
 
@@ -18,8 +17,6 @@ namespace sunlight
 
     bool ServerCommandItemAdd::Execute(GamePlayer& player, int32_t itemId, int32_t quantity) const
     {
-        int32_t addQuantity = 0;
-
-        return _system.Get<ItemArchiveSystem>().AddItem(player, itemId, quantity, addQuantity);
+        return _system.Get<ItemArchiveSystem>().AddItem(player, itemId, quantity);
     }
 }

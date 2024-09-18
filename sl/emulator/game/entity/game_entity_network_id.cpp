@@ -5,9 +5,14 @@
 namespace sunlight
 {
     GameEntityNetworkId::GameEntityNetworkId(const GameEntity& entity)
+        : GameEntityNetworkId(entity.GetId(), entity.GetType())
     {
-        *reinterpret_cast<uint32_t*>(_array.data()) = entity.GetId().Unwrap();
-        *reinterpret_cast<uint32_t*>(_array.data() + 4) = static_cast<uint32_t>(entity.GetType());
+    }
+
+    GameEntityNetworkId::GameEntityNetworkId(game_entity_id_type id, GameEntityType type)
+    {
+        *reinterpret_cast<uint32_t*>(_array.data()) = id.Unwrap();
+        *reinterpret_cast<uint32_t*>(_array.data() + 4) = static_cast<uint32_t>(type);
     }
 
     auto GameEntityNetworkId::ToBuffer() -> std::span<const char>

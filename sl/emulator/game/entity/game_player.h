@@ -32,10 +32,16 @@ namespace sunlight
         GamePlayer(SharedPtrNotNull<GameClient> client, const db::dto::Character& dto,
             const GameDataProvideService& dataProvider, GameEntityIdPublisher& idPublisher);
 
-        bool IsArmed() const;
-        bool IsRunning() const;
+        bool HasDeferred() const;
+
+        void Defer(Buffer buffer);
+        void FlushDeferred();
 
         void Send(Buffer buffer);
+
+    public:
+        bool IsArmed() const;
+        bool IsRunning() const;
 
         auto GetCId() const -> int64_t;
         auto GetAId() const -> int64_t;
@@ -75,5 +81,7 @@ namespace sunlight
         PtrNotNull<Stage> _stage = nullptr;
 
         SharedPtrNotNull<GameClient> _client;
+
+        std::vector<Buffer> _deferred;
     };
 }
