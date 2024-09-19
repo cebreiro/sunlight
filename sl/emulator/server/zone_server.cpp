@@ -34,6 +34,13 @@ namespace sunlight
         _zone = (std::make_shared<Zone>(serviceLocator, *_gameExecutor, _zoneId));
     }
 
+    void ZoneServer::StartUp(uint16_t listenPort)
+    {
+        Server::StartUp(listenPort);
+
+        _zone->Start();
+    }
+
     auto ZoneServer::GetZoneId() const -> int32_t
     {
         return _zoneId;

@@ -1,4 +1,4 @@
-#include "player_stat_update_system.h"
+#include "player_stat_system.h"
 
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
@@ -9,34 +9,34 @@
 
 namespace sunlight
 {
-    PlayerStatUpdateSystem::PlayerStatUpdateSystem(const ServiceLocator& serviceLocator)
+    PlayerStatSystem::PlayerStatSystem(const ServiceLocator& serviceLocator)
         : _serviceLocator(serviceLocator)
     {
     }
 
-    auto PlayerStatUpdateSystem::GetName() const -> std::string_view
+    auto PlayerStatSystem::GetName() const -> std::string_view
     {
         return "player_recovery_system";
     }
 
-    auto PlayerStatUpdateSystem::GetClassId() const -> game_system_id_type
+    auto PlayerStatSystem::GetClassId() const -> game_system_id_type
     {
-        return GameSystem::GetClassId<PlayerStatUpdateSystem>();
+        return GameSystem::GetClassId<PlayerStatSystem>();
     }
 
-    void PlayerStatUpdateSystem::AddItemStat(GamePlayer& player, const GameItem& item)
-    {
-        (void)player;
-        (void)item;
-    }
-
-    void PlayerStatUpdateSystem::RemoveItemStat(GamePlayer& player, const GameItem& item)
+    void PlayerStatSystem::AddItemStat(GamePlayer& player, const GameItem& item)
     {
         (void)player;
         (void)item;
     }
 
-    void PlayerStatUpdateSystem::OnInitialize(GamePlayer& player)
+    void PlayerStatSystem::RemoveItemStat(GamePlayer& player, const GameItem& item)
+    {
+        (void)player;
+        (void)item;
+    }
+
+    void PlayerStatSystem::OnInitialize(GamePlayer& player)
     {
         PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
         PlayerJobComponent& jobComponent = player.GetComponent<PlayerJobComponent>();
@@ -91,7 +91,7 @@ namespace sunlight
         }
     }
 
-    void PlayerStatUpdateSystem::OnLocalActivate(GamePlayer& player)
+    void PlayerStatSystem::OnLocalActivate(GamePlayer& player)
     {
         PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
 
@@ -99,7 +99,7 @@ namespace sunlight
         statComponent.Resume(RecoveryStatType::SP);
     }
 
-    auto PlayerStatUpdateSystem::CalculateJobMaxHP(const sox::JobReference& data, int32_t jobLevel,
+    auto PlayerStatSystem::CalculateJobMaxHP(const sox::JobReference& data, int32_t jobLevel,
         const PlayerStatComponent& statComponent) -> StatValue
     {
         const double health = statComponent.GetFinalStat(PlayerStatType::Health).As<double>();
@@ -108,7 +108,7 @@ namespace sunlight
         return (4.0 * (health + 2.0 * (jobLevel)) * data.mHPFactor) + 10.0;
     }
 
-    auto PlayerStatUpdateSystem::CalculateJobMaxSP(const sox::JobReference& data, int32_t jobLevel,
+    auto PlayerStatSystem::CalculateJobMaxSP(const sox::JobReference& data, int32_t jobLevel,
         const PlayerStatComponent& statComponent) -> StatValue
     {
         const double intell = statComponent.GetFinalStat(PlayerStatType::Intell).As<double>();
@@ -119,7 +119,7 @@ namespace sunlight
         return (2.0 * (intell + wisdom + will + 5.0 * (jobLevel))) * data.mSPFactor;
     }
 
-    auto PlayerStatUpdateSystem::CalculateJobRecoveryHP(const sox::JobReference& data,
+    auto PlayerStatSystem::CalculateJobRecoveryHP(const sox::JobReference& data,
         const PlayerStatComponent& statComponent) -> StatValue
     {
         const double health = statComponent.GetFinalStat(PlayerStatType::Health).As<double>();
@@ -128,7 +128,7 @@ namespace sunlight
         return data.hPRecoveryFactor * health * 0.2 + 2.0;
     }
 
-    auto PlayerStatUpdateSystem::CalculateJobRecoverySP(const sox::JobReference& data,
+    auto PlayerStatSystem::CalculateJobRecoverySP(const sox::JobReference& data,
         const PlayerStatComponent& statComponent) -> StatValue
     {
         const double will = statComponent.GetFinalStat(PlayerStatType::Will).As<double>();

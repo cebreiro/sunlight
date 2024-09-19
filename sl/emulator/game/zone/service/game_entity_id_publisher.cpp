@@ -40,4 +40,32 @@ namespace sunlight
 
         _recycleQueue.push(id);
     }
+
+    auto GameEntityIdPublisher::PublishSceneObjectId() -> int32_t
+    {
+        int32_t result = 0;
+
+        if (_recycleQueueSceneObjectId.empty())
+        {
+            while (result == 0)
+            {
+                result = ++_nextSceneObjectId;
+            }
+        }
+        else
+        {
+            result = _recycleQueueSceneObjectId.front();
+            _recycleQueueSceneObjectId.pop();
+        }
+
+        return result;
+    }
+
+    void GameEntityIdPublisher::ReturnSceneObjectId(int32_t id)
+    {
+        if (id != 0)
+        {
+            _recycleQueueSceneObjectId.push(id);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 #include "game_player.h"
 
+#include "sl/emulator/game/component/entity_movement_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
@@ -131,7 +132,7 @@ namespace sunlight
     {
         auto result = std::make_unique<SceneObjectComponent>();
 
-        result->SetPosition(Eigen::Vector3f(dto.x, dto.y, 0.f));
+        result->SetPosition(Eigen::Vector2f(dto.x, dto.y));
 
         return result;
     }
@@ -151,6 +152,7 @@ namespace sunlight
         (void)AddComponent(CreateSkillComponent(dataProvider.GetSkillDataProvider(), dto));
         (void)AddComponent(std::make_unique<PlayerStatComponent>(dto));
         (void)AddComponent(CreateSceneObjectComponent(dto));
+        (void)AddComponent(std::make_unique<EntityMovementComponent>());
     }
 
     bool GamePlayer::HasDeferred() const
@@ -215,30 +217,18 @@ namespace sunlight
         return _gmLevel;
     }
 
+    auto GamePlayer::GetClient() const -> GameClient&
+    {
+        assert(_client);
+
+        return *_client;
+    }
+
     auto GamePlayer::GetClientId() const -> game_client_id_type
     {
         assert(_client);
 
         return _client->GetId();
-    }
-
-    auto GamePlayer::GetStage() -> Stage&
-    {
-        assert(_stage);
-
-        return *_stage;
-    }
-
-    auto GamePlayer::GetStage() const -> const Stage&
-    {
-        assert(_stage);
-
-        return *_stage;
-    }
-
-    void GamePlayer::SetStage(Stage* stage)
-    {
-        _stage = stage;
     }
 
     void GamePlayer::SetArmed(bool value)
@@ -309,5 +299,15 @@ namespace sunlight
     auto GamePlayer::GetSceneObjectComponent() const -> const SceneObjectComponent&
     {
         return GetComponent<SceneObjectComponent>();
+    }
+
+    auto GamePlayer::GetMovementComponent() -> EntityMovementComponent&
+    {
+        return GetComponent<EntityMovementComponent>();
+    }
+
+    auto GamePlayer::GetMovementComponent() const -> const EntityMovementComponent&
+    {
+        return GetComponent<EntityMovementComponent>();
     }
 }

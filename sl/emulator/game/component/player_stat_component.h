@@ -47,6 +47,10 @@ namespace sunlight
         void SetJobReferenceStat(PlayerStatType type, StatValue value);
         void SetRecoveryStat(RecoveryStatType type, StatValue value);
 
+        void SetLevel(int32_t level);
+        void SetExp(int32_t exp);
+        void SetStatPoint(int32_t point);
+
     private:
         void UpdateFinalStat(PlayerStatType type);
 

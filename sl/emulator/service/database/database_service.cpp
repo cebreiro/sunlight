@@ -184,6 +184,48 @@ namespace sunlight
         co_return characterGet.Release();
     }
 
+    auto DatabaseService::SetCharacterExp(int64_t cid, int32_t exp) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterSetExp characterSetExp(conn, cid, exp);
+
+        if (const DatabaseError error = co_await characterSetExp.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
+    auto DatabaseService::SetCharacterLevel(int64_t cid, int32_t level, int32_t statPoint) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterSetLevel characterSetLevel(conn, cid, level, statPoint);
+
+        if (const DatabaseError error = co_await characterSetLevel.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
     auto DatabaseService::StartTransaction(db::ItemTransaction transaction) -> Future<bool>
     {
         [[maybe_unused]]

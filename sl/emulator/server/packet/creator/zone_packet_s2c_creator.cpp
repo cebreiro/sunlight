@@ -9,7 +9,7 @@
 
 namespace sunlight
 {
-    auto ZonePacketS2CCreator::CreateLoginAccept(const GamePlayer& player) -> Buffer
+    auto ZonePacketS2CCreator::CreateLoginAccept(const GamePlayer& player, int32_t stageId) -> Buffer
     {
         const SceneObjectComponent& sceneObjectComponent = player.GetSceneObjectComponent();
 
@@ -37,7 +37,7 @@ namespace sunlight
         writer.Write(player.GetId().Unwrap());
         writer.Write(player.GetType());
         writer.Write<int32_t>(player.GetStatComponent().GetGender());
-        writer.Write<int32_t>(player.GetStage().GetId());
+        writer.Write<int32_t>(stageId);
 
         // maybe time
         writer.Write<int32_t>(0);

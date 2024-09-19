@@ -63,6 +63,7 @@ namespace sunlight
 
         bool AddNewPickedItem(SharedPtrNotNull<GameItem> item);
         bool RemoveItem(game_entity_id_type id);
+        auto ReleaseItem(game_entity_id_type id) -> SharedPtrNotNull<GameItem>;
 
     public:
         auto FindItem(game_entity_id_type id) const -> const GameItem*;

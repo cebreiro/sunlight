@@ -1,5 +1,4 @@
 #pragma once
-#include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/stat/stat_value.h"
 #include "sl/emulator/game/system/game_system.h"
 
@@ -17,10 +16,10 @@ namespace sunlight
 
 namespace sunlight
 {
-    class PlayerStatUpdateSystem final : public GameSystem
+    class PlayerStatSystem final : public GameSystem
     {
     public:
-        explicit PlayerStatUpdateSystem(const ServiceLocator& serviceLocator);
+        explicit PlayerStatSystem(const ServiceLocator& serviceLocator);
 
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;

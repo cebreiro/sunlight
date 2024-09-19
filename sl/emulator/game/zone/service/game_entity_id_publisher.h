@@ -18,10 +18,16 @@ namespace sunlight
         auto Publish(GameEntityType type) -> game_entity_id_type;
         void Return(GameEntityType type, game_entity_id_type id);
 
+        auto PublishSceneObjectId() -> int32_t;
+        void ReturnSceneObjectId(int32_t id);
+
     private:
         std::string _name;
 
         game_entity_id_type::value_type _nextValue = {};
         std::queue<game_entity_id_type> _recycleQueue;
+
+        int32_t _nextSceneObjectId = 1;
+        std::queue<int32_t> _recycleQueueSceneObjectId;
     };
 }

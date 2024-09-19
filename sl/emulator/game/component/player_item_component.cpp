@@ -823,6 +823,68 @@ namespace sunlight
         return true;
     }
 
+    auto PlayerItemComponent::ReleaseItem(game_entity_id_type id) -> SharedPtrNotNull<GameItem>
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return {};
+        }
+
+        ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
+        switch (positionComponent.GetPositionType())
+        {
+        case ItemPositionType::Inventory:
+        {
+            GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr,
+                ItemSlotRange{
+                .x = positionComponent.GetX(),
+                .y = positionComponent.GetY(),
+                .xSize = iter->second->GetData().GetWidth(),
+                .ySize = iter->second->GetData().GetHeight(),
+                });
+        }
+        break;
+        case ItemPositionType::Equipment:
+        {
+            GameItem*& equipItem = Mutable(static_cast<EquipmentPosition>(positionComponent.GetPage()));
+            assert(equipItem && equipItem == iter->second.get());
+
+            equipItem = nullptr;
+        }
+        break;
+        case ItemPositionType::Pick:
+        {
+            assert(_pickItem == iter->second.get());
+
+            _pickItem = nullptr;
+        }
+        break;
+        case ItemPositionType::QuickSlot:
+        {
+            GetQuickSlotStorage(positionComponent.GetPage())->Set(nullptr,
+                ItemSlotRange{
+                .x = positionComponent.GetX(),
+                .y = positionComponent.GetY(),
+                .xSize = 1,
+                .ySize = 1,
+                });
+        }
+        break;
+        case ItemPositionType::Count:
+        default:
+            assert(false);
+        }
+
+        AddItemRemoveLog(*iter->second);
+
+        SharedPtrNotNull<GameItem> result = std::move(iter->second);
+
+        _items.erase(iter);
+
+        return result;
+    }
+
     auto PlayerItemComponent::FindItem(game_entity_id_type id) const -> const GameItem*
     {
         const auto iter = _items.find(id);

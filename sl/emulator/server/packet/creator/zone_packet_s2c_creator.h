@@ -13,7 +13,7 @@ namespace sunlight
     public:
         ZonePacketS2CCreator() = delete;
 
-        static auto CreateLoginAccept(const GamePlayer& player) -> Buffer;
+        static auto CreateLoginAccept(const GamePlayer& player, int32_t stageId) -> Buffer;
         static auto CreateLoginReject(const std::string& reason) -> Buffer;
 
         static auto CreateObjectLeave(const GameEntity& entity) -> Buffer;

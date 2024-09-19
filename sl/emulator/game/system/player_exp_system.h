@@ -4,14 +4,15 @@
 namespace sunlight
 {
     class GamePlayer;
-    struct ZoneMessage;
 }
 
 namespace sunlight
 {
-    class EntityInitializationSystem final : public GameSystem
+    class PlayerExpSystem : public GameSystem
     {
     public:
+        explicit PlayerExpSystem(const ServiceLocator& serviceLocator);
+
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
 
@@ -19,10 +20,11 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        void Initialize(GamePlayer& player);
+        void GainExp(GamePlayer& player, int32_t exp);
+        void GainCharacterExp(GamePlayer& player, int32_t exp);
+        void GainJobExp(GamePlayer& player, int32_t exp);
 
     private:
-        void HandlePlayerAllState(const ZoneMessage& message);
-        void HandlePlayerActivate(const ZoneMessage& message);
+        const ServiceLocator& _serviceLocator;
     };
 }

@@ -45,4 +45,13 @@ namespace sunlight
 
         return true;
     }
+
+    bool GameSystem::ShouldUpdate() const
+    {
+        return false;
+    }
+
+    void GameSystem::Update()
+    {
+    }
 }

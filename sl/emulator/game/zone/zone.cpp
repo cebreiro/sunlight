@@ -7,6 +7,7 @@
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/map/map_data_provider.h"
 #include "sl/emulator/service/snowflake/snowflake_service.h"
 
 namespace sunlight
@@ -25,11 +26,43 @@ namespace sunlight
         _serviceLocator.Add<GameItemUniqueIdPublisher>(std::make_shared<GameItemUniqueIdPublisher>(_id, *snowflakeValue));
         _serviceLocator.Add<GameEntityIdPublisher>(std::make_shared<GameEntityIdPublisher>(_id));
 
-        _stags.emplace_back(std::make_unique<Stage>(_serviceLocator, id, 10000));
+        const MapDataProvider& mapDataProvider = _serviceLocator.Get<GameDataProvideService>().GetMapDataProvider();
+        if (_mapData = mapDataProvider.FindMap(id); !_mapData)
+        {
+            throw std::runtime_error(fmt::format("fail to find map data. zone: {}", _id));
+        }
+
+        for (const MapStage& stageData : _mapData->stages | notnull::reference)
+        {
+            _stages.emplace_back(std::make_unique<Stage>(_serviceLocator, id, stageData));
+        }
     }
 
     Zone::~Zone()
     {
+    }
+
+    void Zone::Start()
+    {
+        Post(*_strand, [self = shared_from_this()]()
+            {
+                self->_updateFuture = self->Update();
+            });
+    }
+
+    void Zone::Shutdown()
+    {
+        _shutdown.store(true);
+    }
+
+    void Zone::Join()
+    {
+        if (_updateFuture.IsValid())
+        {
+            _updateFuture.Get();
+
+            _updateFuture = Future<void>();
+        }
     }
 
     auto Zone::SpawnPlayer(SharedPtrNotNull<GameClient> client, db::dto::Character dto) -> Future<bool>
@@ -55,7 +88,7 @@ namespace sunlight
             stage->SpawnPlayer(player);
             _playerStages[client->GetId()] = stage;
 
-            client->Send(ServerType::Zone, ZonePacketS2CCreator::CreateLoginAccept(*player));
+            client->Send(ServerType::Zone, ZonePacketS2CCreator::CreateLoginAccept(*player, stage->GetId()));
         }
         catch (const std::exception& e)
         {
@@ -79,24 +112,48 @@ namespace sunlight
             });
     }
 
+    auto Zone::Update() -> Future<void>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        while (true)
+        {
+            for (Stage& stage : _stages | notnull::reference)
+            {
+                stage.Update();
+            }
+
+            co_await Delay(std::chrono::milliseconds(200));
+            assert(ExecutionContext::IsEqualTo(*_strand));
+
+            if (_shutdown)
+            {
+                break;
+            }
+        }
+
+        co_return;
+    }
+
     auto Zone::FindStage(int32_t id) -> Stage*
     {
-        const auto iter = std::ranges::find_if(_stags, [id](const UniquePtrNotNull<Stage>& stage)
+        const auto iter = std::ranges::find_if(_stages, [id](const UniquePtrNotNull<Stage>& stage)
             {
                 return stage->GetId() == id;
             });
 
-        return iter != _stags.end() ? iter->get() : nullptr;
+        return iter != _stages.end() ? iter->get() : nullptr;
     }
 
     auto Zone::FindStage(int32_t id) const -> const Stage*
     {
-        const auto iter = std::ranges::find_if(_stags, [id](const UniquePtrNotNull<Stage>& stage)
+        const auto iter = std::ranges::find_if(_stages, [id](const UniquePtrNotNull<Stage>& stage)
             {
                 return stage->GetId() == id;
             });
 
-        return iter != _stags.end() ? iter->get() : nullptr;
+        return iter != _stages.end() ? iter->get() : nullptr;
     }
 
     auto Zone::GetServiceLocator() const -> const ServiceLocator&

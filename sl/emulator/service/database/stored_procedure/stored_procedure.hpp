@@ -6,4 +6,6 @@
 #include "sl/emulator/service/database/stored_procedure/impl/character_delete_soft.h"
 #include "sl/emulator/service/database/stored_procedure/impl/characters_name_get.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_get.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_set_exp.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_set_level.h"
 #include "sl/emulator/service/database/stored_procedure/impl/item_transaction_execute.h"

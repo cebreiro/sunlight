@@ -171,6 +171,21 @@ namespace sunlight
         Mutable(type).SetValue(value);
     }
 
+    void PlayerStatComponent::SetLevel(int32_t level)
+    {
+        _level = level;
+    }
+
+    void PlayerStatComponent::SetExp(int32_t exp)
+    {
+        _exp = exp;
+    }
+
+    void PlayerStatComponent::SetStatPoint(int32_t point)
+    {
+        _statPoint = point;
+    }
+
     void PlayerStatComponent::UpdateFinalStat(PlayerStatType type)
     {
         Stat& stat = Mutable(type);

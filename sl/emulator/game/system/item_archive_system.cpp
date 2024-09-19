@@ -4,12 +4,15 @@
 
 #include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
+#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
-#include "sl/emulator/game/system/player_stat_update_system.h"
+#include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/player_stat_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
@@ -27,7 +30,9 @@ namespace sunlight
 
     void ItemArchiveSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<PlayerStatUpdateSystem>());
+        Add(stage.Get<GameRepositorySystem>());
+        Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<PlayerStatSystem>());
     }
 
     bool ItemArchiveSystem::Subscribe(Stage& stage)
@@ -398,8 +403,14 @@ namespace sunlight
             success = HandleDestroyPickedItem(player, game_entity_id_type(pickedItemId));
         }
         break;
-        case ZoneMessageType::ITEMARCHIVE_ADDITEM:
         case ZoneMessageType::ITEMARCHIVE_DROPITEM:
+        {
+            const auto [pickedItemId, pickedItemType] = reader.ReadInt64();
+
+            success = HandleDropPickedItem(player, game_entity_id_type(pickedItemId));
+        }
+        break;
+        case ZoneMessageType::ITEMARCHIVE_ADDITEM:
         case ZoneMessageType::ITEMARCHIVE_USEITEM:
         case ZoneMessageType::ITEMARCHIVE_ADD_SUB_GOLD:
         case ZoneMessageType::ITEMARCHIVE_REMOVEITEM:
@@ -645,7 +656,7 @@ namespace sunlight
             return false;
         }
 
-        Get<PlayerStatUpdateSystem>().RemoveItemStat(player, *itemComponent.GetEquipmentItem(position));
+        Get<PlayerStatSystem>().RemoveItemStat(player, *itemComponent.GetEquipmentItem(position));
 
         return true;
     }
@@ -686,7 +697,7 @@ namespace sunlight
                 return false;
             }
 
-            PlayerStatUpdateSystem& playerStatUpdateSystem = Get<PlayerStatUpdateSystem>();
+            PlayerStatSystem& playerStatUpdateSystem = Get<PlayerStatSystem>();
 
             playerStatUpdateSystem.RemoveItemStat(player, *itemComponent.GetPickedItem());
             playerStatUpdateSystem.AddItemStat(player, *itemComponent.GetEquipmentItem(position));
@@ -700,7 +711,7 @@ namespace sunlight
                 return false;
             }
 
-            Get<PlayerStatUpdateSystem>().AddItemStat(player, *itemComponent.GetEquipmentItem(position));
+            Get<PlayerStatSystem>().AddItemStat(player, *itemComponent.GetEquipmentItem(position));
         }
 
         return true;
@@ -731,6 +742,31 @@ namespace sunlight
         return false;
     }
 
+    bool ItemArchiveSystem::HandleDropPickedItem(GamePlayer& player, game_entity_id_type pickedItemId)
+    {
+        PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+
+        const GameItem* targetItem = playerItemComponent.GetPickedItem();
+        if (!targetItem || targetItem->GetId() != pickedItemId)
+        {
+            LogHandleItemError(__FUNCTION__, fmt::format("invalid request. player: {}, target_item: {}",
+                player.GetCId(), pickedItemId));
+
+            return false;
+        }
+
+        auto pickedItem = playerItemComponent.ReleaseItem(pickedItemId);
+
+        Eigen::Vector2f destPosition = player.GetSceneObjectComponent().GetPosition();
+        destPosition.x() += 30.f;
+        destPosition.y() += 30.f;
+
+        Get<SceneObjectSystem>().SpawnItem(std::move(pickedItem),
+            player.GetSceneObjectComponent().GetPosition(), destPosition);
+
+        return true;
+    }
+
     auto ItemArchiveSystem::CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>
     {
         assert(quantity > 0);
@@ -753,24 +789,7 @@ namespace sunlight
         db::ItemTransaction transaction;
         playerItemComponent.FlushItemLogTo(transaction.logs);
 
-        execution::IExecutor* current = ExecutionContext::GetExecutor();
-        assert(current);
-
-        _serviceLocator.Get<DatabaseService>().StartTransaction(std::move(transaction))
-            .Then(*current, [self = shared_from_this(), cid = player.GetCId()](bool success)
-                {
-                    if (!success)
-                    {
-                        self->HandleDatabaseError(cid);
-                    }
-                });
-    }
-
-    void ItemArchiveSystem::HandleDatabaseError(int64_t cid)
-    {
-        (void)cid;
-
-        // TODO: disconnect player from server
+        Get<GameRepositorySystem>().Save(player, std::move(transaction));
     }
 
     void ItemArchiveSystem::LogHandleItemError(const char* func, const std::string& message) const

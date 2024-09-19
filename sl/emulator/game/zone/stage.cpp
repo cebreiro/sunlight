@@ -1,29 +1,42 @@
 #include "stage.h"
 
-#include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/data/map/map_stage.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/zone_message_type.h"
-#include "sl/emulator/game/system/entity_intialization_system.h"
-#include "sl/emulator/game/system/server_command_system.h"
+#include "sl/emulator/game/message/zone_request.h"
+#include "sl/emulator/game/system/entity_movement_system.h"
+#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
-#include "sl/emulator/game/system/player_stat_update_system.h"
+#include "sl/emulator/game/system/player_stat_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/system/server_command_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 
 namespace sunlight
 {
-    Stage::Stage(const ServiceLocator& serviceLocator, int32_t zoneId, int32_t stageId)
+    Stage::Stage(const ServiceLocator& serviceLocator, int32_t zoneId, const MapStage& stageData)
         : _serviceLocator(serviceLocator)
-        , _id(stageId)
         , _zoneId(zoneId)
-        , _name(fmt::format("stage_{}_{}", _zoneId, _id))
+        , _stageData(stageData)
+        , _name(fmt::format("stage_{}_{}", _zoneId, _stageData.id))
     {
         InitializeSystem();
     }
 
     Stage::~Stage()
     {
+    }
+
+    void Stage::Update()
+    {
+        GameTimeService::SetNow(game_clock_type::now());
+
+        for (GameSystem& system : _updateSystems | notnull::reference)
+        {
+            system.Update();
+        }
     }
 
     void Stage::HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader)
@@ -33,7 +46,7 @@ namespace sunlight
         {
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}_{}_{}] fail to find player. client_id: {}, opcode: {}",
-                    __FUNCTION__, _zoneId, _id, id, ToString(opcode)));
+                    __FUNCTION__, _zoneId, _stageData.id, id, ToString(opcode)));
 
             return;
         }
@@ -45,17 +58,32 @@ namespace sunlight
         switch (opcode)
         {
         case ZonePacketC2S::NMC_REQ_MOVE:
-            break;
         case ZonePacketC2S::NMC_REQ_STOP:
-            break;
         case ZonePacketC2S::NMC_REQ_SETDIRECTION:
-            break;
         case ZonePacketC2S::NMC_REQ_CHANGE_ROOM:
-            break;
         case ZonePacketC2S::NMC_REQ_USERINFO:
-            break;
         case ZonePacketC2S::NMC_REQ_UNLOCK:
-            break;
+        case ZonePacketC2S::NMC_SEND_MESSAGE_TO:
+        case ZonePacketC2S::NMC_SEND_LOCAL_MESSAGE:
+        case ZonePacketC2S::NMC_SEND_GLOBAL_MESSAGE:
+        case ZonePacketC2S::NMC_LOGIN:
+        case ZonePacketC2S::NMC_LOGOUT:
+        case ZonePacketC2S::UNKNOWN_0x86:
+        {
+            ZoneRequest request{
+                .player = *player,
+                .type = opcode,
+                .reader = *reader,
+            };
+
+            if (!Publish(request))
+            {
+                SUNLIGHT_LOG_WARN(_serviceLocator,
+                    fmt::format("[{}] unhanlded zone request. player: {}, type: {}, buffer: {}",
+                        GetName(), player->GetCId(), ToString(opcode), reader->GetBuffer().ToString()));
+            }
+        }
+        break;
         case ZonePacketC2S::NMC_TRIGGER_EVENT:
         {
             const uint8_t eventType = reader->Read<uint8_t>();
@@ -112,15 +140,6 @@ namespace sunlight
             }
         }
         break;
-        case ZonePacketC2S::NMC_SEND_MESSAGE_TO:
-            break;
-        case ZonePacketC2S::NMC_SEND_LOCAL_MESSAGE:
-            break;
-        case ZonePacketC2S::NMC_SEND_GLOBAL_MESSAGE:
-            break;
-        case ZonePacketC2S::NMC_LOGIN:
-        case ZonePacketC2S::NMC_LOGOUT:
-        case ZonePacketC2S::UNKNOWN_0x86:
         default:;
         }
     }
@@ -130,14 +149,15 @@ namespace sunlight
         assert(!_players.contains(player->GetClientId()));
 
         _players[player->GetClientId()] = player;
-        _entities[player->GetType()][player->GetId()] = player;
-
-        player->SetStage(this);
-        player->GetSceneObjectComponent().SetStageId(GetId());
 
         GameTimeService::SetNow(game_clock_type::now());
 
-        Get<EntityInitializationSystem>().Initialize(*player);
+        Get<SceneObjectSystem>().SpawnPlayer(std::move(player));
+    }
+
+    bool Stage::AddSubscriber(ZonePacketC2S type, const std::function<void(const ZoneRequest&)>& subscriber)
+    {
+        return _zoneRequestSubscribers.try_emplace(type, subscriber).second;
     }
 
     bool Stage::AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneMessage&)>& subscriber)
@@ -152,7 +172,7 @@ namespace sunlight
 
     auto Stage::GetId() const -> int32_t
     {
-        return _id;
+        return _stageData.id;
     }
 
     auto Stage::GetName() const -> const std::string&
@@ -171,6 +191,11 @@ namespace sunlight
         if (inserted)
         {
             iter->second = std::move(system);
+
+            if (iter->second->ShouldUpdate())
+            {
+                _updateSystems.emplace_back(iter->second.get());
+            }
         }
 
         return inserted;
@@ -178,10 +203,12 @@ namespace sunlight
 
     void Stage::InitializeSystem()
     {
-        Add(std::make_shared<EntityInitializationSystem>());
+        Add(std::make_shared<SceneObjectSystem>(_serviceLocator, _stageData));
+        Add(std::make_shared<EntityMovementSystem>());
         Add(std::make_shared<ServerCommandSystem>(_serviceLocator));
         Add(std::make_shared<ItemArchiveSystem>(_serviceLocator));
-        Add(std::make_shared<PlayerStatUpdateSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerStatSystem>(_serviceLocator));
+        Add(std::make_shared<GameRepositorySystem>(_serviceLocator));
 
         const auto range = _systems | std::views::values;
 
@@ -204,6 +231,19 @@ namespace sunlight
                 throw std::runtime_error("system cyclic dependency detected!!");
             }
         }
+    }
+
+    bool Stage::Publish(const ZoneRequest& request)
+    {
+        const auto iter = _zoneRequestSubscribers.find(request.type);
+        if (iter == _zoneRequestSubscribers.end())
+        {
+            return false;
+        }
+
+        iter->second(request);
+
+        return true;
     }
 
     bool Stage::Publish(const ZoneMessage& message)

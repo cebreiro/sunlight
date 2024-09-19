@@ -119,6 +119,26 @@ namespace sunlight
         return result;
     }
 
+    auto Buffer::DeepCopy() const -> Buffer
+    {
+        buffer::Fragment fragment = buffer::Fragment::Create(GetSize());
+        char* data = fragment.GetData();
+        
+        for (const buffer::Fragment& f : _fragments)
+        {
+            std::copy_n(f.GetData(), f.GetSize(), data);
+
+            data += f.GetSize();
+        }
+
+
+        Buffer result;
+        result._size = GetSize();
+        result._fragments.emplace_back(std::move(fragment));
+
+        return result;
+    }
+
     bool Buffer::Empty() const
     {
         return _size == 0 && _fragments.empty();

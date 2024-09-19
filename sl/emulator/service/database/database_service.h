@@ -43,6 +43,9 @@ namespace sunlight
 
         auto GetCharacter(int64_t cid) -> Future<std::optional<db::dto::Character>>;
 
+        auto SetCharacterExp(int64_t cid, int32_t exp) -> Future<bool>;
+        auto SetCharacterLevel(int64_t cid, int32_t level, int32_t statPoint) -> Future<bool>;
+
         auto StartTransaction(db::ItemTransaction transaction) -> Future<bool>;
 
     private:

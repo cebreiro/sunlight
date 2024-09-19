@@ -6,6 +6,8 @@
 
 namespace sunlight
 {
+    struct MapFile;
+
     class Stage;
     class GameClient;
     class GamePlayer;
@@ -19,8 +21,15 @@ namespace sunlight
         Zone(const ServiceLocator& serviceLocator, execution::IExecutor& executor, int32_t id);
         ~Zone();
 
+        void Start();
+        void Shutdown();
+        void Join();
+
         auto SpawnPlayer(SharedPtrNotNull<GameClient> client, db::dto::Character dto) -> Future<bool>;
         void HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader);
+
+    private:
+        auto Update() -> Future<void>;
 
     public:
         auto FindStage(int32_t id) -> Stage*;
@@ -39,7 +48,12 @@ namespace sunlight
         SharedPtrNotNull<Strand> _strand;
 
         int32_t _id = 0;
-        std::vector<UniquePtrNotNull<Stage>> _stags;
+        PtrNotNull<const MapFile> _mapData = nullptr;
+
+        std::atomic<bool> _shutdown = false;
+        Future<void> _updateFuture;
+
+        std::vector<UniquePtrNotNull<Stage>> _stages;
         std::unordered_map<game_client_id_type, PtrNotNull<Stage>> _playerStages;
     };
 }

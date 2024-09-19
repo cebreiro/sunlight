@@ -27,6 +27,7 @@ namespace sunlight
         void MergeBack(Buffer buffer);
 
         auto ShallowCopy() const -> Buffer;
+        auto DeepCopy() const -> Buffer;
 
         bool Empty() const;
 

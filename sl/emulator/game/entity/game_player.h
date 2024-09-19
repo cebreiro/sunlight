@@ -19,6 +19,7 @@ namespace sunlight
     class PlayerSkillComponent;
     class PlayerStatComponent;
     class SceneObjectComponent;
+    class EntityMovementComponent;
 }
 
 namespace sunlight
@@ -48,11 +49,9 @@ namespace sunlight
         auto GetName() const -> const std::string&;
         auto GetZoneId() const -> int32_t;
         auto GetGmLevel() const -> int8_t;
+        auto GetClient() const -> GameClient&;
         auto GetClientId() const -> game_client_id_type;
-        auto GetStage() -> Stage&;
-        auto GetStage() const -> const Stage&;
 
-        void SetStage(Stage* stage);
         void SetArmed(bool value);
         void SetRunning(bool value);
 
@@ -69,6 +68,8 @@ namespace sunlight
         auto GetStatComponent() const -> const PlayerStatComponent&;
         auto GetSceneObjectComponent() -> SceneObjectComponent&;
         auto GetSceneObjectComponent() const -> const SceneObjectComponent&;
+        auto GetMovementComponent() -> EntityMovementComponent&;
+        auto GetMovementComponent() const -> const EntityMovementComponent&;
 
     private:
         int64_t _cid = 0;
@@ -78,7 +79,6 @@ namespace sunlight
         int8_t _gmLevel = 0;
         bool _armed = false;
         bool _running = false;
-        PtrNotNull<Stage> _stage = nullptr;
 
         SharedPtrNotNull<GameClient> _client;
 

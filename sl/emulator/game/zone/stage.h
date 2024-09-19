@@ -1,7 +1,4 @@
 #pragma once
-#include <boost/unordered/unordered_flat_map.hpp>
-#include "sl/emulator/game/entity/game_entity_id_type.h"
-#include "sl/emulator/game/entity/game_entity_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/server/client/game_client_id.h"
 #include "sl/emulator/server/packet/zone_packet_c2s.h"
@@ -10,10 +7,14 @@
 
 namespace sunlight
 {
-    class GameEntity;
-    class GamePlayer;
+    struct MapStage;
+    struct ZoneRequest;
     struct ZoneMessage;
     struct ZoneCommunityMessage;
+
+    class GameEntity;
+    class GamePlayer;
+    class GameItem;
 }
 
 namespace sunlight
@@ -21,13 +22,16 @@ namespace sunlight
     class Stage
     {
     public:
-        Stage(const ServiceLocator& serviceLocator, int32_t zoneId, int32_t stageId);
+        Stage(const ServiceLocator& serviceLocator, int32_t zoneId, const MapStage& stageData);
         ~Stage();
+
+        void Update();
 
         void HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader);
 
         void SpawnPlayer(SharedPtrNotNull<GamePlayer> player);
 
+        bool AddSubscriber(ZonePacketC2S type, const std::function<void(const ZoneRequest&)>& subscriber);
         bool AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneMessage&)>& subscriber);
         bool AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneCommunityMessage&)>& subscriber);
 
@@ -43,22 +47,24 @@ namespace sunlight
 
         void InitializeSystem();
 
+        bool Publish(const ZoneRequest& request);
         bool Publish(const ZoneMessage& message);
         bool Publish(const ZoneCommunityMessage& message);
 
     private:
         const ServiceLocator& _serviceLocator;
-        int32_t _id = 0;
         int32_t _zoneId = 0;
+        const MapStage& _stageData;
         std::string _name;
 
         std::unordered_map<game_system_id_type, SharedPtrNotNull<GameSystem>> _systems;
+        std::vector<PtrNotNull<GameSystem>> _updateSystems;
+
+        std::unordered_map<ZonePacketC2S, std::function<void(const ZoneRequest&)>> _zoneRequestSubscribers;
         std::unordered_map<ZoneMessageType, std::function<void(const ZoneMessage&)>> _zoneMessageSubscribers;
         std::unordered_map<ZoneMessageType, std::function<void(const ZoneCommunityMessage&)>> _zoneCommunityMessageSubscribers;
 
         std::unordered_map<game_client_id_type, SharedPtrNotNull<GamePlayer>> _players;
-        std::unordered_map<GameEntityType,
-            boost::unordered::unordered_flat_map<game_entity_id_type, SharedPtrNotNull<GameEntity>>> _entities;
     };
 
     template <typename T> requires std::derived_from<T, GameSystem>

@@ -1,0 +1,40 @@
+#pragma once
+#include "sl/emulator/game/system/game_system.h"
+#include "sl/emulator/service/database/transaction/item/item_transaction.h"
+
+namespace sunlight
+{
+    class GameClient;
+    class GamePlayer;
+}
+
+namespace sunlight
+{
+    class GameRepositorySystem final : public GameSystem
+    {
+    public:
+        explicit GameRepositorySystem(const ServiceLocator& serviceLocator);
+
+        void InitializeSubSystem(Stage& stage) override;
+        bool Subscribe(Stage& stage) override;
+        auto GetName() const -> std::string_view override;
+        auto GetClassId() const -> game_system_id_type override;
+
+    public:
+        bool IsPending() const;
+        bool IsPendingSaves(const GamePlayer& player) const;
+
+        void Save(const GamePlayer& player, db::ItemTransaction transaction);
+        void SaveCharacterExp(const GamePlayer& player, int32_t exp);
+        void SaveCharacterLevel(const GamePlayer& player, int32_t level, int32_t statPoint);
+
+    private:
+        void OnComplete(int64_t cid);
+        void OnError(int64_t cid);
+
+    private:
+        const ServiceLocator& _serviceLocator;
+
+        std::unordered_map<int64_t, std::pair<int32_t, WeakPtrNotNull<GameClient>>> _pending;
+    };
+}

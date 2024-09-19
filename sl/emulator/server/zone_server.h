@@ -21,6 +21,7 @@ namespace sunlight
         ~ZoneServer();
 
         void Initialize(ServiceLocator& serviceLocator) override;
+        void StartUp(uint16_t listenPort) override;
 
     public:
         auto GetZoneId() const -> int32_t;

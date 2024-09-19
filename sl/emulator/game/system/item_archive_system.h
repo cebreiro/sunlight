@@ -51,14 +51,13 @@ namespace sunlight
         bool HandleLowerEquipment(GamePlayer& player, game_entity_id_type equipItemId, EquipmentPosition position);
 
         bool HandleDestroyPickedItem(GamePlayer& player, game_entity_id_type pickedItemId);
+        bool HandleDropPickedItem(GamePlayer& player, game_entity_id_type pickedItemId);
 
     private:
         auto CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>;
 
     private:
         void SaveChanges(GamePlayer& player);
-
-        void HandleDatabaseError(int64_t cid);
 
     private:
         void LogHandleItemError(const char* func, const std::string& message) const;

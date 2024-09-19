@@ -19,6 +19,9 @@ namespace sunlight
         virtual void InitializeSubSystem(Stage& stage);
         virtual bool Subscribe(Stage& stage);
 
+        virtual bool ShouldUpdate() const;
+        virtual void Update();
+
         virtual auto GetName() const -> std::string_view = 0;
         virtual auto GetClassId() const -> game_system_id_type = 0;
 

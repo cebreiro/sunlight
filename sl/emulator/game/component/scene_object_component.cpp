@@ -4,7 +4,7 @@ namespace sunlight
 {
     bool SceneObjectComponent::IsMoving() const
     {
-        return _unk3 == 0x10;
+        return _forwardMovement.unk3 == 0x10;
     }
 
     auto SceneObjectComponent::GetId() const -> int32_t
@@ -12,44 +12,39 @@ namespace sunlight
         return _id;
     }
 
-    auto SceneObjectComponent::GetStageId() const -> int32_t
+    auto SceneObjectComponent::GetPosition() const -> const Eigen::Vector2f&
     {
-        return _stageId;
+        return _forwardMovement.position;
     }
 
-    auto SceneObjectComponent::GetPosition() const -> const Eigen::Vector3f&
+    auto SceneObjectComponent::GetDestPosition() const -> const Eigen::Vector2f&
     {
-        return _position;
-    }
-
-    auto SceneObjectComponent::GetDestPosition() const -> const Eigen::Vector3f&
-    {
-        return _destPosition;
+        return _forwardMovement.destPosition;
     }
 
     auto SceneObjectComponent::GetYaw() const -> float
     {
-        return _yaw;
+        return _forwardMovement.yaw;
     }
 
     auto SceneObjectComponent::GetSpeed() const -> float
     {
-        return _speed;
+        return _forwardMovement.speed;
     }
 
     auto SceneObjectComponent::GetUnk1() const -> float
     {
-        return _unk1;
+        return _forwardMovement.unk1;
     }
 
     auto SceneObjectComponent::GetUnk2() const -> uint16_t
     {
-        return _unk2;
+        return _forwardMovement.unk2;
     }
 
     auto SceneObjectComponent::GetUnk3() const -> uint16_t
     {
-        return _unk3;
+        return _forwardMovement.unk3;
     }
 
     void SceneObjectComponent::SetId(int32_t id)
@@ -57,43 +52,43 @@ namespace sunlight
         _id = id;
     }
 
-    void SceneObjectComponent::SetStageId(int32_t id)
+    void SceneObjectComponent::SetPosition(const Eigen::Vector2f& pos)
     {
-        _stageId = id;
+        _forwardMovement.position = pos;
     }
 
-    void SceneObjectComponent::SetPosition(const Eigen::Vector3f& pos)
+    void SceneObjectComponent::SetDestPosition(const Eigen::Vector2f& pos)
     {
-        _position = pos;
-    }
-
-    void SceneObjectComponent::SetDestPosition(const Eigen::Vector3f& pos)
-    {
-        _destPosition = pos;
+        _forwardMovement.destPosition = pos;
     }
 
     void SceneObjectComponent::SetYaw(float yaw)
     {
-        _yaw = yaw;
+        _forwardMovement.yaw = yaw;
     }
 
     void SceneObjectComponent::SetSpeed(float speed)
     {
-        _speed = speed;
+        _forwardMovement.speed = speed;
     }
 
     void SceneObjectComponent::SetUnk1(float unk1)
     {
-        _unk1 = unk1;
+        _forwardMovement.unk1 = unk1;
     }
 
     void SceneObjectComponent::SetUnk2(uint16_t value)
     {
-        _unk2 = value;
+        _forwardMovement.unk2 = value;
     }
 
     void SceneObjectComponent::SetUnk3(uint16_t value)
     {
-        _unk3 = value;
+        _forwardMovement.unk3 = value;
+    }
+
+    void SceneObjectComponent::Set(const ForwardMovement& movement)
+    {
+        _forwardMovement = movement;
     }
 }

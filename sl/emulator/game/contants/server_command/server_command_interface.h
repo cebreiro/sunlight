@@ -16,6 +16,7 @@ namespace sunlight
 
         virtual bool HandleCommand(GamePlayer& player, const ServerCommandParamReader& reader) const = 0;
         virtual auto GetName() const -> std::string_view = 0;
+        virtual auto GetRequiredGmLevel() const -> int8_t = 0;
     };
 
 
