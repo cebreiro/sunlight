@@ -148,17 +148,16 @@ namespace sunlight
 
     void SceneObjectSystem::SpawnPlayer(SharedPtrNotNull<GamePlayer> player)
     {
+        assert(!_entityViewRange.contains(player->GetId()));
+
         _entities[player->GetType()][player->GetId()] = player;
 
         Get<PlayerStatSystem>().OnInitialize(*player);
-
-        player->GetSceneObjectComponent();
 
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
         sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId());
 
         GameSpatialSector& sector = GetSector(sceneObjectComponent.GetPosition());
-
         _entityViewRange[player->GetId()] = &sector;
 
         // TODO: do sync
@@ -168,7 +167,7 @@ namespace sunlight
 
     void SceneObjectSystem::SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos)
     {
-        (void)item->RemoveComponent<ItemPositionComponent>();
+        assert(!_entityViewRange.contains(item->GetId()));
 
         if (!item->HasComponent<SceneObjectComponent>())
         {
@@ -229,7 +228,6 @@ namespace sunlight
         sector.RemoveEntity(entity);
 
         iter2->second.erase(id);
-        _entities.erase(iter2);
         _entityViewRange.erase(iter1);
     }
 
@@ -243,19 +241,19 @@ namespace sunlight
             return;
         }
 
-        GameSpatialSector*& oldSector = iter->second;
-        assert(oldSector->GetCenter().Contains(entity.GetType(), entity.GetId()));
+        GameSpatialSector& oldSector = *iter->second;
+        assert(oldSector.GetCenter().Contains(entity.GetType(), entity.GetId()));
 
         GameSpatialSector& newSector = GetSector(newPosition);
-        if (oldSector == &newSector)
+        if (&oldSector == &newSector)
         {
             return;
         }
 
         GamePlayer* player = entity.Cast<GamePlayer>();
-        oldSector->RemoveEntity(entity);
+        oldSector.RemoveEntity(entity);
 
-        if (GameSpatialSector::Subset outs = (*oldSector - newSector); !outs.Empty())
+        if (GameSpatialSector::Subset outs = (oldSector - newSector); !outs.Empty())
         {
             for (GameSpatialCell& cell : outs.GetCells())
             {
@@ -277,7 +275,7 @@ namespace sunlight
             }
         }
 
-        if (GameSpatialSector::Subset ins = (newSector - *oldSector); !ins.Empty())
+        if (GameSpatialSector::Subset ins = (newSector - oldSector); !ins.Empty())
         {
             for (GameSpatialCell& in : ins.GetCells())
             {
@@ -320,7 +318,7 @@ namespace sunlight
         }
 
         newSector.AddEntity(entity);
-        oldSector = &newSector;
+        iter->second = &newSector;
 
         if (player && player->HasDeferred())
         {

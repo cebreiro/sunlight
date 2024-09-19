@@ -118,5 +118,7 @@ namespace sunlight
         {
             _movingEntities.erase(request.player.GetId());
         }
+
+        Get<SceneObjectSystem>().UpdateViewRange(request.player, request.player.GetSceneObjectComponent().GetPosition());
     }
 }
