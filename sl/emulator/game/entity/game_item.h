@@ -16,6 +16,8 @@ namespace sunlight
     public:
         GameItem(GameEntityIdPublisher& idPublisher, const ItemData& data, int32_t quantity);
 
+        bool HasUId() const;
+
         auto GetData() const -> const ItemData&;
         auto GetUId() const -> const std::optional<int64_t>&;
         auto GetQuantity() const -> int32_t;

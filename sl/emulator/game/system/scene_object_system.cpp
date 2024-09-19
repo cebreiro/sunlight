@@ -19,6 +19,8 @@
 
 namespace sunlight
 {
+    const std::shared_ptr<GameEntity> SceneObjectSystem::null_shared_entity;
+
     SceneObjectSystem::SceneObjectSystem(const ServiceLocator& serviceLocator, const MapStage& stageData)
         : _serviceLocator(serviceLocator)
         , _id(stageData.id)
@@ -193,6 +195,42 @@ namespace sunlight
             });
 
         sector.AddEntity(*item);
+    }
+
+    void SceneObjectSystem::RemoveItem(game_entity_id_type id)
+    {
+        const auto iter1 = _entityViewRange.find(id);
+        if (iter1 == _entityViewRange.end())
+        {
+            return;
+        }
+
+        const auto iter2 = _entities.find(GameEntityType::Item);
+        if (iter2 == _entities.end())
+        {
+            assert(false);
+
+            return;
+        }
+
+        const auto iter3 = iter2->second.find(id);
+        if (iter3 == iter2->second.end())
+        {
+            assert(false);
+
+            return;
+        }
+
+        GameEntity& entity = *iter3->second;
+        GameSpatialSector& sector = *iter1->second;
+
+        Broadcast(sector, ZonePacketS2CCreator::CreateObjectLeave(entity));
+
+        sector.RemoveEntity(entity);
+
+        iter2->second.erase(id);
+        _entities.erase(iter2);
+        _entityViewRange.erase(iter1);
     }
 
     void SceneObjectSystem::UpdateViewRange(GameEntity& entity, const Eigen::Vector2f& newPosition)
@@ -372,6 +410,40 @@ namespace sunlight
 
             function(*player);
         }
+    }
+
+    auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&
+    {
+        const auto iter1 = _entities.find(type);
+        if (iter1 == _entities.end())
+        {
+            return null_shared_entity;
+        }
+
+        const auto iter2 = iter1->second.find(id);
+        if (iter2 == iter1->second.end())
+        {
+            return null_shared_entity;
+        }
+
+        return iter2->second;
+    }
+
+    auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) const -> const std::shared_ptr<GameEntity>&
+    {
+        const auto iter1 = _entities.find(type);
+        if (iter1 == _entities.end())
+        {
+            return null_shared_entity;
+        }
+
+        const auto iter2 = iter1->second.find(id);
+        if (iter2 == iter1->second.end())
+        {
+            return null_shared_entity;
+        }
+
+        return iter2->second;
     }
 
     void SceneObjectSystem::HandlePlayerAllState(const ZoneMessage& message)

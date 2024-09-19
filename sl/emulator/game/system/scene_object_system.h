@@ -37,6 +37,8 @@ namespace sunlight
         void SpawnPlayer(SharedPtrNotNull<GamePlayer> player);
         void SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos);
 
+        void RemoveItem(game_entity_id_type id);
+
     public:
         void UpdateViewRange(GameEntity& entity, const Eigen::Vector2f& newPosition);
 
@@ -45,6 +47,10 @@ namespace sunlight
         void Broadcast(GameSpatialSector& sector, const Buffer& buffer);
 
         void Visit(GameSpatialSector& sector, const std::function<void(GamePlayer&)>& function);
+
+    public:
+        auto FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&;
+        auto FindEntity(GameEntityType type, game_entity_id_type id) const -> const std::shared_ptr<GameEntity>&;
 
     private:
         void HandlePlayerAllState(const ZoneMessage& message);
@@ -80,5 +86,7 @@ namespace sunlight
 
         std::unordered_map<GameEntityType,
             boost::unordered::unordered_flat_map<game_entity_id_type, SharedPtrNotNull<GameEntity>>> _entities;
+
+        static const std::shared_ptr<GameEntity> null_shared_entity;
     };
 }

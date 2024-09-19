@@ -9,6 +9,7 @@
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
@@ -208,6 +209,7 @@ namespace sunlight
         Add(std::make_shared<ServerCommandSystem>(_serviceLocator));
         Add(std::make_shared<ItemArchiveSystem>(_serviceLocator));
         Add(std::make_shared<PlayerStatSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerStateSystem>(_serviceLocator));
         Add(std::make_shared<GameRepositorySystem>(_serviceLocator));
 
         const auto range = _systems | std::views::values;

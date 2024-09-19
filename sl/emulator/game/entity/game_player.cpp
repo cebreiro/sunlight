@@ -1,6 +1,7 @@
 #include "game_player.h"
 
 #include "sl/emulator/game/component/entity_movement_component.h"
+#include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
@@ -153,6 +154,7 @@ namespace sunlight
         (void)AddComponent(std::make_unique<PlayerStatComponent>(dto));
         (void)AddComponent(CreateSceneObjectComponent(dto));
         (void)AddComponent(std::make_unique<EntityMovementComponent>());
+        (void)AddComponent(std::make_unique<EntityStateComponent>());
     }
 
     bool GamePlayer::HasDeferred() const
@@ -309,5 +311,17 @@ namespace sunlight
     auto GamePlayer::GetMovementComponent() const -> const EntityMovementComponent&
     {
         return GetComponent<EntityMovementComponent>();
+    }
+
+    auto GamePlayer::GetStateComponent() -> EntityStateComponent&
+    {
+        return GetComponent<EntityStateComponent>();
+
+    }
+
+    auto GamePlayer::GetStateComponent() const -> const EntityStateComponent&
+    {
+        return GetComponent<EntityStateComponent>();
+
     }
 }

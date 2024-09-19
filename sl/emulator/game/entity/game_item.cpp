@@ -10,6 +10,11 @@ namespace sunlight
         assert(_quantity >= 1);
     }
 
+    bool GameItem::HasUId() const
+    {
+        return _uid.has_value();
+    }
+
     auto GameItem::GetData() const -> const ItemData&
     {
         return _data;

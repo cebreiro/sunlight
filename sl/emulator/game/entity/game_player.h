@@ -20,6 +20,7 @@ namespace sunlight
     class PlayerStatComponent;
     class SceneObjectComponent;
     class EntityMovementComponent;
+    class EntityStateComponent;
 }
 
 namespace sunlight
@@ -70,6 +71,8 @@ namespace sunlight
         auto GetSceneObjectComponent() const -> const SceneObjectComponent&;
         auto GetMovementComponent() -> EntityMovementComponent&;
         auto GetMovementComponent() const -> const EntityMovementComponent&;
+        auto GetStateComponent() -> EntityStateComponent&;
+        auto GetStateComponent() const -> const EntityStateComponent&;
 
     private:
         int64_t _cid = 0;

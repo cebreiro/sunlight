@@ -95,7 +95,10 @@ namespace sunlight
             return false;
         }
 
-        item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+        if (!item->HasUId())
+        {
+            item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+        }
 
         if (!itemComponent.AddInventoryItem(item, &pos.value()))
         {
@@ -243,7 +246,10 @@ namespace sunlight
             return true;
         }
 
-        item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+        if (!item->HasUId())
+        {
+            item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+        }
 
         if (itemData.IsAbleToUseQuickSlot())
         {
@@ -253,6 +259,8 @@ namespace sunlight
                 if (itemComponent.AddQuickSlotItem(item, &pos.value()))
                 {
                     player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *item, item->GetQuantity()));
+
+                    resultAddedCount += item->GetQuantity();
 
                     return true;
                 }
