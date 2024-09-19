@@ -21,6 +21,7 @@ namespace sunlight
 {
     SceneObjectSystem::SceneObjectSystem(const ServiceLocator& serviceLocator, const MapStage& stageData)
         : _serviceLocator(serviceLocator)
+        , _id(stageData.id)
     {
         if (stageData.terrain)
         {
@@ -124,6 +125,12 @@ namespace sunlight
             return false;
         }
 
+        if (!stage.AddSubscriber(ZoneMessageType::REQUESTITEMSTRUCT,
+            std::bind_front(&SceneObjectSystem::HandleRequestItemStructure, this)))
+        {
+            return false;
+        }
+
         return true;
     }
 
@@ -166,6 +173,8 @@ namespace sunlight
             item->AddComponent(std::make_unique<SceneObjectComponent>());
         }
 
+        _entities[item->GetType()][item->GetId()] = item;
+
         SceneObjectComponent& sceneObjectComponent = item->GetComponent<SceneObjectComponent>();
         sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId());
         sceneObjectComponent.SetPosition(destPos);
@@ -174,12 +183,14 @@ namespace sunlight
         GameSpatialSector& sector = GetSector(sceneObjectComponent.GetPosition());
         _entityViewRange[item->GetId()] = &sector;
 
-        // TODO: do sync
-        // Broadcast(sector, ...);
+        Visit(sector, [&](GamePlayer& player)
+            {
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(*item));
+                player.Defer(SceneObjectPacketCreator::CreateInformation(*item));
+                player.Defer(SceneObjectPacketCreator::CreateItemSpawn(*item, player.GetCId(), originPos));
 
-        Broadcast(sector, ZonePacketS2CCreator::CreateObjectMove(*item));
-        Broadcast(sector, SceneObjectPacketCreator::CreateInformation(*item));
-        Broadcast(sector, SceneObjectPacketCreator::CreateItemSpawn(*item, true, true, originPos));
+                player.FlushDeferred();
+            });
 
         sector.AddEntity(*item);
     }
@@ -203,27 +214,80 @@ namespace sunlight
             return;
         }
 
+        GamePlayer* player = entity.Cast<GamePlayer>();
+        oldSector->RemoveEntity(entity);
+
         if (GameSpatialSector::Subset outs = (*oldSector - newSector); !outs.Empty())
         {
             for (GameSpatialCell& cell : outs.GetCells())
             {
-                cell.RemoveEntity(entity);
+                if (player || !cell.Empty(GameEntityType::Player))
+                {
+                    for (GameEntity& target : cell.GetEntities())
+                    {
+                        if (GamePlayer* targetPlayer = target.Cast<GamePlayer>())
+                        {
+                            targetPlayer->Send(ZonePacketS2CCreator::CreateObjectLeave(entity));
+                        }
 
-                // TODO: sync
+                        if (player)
+                        {
+                            player->Defer(ZonePacketS2CCreator::CreateObjectLeave(target));
+                        }
+                    }
+                }
             }
         }
 
         if (GameSpatialSector::Subset ins = (newSector - *oldSector); !ins.Empty())
         {
-            for (GameSpatialCell& cell : ins.GetCells())
+            for (GameSpatialCell& in : ins.GetCells())
             {
-                // TODO: sync
+                if (player || !in.Empty(GameEntityType::Player))
+                {
+                    for (GameEntity& target : in.GetEntities())
+                    {
+                        if (GamePlayer* targetPlayer = target.Cast<GamePlayer>())
+                        {
+                            targetPlayer->Send(ZonePacketS2CCreator::CreateObjectMove(entity));
+                        }
 
-                cell.AddEntity(entity);
+                        if (player)
+                        {
+                            player->Defer(ZonePacketS2CCreator::CreateObjectMove(target));
+
+                            switch (target.GetType())
+                            {
+                            case GameEntityType::Player:
+                            {
+                                assert(false);
+                            }
+                            break;
+                            case GameEntityType::Item:
+                            {
+                                GameItem* item = target.Cast<GameItem>();
+                                assert(item);
+
+                                player->Defer(SceneObjectPacketCreator::CreateInformation(*item));
+                                player->Defer(SceneObjectPacketCreator::CreateItemDisplay(*item, player->GetCId()));
+                            }
+                            break;
+                            default:
+                                assert(false);
+                            }
+                        }
+                    }
+                }
             }
         }
 
+        newSector.AddEntity(entity);
         oldSector = &newSector;
+
+        if (player && player->HasDeferred())
+        {
+            player->FlushDeferred();
+        }
     }
 
     void SceneObjectSystem::Broadcast(game_entity_id_type centerEntityId, const Buffer& buffer, bool includeCenter)
@@ -288,8 +352,31 @@ namespace sunlight
         }
     }
 
+    void SceneObjectSystem::Visit(GameSpatialSector& sector, const std::function<void(GamePlayer&)>& function)
+    {
+        auto range = sector.GetEntities(GameEntityType::Player);
+        if (range.begin() == range.end())
+        {
+            return;
+        }
+
+        for (GameEntity& entity : range)
+        {
+            GamePlayer* player = entity.Cast<GamePlayer>();
+            if (!player)
+            {
+                assert(false);
+
+                continue;
+            }
+
+            function(*player);
+        }
+    }
+
     void SceneObjectSystem::HandlePlayerAllState(const ZoneMessage& message)
     {
+        message.player.Send(ZonePacketS2CCreator::CreateObjectVisibleRange(static_cast<float>(cell_size)));
         message.player.Send(GamePlayerMessageCreator::CreateAllState(message.player));
     }
 
@@ -300,6 +387,19 @@ namespace sunlight
         player.SetActive(true);
 
         Get<PlayerStatSystem>().OnLocalActivate(player);
+    }
+
+    void SceneObjectSystem::HandleRequestItemStructure(const ZoneMessage& message)
+    {
+        (void)message;
+
+        // origin zone message protocol
+        // 1) server -> client / object_move, nms_user_info
+        // 2) client -> server / request_item_structure (here)
+        // 3) server -> client / create_item
+        
+        // but, this emulator does not respect origin protocol
+        // create_item is sent at process (1)
     }
 
     auto SceneObjectSystem::GetSector(int32_t x, int32_t y) -> GameSpatialSector&

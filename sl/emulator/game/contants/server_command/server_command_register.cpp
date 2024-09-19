@@ -9,6 +9,7 @@ namespace sunlight
     {
         system.AddCommand(std::make_shared<ServerCommandItemAdd>(system));
         system.AddCommand(std::make_shared<ServerCommandItemGain>(system));
+        system.AddCommand(std::make_shared<ServerCommandItemSpawn>(system));
 
         system.AddCommand(std::make_shared<ServerCommandShowStringTable>());
     }

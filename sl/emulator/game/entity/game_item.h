@@ -11,6 +11,9 @@ namespace sunlight
     class GameItem final : public GameEntity
     {
     public:
+        static constexpr GameEntityType TYPE = GameEntityType::Item;
+
+    public:
         GameItem(GameEntityIdPublisher& idPublisher, const ItemData& data, int32_t quantity);
 
         auto GetData() const -> const ItemData&;

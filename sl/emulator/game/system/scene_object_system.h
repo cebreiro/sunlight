@@ -1,8 +1,10 @@
 #pragma once
 #include <boost/unordered/unordered_flat_map.hpp>
 
+#include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/entity/game_entity_type.h"
+#include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/system/game_system.h"
 
 namespace sunlight
@@ -42,9 +44,13 @@ namespace sunlight
         void Broadcast(const Eigen::Vector2f& position, const Buffer& buffer);
         void Broadcast(GameSpatialSector& sector, const Buffer& buffer);
 
+        void Visit(GameSpatialSector& sector, const std::function<void(GamePlayer&)>& function);
+
     private:
         void HandlePlayerAllState(const ZoneMessage& message);
         void HandlePlayerActivate(const ZoneMessage& message);
+
+        void HandleRequestItemStructure(const ZoneMessage& message);
 
     private:
         auto GetSector(int32_t x, int32_t y) -> GameSpatialSector&;
@@ -59,12 +65,13 @@ namespace sunlight
     private:
         const ServiceLocator& _serviceLocator;
 
+        int32_t _id = 0;
         int32_t _width = 0;
         int32_t _height = 0;
         int32_t _xSize = 0;
         int32_t _ySize = 0;
 
-        static constexpr int32_t cell_size = 384;
+        static constexpr int32_t cell_size = static_cast<int32_t>(GameConstant::STAGE_TERRAIN_BLOCK_SIZE) * 2;
 
         std::vector<UniquePtrNotNull<GameSpatialSector>> _sectors;
         std::vector<UniquePtrNotNull<GameSpatialCell>> _cells;

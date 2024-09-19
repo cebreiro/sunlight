@@ -157,7 +157,7 @@ namespace sunlight
 
     bool GamePlayer::HasDeferred() const
     {
-        return _deferred.empty();
+        return !_deferred.empty();
     }
 
     void GamePlayer::Defer(Buffer buffer)

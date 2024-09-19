@@ -2,6 +2,7 @@
 
 #include <boost/scope/scope_exit.hpp>
 
+#include "sl/emulator/game/component/item_ownership_component.h"
 #include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
@@ -13,6 +14,7 @@
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
@@ -756,6 +758,17 @@ namespace sunlight
         }
 
         auto pickedItem = playerItemComponent.ReleaseItem(pickedItemId);
+
+        if (!pickedItem->HasComponent<ItemOwnershipComponent>())
+        {
+            pickedItem->AddComponent(std::make_unique<ItemOwnershipComponent>());
+        }
+
+        auto& ownershipComponent = pickedItem->GetComponent<ItemOwnershipComponent>();
+        ownershipComponent.Clear();
+
+        ownershipComponent.Add(player.GetCId());
+        ownershipComponent.SetEndTimePoint(GameTimeService::Now() + std::chrono::seconds(30));
 
         Eigen::Vector2f destPosition = player.GetSceneObjectComponent().GetPosition();
         destPosition.x() += 30.f;

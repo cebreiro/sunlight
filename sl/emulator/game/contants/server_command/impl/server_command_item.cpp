@@ -1,7 +1,13 @@
 #include "server_command_item.h"
 
+#include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
 namespace sunlight
 {
@@ -45,5 +51,49 @@ namespace sunlight
         int32_t addQuantity = 0;
 
         return _system.Get<ItemArchiveSystem>().GainItem(player, itemId, quantity, addQuantity);
+    }
+
+    ServerCommandItemSpawn::ServerCommandItemSpawn(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandItemSpawn::GetName() const -> std::string_view
+    {
+        return "item_spawn";
+    }
+
+    auto ServerCommandItemSpawn::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandItemSpawn::Execute(GamePlayer& player, int32_t itemId, int32_t quantity) const
+    {
+        const ItemDataProvider& itemDataProvider = _system.GetServiceLocator().Get<GameDataProvideService>().GetItemDataProvider();
+        const ItemData* itemData = itemDataProvider.Find(itemId);
+
+        if (!itemData)
+        {
+            return false;
+        }
+
+        auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(),
+            *itemData, std::clamp(quantity, 1, itemData->GetMaxOverlapCount()));;
+        {
+            item->AddComponent(std::make_unique<SceneObjectComponent>());
+        }
+
+        const Eigen::Vector2f& playerPos = player.GetSceneObjectComponent().GetPosition();
+
+        SceneObjectComponent& sceneObjectComponent = item->GetComponent<SceneObjectComponent>();
+        sceneObjectComponent.SetPosition(playerPos);
+        sceneObjectComponent.SetDestPosition(playerPos);
+
+        SceneObjectSystem& sceneObjectSystem = _system.Get<SceneObjectSystem>();
+
+        sceneObjectSystem.SpawnItem(std::move(item), playerPos, playerPos);
+
+        return true;
     }
 }

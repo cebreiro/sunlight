@@ -7,6 +7,7 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 
 namespace sunlight
@@ -19,6 +20,7 @@ namespace sunlight
     void ServerCommandSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<ItemArchiveSystem>());
+        Add(stage.Get<SceneObjectSystem>());
 
         ServerCommandRegister::Register(*this);
     }
