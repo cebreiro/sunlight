@@ -1,11 +1,16 @@
 #include "player_stat_system.h"
 
-#include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/data/sox/job_reference.h"
-#include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/exp/character_exp_data.h"
+#include "sl/emulator/service/gamedata/exp/exp_data_provider.h"
 
 namespace sunlight
 {
@@ -14,9 +19,64 @@ namespace sunlight
     {
     }
 
+    void PlayerStatSystem::InitializeSubSystem(Stage& stage)
+    {
+        Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<GameRepositorySystem>());
+    }
+
+    bool PlayerStatSystem::Subscribe(Stage& stage)
+    {
+        (void)stage;
+
+        return true;
+    }
+
+    void PlayerStatSystem::GainCharacterExp(GamePlayer& player, int32_t exp)
+    {
+        PlayerStatComponent& statComponent = player.GetStatComponent();
+        const int32_t level = statComponent.GetLevel();
+
+        if (level >= GameConstant::PLAYER_CHARACTER_LEVEL_MAX)
+        {
+            return;
+        }
+
+        const ExpDataProvider& expDataProvider = _serviceLocator.Get<GameDataProvideService>().GetExpDataProvider();
+        const CharacterExpData* data = expDataProvider.FindCharacterData(level);
+
+        if (!data)
+        {
+            assert(false);
+
+            return;
+        }
+
+        GameRepositorySystem& repositorySystem = Get<GameRepositorySystem>();
+
+        statComponent.SetExp(statComponent.GetExp() + exp);
+        player.Send(GamePlayerMessageCreator::CreateCharacterExpGain(player, exp));
+
+        if (statComponent.GetExp() >= data->expMax)
+        {
+            statComponent.SetLevel(level + 1);
+            statComponent.SetExp(0);
+            statComponent.SetStatPoint(statComponent.GetStatPoint() + GameConstant::STAT_POINT_PER_CHARACTER_LEVEL_UP);
+
+            repositorySystem.SaveCharacterLevel(player, statComponent.GetLevel(), statComponent.GetStatPoint());
+
+            Get<SceneObjectSystem>().Broadcast(player.GetId(),
+                GamePlayerMessageCreator::CreateCharacterLevelUp(player), true);
+        }
+        else
+        {
+            repositorySystem.SaveCharacterExp(player, statComponent.GetExp());
+        }
+    }
+
     auto PlayerStatSystem::GetName() const -> std::string_view
     {
-        return "player_recovery_system";
+        return "player_system";
     }
 
     auto PlayerStatSystem::GetClassId() const -> game_system_id_type

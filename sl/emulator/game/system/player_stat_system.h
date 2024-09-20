@@ -21,6 +21,11 @@ namespace sunlight
     public:
         explicit PlayerStatSystem(const ServiceLocator& serviceLocator);
 
+        void InitializeSubSystem(Stage& stage) override;
+        bool Subscribe(Stage& stage) override;
+
+        void GainCharacterExp(GamePlayer& player, int32_t exp);
+
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 
