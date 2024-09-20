@@ -1,5 +1,6 @@
 #include "zone.h"
 
+#include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
@@ -23,6 +24,7 @@ namespace sunlight
             throw std::runtime_error(fmt::format("fail to get snowflake value. zone: {}", _id));
         }
 
+        _serviceLocator.Add<GameDebugger>(std::make_shared<GameDebugger>());
         _serviceLocator.Add<GameItemUniqueIdPublisher>(std::make_shared<GameItemUniqueIdPublisher>(_id, *snowflakeValue));
         _serviceLocator.Add<GameEntityIdPublisher>(std::make_shared<GameEntityIdPublisher>(_id));
 

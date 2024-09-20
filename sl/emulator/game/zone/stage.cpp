@@ -1,6 +1,7 @@
 #include "stage.h"
 
 #include "sl/data/map/map_stage.h"
+#include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
@@ -34,12 +35,19 @@ namespace sunlight
 
     void Stage::Update()
     {
+        if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
+        {
+            GameDebugger::SetInstance(debugger);
+        }
+
         GameTimeService::SetNow(game_clock_type::now());
 
         for (GameSystem& system : _updateSystems | notnull::reference)
         {
             system.Update();
         }
+
+        GameDebugger::SetInstance(nullptr);
     }
 
     void Stage::HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader)
@@ -55,6 +63,11 @@ namespace sunlight
         }
 
         SharedPtrNotNull<GamePlayer> player = iter->second;
+
+        if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
+        {
+            GameDebugger::SetInstance(debugger);
+        }
 
         GameTimeService::SetNow(game_clock_type::now());
 
@@ -145,6 +158,8 @@ namespace sunlight
         break;
         default:;
         }
+
+        GameDebugger::SetInstance(nullptr);
     }
 
     void Stage::SpawnPlayer(SharedPtrNotNull<GamePlayer> player)
@@ -153,9 +168,16 @@ namespace sunlight
 
         _players[player->GetClientId()] = player;
 
+        if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
+        {
+            GameDebugger::SetInstance(debugger);
+        }
+
         GameTimeService::SetNow(game_clock_type::now());
 
         Get<SceneObjectSystem>().SpawnPlayer(std::move(player));
+
+        GameDebugger::SetInstance(nullptr);
     }
 
     bool Stage::AddSubscriber(ZonePacketC2S type, const std::function<void(const ZoneRequest&)>& subscriber)

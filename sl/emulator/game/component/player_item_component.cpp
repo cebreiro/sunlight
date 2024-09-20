@@ -2,6 +2,7 @@
 
 #include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/contants/item/item_slot_stroage.h"
+#include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
@@ -223,6 +224,7 @@ namespace sunlight
         assert(slotStorage->HasEmptySlot(range));
 
         slotStorage->Set(item.get(), range);
+        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, slotStorage->GetDebugString());
 
         AddItemAddLog(*item);
 
@@ -274,6 +276,7 @@ namespace sunlight
         assert(slotStorage->HasEmptySlot(range));
 
         slotStorage->Set(item.get(), range);
+        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, slotStorage->GetDebugString());
 
         AddItemAddLog(*item);
 
@@ -499,7 +502,7 @@ namespace sunlight
                 .xSize = iter->second->GetData().GetWidth(),
                 .ySize = iter->second->GetData().GetHeight(),
                 });
-            std::cout << GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString();
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
         }
         break;
         case ItemPositionType::Equipment:
@@ -523,7 +526,7 @@ namespace sunlight
                 .xSize = 1,
                 .ySize = 1,
                 });
-            std::cout << GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString();
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
         }
         break;
         case ItemPositionType::Count:
@@ -579,7 +582,7 @@ namespace sunlight
         itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
 
         storage->Set(_pickItem, slotRange);
-        std::cout << storage->GetDebugString();
+        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
 
         AddItemUpdatePositionLog(*_pickItem);
 
@@ -631,7 +634,7 @@ namespace sunlight
             .ySize = inventoryItem->GetData().GetHeight(),
             });
         storage->Set(_pickItem, slotRange);
-        std::cout << storage->GetDebugString();
+        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
 
         positionComponent.SetPositionType(ItemPositionType::Pick);
         positionComponent.ResetPosition();
@@ -686,7 +689,7 @@ namespace sunlight
         itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
 
         storage->Set(_pickItem, slotRange);
-        std::cout << storage->GetDebugString();
+        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
 
         AddItemUpdatePositionLog(*_pickItem);
 
@@ -738,7 +741,7 @@ namespace sunlight
             .ySize = 1,
             });
         storage->Set(_pickItem, slotRange);
-        std::cout << storage->GetDebugString();
+        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
 
         positionComponent.SetPositionType(ItemPositionType::Pick);
         positionComponent.ResetPosition();
@@ -853,7 +856,8 @@ namespace sunlight
                 .xSize = iter->second->GetData().GetWidth(),
                 .ySize = iter->second->GetData().GetHeight(),
             });
-            std::cout << GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString();
+
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
         }
         break;
         case ItemPositionType::Equipment:
@@ -880,7 +884,7 @@ namespace sunlight
                 .xSize = 1,
                 .ySize = 1,
                 });
-            std::cout << GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString();
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
         }
         break;
         case ItemPositionType::Count:
@@ -915,6 +919,7 @@ namespace sunlight
                 .xSize = iter->second->GetData().GetWidth(),
                 .ySize = iter->second->GetData().GetHeight(),
                 });
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
         }
         break;
         case ItemPositionType::Equipment:
@@ -941,6 +946,7 @@ namespace sunlight
                 .xSize = 1,
                 .ySize = 1,
                 });
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
         }
         break;
         case ItemPositionType::Count:

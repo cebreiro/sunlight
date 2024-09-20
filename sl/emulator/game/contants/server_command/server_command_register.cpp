@@ -20,5 +20,8 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandExpGain>(system));
         system.AddCommand(std::make_shared<ServerCommandExpCharacterGain>(system));
         system.AddCommand(std::make_shared<ServerCommandExpJobGain>(system));
+
+        system.AddCommand(std::make_shared<ServerCommandDebugServer>(system));
+        system.AddCommand(std::make_shared<ServerCommandDebugServerOff>(system));
     }
 }

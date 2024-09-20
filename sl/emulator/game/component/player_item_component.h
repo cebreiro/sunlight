@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/unordered/unordered_flat_set.hpp>
+#include "sl/emulator/game/debug/game_debug_type.h"
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/game_component.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
@@ -114,6 +115,8 @@ namespace sunlight
         std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_QUICK_SLOT_PAGE_SIZE> _quickSlotStorages;
 
         GameItem* _pickItem = nullptr;
+
+        static constexpr GameDebugType debug_type = GameDebugType::PlayerItemSlot;
     };
 
     inline auto PlayerItemComponent::GetItemRange() const
