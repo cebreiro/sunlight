@@ -7,6 +7,7 @@
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/message/zone_request.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
@@ -204,7 +205,8 @@ namespace sunlight
 
     void Stage::InitializeSystem()
     {
-        Add(std::make_shared<SceneObjectSystem>(_serviceLocator, _stageData));
+        Add(std::make_shared<SceneObjectSystem>(_serviceLocator));
+        Add(std::make_shared<EntityViewRangeSystem>(_serviceLocator, _stageData));
         Add(std::make_shared<EntityMovementSystem>());
         Add(std::make_shared<ServerCommandSystem>(_serviceLocator));
         Add(std::make_shared<ItemArchiveSystem>(_serviceLocator));

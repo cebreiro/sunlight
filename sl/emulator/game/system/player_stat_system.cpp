@@ -1,12 +1,13 @@
 #include "player_stat_system.h"
 
+#include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/data/sox/job_reference.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
-#include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/exp/character_exp_data.h"
@@ -21,7 +22,7 @@ namespace sunlight
 
     void PlayerStatSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<GameRepositorySystem>());
     }
 
@@ -65,7 +66,7 @@ namespace sunlight
 
             repositorySystem.SaveCharacterLevel(player, statComponent.GetLevel(), statComponent.GetStatPoint());
 
-            Get<SceneObjectSystem>().Broadcast(player.GetId(),
+            Get<EntityViewRangeSystem>().Broadcast(player,
                 GamePlayerMessageCreator::CreateCharacterLevelUp(player), true);
         }
         else

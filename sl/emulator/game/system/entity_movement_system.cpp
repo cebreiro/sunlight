@@ -5,6 +5,7 @@
 #include "sl/emulator/game/contants/movement/forward_movement.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_request.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -13,7 +14,7 @@ namespace sunlight
 {
     void EntityMovementSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<EntityViewRangeSystem>());
     }
 
     bool EntityMovementSystem::Subscribe(Stage& stage)
@@ -60,7 +61,7 @@ namespace sunlight
 
                     entity.GetComponent<SceneObjectComponent>().SetPosition(newPosition);
 
-                    Get<SceneObjectSystem>().UpdateViewRange(entity, newPosition);
+                    Get<EntityViewRangeSystem>().UpdateViewRange(entity, newPosition);
 
                     if (t >= 1.f)
                     {
@@ -96,6 +97,8 @@ namespace sunlight
 
     void EntityMovementSystem::HandleMovement(const ZoneRequest& request)
     {
+        GamePlayer& player = request.player;
+
         BufferReader reader1 = request.reader.ReadObject();
         ForwardMovement movement1 = ForwardMovement::CreateFrom(reader1);
 
@@ -104,21 +107,23 @@ namespace sunlight
 
         (void)movement1;
 
-        EntityMovementComponent& movementComponent = request.player.GetMovementComponent();
+        EntityMovementComponent& movementComponent = player.GetMovementComponent();
         movementComponent.SetStartTimePoint(GameTimeService::Now());
         movementComponent.SetForwardMovement(movement2);
 
-        request.player.GetSceneObjectComponent().Set(movement2);
+        SceneObjectComponent& sceneObjectComponent = player.GetSceneObjectComponent();
+
+        sceneObjectComponent.Set(movement2);
 
         if (movementComponent.IsMoving())
         {
-            _movingEntities[request.player.GetId()] = &request.player;
+            _movingEntities[player.GetId()] = &player;
         }
         else
         {
-            _movingEntities.erase(request.player.GetId());
+            _movingEntities.erase(player.GetId());
         }
 
-        Get<SceneObjectSystem>().UpdateViewRange(request.player, request.player.GetSceneObjectComponent().GetPosition());
+        Get<EntityViewRangeSystem>().UpdateViewRange(player, sceneObjectComponent.GetPosition());
     }
 }
