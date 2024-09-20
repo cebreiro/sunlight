@@ -74,7 +74,7 @@ namespace sunlight
         PacketWriter writer;
 
         const int32_t hatModel = appearanceComponent.GetHatModelId();
-        const int32_t hairModel = appearanceComponent.GetHatModelId();
+        const int32_t hairModel = appearanceComponent.GetHair();
 
         writer.Write<int32_t>(hatModel != 0 ? hairModel : 0);
         writer.Write<int32_t>(appearanceComponent.GetHairColor());
@@ -279,6 +279,32 @@ namespace sunlight
 
         constexpr int32_t statusEffectCount = 0;
         writer.Write<int32_t>(statusEffectCount);
+
+        return writer.Flush();
+    }
+
+    auto ZoneDataTransferObjectCreator::CreatePlayerStat(const GamePlayer& player) -> Buffer
+    {
+        const PlayerStatComponent& statComponent = player.GetStatComponent();
+        const Job& mainJob = player.GetJobComponent().GetMainJob();
+
+        PacketWriter writer;
+        writer.Write<int16_t>(statComponent.GetFinalStat(RecoveryStatType::HP).As<int16_t>());
+        writer.Write<int16_t>(statComponent.GetFinalStat(RecoveryStatType::SP).As<int16_t>());
+        writer.Write<int16_t>(statComponent.Get(PlayerStatType::Dex).Get(StatOriginType::Base).As<int16_t>());
+        writer.Write<int16_t>(statComponent.Get(PlayerStatType::Health).Get(StatOriginType::Base).As<int16_t>());
+        writer.Write<int16_t>(statComponent.Get(PlayerStatType::Will).Get(StatOriginType::Base).As<int16_t>());
+        writer.Write<int16_t>(static_cast<int16_t>(statComponent.GetLevel()));
+        writer.Write<int16_t>(statComponent.Get(PlayerStatType::Intell).Get(StatOriginType::Base).As<int16_t>());
+        writer.Write<int16_t>(statComponent.Get(PlayerStatType::Wisdom).Get(StatOriginType::Base).As<int16_t>());
+        writer.Write<int16_t>(statComponent.Get(PlayerStatType::Accr).Get(StatOriginType::Base).As<int16_t>());
+        writer.Write<int16_t>(statComponent.Get(PlayerStatType::Str).Get(StatOriginType::Base).As<int16_t>());
+        writer.Write<int16_t>(0); // add max hp_1
+        writer.Write<int16_t>(0); // add max hp_2
+        writer.Write<int16_t>(static_cast<int16_t>(mainJob.GetId()));
+        writer.Write<int16_t>(static_cast<int16_t>(mainJob.GetLevel()));
+        writer.Write<int32_t>(statComponent.GetStatPoint());
+        writer.Write<int32_t>(0); // anger ? 1 : 0
 
         return writer.Flush();
     }

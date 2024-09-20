@@ -9,6 +9,7 @@
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 
 namespace sunlight
 {
@@ -101,18 +102,16 @@ namespace sunlight
 
         BufferReader reader1 = request.reader.ReadObject();
         ForwardMovement movement1 = ForwardMovement::CreateFrom(reader1);
+        (void)movement1;
 
         BufferReader reader2 = request.reader.ReadObject();
         ForwardMovement movement2 = ForwardMovement::CreateFrom(reader2);
-
-        (void)movement1;
 
         EntityMovementComponent& movementComponent = player.GetMovementComponent();
         movementComponent.SetStartTimePoint(GameTimeService::Now());
         movementComponent.SetForwardMovement(movement2);
 
         SceneObjectComponent& sceneObjectComponent = player.GetSceneObjectComponent();
-
         sceneObjectComponent.Set(movement2);
 
         if (movementComponent.IsMoving())
@@ -124,6 +123,8 @@ namespace sunlight
             _movingEntities.erase(player.GetId());
         }
 
-        Get<EntityViewRangeSystem>().UpdateViewRange(player, sceneObjectComponent.GetPosition());
+        EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
+        viewRangeSystem.Broadcast(player, ZonePacketS2CCreator::CreateObjectMove(player), false);
+        viewRangeSystem.UpdateViewRange(player, sceneObjectComponent.GetPosition());
     }
 }

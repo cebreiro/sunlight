@@ -23,6 +23,8 @@ namespace sunlight
         auto GetWeaponModelId() const -> int32_t;
         auto GetWeaponModelColor() const -> int32_t;
 
+        auto GetWeaponMotionCategory() const -> int32_t;
+
         void SetHair(int32_t hair);
         void SetHairColor(int32_t hairColor);
         void SetFace(int32_t face);
@@ -39,6 +41,8 @@ namespace sunlight
         void SetShoesModelColor(int32_t shoesModelColor);
         void SetWeaponModelId(int32_t weaponModelId);
         void SetWeaponModelColor(int32_t weaponModelColor);
+
+        void SetWeaponMotionCategory(int32_t weaponMotionCategory);
 
     private:
         int32_t _hair = 0;
@@ -58,5 +62,7 @@ namespace sunlight
         int32_t _shoesModelColor = 0;
         int32_t _weaponModelId = 0;
         int32_t _weaponModelColor = 0;
+
+        int32_t _weaponMotionCategory = 0;
     };
 }

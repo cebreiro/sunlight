@@ -44,12 +44,10 @@ namespace sunlight
         }
 
         const ExpDataProvider& expDataProvider = _serviceLocator.Get<GameDataProvideService>().GetExpDataProvider();
-        const CharacterExpData* data = expDataProvider.FindCharacterData(level);
+        const CharacterExpData* data = expDataProvider.FindCharacterData(level + 1);
 
         if (!data)
         {
-            assert(false);
-
             return;
         }
 
@@ -77,7 +75,7 @@ namespace sunlight
 
     auto PlayerStatSystem::GetName() const -> std::string_view
     {
-        return "player_system";
+        return "player_stat_system";
     }
 
     auto PlayerStatSystem::GetClassId() const -> game_system_id_type

@@ -7,6 +7,8 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/message/creator/scene_object_message_creator.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -21,6 +23,7 @@ namespace sunlight
     void PlayerStateSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<ItemArchiveSystem>());
     }
 
@@ -55,6 +58,9 @@ namespace sunlight
         EntityStateComponent& stateComponent = player.GetStateComponent();
         stateComponent.SetState(state);
 
+        Get<EntityViewRangeSystem>().Broadcast(player,
+            SceneObjectPacketCreator::CreateState(player), false);
+
         switch (state.type)
         {
         case GameEntityStateType::Idle:
@@ -76,8 +82,8 @@ namespace sunlight
         case GameEntityStateType::PlaySkill:
         case GameEntityStateType::DamagedMotion:
         case GameEntityStateType::Conversation:
-        case GameEntityStateType::Dying1:
-        case GameEntityStateType::Dying2:
+        case GameEntityStateType::Dying:
+        case GameEntityStateType::Dead:
         case GameEntityStateType::Entering:
         case GameEntityStateType::Leaving:
         case GameEntityStateType::DamageCancel:

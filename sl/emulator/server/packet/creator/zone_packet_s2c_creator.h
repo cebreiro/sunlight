@@ -2,6 +2,8 @@
 
 namespace sunlight
 {
+    struct ForwardMovement;
+
     class GameEntity;
     class GamePlayer;
 }
@@ -20,6 +22,8 @@ namespace sunlight
         static auto CreateObjectLeave(int32_t id) -> Buffer;
 
         static auto CreateObjectMove(const GameEntity& entity) -> Buffer;
+        static auto CreateObjectMove(const GameEntity& entity, const ForwardMovement& movement) -> Buffer;
+
         static auto CreateObjectForceMove(const GameEntity& entity) -> Buffer;
         static auto CreateObjectRoomChange(int32_t roomId) -> Buffer;
         static auto CreateObjectVisibleRange(float range) -> Buffer;

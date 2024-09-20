@@ -896,6 +896,14 @@ namespace sunlight
         return iter->second.get();
     }
 
+    auto PlayerItemComponent::FindEquipmentItem(EquipmentPosition position) const -> const GameItem*
+    {
+        const int64_t index = static_cast<int64_t>(position);
+        assert(index >= 0 && index < std::ssize(_equipments));
+
+        return _equipments[index];
+    }
+
     auto PlayerItemComponent::FindInventoryItem(game_entity_id_type id) const -> const GameItem*
     {
         const auto iter = _items.find(id);

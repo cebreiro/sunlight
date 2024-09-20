@@ -60,7 +60,9 @@ namespace sunlight
         int32_t _xSize = 0;
         int32_t _ySize = 0;
 
-        static constexpr int32_t cell_size = 1000;
+        // camera range is approximately 530.
+        // create an entity outside of camera range by adding 128
+        static constexpr int32_t cell_size = 512 + 128;
 
         std::vector<UniquePtrNotNull<GameSpatialSector>> _sectors;
         std::vector<UniquePtrNotNull<GameSpatialCell>> _cells;

@@ -67,6 +67,7 @@ namespace sunlight
 
     public:
         auto FindItem(game_entity_id_type id) const -> const GameItem*;
+        auto FindEquipmentItem(EquipmentPosition position) const -> const GameItem*;
         auto FindInventoryItem(game_entity_id_type id) const -> const GameItem*;
         auto FindQuickSlotItem(game_entity_id_type id) const -> const GameItem*;
         auto FindEmptyInventoryPosition(int32_t width, int32_t height) const -> std::optional<InventoryPosition>;

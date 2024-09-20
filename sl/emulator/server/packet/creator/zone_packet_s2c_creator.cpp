@@ -104,6 +104,31 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto ZonePacketS2CCreator::CreateObjectMove(const GameEntity& entity, const ForwardMovement& movement) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_OBJECT_MOVE);
+        {
+            const auto& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
+
+            PacketWriter objectWriter;
+            objectWriter.Write<int32_t>(sceneObjectComponent.GetId());
+            objectWriter.Write<float>(movement.position.x());
+            objectWriter.Write<float>(movement.position.y());
+            objectWriter.Write<float>(movement.yaw);
+            objectWriter.Write<float>(movement.speed);
+            objectWriter.Write<float>(movement.unk1);
+            objectWriter.Write<float>(movement.destPosition.x());
+            objectWriter.Write<float>(movement.destPosition.y());
+            objectWriter.Write<uint16_t>(movement.unk2);
+            objectWriter.Write<uint16_t>(movement.unk3);
+
+            writer.WriteObject(objectWriter);
+        }
+
+        return writer.Flush();
+    }
+
     auto ZonePacketS2CCreator::CreateObjectForceMove(const GameEntity& entity) -> Buffer
     {
         assert(entity.FindComponent<SceneObjectComponent>());

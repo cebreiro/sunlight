@@ -2,10 +2,13 @@
 
 #include <boost/container/static_vector.hpp>
 
+#include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/item_ownership_component.h"
+#include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -15,6 +18,66 @@
 
 namespace sunlight
 {
+    auto SceneObjectPacketCreator::CreateState(const GameEntity& entity) -> Buffer
+    {
+        assert(entity.HasComponent<EntityStateComponent>());
+
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(entity).ToBuffer());
+        writer.Write(ZoneMessageType::CHAR_STATE);
+
+        {
+            const GameEntityState& state = entity.GetComponent<EntityStateComponent>().GetState();
+
+            PacketWriter objectWriter;
+            objectWriter.Write<uint8_t>(state.bitmask1);
+            objectWriter.Write<uint8_t>(state.bitmask2);
+            objectWriter.Write<int8_t>(static_cast<int8_t>(state.type));
+            objectWriter.Write<int8_t>(static_cast<int8_t>(state.moveType));
+            objectWriter.Write<uint8_t>(state.unk4);
+            objectWriter.Write<uint8_t>(state.unk5);
+            objectWriter.Write<float>(state.destPosition.x());
+            objectWriter.Write<float>(state.destPosition.y());
+            objectWriter.Write<float>(state.destPosition.z());
+
+            objectWriter.Write<uint32_t>(state.targetId.Unwrap());
+            objectWriter.Write<uint32_t>(static_cast<uint32_t>(state.targetType));
+            objectWriter.Write<int32_t>(state.attackId);
+            objectWriter.Write<int32_t>(state.motionId);
+            objectWriter.Write<int32_t>(state.fxId);
+            objectWriter.Write<int32_t>(state.param1);
+            objectWriter.Write<int32_t>(state.param2);
+            objectWriter.Write<int32_t>(state.skillId);
+
+            writer.WriteObject(objectWriter);
+        }
+
+        return writer.Flush();
+    }
+
+    auto SceneObjectPacketCreator::CreateInformation(const GamePlayer& player, bool showSpawnEffect) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_USERINFO); // handled on client 4E6A40
+        writer.Write<int32_t>(player.GetComponent<SceneObjectComponent>().GetId());
+        writer.Write(static_cast<int32_t>(player.GetType()));
+        writer.Write(static_cast<int32_t>(player.GetId().Unwrap()));
+        writer.Write<int32_t>(player.GetStatComponent().GetGender());
+        writer.WriteString(player.GetName());
+        writer.Write<int8_t>(player.IsArmed() ? 1 : 0);
+        writer.Write<int8_t>(showSpawnEffect ? 0 : 1);
+
+        // client 0x4E6BE1
+        // state dying, dead or none(0)
+        // other state causes client crash
+        writer.Write<int32_t>(0);
+
+        return writer.Flush();
+    }
+
     auto SceneObjectPacketCreator::CreateInformation(const GameItem& item) -> Buffer
     {
         SlPacketWriter writer;

@@ -12,6 +12,7 @@
 #include "sl/emulator/game/entity/game_entity.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 
@@ -204,9 +205,27 @@ namespace sunlight
                 {
                     for (GameEntity& target : in.GetEntities())
                     {
-                        if (GamePlayer* targetPlayer = target.Cast<GamePlayer>())
+                        if (GamePlayer* targetPlayer = target.Cast<GamePlayer>(); targetPlayer)
                         {
-                            targetPlayer->Send(ZonePacketS2CCreator::CreateObjectMove(entity));
+                            targetPlayer->Defer(ZonePacketS2CCreator::CreateObjectMove(entity));
+
+                            switch (entity.GetType())
+                            {
+                            case GameEntityType::Player:
+                            {
+                                assert(player && player == &entity);
+
+                                targetPlayer->Defer(SceneObjectPacketCreator::CreateInformation(*player, false));
+                                targetPlayer->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(*player));
+                            }
+                            break;
+                            case GameEntityType::NPC:
+                            case GameEntityType::Enemy:
+                            default:
+                                assert(false);
+                            }
+
+                            targetPlayer->FlushDeferred();
                         }
 
                         if (player)
@@ -217,7 +236,10 @@ namespace sunlight
                             {
                             case GameEntityType::Player:
                             {
-                                assert(false);
+                                GamePlayer& targetPlayer = *target.Cast<GamePlayer>();
+
+                                player->Defer(SceneObjectPacketCreator::CreateInformation(targetPlayer, false));
+                                player->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(targetPlayer));
                             }
                             break;
                             case GameEntityType::Item:
@@ -229,6 +251,8 @@ namespace sunlight
                                 player->Defer(SceneObjectPacketCreator::CreateItemDisplay(*item, player->GetCId()));
                             }
                             break;
+                            case GameEntityType::NPC:
+                            case GameEntityType::Enemy:
                             default:
                                 assert(false);
                             }

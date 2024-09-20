@@ -82,6 +82,11 @@ namespace sunlight
         return _weaponModelColor;
     }
 
+    auto PlayerAppearanceComponent::GetWeaponMotionCategory() const -> int32_t
+    {
+        return _weaponMotionCategory;
+    }
+
     void PlayerAppearanceComponent::SetHair(int32_t hair)
     {
         _hair = hair;
@@ -160,5 +165,10 @@ namespace sunlight
     void PlayerAppearanceComponent::SetWeaponModelColor(int32_t weaponModelColor)
     {
         _weaponModelColor = weaponModelColor;
+    }
+
+    void PlayerAppearanceComponent::SetWeaponMotionCategory(int32_t weaponMotionCategory)
+    {
+        _weaponMotionCategory = weaponMotionCategory;
     }
 }
