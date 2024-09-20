@@ -155,7 +155,7 @@ namespace sunlight
         Get<PlayerStatSystem>().OnInitialize(*player);
 
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
-        sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId());
+        sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(player->GetType()));
 
         GameSpatialSector& sector = GetSector(sceneObjectComponent.GetPosition());
         _entityViewRange[player->GetId()] = &sector;
@@ -177,7 +177,7 @@ namespace sunlight
         _entities[item->GetType()][item->GetId()] = item;
 
         SceneObjectComponent& sceneObjectComponent = item->GetComponent<SceneObjectComponent>();
-        sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId());
+        sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(item->GetType()));
         sceneObjectComponent.SetPosition(destPos);
         sceneObjectComponent.SetDestPosition(destPos);
 
@@ -446,7 +446,6 @@ namespace sunlight
 
     void SceneObjectSystem::HandlePlayerAllState(const ZoneMessage& message)
     {
-        message.player.Send(ZonePacketS2CCreator::CreateObjectVisibleRange(static_cast<float>(cell_size)));
         message.player.Send(GamePlayerMessageCreator::CreateAllState(message.player));
     }
 

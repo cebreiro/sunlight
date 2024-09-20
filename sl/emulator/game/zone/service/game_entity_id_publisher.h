@@ -18,8 +18,11 @@ namespace sunlight
         auto Publish(GameEntityType type) -> game_entity_id_type;
         void Return(GameEntityType type, game_entity_id_type id);
 
-        auto PublishSceneObjectId() -> int32_t;
-        void ReturnSceneObjectId(int32_t id);
+        auto PublishSceneObjectId(GameEntityType type) -> int32_t;
+        void ReturnSceneObjectId(GameEntityType type, int32_t id);
+
+    private:
+        static bool IsEntityType(int32_t value);
 
     private:
         std::string _name;

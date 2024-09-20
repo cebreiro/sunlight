@@ -17,6 +17,8 @@ namespace sunlight
         static auto CreateLoginReject(const std::string& reason) -> Buffer;
 
         static auto CreateObjectLeave(const GameEntity& entity) -> Buffer;
+        static auto CreateObjectLeave(int32_t id) -> Buffer;
+
         static auto CreateObjectMove(const GameEntity& entity) -> Buffer;
         static auto CreateObjectForceMove(const GameEntity& entity) -> Buffer;
         static auto CreateObjectRoomChange(int32_t roomId) -> Buffer;

@@ -80,15 +80,8 @@ namespace sunlight
 
         auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(),
             *itemData, std::clamp(quantity, 1, itemData->GetMaxOverlapCount()));;
-        {
-            item->AddComponent(std::make_unique<SceneObjectComponent>());
-        }
-
+ 
         const Eigen::Vector2f& playerPos = player.GetSceneObjectComponent().GetPosition();
-
-        SceneObjectComponent& sceneObjectComponent = item->GetComponent<SceneObjectComponent>();
-        sceneObjectComponent.SetPosition(playerPos);
-        sceneObjectComponent.SetDestPosition(playerPos);
 
         SceneObjectSystem& sceneObjectSystem = _system.Get<SceneObjectSystem>();
 

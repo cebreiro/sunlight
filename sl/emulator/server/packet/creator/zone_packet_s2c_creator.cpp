@@ -68,6 +68,15 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto ZonePacketS2CCreator::CreateObjectLeave(int32_t id) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_OBJECT_LEAVE);
+        writer.Write<int32_t>(id);
+
+        return writer.Flush();
+    }
+
     auto ZonePacketS2CCreator::CreateObjectMove(const GameEntity& entity) -> Buffer
     {
         assert(entity.FindComponent<SceneObjectComponent>());
