@@ -35,12 +35,12 @@ namespace sunlight
         auto GetWidth() const -> int32_t;
         auto GetHeight() const -> int32_t;
 
+        auto GetDebugString() const -> std::string;
+
     private:
         int32_t _width = 0;
         int32_t _height = 0;
 
         std::vector<std::vector<GameItem*>> _slots;
-
-        mutable std::vector<ItemSlotRange> _emptySlotFindBufferCache;
     };
 }

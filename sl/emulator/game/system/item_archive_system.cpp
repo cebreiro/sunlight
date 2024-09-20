@@ -648,7 +648,7 @@ namespace sunlight
             }
             else
             {
-                if (!itemComponent.SwapPickedItemTo(page, x, y))
+                if (!itemComponent.SwapPickedItemToQuickSlot(page, x, y))
                 {
                     LogHandleItemError(__FUNCTION__, fmt::format("fail to swap picked item. pos: [{}, {}, {}]",
                         page, x, y));

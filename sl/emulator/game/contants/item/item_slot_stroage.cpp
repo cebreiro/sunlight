@@ -130,4 +130,49 @@ namespace sunlight
     {
         return _height;
     }
+
+    auto ItemSlotStorage::GetDebugString() const -> std::string
+    {
+        std::unordered_map<const GameItem*, char> typeMap;
+
+        char nextCharacter = 'A';
+        std::ostringstream oss;
+
+        oss << "\n--------------------------------------------------\n";
+
+        for (int32_t y = 0; y < _height; ++y)
+        {
+            for (int32_t x = 0; x < _width; ++x)
+            {
+                if (const GameItem* item = _slots[y][x]; item)
+                {
+                    const char value = [&]() -> char
+                        {
+                            const auto iter = typeMap.find(item);
+                            if (iter == typeMap.end())
+                            {
+                                return typeMap[item] = nextCharacter++;
+                            }
+
+                            return iter->second;
+                        
+                        }();
+
+                    oss << value;
+                }
+                else
+                {
+                    oss << '-';
+                }
+
+                oss << ' ';
+            }
+
+            oss << '\n';
+        }
+
+        oss << "--------------------------------------------------\n";
+
+        return oss.str();
+    }
 }

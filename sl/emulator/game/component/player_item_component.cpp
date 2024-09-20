@@ -499,6 +499,7 @@ namespace sunlight
                 .xSize = iter->second->GetData().GetWidth(),
                 .ySize = iter->second->GetData().GetHeight(),
                 });
+            std::cout << GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString();
         }
         break;
         case ItemPositionType::Equipment:
@@ -522,6 +523,7 @@ namespace sunlight
                 .xSize = 1,
                 .ySize = 1,
                 });
+            std::cout << GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString();
         }
         break;
         case ItemPositionType::Count:
@@ -577,6 +579,7 @@ namespace sunlight
         itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
 
         storage->Set(_pickItem, slotRange);
+        std::cout << storage->GetDebugString();
 
         AddItemUpdatePositionLog(*_pickItem);
 
@@ -619,17 +622,23 @@ namespace sunlight
         }
 
         GameItem* inventoryItem = *_itemStorageQueryResult.begin();
-        ItemPositionComponent& inventoryItemPositionComponent = inventoryItem->GetComponent<ItemPositionComponent>();
+        ItemPositionComponent& positionComponent = inventoryItem->GetComponent<ItemPositionComponent>();
 
         storage->Set(nullptr, ItemSlotRange{
-            .x = inventoryItemPositionComponent.GetX(),
-            .y = inventoryItemPositionComponent.GetY(),
+            .x = positionComponent.GetX(),
+            .y = positionComponent.GetY(),
             .xSize = inventoryItem->GetData().GetWidth(),
             .ySize = inventoryItem->GetData().GetHeight(),
             });
         storage->Set(_pickItem, slotRange);
+        std::cout << storage->GetDebugString();
 
-        _pickItem->GetComponent<ItemPositionComponent>().SwapPosition(inventoryItemPositionComponent);
+        positionComponent.SetPositionType(ItemPositionType::Pick);
+        positionComponent.ResetPosition();
+
+        ItemPositionComponent& pickItemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        pickItemPositionComponent.SetPositionType(ItemPositionType::Inventory);
+        pickItemPositionComponent.SetPosition(page, x, y);
 
         AddItemUpdatePositionLog(*_pickItem);
         AddItemUpdatePositionLog(*inventoryItem);
@@ -677,10 +686,71 @@ namespace sunlight
         itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
 
         storage->Set(_pickItem, slotRange);
+        std::cout << storage->GetDebugString();
 
         AddItemUpdatePositionLog(*_pickItem);
 
         _pickItem = nullptr;
+
+        return true;
+    }
+
+    bool PlayerItemComponent::SwapPickedItemToQuickSlot(int8_t page, int8_t x, int8_t y)
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        ItemSlotStorage* storage = GetQuickSlotStorage(page);
+        if (!storage)
+        {
+            return false;
+        }
+
+        const ItemSlotRange slotRange{
+            .x = x,
+            .y = y,
+            .xSize = 1,
+            .ySize = 1,
+        };
+
+        if (!storage->Contains(slotRange))
+        {
+            return false;
+        }
+
+        _itemStorageQueryResult.clear();
+        storage->Get(_itemStorageQueryResult, slotRange);
+
+        if (_itemStorageQueryResult.size() != 1)
+        {
+            return false;
+        }
+
+        GameItem* inventoryItem = *_itemStorageQueryResult.begin();
+        ItemPositionComponent& positionComponent = inventoryItem->GetComponent<ItemPositionComponent>();
+
+        storage->Set(nullptr, ItemSlotRange{
+            .x = positionComponent.GetX(),
+            .y = positionComponent.GetY(),
+            .xSize = 1,
+            .ySize = 1,
+            });
+        storage->Set(_pickItem, slotRange);
+        std::cout << storage->GetDebugString();
+
+        positionComponent.SetPositionType(ItemPositionType::Pick);
+        positionComponent.ResetPosition();
+
+        ItemPositionComponent& pickItemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        pickItemPositionComponent.SetPositionType(ItemPositionType::QuickSlot);
+        pickItemPositionComponent.SetPosition(page, x, y);
+
+        AddItemUpdatePositionLog(*_pickItem);
+        AddItemUpdatePositionLog(*inventoryItem);
+
+        _pickItem = inventoryItem;
 
         return true;
     }
@@ -783,6 +853,7 @@ namespace sunlight
                 .xSize = iter->second->GetData().GetWidth(),
                 .ySize = iter->second->GetData().GetHeight(),
             });
+            std::cout << GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString();
         }
         break;
         case ItemPositionType::Equipment:
@@ -809,6 +880,7 @@ namespace sunlight
                 .xSize = 1,
                 .ySize = 1,
                 });
+            std::cout << GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString();
         }
         break;
         case ItemPositionType::Count:
