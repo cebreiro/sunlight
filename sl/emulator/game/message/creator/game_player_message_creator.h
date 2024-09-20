@@ -1,5 +1,6 @@
 #pragma once
 #include "sl/emulator/game/contants/item/equipment_position.h"
+#include "sl/emulator/game/contants/job/job_id.h"
 
 namespace sunlight
 {
@@ -18,6 +19,9 @@ namespace sunlight
 
         static auto CreateCharacterExpGain(const GamePlayer& player, int32_t value) -> Buffer;
         static auto CreateCharacterLevelUp(const GamePlayer& player) -> Buffer;
+        static auto CreateJobExpGain(const GamePlayer& player, JobId id, int32_t exp) -> Buffer;
+        static auto CreateJobExpLevelUp(const GamePlayer& player) -> Buffer;
+        static auto CreateJobSkillAdd(const GamePlayer& player, JobId id, int32_t skillId, int32_t unk) -> Buffer;
 
         static auto CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer;
 

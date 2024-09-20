@@ -226,6 +226,49 @@ namespace sunlight
         co_return true;
     }
 
+    auto DatabaseService::SetJobExp(int64_t cid, int32_t job, int32_t exp) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterSetJobExp characterSetJobExp(conn, cid, job, exp);
+
+        if (const DatabaseError error = co_await characterSetJobExp.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
+    auto DatabaseService::SetJobLevel(int64_t cid, int32_t job, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterSetJobLevel characterSetJobLevel(conn, cid, job, level, skillPoint, skills);
+
+        if (const DatabaseError error = co_await characterSetJobLevel.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+
+    }
+
     auto DatabaseService::StartTransaction(db::ItemTransaction transaction) -> Future<bool>
     {
         [[maybe_unused]]

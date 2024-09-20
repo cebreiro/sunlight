@@ -160,6 +160,51 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto GamePlayerMessageCreator::CreateJobExpGain(const GamePlayer& player, JobId jobId, int32_t exp) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_GAIN_JOB_EXP);
+        writer.Write<int32_t>(exp);
+        writer.Write<int32_t>(static_cast<int32_t>(jobId));
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateJobExpLevelUp(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_SHOW_JOB_LEVELUP_FX);
+        writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerStat(player));
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateJobSkillAdd(const GamePlayer& player, JobId jobId, int32_t skillId, int32_t unk) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::ADD_ABILITY);
+        writer.Write<int32_t>(skillId);
+        writer.Write<int32_t>(static_cast<int32_t>(jobId));
+        writer.Write<int32_t>(unk);
+
+        return writer.Flush();
+    }
+
     auto GamePlayerMessageCreator::CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer
     {
         SlPacketWriter writer;

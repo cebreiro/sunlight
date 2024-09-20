@@ -8,4 +8,6 @@
 #include "sl/emulator/service/database/stored_procedure/impl/character_get.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_set_exp.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_set_level.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_set_job_exp.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_set_job_level.h"
 #include "sl/emulator/service/database/stored_procedure/impl/item_transaction_execute.h"

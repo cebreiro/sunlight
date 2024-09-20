@@ -66,4 +66,31 @@ namespace sunlight
 
         throw std::runtime_error("player has no job");
     }
+
+    auto PlayerJobComponent::MutableIf(JobType type) -> Job*
+    {
+        const int64_t index = static_cast<int64_t>(type);
+        assert(index >= 0 && index < std::ssize(_jobs));
+
+        std::optional<Job>& job = _jobs[index];
+
+        return job.has_value() ? &(*job) : nullptr;
+    }
+
+    auto PlayerJobComponent::MutableMainJob() -> Job&
+    {
+        Job* advanced = MutableIf(JobType::Advanced);
+        if (advanced)
+        {
+            return *advanced;
+        }
+
+        Job* novice = MutableIf(JobType::Novice);
+        if (novice)
+        {
+            return *novice;
+        }
+
+        throw std::runtime_error("player has no job");
+    }
 }

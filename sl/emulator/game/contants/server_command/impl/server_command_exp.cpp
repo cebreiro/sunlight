@@ -1,5 +1,6 @@
 #include "server_command_exp.h"
 
+#include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
 
@@ -23,6 +24,7 @@ namespace sunlight
     bool ServerCommandExpGain::Execute(GamePlayer& player, int32_t value) const
     {
         _system.Get<PlayerStatSystem>().GainCharacterExp(player, value);
+        _system.Get<PlayerJobSystem>().GainJobExp(player, value);
 
         return true;
     }
@@ -66,8 +68,7 @@ namespace sunlight
 
     bool ServerCommandExpJobGain::Execute(GamePlayer& player, int32_t value) const
     {
-        (void)player;
-        (void)value;
+        _system.Get<PlayerJobSystem>().GainJobExp(player, value);
 
         return true;
     }

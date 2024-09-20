@@ -16,7 +16,7 @@ namespace sunlight
             {
                 if (job != 0)
                 {
-                    result.jobs.push_back(static_cast<JobId>(job));
+                    result.jobs.push_back(job);
                 }
             }
         }

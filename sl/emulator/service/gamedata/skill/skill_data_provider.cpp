@@ -19,9 +19,9 @@ namespace sunlight
 
             const PlayerSkillData& data = iter->second;
 
-            for (const JobId jobId : data.jobs)
+            for (const int32_t job : data.jobs)
             {
-                _jobIndex[jobId][data.levelQualification].push_back(&data);
+                _jobIndex[job][data.levelQualification].push_back(&data);
             }
         }
     }
@@ -33,11 +33,11 @@ namespace sunlight
         return iter != _playerSkillData.end() ? &iter->second : nullptr;
     }
 
-    auto SkillDataProvider::Find(JobId jobId, int32_t level) const -> const std::vector<PtrNotNull<const PlayerSkillData>>&
+    auto SkillDataProvider::FindByJob(int32_t job, int32_t level) const -> const std::vector<PtrNotNull<const PlayerSkillData>>&
     {
         static const std::vector<PtrNotNull<const PlayerSkillData>> nullObject;
 
-        const auto iter1 = _jobIndex.find(jobId);
+        const auto iter1 = _jobIndex.find(job);
         if (iter1 == _jobIndex.end())
         {
             return nullObject;

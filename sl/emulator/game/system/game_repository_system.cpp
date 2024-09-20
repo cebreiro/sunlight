@@ -97,6 +97,42 @@ namespace sunlight
                 });
     }
 
+    void GameRepositorySystem::SaveJobExp(const GamePlayer& player, int32_t job, int32_t exp)
+    {
+        ++_pending[player.GetCId()].first;
+
+        _serviceLocator.Get<DatabaseService>().SetJobExp(player.GetCId(), job, exp)
+            .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(cid);
+                    }
+                    else
+                    {
+                        OnError(cid);
+                    }
+                });
+    }
+
+    void GameRepositorySystem::SaveJobLevel(const GamePlayer& player, int32_t job, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills)
+    {
+        ++_pending[player.GetCId()].first;
+
+        _serviceLocator.Get<DatabaseService>().SetJobLevel(player.GetCId(), job, level, skillPoint, std::move(skills))
+            .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(cid);
+                    }
+                    else
+                    {
+                        OnError(cid);
+                    }
+                });
+    }
+
     void GameRepositorySystem::OnComplete(int64_t cid)
     {
         auto iter = _pending.find(cid);

@@ -1,5 +1,6 @@
 #pragma once
 #include "sl/emulator/game/system/game_system.h"
+#include "sl/emulator/service/database/request/skill_create.h"
 #include "sl/emulator/service/database/transaction/item/item_transaction.h"
 
 namespace sunlight
@@ -27,6 +28,8 @@ namespace sunlight
         void Save(const GamePlayer& player, db::ItemTransaction transaction);
         void SaveCharacterExp(const GamePlayer& player, int32_t exp);
         void SaveCharacterLevel(const GamePlayer& player, int32_t level, int32_t statPoint);
+        void SaveJobExp(const GamePlayer& player, int32_t job, int32_t exp);
+        void SaveJobLevel(const GamePlayer& player, int32_t job, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills);
 
     private:
         void OnComplete(int64_t cid);

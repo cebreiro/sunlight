@@ -20,6 +20,7 @@
 #include "sl/emulator/service/authentication/authentication_token.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/skill/skill_data_provider.h"
 #include "sl/emulator/service/gateway/gateway_service.h"
 #include "sl/emulator/service/unique_name/unique_name_service.h"
 
@@ -321,12 +322,17 @@ namespace sunlight
                 });
         }
 
-        request.skills.emplace_back(req::SkillCreate{
-            .cid = request.id,
-            .id = 123123,
-            .job = request.job,
-            .level = 1
-            });
+        const SkillDataProvider& skillDataProvider = _serviceLocator.Get<GameDataProvideService>().GetSkillDataProvider();
+
+        for (const PlayerSkillData& skillData : skillDataProvider.FindByJob(request.job, 1) | notnull::reference)
+        {
+            request.skills.emplace_back(req::SkillCreate{
+                .cid = request.id,
+                .id = skillData.index,
+                .job = request.job,
+                .level = 1
+                });
+        }
 
         success = co_await _serviceLocator.Get<DatabaseService>().CreateCharacter(request);
         if (!success)

@@ -15,6 +15,8 @@ namespace sunlight
 
         Job(const sox::JobReference& data, JobId id, int32_t level, int32_t exp, int32_t skillPoint);
 
+        bool IsNovice() const;
+
         auto GetData() const -> const sox::JobReference&;
         auto GetId() const -> JobId;
         auto GetLevel() const -> int32_t;

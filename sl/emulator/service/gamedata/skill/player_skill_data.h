@@ -20,7 +20,7 @@ namespace sunlight
         int32_t index = 0;
         int32_t routineId = 0;
         int32_t abilityType = 0;
-        boost::container::static_vector<JobId, 3> jobs;
+        boost::container::static_vector<int32_t, 3> jobs;
         int32_t degree = 0;
         int32_t maxLevel = 0;
         int32_t delayId = 0;

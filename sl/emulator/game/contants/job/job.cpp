@@ -11,6 +11,21 @@ namespace sunlight
     {
     }
 
+    bool Job::IsNovice() const
+    {
+        switch (_id)
+        {
+        case JobId::NoviceFighter:
+        case JobId::NoviceRanger:
+        case JobId::NoviceMagician:
+        case JobId::NoviceArtisan:
+            return true;
+        default:;
+        }
+
+        return false;
+    }
+
     auto Job::GetData() const -> const sox::JobReference&
     {
         assert(_data);

@@ -14,6 +14,7 @@
 #include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
+#include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -234,6 +235,7 @@ namespace sunlight
         Add(std::make_shared<ServerCommandSystem>(_serviceLocator));
         Add(std::make_shared<ItemArchiveSystem>(_serviceLocator));
         Add(std::make_shared<PlayerStatSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerJobSystem>(_serviceLocator));
         Add(std::make_shared<PlayerStateSystem>(_serviceLocator));
         Add(std::make_shared<PlayerAppearanceSystem>(_serviceLocator));
         Add(std::make_shared<GameRepositorySystem>(_serviceLocator));

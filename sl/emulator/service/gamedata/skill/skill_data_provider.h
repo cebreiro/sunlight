@@ -15,10 +15,10 @@ namespace sunlight
         SkillDataProvider(const ServiceLocator& serviceLocator, const SoxTableSet& tableSet);
 
         auto FindPlayerSkill(int32_t skillId) const -> const PlayerSkillData*;
-        auto Find(JobId jobId, int32_t level) const -> const std::vector<PtrNotNull<const PlayerSkillData>>&;
+        auto FindByJob(int32_t job, int32_t level) const -> const std::vector<PtrNotNull<const PlayerSkillData>>&;
 
     private:
         std::unordered_map<int32_t, PlayerSkillData> _playerSkillData;
-        std::unordered_map<JobId, std::unordered_map<int32_t, std::vector<PtrNotNull<const PlayerSkillData>>>> _jobIndex;
+        std::unordered_map<int32_t, std::unordered_map<int32_t, std::vector<PtrNotNull<const PlayerSkillData>>>> _jobIndex;
     };
 }
