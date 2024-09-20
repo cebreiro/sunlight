@@ -14,6 +14,8 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandShowStringTable>());
 
         system.AddCommand(std::make_shared<ServerCommandPacketObjectLeave>());
+        system.AddCommand(std::make_shared<ServerCommandPacketHairColorChange>(system));
+        system.AddCommand(std::make_shared<ServerCommandPacketSkinColorChange>(system));
 
         system.AddCommand(std::make_shared<ServerCommandExpGain>(system));
         system.AddCommand(std::make_shared<ServerCommandExpCharacterGain>(system));

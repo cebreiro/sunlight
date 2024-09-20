@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/emulator/game/contants/item/equipment_position.h"
 
 namespace sunlight
 {
@@ -19,5 +20,9 @@ namespace sunlight
         static auto CreateCharacterLevelUp(const GamePlayer& player) -> Buffer;
 
         static auto CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer;
+
+        static auto CreatePlayerEquipmentChange(const GamePlayer& player, EquipmentPosition position, int32_t modelId, int32_t modelColor) -> Buffer;
+        static auto CreatePlayerHairColorChange(const GamePlayer& player, int32_t newColor) -> Buffer;
+        static auto CreatePlayerSkinColorChange(const GamePlayer& player, int32_t newColor) -> Buffer;
     };
 }

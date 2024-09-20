@@ -31,6 +31,8 @@ namespace sunlight
 
     auto GamePlayerMessageCreator::CreateRemotePlayerState(const GamePlayer& player) -> Buffer
     {
+        // client 0x48A4F0
+
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
         writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
@@ -61,7 +63,7 @@ namespace sunlight
 
         const PlayerAppearanceComponent& appearanceComponent = player.GetAppearanceComponent();
 
-        writer.Write<int32_t>(appearanceComponent.GetHatModelId() != 0 ? appearanceComponent.GetHair() : 0);
+        writer.Write<int32_t>(appearanceComponent.GetHair());
         writer.Write<int32_t>(appearanceComponent.GetHairColor());
         writer.Write<int32_t>(appearanceComponent.GetSkinColor());
 
@@ -69,8 +71,7 @@ namespace sunlight
         {
             PacketWriter objectWriter;
             objectWriter.Write<int32_t>(0);
-            objectWriter.Write<int32_t>(appearanceComponent.GetHatModelId() != 0
-                ? appearanceComponent.GetHatModelColor() : appearanceComponent.GetHairColor());
+            objectWriter.Write<int32_t>(appearanceComponent.GetHatModelColor());
             objectWriter.Write<int32_t>(appearanceComponent.GetJacketModelColor());
             objectWriter.Write<int32_t>(appearanceComponent.GetGlovesModelColor());
             objectWriter.Write<int32_t>(appearanceComponent.GetPantsModelColor());
@@ -84,8 +85,7 @@ namespace sunlight
         {
             PacketWriter objectWriter;
             objectWriter.Write<int32_t>(appearanceComponent.GetFace());
-            objectWriter.Write<int32_t>(appearanceComponent.GetHatModelId() != 0
-                ? appearanceComponent.GetHatModelId() : appearanceComponent.GetHair());
+            objectWriter.Write<int32_t>(appearanceComponent.GetHatModelId());
             objectWriter.Write<int32_t>(appearanceComponent.GetJacketModelId());
             objectWriter.Write<int32_t>(appearanceComponent.GetGlovesModelId());
             objectWriter.Write<int32_t>(appearanceComponent.GetPantsModelId());
@@ -170,6 +170,51 @@ namespace sunlight
         writer.Write(ZoneMessageType::PLAYER_PICK_ITEM_FX);
         writer.Write<int32_t>(x);
         writer.Write<int32_t>(y);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreatePlayerEquipmentChange(const GamePlayer& player, EquipmentPosition position,
+        int32_t modelId, int32_t modelColor) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_MSG);
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_EQUIPMENT);
+        writer.Write<int32_t>(static_cast<int32_t>(position));
+        writer.Write<int32_t>(modelId);
+        writer.Write<int32_t>(modelColor);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreatePlayerHairColorChange(const GamePlayer& player, int32_t newColor) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_MSG);
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_HAIR_COLOR);;
+        writer.Write<int32_t>(newColor);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreatePlayerSkinColorChange(const GamePlayer& player, int32_t newColor) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_MSG);
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_SKIN_COLOR);;
+        writer.Write<int32_t>(newColor);
 
         return writer.Flush();
     }

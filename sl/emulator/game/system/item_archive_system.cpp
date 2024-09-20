@@ -4,13 +4,16 @@
 
 #include "sl/emulator/game/component/item_ownership_component.h"
 #include "sl/emulator/game/component/item_position_component.h"
+#include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
+#include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -34,6 +37,7 @@ namespace sunlight
     {
         Add(stage.Get<GameRepositorySystem>());
         Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<PlayerStatSystem>());
     }
 
@@ -666,6 +670,20 @@ namespace sunlight
             return false;
         }
 
+
+        if (position == EquipmentPosition::Hat)
+        {
+            const PlayerAppearanceComponent& appearanceComponent = player.GetAppearanceComponent();
+
+            Get<EntityViewRangeSystem>().Broadcast(player,
+                GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position, appearanceComponent.GetHair(), appearanceComponent.GetHairColor()), false);
+        }
+        else
+        {
+            Get<EntityViewRangeSystem>().Broadcast(player,
+                GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position, 0, 0), false);
+        }
+
         Get<PlayerStatSystem>().RemoveItemStat(player, *itemComponent.GetEquipmentItem(position));
 
         return true;
@@ -723,6 +741,13 @@ namespace sunlight
 
             Get<PlayerStatSystem>().AddItemStat(player, *itemComponent.GetEquipmentItem(position));
         }
+
+        const GameItem* equipItem = itemComponent.GetEquipmentItem(position);
+        assert(equipItem);
+
+        Get<EntityViewRangeSystem>().Broadcast(player,
+            GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position,
+                equipItem->GetData().GetModelId(), equipItem->GetData().GetModelColor()), false);
 
         return true;
     }
