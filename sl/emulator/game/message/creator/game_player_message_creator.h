@@ -14,6 +14,8 @@ namespace sunlight
 
         static auto CreateAllState(const GamePlayer& player) -> Buffer;
 
+        static auto CreateCharacterLevelUp(const GamePlayer& player) -> Buffer;
+
         static auto CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer;
     };
 }

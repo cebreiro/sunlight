@@ -3,7 +3,9 @@
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/exp/exp_data_provider.h"
@@ -17,6 +19,7 @@ namespace sunlight
 
     void PlayerExpSystem::InitializeSubSystem(Stage& stage)
     {
+        Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<GameRepositorySystem>());
     }
 
@@ -65,20 +68,23 @@ namespace sunlight
 
         GameRepositorySystem& repositorySystem = Get<GameRepositorySystem>();
 
-        const int32_t newExp = std::min(data->expMax, statComponent.GetExp() + exp);
-        if (newExp >= data->expMax)
+        statComponent.SetExp(statComponent.GetExp() + exp);
+        player.Send(GamePlayerMessageCreator::CreateCharacterExpGain(player, exp));
+
+        if (statComponent.GetExp() >= data->expMax)
         {
             statComponent.SetLevel(level + 1);
             statComponent.SetExp(0);
             statComponent.SetStatPoint(statComponent.GetStatPoint() + GameConstant::STAT_POINT_PER_CHARACTER_LEVEL_UP);
 
             repositorySystem.SaveCharacterLevel(player, statComponent.GetLevel(), statComponent.GetStatPoint());
+
+            Get<SceneObjectSystem>().Broadcast(player.GetId(),
+                GamePlayerMessageCreator::CreateCharacterLevelUp(player), true);
         }
         else
         {
-            statComponent.SetExp(newExp);
-
-            repositorySystem.SaveCharacterExp(player, newExp);
+            repositorySystem.SaveCharacterExp(player, statComponent.GetExp());
         }
     }
 

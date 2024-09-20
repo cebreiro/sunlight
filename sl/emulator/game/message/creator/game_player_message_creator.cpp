@@ -28,6 +28,33 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto GamePlayerMessageCreator::CreateCharacterExpGain(const GamePlayer& player, int32_t value) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_GAIN_CHARACTER_EXP);
+        writer.Write<int32_t>(value);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateCharacterLevelUp(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_SHOW_CHR_LEVELUP_FX);
+
+        return writer.Flush();
+    }
+
     auto GamePlayerMessageCreator::CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer
     {
         SlPacketWriter writer;
