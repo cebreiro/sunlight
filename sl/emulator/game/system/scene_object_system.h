@@ -77,7 +77,7 @@ namespace sunlight
         int32_t _xSize = 0;
         int32_t _ySize = 0;
 
-        static constexpr int32_t cell_size = static_cast<int32_t>(GameConstant::STAGE_TERRAIN_BLOCK_SIZE) * 2;
+        static constexpr int32_t cell_size = 1000;
 
         std::vector<UniquePtrNotNull<GameSpatialSector>> _sectors;
         std::vector<UniquePtrNotNull<GameSpatialCell>> _cells;
