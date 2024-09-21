@@ -5,6 +5,7 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
+#include "sl/emulator/game/message/zone_message_router.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/message/zone_request.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
@@ -26,7 +27,10 @@ namespace sunlight
         , _zoneId(zoneId)
         , _stageData(stageData)
         , _name(fmt::format("stage_{}_{}", _zoneId, _stageData.id))
+        , _zoneMessageRouter(std::make_unique<ZoneMessageRouter>(*this))
     {
+        _zoneMessageRouter->Subscribe();
+
         InitializeSystem();
     }
 
@@ -204,6 +208,11 @@ namespace sunlight
     auto Stage::GetName() const -> const std::string&
     {
         return _name;
+    }
+
+    auto Stage::GetServiceLocator() const -> const ServiceLocator&
+    {
+        return _serviceLocator;
     }
 
     template <typename T> requires std::derived_from<T, GameSystem>

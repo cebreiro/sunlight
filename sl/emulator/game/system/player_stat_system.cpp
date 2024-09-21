@@ -5,6 +5,7 @@
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/data/sox/job_reference.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
@@ -156,6 +157,63 @@ namespace sunlight
 
         statComponent.Resume(RecoveryStatType::HP);
         statComponent.Resume(RecoveryStatType::SP);
+    }
+
+    void PlayerStatSystem::OnStatPointUse(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+        PlayerStatComponent& statComponent = player.GetStatComponent();
+
+        SlPacketReader& reader = message.reader;
+
+        std::array<int32_t, 7> addStats = {};
+        addStats[0] = reader.Read<int32_t>();
+        addStats[1] = reader.Read<int32_t>();
+        addStats[2] = reader.Read<int32_t>();
+        addStats[3] = reader.Read<int32_t>();
+        addStats[4] = reader.Read<int32_t>();
+        addStats[5] = reader.Read<int32_t>();
+        addStats[6] = reader.Read<int32_t>();
+
+        const bool hasNegativeValue = std::ranges::any_of(addStats, [](int32_t addValue)
+            {
+                return addValue < 0;
+            });
+        const int32_t sum = std::accumulate(addStats.begin(), addStats.end(), int32_t{ 0 },
+            [](int32_t sum, int32_t value) -> int32_t
+            {
+                return sum + value;
+            });
+
+        if (hasNegativeValue || sum > statComponent.GetStatPoint())
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] player cheat request. cid: {}, stats: {{ {}, {}, {}, {}, {}, {}, {} }}, sum: {}, stat_point: {}",
+                    GetName(), player.GetCId(),
+                    addStats[0], addStats[1], addStats[2], addStats[3], addStats[4], addStats[5], addStats[6],
+                    sum, statComponent.GetStatPoint()));
+
+            return;
+        }
+
+        statComponent.SetStatPoint(statComponent.GetStatPoint() - sum);
+        statComponent.AddBaseStat(PlayerStatType::Str, addStats[0]);
+        statComponent.AddBaseStat(PlayerStatType::Dex, addStats[1]);
+        statComponent.AddBaseStat(PlayerStatType::Accr, addStats[2]);
+        statComponent.AddBaseStat(PlayerStatType::Health, addStats[3]);
+        statComponent.AddBaseStat(PlayerStatType::Intell, addStats[4]);
+        statComponent.AddBaseStat(PlayerStatType::Wisdom, addStats[5]);
+        statComponent.AddBaseStat(PlayerStatType::Will, addStats[6]);
+
+        Get<GameRepositorySystem>().SaveStat(player,
+            statComponent.GetStatPoint(),
+            statComponent.Get(PlayerStatType::Str).Get(StatOriginType::Base).As<int32_t>(),
+            statComponent.Get(PlayerStatType::Dex).Get(StatOriginType::Base).As<int32_t>(),
+            statComponent.Get(PlayerStatType::Accr).Get(StatOriginType::Base).As<int32_t>(),
+            statComponent.Get(PlayerStatType::Health).Get(StatOriginType::Base).As<int32_t>(),
+            statComponent.Get(PlayerStatType::Intell).Get(StatOriginType::Base).As<int32_t>(),
+            statComponent.Get(PlayerStatType::Wisdom).Get(StatOriginType::Base).As<int32_t>(),
+            statComponent.Get(PlayerStatType::Will).Get(StatOriginType::Base).As<int32_t>());
     }
 
     auto PlayerStatSystem::CalculateJobMaxHP(const sox::JobReference& data, int32_t jobLevel,

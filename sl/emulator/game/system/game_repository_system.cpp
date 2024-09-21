@@ -133,6 +133,25 @@ namespace sunlight
                 });
     }
 
+    void GameRepositorySystem::SaveStat(const GamePlayer& player, int32_t statPoint, int32_t str, int32_t dex,
+        int32_t accr, int32_t health, int32_t intell, int32_t wis, int32_t will)
+    {
+        ++_pending[player.GetCId()].first;
+
+        _serviceLocator.Get<DatabaseService>().SetStat(player.GetCId(), statPoint, str, dex, accr, health, intell, wis, will)
+            .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(cid);
+                    }
+                    else
+                    {
+                        OnError(cid);
+                    }
+                });
+    }
+
     void GameRepositorySystem::OnComplete(int64_t cid)
     {
         auto iter = _pending.find(cid);

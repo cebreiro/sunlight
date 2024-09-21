@@ -9,6 +9,8 @@ namespace sunlight::sox
 
 namespace sunlight
 {
+    struct ZoneMessage;
+
     class GameItem;
     class GamePlayer;
     class PlayerStatComponent;
@@ -36,6 +38,7 @@ namespace sunlight
     public:
         void OnInitialize(GamePlayer& player);
         void OnLocalActivate(GamePlayer& player);
+        void OnStatPointUse(const ZoneMessage& message);
 
     private:
         static auto CalculateJobMaxHP(const sox::JobReference& data, int32_t jobLevel,

@@ -69,6 +69,16 @@ namespace sunlight
         stat.SetUpdateTimePoint(GameTimeService::Now());
     }
 
+    void PlayerStatComponent::AddBaseStat(PlayerStatType type, StatValue value)
+    {
+        constexpr StatOriginType origin = StatOriginType::Base;
+
+        Stat& stat = Mutable(type);
+        
+        stat.Set(origin, stat.Get(origin) + value);
+        stat.SetChanges(true);
+    }
+
     void PlayerStatComponent::OnChangeMaxHP()
     {
         Mutable(RecoveryStatType::HP).Update(GameTimeService::Now());
@@ -162,8 +172,11 @@ namespace sunlight
     {
         Stat& stat = Mutable(type);
 
-        stat.Set(StatOriginType::JobReference, value);
-        stat.SetChanges(true);
+        if (stat.Get(StatOriginType::JobReference) != value)
+        {
+            stat.Set(StatOriginType::JobReference, value);
+            stat.SetChanges(true);
+        }
     }
 
     void PlayerStatComponent::SetRecoveryStat(RecoveryStatType type, StatValue value)

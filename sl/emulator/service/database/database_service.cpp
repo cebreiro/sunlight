@@ -269,6 +269,28 @@ namespace sunlight
 
     }
 
+    auto DatabaseService::SetStat(int64_t cid, int32_t statPoint, int32_t str, int32_t dex, int32_t accr,
+        int32_t health, int32_t intell, int32_t wis, int32_t will) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterSetStat characterSetStat(conn, cid, statPoint, str, dex, accr, health, intell, wis, will);
+
+        if (const DatabaseError error = co_await characterSetStat.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
     auto DatabaseService::StartTransaction(db::ItemTransaction transaction) -> Future<bool>
     {
         [[maybe_unused]]

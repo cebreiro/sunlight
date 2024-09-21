@@ -15,12 +15,19 @@ namespace sunlight
     class GameEntity;
     class GamePlayer;
     class GameItem;
+    class ZoneMessageRouter;
 }
 
 namespace sunlight
 {
     class Stage
     {
+    public:
+        Stage(const Stage& other) = delete;
+        Stage(Stage&& other) noexcept = delete;
+        Stage& operator=(const Stage& other) = delete;
+        Stage& operator=(Stage&& other) noexcept = delete;
+
     public:
         Stage(const ServiceLocator& serviceLocator, int32_t zoneId, const MapStage& stageData);
         ~Stage();
@@ -37,6 +44,7 @@ namespace sunlight
 
         auto GetId() const -> int32_t;
         auto GetName() const -> const std::string&;
+        auto GetServiceLocator() const -> const ServiceLocator&;
 
         template <typename T> requires std::derived_from<T, GameSystem>
         auto Get() -> T&;
@@ -56,6 +64,8 @@ namespace sunlight
         int32_t _zoneId = 0;
         const MapStage& _stageData;
         std::string _name;
+
+        UniquePtrNotNull<ZoneMessageRouter> _zoneMessageRouter;
 
         std::unordered_map<game_system_id_type, SharedPtrNotNull<GameSystem>> _systems;
         std::vector<PtrNotNull<GameSystem>> _updateSystems;

@@ -27,6 +27,8 @@ namespace sunlight
         void Suspend(RecoveryStatType type);
         void Resume(RecoveryStatType type);
 
+        void AddBaseStat(PlayerStatType type, StatValue value);
+
         void OnChangeMaxHP();
         void OnChangeMaxSP();
         void OnChangeRecoveryHP();
