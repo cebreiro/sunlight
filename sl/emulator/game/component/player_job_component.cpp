@@ -40,7 +40,37 @@ namespace sunlight
         return _jobs[index].has_value();
     }
 
-    auto PlayerJobComponent::GetIf(JobType type) const -> const Job*
+    auto PlayerJobComponent::Find(JobId id) -> Job*
+    {
+        const auto iter = std::ranges::find_if(_jobs, [id](const std::optional<Job>& job) -> bool
+            {
+                return job.has_value() && job->GetId() == id;
+            });
+
+        return iter != _jobs.end() ? &iter->value() : nullptr;
+    }
+
+    auto PlayerJobComponent::Find(JobId id) const -> const Job*
+    {
+        const auto iter = std::ranges::find_if(_jobs, [id](const std::optional<Job>& job) -> bool
+            {
+                return job.has_value() && job->GetId() == id;
+            });
+
+        return iter != _jobs.end() ? &iter->value() : nullptr;
+    }
+
+    auto PlayerJobComponent::Find(JobType type) -> Job*
+    {
+        const int64_t index = static_cast<int64_t>(type);
+        assert(index >= 0 && index < std::ssize(_jobs));
+
+        std::optional<Job>& job = _jobs[index];
+
+        return job.has_value() ? &(*job) : nullptr;
+    }
+
+    auto PlayerJobComponent::Find(JobType type) const -> const Job*
     {
         const int64_t index = static_cast<int64_t>(type);
         assert(index >= 0 && index < std::ssize(_jobs));
@@ -52,13 +82,13 @@ namespace sunlight
 
     auto PlayerJobComponent::GetMainJob() const -> const Job&
     {
-        const Job* advanced = GetIf(JobType::Advanced);
+        const Job* advanced = Find(JobType::Advanced);
         if (advanced)
         {
             return *advanced;
         }
 
-        const Job* novice = GetIf(JobType::Novice);
+        const Job* novice = Find(JobType::Novice);
         if (novice)
         {
             return *novice;
@@ -67,25 +97,15 @@ namespace sunlight
         throw std::runtime_error("player has no job");
     }
 
-    auto PlayerJobComponent::MutableIf(JobType type) -> Job*
-    {
-        const int64_t index = static_cast<int64_t>(type);
-        assert(index >= 0 && index < std::ssize(_jobs));
-
-        std::optional<Job>& job = _jobs[index];
-
-        return job.has_value() ? &(*job) : nullptr;
-    }
-
     auto PlayerJobComponent::MutableMainJob() -> Job&
     {
-        Job* advanced = MutableIf(JobType::Advanced);
+        Job* advanced = Find(JobType::Advanced);
         if (advanced)
         {
             return *advanced;
         }
 
-        Job* novice = MutableIf(JobType::Novice);
+        Job* novice = Find(JobType::Novice);
         if (novice)
         {
             return *novice;

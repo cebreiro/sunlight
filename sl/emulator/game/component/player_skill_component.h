@@ -9,6 +9,9 @@ namespace sunlight
     public:
         bool AddSkill(const PlayerSkill& skill);
 
+        auto FindSkill(int32_t skillId) -> PlayerSkill*;
+        auto FindSkill(int32_t skillId) const -> const PlayerSkill*;
+
         auto GetSkillCount() const -> int64_t;
         inline auto GetSkills() const;
 

@@ -1,8 +1,10 @@
 #include "player_job_system.h"
 
 #include "sl/emulator/game/component/player_job_component.h"
+#include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/data/sox/job_reference.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -94,6 +96,75 @@ namespace sunlight
         }
 
         player.FlushDeferred();
+    }
+
+    void PlayerJobSystem::OnSkillLevelSet(const ZoneMessage& message)
+    {
+        SlPacketReader& reader = message.reader;
+        GamePlayer& player = message.player;
+
+        const int32_t skillId = reader.Read<int32_t>();
+        const int32_t newLevel = reader.Read<int32_t>();
+
+        PlayerJobComponent& jobComponent = player.GetJobComponent();
+        PlayerSkillComponent& skillComponent = player.GetSkillComponent();
+
+        std::string error;
+
+        do
+        {
+            PlayerSkill* skill = skillComponent.FindSkill(skillId);
+            if (!skill)
+            {
+                error = fmt::format("fail to find skill_id");
+
+                break;
+            }
+
+            const int32_t skillLevel = skill->GetBaseLevel();
+            const int32_t maxLevel = skill->GetData().maxLevel;
+
+            if (skillLevel >= maxLevel || newLevel > maxLevel || skillLevel >= newLevel)
+            {
+                error = fmt::format("invalid skill level condition");
+
+                break;
+            }
+
+            Job* job = jobComponent.Find(skill->GetJobId());
+            if (!job)
+            {
+                error = fmt::format("fail to find skill's job");
+
+                break;
+            }
+
+            const int32_t usedSkillPoint = newLevel - skillLevel;
+
+            if (usedSkillPoint > job->GetSkillPoint())
+            {
+                error = fmt::format("lack of skill point");
+
+                break;
+            }
+
+            skill->SetBaseLevel(newLevel);
+            job->SetSkillPoint(job->GetSkillPoint() - usedSkillPoint);
+
+            assert(job->GetSkillPoint() >= 0);
+
+            Get<GameRepositorySystem>().SaveSkillLevel(player,
+                static_cast<int32_t>(job->GetId()), job->GetSkillPoint(), skill->GetId(), newLevel);
+
+            player.Send(GamePlayerMessageCreator::CreateJobSkillPointChange(player, job->GetId(), job->GetSkillPoint(), false));
+
+            return;
+            
+        } while (false);
+
+        SUNLIGHT_LOG_INFO(_serviceLocator,
+            fmt::format("[{}] fail to handle. player: {}, error: {}",
+                GetName(), player.GetCId(), error));
     }
 
     auto PlayerJobSystem::GetJobGainSkills(JobId id, int32_t level) const -> std::vector<int32_t>

@@ -101,8 +101,8 @@ namespace sunlight
         PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
         PlayerJobComponent& jobComponent = player.GetComponent<PlayerJobComponent>();
 
-        const Job* novice = jobComponent.GetIf(JobType::Novice);
-        const Job* advanced = jobComponent.GetIf(JobType::Advanced);
+        const Job* novice = jobComponent.Find(JobType::Novice);
+        const Job* advanced = jobComponent.Find(JobType::Advanced);
 
         const int32_t levelSum = (novice ? novice->GetLevel() : 0) + (advanced ? advanced->GetLevel() : 0);
         const sox::JobReference* data = advanced ? &advanced->GetData() : (novice ? &novice->GetData() : nullptr);

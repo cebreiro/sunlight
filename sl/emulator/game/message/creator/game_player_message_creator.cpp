@@ -205,6 +205,22 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto GamePlayerMessageCreator::CreateJobSkillPointChange(const GamePlayer& player, JobId jobId, int32_t newSkillPoint, bool unk) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_CHANGE_SKILL_POINT);
+        writer.Write<int32_t>(newSkillPoint);
+        writer.Write<int32_t>(static_cast<int32_t>(jobId) / 1000 - 1); // client 485C10h
+        writer.Write<int8_t>(unk ? 1 : 0);
+
+        return writer.Flush();
+    }
+
     auto GamePlayerMessageCreator::CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer
     {
         SlPacketWriter writer;

@@ -4,6 +4,8 @@
 
 namespace sunlight
 {
+    struct ZoneMessage;
+
     class GamePlayer;
 }
 
@@ -21,6 +23,9 @@ namespace sunlight
 
     public:
         void GainJobExp(GamePlayer& player, int32_t exp);
+
+    public:
+        void OnSkillLevelSet(const ZoneMessage& message);
 
     private:
         auto GetJobGainSkills(JobId id, int32_t level) const -> std::vector<int32_t>;

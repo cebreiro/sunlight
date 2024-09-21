@@ -18,10 +18,12 @@ namespace sunlight
 
         bool HasJob(JobType type) const;
 
-        auto GetIf(JobType type) const -> const Job*;
-        auto GetMainJob() const -> const Job&;
+        auto Find(JobId id) -> Job*;
+        auto Find(JobId id) const -> const Job*;
+        auto Find(JobType type) -> Job*;
+        auto Find(JobType type) const -> const Job*;
 
-        auto MutableIf(JobType type) -> Job*;
+        auto GetMainJob() const -> const Job&;
         auto MutableMainJob() -> Job&;
 
     private:

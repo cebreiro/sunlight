@@ -132,10 +132,10 @@ namespace sunlight
 
         writer.WriteZeroBytes(32);
 
-        const Job* noviceJob = jobComponent.GetIf(JobType::Novice);
-        const Job* advancedJob = jobComponent.GetIf(JobType::Advanced);
-        const Job* mixSkillJob = jobComponent.GetIf(JobType::MixSkill);
-        const Job* subJob = jobComponent.GetIf(JobType::Sub);
+        const Job* noviceJob = jobComponent.Find(JobType::Novice);
+        const Job* advancedJob = jobComponent.Find(JobType::Advanced);
+        const Job* mixSkillJob = jobComponent.Find(JobType::MixSkill);
+        const Job* subJob = jobComponent.Find(JobType::Sub);
 
         writer.Write<int32_t>(noviceJob ? noviceJob->GetSkillPoint() : 0);
         writer.Write<int32_t>(advancedJob ? advancedJob->GetSkillPoint() : 0);
