@@ -43,6 +43,8 @@ namespace sunlight
 
         auto GetCharacter(int64_t cid) -> Future<std::optional<db::dto::Character>>;
 
+        auto AddNewJob(int64_t cid, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills) -> Future<bool>;
+
         auto SetCharacterExp(int64_t cid, int32_t exp) -> Future<bool>;
         auto SetCharacterLevel(int64_t cid, int32_t level, int32_t statPoint) -> Future<bool>;
         auto SetJobExp(int64_t cid, int32_t job, int32_t exp) -> Future<bool>;

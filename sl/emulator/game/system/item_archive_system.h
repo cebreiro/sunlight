@@ -6,11 +6,12 @@
 
 namespace sunlight
 {
+    struct ZoneMessage;
+
     class ItemData;
     class GameEntityIdPool;
     class GameItem;
     class GamePlayer;
-    struct ZoneMessage;
 }
 
 namespace sunlight
@@ -37,6 +38,9 @@ namespace sunlight
 
     public:
         static bool IsValid(EquipmentPosition position, sox::EquipmentType soxType);
+
+    public:
+        void OnWeaponSwap(const ZoneMessage& message);
 
     private:
         void HandleMessage(const ZoneMessage& message);

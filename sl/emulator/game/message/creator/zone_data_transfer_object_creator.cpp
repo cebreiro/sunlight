@@ -308,4 +308,34 @@ namespace sunlight
 
         return writer.Flush();
     }
+
+    auto ZoneDataTransferObjectCreator::CreatePlayerWeaponMotion(const GamePlayer& player) -> Buffer
+    {
+        PacketWriter writer;
+        writer.Write<int32_t>(0);
+        writer.Write<int32_t>(0);
+        writer.Write<int32_t>(0);
+        writer.Write<int8_t>(0);
+        writer.Write<int32_t>(0);
+        writer.Write<int32_t>(0);
+        writer.Write<int32_t>(0);
+
+        int32_t v13 = 0;
+        writer.Write<int32_t>(v13);
+        writer.Write<int32_t>(0); // 0x4A3F98 - EAX
+        writer.Write<int32_t>(player.GetAppearanceComponent().GetWeaponMotionCategory());
+        writer.Write<int32_t>(0); // 0x49643D attacked monster id?
+        writer.Write<int32_t>(0); // 0x4A4F50
+        writer.Write<int32_t>(0); // 0x4A4F50
+
+        if (v13 <= 10)
+        {
+            for (int32_t i = 0; i < v13; ++i)
+            {
+                writer.Write<int32_t>(0);
+            }
+        }
+
+        return writer.Flush();
+    }
 }

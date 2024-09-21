@@ -18,6 +18,8 @@ namespace sunlight
 
         bool HasJob(JobType type) const;
 
+        bool AddJob(JobType type, const Job& job);
+
         auto Find(JobId id) -> Job*;
         auto Find(JobId id) const -> const Job*;
         auto Find(JobType type) -> Job*;

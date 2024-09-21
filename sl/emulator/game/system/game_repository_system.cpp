@@ -133,6 +133,24 @@ namespace sunlight
                 });
     }
 
+    void GameRepositorySystem::SaveNewJob(const GamePlayer& player, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills)
+    {
+        ++_pending[player.GetCId()].first;
+
+        _serviceLocator.Get<DatabaseService>().AddNewJob(player.GetCId(), job, jobType, level, skillPoint, std::move(skills))
+            .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(cid);
+                    }
+                    else
+                    {
+                        OnError(cid);
+                    }
+                });
+    }
+
     void GameRepositorySystem::SaveSkillLevel(const GamePlayer& player, int32_t job, int32_t skillPoint,
         int32_t skillId, int32_t skillLevel)
     {

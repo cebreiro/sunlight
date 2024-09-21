@@ -758,6 +758,33 @@ namespace sunlight
         return true;
     }
 
+    bool PlayerItemComponent::SwapWeaponItem()
+    {
+        GameItem*& mainWeapon = Mutable(EquipmentPosition::Weapon1);
+        GameItem*& subWeapon = Mutable(EquipmentPosition::Weapon2);
+
+        if (!mainWeapon && !subWeapon)
+        {
+            return false;
+        }
+
+        if (mainWeapon)
+        {
+            mainWeapon->GetComponent<ItemPositionComponent>().SetPage(static_cast<int8_t>(EquipmentPosition::Weapon2));
+            AddItemUpdatePositionLog(*mainWeapon);
+        }
+
+        if (subWeapon)
+        {
+            subWeapon->GetComponent<ItemPositionComponent>().SetPage(static_cast<int8_t>(EquipmentPosition::Weapon1));
+            AddItemUpdatePositionLog(*subWeapon);
+        }
+
+        std::swap(mainWeapon, subWeapon);
+
+        return true;
+    }
+
     bool PlayerItemComponent::SetItemQuantity(game_entity_id_type id, int32_t quantity)
     {
         const auto iter = _items.find(id);

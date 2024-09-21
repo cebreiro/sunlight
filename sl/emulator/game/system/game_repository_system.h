@@ -30,6 +30,7 @@ namespace sunlight
         void SaveCharacterLevel(const GamePlayer& player, int32_t level, int32_t statPoint);
         void SaveJobExp(const GamePlayer& player, int32_t job, int32_t exp);
         void SaveJobLevel(const GamePlayer& player, int32_t job, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills);
+        void SaveNewJob(const GamePlayer& player, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills);
         void SaveSkillLevel(const GamePlayer& player, int32_t job, int32_t skillPoint, int32_t skillId, int32_t skillLevel);
 
         void SaveStat(const GamePlayer& player, int32_t statPoint, int32_t str, int32_t dex, int32_t accr,

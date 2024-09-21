@@ -41,6 +41,84 @@ namespace sunlight
         return GameSystem::GetClassId<PlayerJobSystem>();
     }
 
+    bool PlayerJobSystem::Promote(GamePlayer& player, JobId advanced)
+    {
+        PlayerJobComponent& jobComponent = player.GetJobComponent();
+
+        if (jobComponent.HasJob(JobType::Advanced))
+        {
+            return false;
+        }
+
+        Job& job = jobComponent.MutableMainJob();
+        if (!job.IsNovice())
+        {
+            return false;
+        }
+
+        if (job.GetLevel() < job.GetData().maxJobLevel)
+        {
+            return false;
+        }
+
+        if (!IsPromotable(job.GetId(), advanced))
+        {
+            return false;
+        }
+
+        const GameDataProvideService& gameDataProvider = _serviceLocator.Get<GameDataProvideService>();
+        const SkillDataProvider& skillDataProvider = gameDataProvider.GetSkillDataProvider();
+
+        const sox::JobReference* newJobData = gameDataProvider.Get<sox::JobReferenceTable>().Find(static_cast<int32_t>(advanced));
+        if (!newJobData)
+        {
+            return false;
+        }
+
+        const Job newJob(*newJobData, advanced, 1, 0, 0);
+        (void)jobComponent.AddJob(JobType::Advanced, newJob);
+
+        const std::vector<int32_t>& skills = GetJobGainSkills(newJob.GetId(), newJob.GetLevel());
+
+        PlayerSkillComponent& skillComponent = player.GetSkillComponent();
+
+        for (int32_t skillId : skills)
+        {
+            const PlayerSkillData* skillData = skillDataProvider.FindPlayerSkill(skillId);
+            if (!skillData)
+            {
+                assert(false);
+
+                continue;
+            }
+
+            (void)skillComponent.AddSkill(PlayerSkill(advanced, skillData));
+
+            player.Defer(GamePlayerMessageCreator::CreateJobSkillAdd(player, newJob.GetId(), skillId, 0));
+        }
+
+        const auto transform = [cid = player.GetCId(), &newJob](int32_t skillId) -> req::SkillCreate
+            {
+                return req::SkillCreate{
+                    .cid = cid,
+                    .id = skillId,
+                    .job = static_cast<int32_t>(newJob.GetId()),
+                    .level = 1,
+                };
+            };
+
+        Get<GameRepositorySystem>().SaveNewJob(player, static_cast<int32_t>(newJob.GetId()),
+            static_cast<int32_t>(JobType::Advanced), newJob.GetLevel(), newJob.GetSkillPoint(),
+            std::ranges::to<std::vector>(skills | std::views::transform(transform)));
+
+        player.Defer(GamePlayerMessageCreator::CreateJobPromotion(player, advanced));
+        player.FlushDeferred();
+
+        // TODO: update stat
+
+        return true;
+    }
+
     void PlayerJobSystem::GainJobExp(GamePlayer& player, int32_t exp)
     {
         PlayerJobComponent& jobComponent = player.GetJobComponent();
@@ -186,5 +264,34 @@ namespace sunlight
         }
 
         return result;
+    }
+
+    bool PlayerJobSystem::IsPromotable(JobId novice, JobId advanced)
+    {
+        switch (advanced)
+        {
+        case JobId::SwordWarrior:
+        case JobId::Berserker:
+        case JobId::Dragoon:
+        case JobId::MartialArtist:
+            return novice == JobId::NoviceFighter;
+        case JobId::Archer:
+        case JobId::Gunner:
+        case JobId::Agent:
+        case JobId::TreasureHunter:
+            return novice == JobId::NoviceRanger;
+        case JobId::Mage:
+        case JobId::Healer:
+        case JobId::Mystic:
+        case JobId::Engineer:
+            return novice == JobId::NoviceMagician;
+        case JobId::WeaponSmith:
+        case JobId::Designer:
+        case JobId::Cook:
+        case JobId::Chemist:
+            return novice == JobId::NoviceArtisan;
+        }
+
+        return false;
     }
 }

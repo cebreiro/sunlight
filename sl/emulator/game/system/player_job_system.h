@@ -22,6 +22,8 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
+        bool Promote(GamePlayer& player, JobId advanced);
+
         void GainJobExp(GamePlayer& player, int32_t exp);
 
     public:
@@ -29,6 +31,9 @@ namespace sunlight
 
     private:
         auto GetJobGainSkills(JobId id, int32_t level) const -> std::vector<int32_t>;
+
+    private:
+        static bool IsPromotable(JobId novice, JobId advanced);
 
     private:
         const ServiceLocator& _serviceLocator;

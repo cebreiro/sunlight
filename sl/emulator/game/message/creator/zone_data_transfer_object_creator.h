@@ -20,5 +20,6 @@ namespace sunlight
         static auto CreatePlayerStatusEffect(const GamePlayer& player) -> Buffer;
 
         static auto CreatePlayerStat(const GamePlayer& player) -> Buffer;
+        static auto CreatePlayerWeaponMotion(const GamePlayer& player) -> Buffer;
     };
 }

@@ -322,6 +322,25 @@ namespace sunlight
         return false;
     }
 
+    void ItemArchiveSystem::OnWeaponSwap(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+
+        if (!itemComponent.SwapWeaponItem())
+        {
+            return;
+        }
+
+        // TODO: update stat
+
+        assert(itemComponent.HasItemLog());
+        SaveChanges(player);
+
+        player.Send(GamePlayerMessageCreator::CreatePlayerWeaponSwap(player, itemComponent.FindEquipmentItem(EquipmentPosition::Weapon1)));
+        Get<EntityViewRangeSystem>().Broadcast(player, GamePlayerMessageCreator::CreateRemovePlayerWeaponChange(player), true);
+    }
+
     void ItemArchiveSystem::HandleMessage(const ZoneMessage& message)
     {
         GamePlayer& player = message.player;

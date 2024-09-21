@@ -2,6 +2,7 @@
 
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
+#include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -39,6 +40,11 @@ namespace sunlight
         case ZoneMessageType::SLV2_SKILL_LEVEL_CHANGE:
         {
             _stage.Get<PlayerJobSystem>().OnSkillLevelSet(message);
+        }
+        break;
+        case ZoneMessageType::SLV2_WEAPON_SWAP:
+        {
+            _stage.Get<ItemArchiveSystem>().OnWeaponSwap(message);
         }
         break;
         default:

@@ -58,6 +58,8 @@ namespace sunlight
         bool LowerPickedItemToQuickSlot(int8_t page, int8_t x, int8_t y);
         bool SwapPickedItemToQuickSlot(int8_t page, int8_t x, int8_t y);
 
+        bool SwapWeaponItem();
+
     public:
         bool SetItemQuantity(game_entity_id_type id, int32_t quantity);
         bool IncreaseItemQuantity(game_entity_id_type id, int32_t quantity);

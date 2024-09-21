@@ -2,12 +2,14 @@
 
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
+#include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/message/creator/zone_data_transfer_object_creator.h"
 #include "sl/emulator/server/packet/zone_packet_s2c.h"
 #include "sl/emulator/server/packet/io/sl_packet_writer.h"
+#include "sl/emulator/service/gamedata/item/item_data.h"
 
 namespace sunlight
 {
@@ -95,36 +97,7 @@ namespace sunlight
             writer.WriteObject(objectWriter);
         }
 
-        // motion
-        {
-            PacketWriter objectWriter;
-            objectWriter.Write<int32_t>(0);
-            objectWriter.Write<int32_t>(0);
-            objectWriter.Write<int32_t>(0);
-            objectWriter.Write<int8_t>(0);
-            objectWriter.Write<int32_t>(0);
-            objectWriter.Write<int32_t>(0);
-            objectWriter.Write<int32_t>(0);
-
-            int32_t v13 = 0;
-            objectWriter.Write<int32_t>(v13);
-            objectWriter.Write<int32_t>(0); // 0x4A3F98 - EAX
-            objectWriter.Write<int32_t>(appearanceComponent.GetWeaponMotionCategory());
-            objectWriter.Write<int32_t>(0); // 0x49643D attacked monster id?
-            objectWriter.Write<int32_t>(0); // 0x4A4F50
-            objectWriter.Write<int32_t>(0); // 0x4A4F50
-
-            if (v13 <= 10)
-            {
-                for (int32_t i = 0; i < v13; ++i)
-                {
-                    objectWriter.Write<int32_t>(0);
-                }
-            }
-
-            writer.WriteObject(objectWriter);
-        }
-
+        writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerWeaponMotion(player));
         writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerStat(player));
         
         // unk maybe status_effect
@@ -221,6 +194,20 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto GamePlayerMessageCreator::CreateJobPromotion(const GamePlayer& player, JobId jobId) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_PROMOTE_JOB);
+        writer.Write<int32_t>(static_cast<int32_t>(jobId));
+
+        return writer.Flush();
+    }
+
     auto GamePlayerMessageCreator::CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer
     {
         SlPacketWriter writer;
@@ -231,6 +218,35 @@ namespace sunlight
         writer.Write(ZoneMessageType::PLAYER_PICK_ITEM_FX);
         writer.Write<int32_t>(x);
         writer.Write<int32_t>(y);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreatePlayerWeaponSwap(const GamePlayer& player, const GameItem* weapon) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_WEAPON_SWAP);
+        writer.Write<int32_t>(weapon ? weapon->GetData().GetModelId() : 0);
+        writer.Write<int32_t>(weapon ? weapon->GetData().GetModelColor() : 0);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateRemovePlayerWeaponChange(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_CHANGE_REMOTE_PLAYER_MOTION);
+        writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerWeaponMotion(player));
 
         return writer.Flush();
     }

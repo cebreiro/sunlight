@@ -40,6 +40,22 @@ namespace sunlight
         return _jobs[index].has_value();
     }
 
+    bool PlayerJobComponent::AddJob(JobType type, const Job& job)
+    {
+        const int64_t index = static_cast<int64_t>(type);
+        assert(index >= 0 && index < std::ssize(_jobs));
+
+        std::optional<Job>& item = _jobs[index];
+        if (item.has_value())
+        {
+            return false;
+        }
+
+        item = job;
+
+        return true;
+    }
+
     auto PlayerJobComponent::Find(JobId id) -> Job*
     {
         const auto iter = std::ranges::find_if(_jobs, [id](const std::optional<Job>& job) -> bool
