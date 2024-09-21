@@ -1,7 +1,12 @@
 #include "stage.h"
 
+#include "sl/data/map/map_prop.h"
 #include "sl/data/map/map_stage.h"
+#include "sl/data/map/map_stage_room.h"
+#include "sl/data/map/map_stage_terrain.h"
+#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
+#include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
@@ -18,6 +23,7 @@
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/time/game_time_service.h"
 
 namespace sunlight
@@ -32,6 +38,19 @@ namespace sunlight
         _zoneMessageRouter->Subscribe();
 
         InitializeSystem();
+
+        if (stageData.terrain)
+        {
+            InitializeNPC(stageData.terrain->props);
+        }
+        else if (stageData.room)
+        {
+            InitializeNPC(stageData.room->props);
+        }
+        else
+        {
+            assert(false);
+        }
     }
 
     Stage::~Stage()
@@ -272,6 +291,64 @@ namespace sunlight
         }
     }
 
+    void Stage::InitializeNPC(const std::vector<MapProp>& props)
+    {
+        GameEntityIdPublisher& entityIdPublisher = _serviceLocator.Get<GameEntityIdPublisher>();
+
+        for (const MapProp& prop : props)
+        {
+            if (prop.type == static_cast<int32_t>(GameEntityType::NPC))
+            {
+                const auto [pos, yaw] = ExtractPositionAndYaw(prop.position);
+
+                auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
+                sceneObjectComponent->SetId(entityIdPublisher.PublishSceneObjectId(GameEntityType::NPC));
+                sceneObjectComponent->SetPosition(Eigen::Vector2f(pos.x(), pos.y()));
+                sceneObjectComponent->SetDestPosition(sceneObjectComponent->GetPosition());
+                sceneObjectComponent->SetYaw(yaw);
+
+                auto npc = std::make_shared<GameNPC>(game_entity_id_type(prop.id), prop.pnx);
+                npc->AddComponent(std::move(sceneObjectComponent));
+
+                if (prop.unk2)
+                {
+                    // merchant
+                }
+
+                Get<SceneObjectSystem>().SpawnNPC(std::move(npc));
+            }
+        }
+    }
+
+    void Stage::InitializeNPC(const std::vector<MapTerrainProp>& props)
+    {
+        GameEntityIdPublisher& entityIdPublisher = _serviceLocator.Get<GameEntityIdPublisher>();
+
+        for (const MapTerrainProp& prop : props)
+        {
+            if (prop.type == static_cast<int32_t>(GameEntityType::NPC))
+            {
+                const auto [pos, yaw] = ExtractPositionAndYaw(prop.position);
+
+                auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
+                sceneObjectComponent->SetId(entityIdPublisher.PublishSceneObjectId(GameEntityType::NPC));
+                sceneObjectComponent->SetPosition(Eigen::Vector2f(pos.x(), pos.y()));
+                sceneObjectComponent->SetDestPosition(sceneObjectComponent->GetPosition());
+                sceneObjectComponent->SetYaw(yaw);
+
+                auto npc = std::make_shared<GameNPC>(game_entity_id_type(prop.id), prop.pnx);
+                npc->AddComponent(std::move(sceneObjectComponent));
+
+                if (prop.unk2)
+                {
+                    // merchant
+                }
+
+                Get<SceneObjectSystem>().SpawnNPC(std::move(npc));
+            }
+        }
+    }
+
     bool Stage::Publish(const ZoneRequest& request)
     {
         const auto iter = _zoneRequestSubscribers.find(request.type);
@@ -309,5 +386,36 @@ namespace sunlight
         iter->second(message);
 
         return true;
+    }
+
+    auto Stage::ExtractPositionAndYaw(const Eigen::Matrix4f& matrix) -> std::pair<Eigen::Vector3f, float>
+    {
+        std::pair<Eigen::Vector3f, float> result;
+        result.first = matrix.block<1, 3>(3, 0).transpose();
+
+        /*result.first.x() = matrix(3, 0);
+        result.first.y() = matrix(1, 3);
+        result.first.z() = matrix(2, 3);*/
+
+        result.second = std::atan2f(matrix(1, 0), matrix(0, 0)) * 180.0f / static_cast<float>(std::numbers::pi);
+
+        //Eigen::Matrix3f rotationMatrix = matrix.block<3, 3>(0, 0);
+        //result.first = matrix.block<3, 1>(0, 3);
+
+        //Eigen::Vector3f scale;
+        //scale.x() = rotationMatrix.col(0).norm();
+        //scale.y() = rotationMatrix.col(1).norm();
+        //scale.z() = rotationMatrix.col(2).norm();
+
+        //rotationMatrix.col(0) /= scale.x();
+        //rotationMatrix.col(1) /= scale.y();
+        //rotationMatrix.col(2) /= scale.z();
+
+        //Eigen::Quaternionf rotationQuat = Eigen::Quaternionf(rotationMatrix);
+
+        //Eigen::AngleAxisf axisAngle(rotationQuat);
+        //result.second = axisAngle.angle() * (180.0f / static_cast<float>(std::numbers::pi));
+
+        return result;
     }
 }

@@ -5,15 +5,24 @@
 namespace sunlight
 {
     GameEntity::GameEntity(GameEntityIdPublisher& idPublisher, GameEntityType type)
-        : _idPublisher(idPublisher)
+        : _idPublisher(&idPublisher)
         , _id(idPublisher.Publish(type))
+        , _type(type)
+    {
+    }
+
+    GameEntity::GameEntity(game_entity_id_type id, GameEntityType type)
+        : _id(id)
         , _type(type)
     {
     }
 
     GameEntity::~GameEntity()
     {
-        _idPublisher.Return(_type, _id);
+        if (_idPublisher)
+        {
+            _idPublisher->Return(_type, _id);
+        }
     }
 
     bool GameEntity::IsActive() const

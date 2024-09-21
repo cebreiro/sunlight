@@ -24,7 +24,7 @@ namespace sunlight
         std::vector<MapEventObjectV5> eventsV5;
 
         std::array<char, 4> propDesc = {};
-        std::vector<MapTerrainPop> props;
+        std::vector<MapTerrainProp> props;
 
         std::array<char, 8> buildingDesc = {};
         std::vector<MapBuildingObject> buildings;

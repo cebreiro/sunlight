@@ -8,6 +8,7 @@
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
@@ -74,6 +75,22 @@ namespace sunlight
         // state dying, dead or none(0)
         // other state causes client crash
         writer.Write<int32_t>(0);
+
+        return writer.Flush();
+    }
+
+    auto SceneObjectPacketCreator::CreateInformation(const GameNPC& npc) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_USERINFO); // handled on client 4E6A40
+        writer.Write<int32_t>(npc.GetComponent<SceneObjectComponent>().GetId());
+        writer.Write(static_cast<int32_t>(npc.GetType()));
+        writer.Write(static_cast<int32_t>(npc.GetId().Unwrap()));
+        writer.Write<int32_t>(npc.GetPNX());
+
+        // client 0x4E6AFE, call sub_488D10
+        writer.WriteString(npc.GetName());
+        writer.Write<int32_t>(0); // unk
 
         return writer.Flush();
     }

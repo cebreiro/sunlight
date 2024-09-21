@@ -7,6 +7,8 @@
 
 namespace sunlight
 {
+    struct MapProp;
+    struct MapTerrainProp;
     struct MapStage;
     struct ZoneRequest;
     struct ZoneMessage;
@@ -54,10 +56,15 @@ namespace sunlight
         bool Add(SharedPtrNotNull<T> system);
 
         void InitializeSystem();
+        void InitializeNPC(const std::vector<MapProp>& props);
+        void InitializeNPC(const std::vector<MapTerrainProp>& props);
 
         bool Publish(const ZoneRequest& request);
         bool Publish(const ZoneMessage& message);
         bool Publish(const ZoneCommunityMessage& message);
+
+    private:
+        static auto ExtractPositionAndYaw(const Eigen::Matrix4f& matrix) -> std::pair<Eigen::Vector3f, float>;
 
     private:
         const ServiceLocator& _serviceLocator;

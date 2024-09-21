@@ -9,8 +9,8 @@
 #include "sl/emulator/game/contants/sector/game_spatial_id.h"
 #include "sl/emulator/game/contants/sector/game_spatial_mbr.h"
 #include "sl/emulator/game/contants/sector/game_spatial_sector.h"
-#include "sl/emulator/game/entity/game_entity.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
@@ -219,10 +219,6 @@ namespace sunlight
                                 targetPlayer->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(*player));
                             }
                             break;
-                            case GameEntityType::NPC:
-                            case GameEntityType::Enemy:
-                            default:
-                                assert(false);
                             }
 
                             targetPlayer->FlushDeferred();
@@ -242,16 +238,21 @@ namespace sunlight
                                 player->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(targetPlayer));
                             }
                             break;
-                            case GameEntityType::Item:
+                            case GameEntityType::NPC:
                             {
-                                GameItem* item = target.Cast<GameItem>();
-                                assert(item);
+                                const GameNPC& npc = *target.Cast<GameNPC>();
 
-                                player->Defer(SceneObjectPacketCreator::CreateInformation(*item));
-                                player->Defer(SceneObjectPacketCreator::CreateItemDisplay(*item, player->GetCId()));
+                                player->Defer(SceneObjectPacketCreator::CreateInformation(npc));
                             }
                             break;
-                            case GameEntityType::NPC:
+                            case GameEntityType::Item:
+                            {
+                                const GameItem& item = *target.Cast<GameItem>();
+
+                                player->Defer(SceneObjectPacketCreator::CreateInformation(item));
+                                player->Defer(SceneObjectPacketCreator::CreateItemDisplay(item, player->GetCId()));
+                            }
+                            break;
                             case GameEntityType::Enemy:
                             default:
                                 assert(false);

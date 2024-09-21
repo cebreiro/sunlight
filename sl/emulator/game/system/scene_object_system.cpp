@@ -2,6 +2,7 @@
 
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
@@ -97,6 +98,14 @@ namespace sunlight
                     player->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(other));
                 }
                 break;
+                case GameEntityType::NPC:
+                {
+                    const GameNPC& npc = *entity.Cast<GameNPC>();
+
+                    player->Defer(ZonePacketS2CCreator::CreateObjectMove(npc));
+                    player->Defer(SceneObjectPacketCreator::CreateInformation(npc));
+                }
+                break;
                 case GameEntityType::Item:
                 {
                     const GameItem& item = *entity.Cast<GameItem>();
@@ -106,7 +115,6 @@ namespace sunlight
                     player->Defer(SceneObjectPacketCreator::CreateItemDisplay(item, player->GetCId()));
                 }
                 break;
-                case GameEntityType::NPC:
                 case GameEntityType::Enemy:
                 default:
                     assert(false);
@@ -119,6 +127,34 @@ namespace sunlight
         {
             player->FlushDeferred();
         }
+    }
+
+    bool SceneObjectSystem::SpawnNPC(SharedPtrNotNull<GameNPC> npc)
+    {
+        assert(npc->HasComponent<SceneObjectComponent>());
+
+        auto& npcs = _entities[npc->GetType()];
+        if (npcs.contains(npc->GetId()))
+        {
+            return false;
+        }
+
+        npcs[npc->GetId()] = npc;
+
+        const Eigen::Vector2f& position = npc->GetComponent<SceneObjectComponent>().GetPosition();
+
+        EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
+
+        viewRangeSystem.VisitPlayer(position, [&](GamePlayer& player)
+            {
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(*npc));
+                player.Defer(SceneObjectPacketCreator::CreateInformation(*npc));
+
+                player.FlushDeferred();
+            });
+        viewRangeSystem.Add(*npc);
+
+        return true;
     }
 
     void SceneObjectSystem::SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos)

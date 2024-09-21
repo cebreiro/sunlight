@@ -18,10 +18,10 @@ namespace sunlight
         int32_t unk5 = 0;
     };
 
-    struct MapTerrainPop
+    struct MapTerrainProp
     {
-        MapTerrainPop() = default;
-        explicit MapTerrainPop(StreamReader<std::vector<char>::const_iterator>& reader);
+        MapTerrainProp() = default;
+        explicit MapTerrainProp(StreamReader<std::vector<char>::const_iterator>& reader);
 
         int32_t id = 0;
         int32_t type = 0;

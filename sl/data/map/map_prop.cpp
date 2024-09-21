@@ -17,7 +17,7 @@ namespace sunlight
         unk5 = reader.Read<int32_t>();
     }
 
-    MapTerrainPop::MapTerrainPop(StreamReader<std::vector<char>::const_iterator>& reader)
+    MapTerrainProp::MapTerrainProp(StreamReader<std::vector<char>::const_iterator>& reader)
     {
         id = reader.Read<int32_t>();
         type = reader.Read<int32_t>();

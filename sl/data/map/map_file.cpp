@@ -21,14 +21,14 @@ namespace sunlight
 
         const int32_t count = reader.Read<int32_t>();
         mapFile.stages.reserve(count);
-        mapFile.unk2.reserve(count);
 
         for (int32_t i = 0; i < count; ++i)
         {
-            mapFile.stages.emplace_back(std::make_unique<MapStage>(reader));
+            const int64_t current = reader.GetReadSize();
+            const MapStage& stageData = *mapFile.stages.emplace_back(std::make_unique<MapStage>(reader));
 
-            std::array<char, 36>& unk = mapFile.unk2.emplace_back();
-            reader.ReadBuffer(unk.data(), std::ssize(unk));
+            // skip unk bytes
+            reader.SetOffset(current + stageData.size + 36);
         }
 
         return mapFile;

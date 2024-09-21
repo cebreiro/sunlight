@@ -28,6 +28,8 @@ namespace sunlight
         break;
         default:;
         }
+
+        assert(terrain || room);
     }
 
     MapStage::~MapStage()

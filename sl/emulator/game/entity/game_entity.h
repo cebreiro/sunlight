@@ -21,6 +21,7 @@ namespace sunlight
 
     public:
         GameEntity(GameEntityIdPublisher& idPublisher, GameEntityType type);
+        GameEntity(game_entity_id_type id, GameEntityType type);
         virtual ~GameEntity();
 
         bool IsActive() const;
@@ -66,7 +67,7 @@ namespace sunlight
         auto GetComponent() const -> const T&;
 
     private:
-        GameEntityIdPublisher& _idPublisher;
+        GameEntityIdPublisher* _idPublisher = nullptr;
 
         game_entity_id_type _id = {};
         GameEntityType _type = GameEntityType::None;

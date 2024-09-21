@@ -23,7 +23,6 @@ namespace sunlight
         int32_t unk1 = 0;
 
         std::vector<UniquePtrNotNull<MapStage>> stages;
-        std::vector<std::array<char, 36>> unk2;
 
         static auto CreateFrom(const std::filesystem::path& filePath) -> MapFile;
     };

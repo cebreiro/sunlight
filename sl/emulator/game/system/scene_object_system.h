@@ -13,6 +13,7 @@ namespace sunlight
 
     class GameEntity;
     class GamePlayer;
+    class GameNPC;
     class GameItem;
 
     class GameSpatialSector;
@@ -34,6 +35,7 @@ namespace sunlight
 
     public:
         void SpawnPlayer(SharedPtrNotNull<GamePlayer> player);
+        bool SpawnNPC(SharedPtrNotNull<GameNPC> npc);
         void SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos);
 
         void RemoveItem(game_entity_id_type id);
