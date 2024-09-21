@@ -25,7 +25,7 @@ namespace sunlight
     class SceneObjectSystem final : public GameSystem
     {
     public:
-        explicit SceneObjectSystem(const ServiceLocator& serviceLocator);
+        SceneObjectSystem(const ServiceLocator& serviceLocator, int32_t stageId);
         ~SceneObjectSystem();
 
         void InitializeSubSystem(Stage& stage) override;
@@ -52,6 +52,7 @@ namespace sunlight
 
     private:
         const ServiceLocator& _serviceLocator;
+        int32_t _stageId;
 
         std::unordered_map<GameEntityType,
             boost::unordered::unordered_flat_map<game_entity_id_type, SharedPtrNotNull<GameEntity>>> _entities;

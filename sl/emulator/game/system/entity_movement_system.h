@@ -29,6 +29,9 @@ namespace sunlight
     public:
         bool Remove(game_entity_id_type id);
 
+    public:
+        void Teleport(GameEntity& entity, Eigen::Vector2f position);
+
     private:
         void HandleMovement(const ZoneRequest& request);
 

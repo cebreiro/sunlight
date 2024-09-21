@@ -96,6 +96,30 @@ namespace sunlight
         return _movingEntities.erase(id);
     }
 
+    void EntityMovementSystem::Teleport(GameEntity& entity, Eigen::Vector2f position)
+    {
+        SceneObjectComponent* sceneObjectComponent = entity.FindComponent<SceneObjectComponent>();
+        if (!sceneObjectComponent)
+        {
+            assert(false);
+
+            return;
+        }
+
+        sceneObjectComponent->SetMoving(false);
+        sceneObjectComponent->SetPosition(position);
+        sceneObjectComponent->SetDestPosition(position);
+
+        if (GamePlayer* player = entity.Cast<GamePlayer>(); player)
+        {
+            player->Send(ZonePacketS2CCreator::CreateObjectForceMove(entity));
+        }
+
+        Remove(entity.GetId());
+
+        Get<EntityViewRangeSystem>().UpdateViewRange(entity, sceneObjectComponent->GetPosition());
+    }
+
     void EntityMovementSystem::HandleMovement(const ZoneRequest& request)
     {
         GamePlayer& player = request.player;

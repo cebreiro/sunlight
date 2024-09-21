@@ -91,4 +91,9 @@ namespace sunlight
     {
         _forwardMovement = movement;
     }
+
+    void SceneObjectComponent::SetMoving(bool value)
+    {
+        _forwardMovement.unk3 = value ? 0x10 : 0;
+    }
 }

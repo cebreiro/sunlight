@@ -87,8 +87,6 @@ namespace sunlight
                 throw std::runtime_error(fmt::format("fail to find stage. stage: {}", dto.stage));
             }
 
-            client->Send(ServerType::Zone, ZonePacketS2CCreator::CreateLoginAccept(*player, stage->GetId()));
-
             stage->SpawnPlayer(player);
             _playerStages[client->GetId()] = stage;
         }

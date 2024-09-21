@@ -28,6 +28,7 @@ namespace sunlight
         void SetUnk3(uint16_t value);
 
         void Set(const ForwardMovement& movement);
+        void SetMoving(bool value);
 
     private:
         int32_t _id = 0;

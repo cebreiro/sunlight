@@ -18,8 +18,9 @@ namespace sunlight
 {
     const std::shared_ptr<GameEntity> SceneObjectSystem::null_shared_entity;
 
-    SceneObjectSystem::SceneObjectSystem(const ServiceLocator& serviceLocator)
+    SceneObjectSystem::SceneObjectSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
+        , _stageId(stageId)
     {
     }
 
@@ -76,6 +77,8 @@ namespace sunlight
 
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
         sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(player->GetType()));
+
+        player->Defer(ZonePacketS2CCreator::CreateLoginAccept(*player, _stageId));
 
         EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
 

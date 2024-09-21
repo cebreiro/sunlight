@@ -19,7 +19,7 @@ namespace sunlight
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
         writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
         writer.Write<int32_t>(0);
-        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer()); // virtual function handler by entity type. client 0x4EC3F3
         writer.Write(ZoneMessageType::CONTAIN_ALL_STATE);
         writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerUnkState(player));
         writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerAppearance(player));

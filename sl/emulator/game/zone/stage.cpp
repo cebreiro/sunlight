@@ -257,7 +257,7 @@ namespace sunlight
 
     void Stage::InitializeSystem()
     {
-        Add(std::make_shared<SceneObjectSystem>(_serviceLocator));
+        Add(std::make_shared<SceneObjectSystem>(_serviceLocator, _stageData.id));
         Add(std::make_shared<EntityViewRangeSystem>(_serviceLocator, _stageData));
         Add(std::make_shared<EntityMovementSystem>());
         Add(std::make_shared<ServerCommandSystem>(_serviceLocator));
