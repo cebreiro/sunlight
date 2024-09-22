@@ -5,8 +5,10 @@
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
+#include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
+#include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/server/client/game_client.h"
@@ -155,6 +157,7 @@ namespace sunlight
         (void)AddComponent(CreateSceneObjectComponent(dto));
         (void)AddComponent(std::make_unique<EntityMovementComponent>());
         (void)AddComponent(std::make_unique<EntityStateComponent>());
+        (void)AddComponent(std::make_unique<PlayerNPCScriptComponent>());
     }
 
     bool GamePlayer::HasDeferred() const
@@ -323,5 +326,15 @@ namespace sunlight
     {
         return GetComponent<EntityStateComponent>();
 
+    }
+
+    auto GamePlayer::GetNPCScriptComponent() -> PlayerNPCScriptComponent&
+    {
+        return GetComponent<PlayerNPCScriptComponent>();
+    }
+
+    auto GamePlayer::GetNPCScriptComponent() const -> const PlayerNPCScriptComponent&
+    {
+        return GetComponent<PlayerNPCScriptComponent>();
     }
 }

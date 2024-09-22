@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/emulator/game/entity/game_entity_id_type.h"
 
 namespace sunlight
 {
@@ -18,6 +19,7 @@ namespace sunlight
 
         static auto CreateTalkBoxCreate(const GameNPC& npc, const GamePlayer& player, int32_t width, int32_t height) -> Buffer;
         static auto CreateTalkBoxClose(const GameNPC& npc) -> Buffer;
+        static auto CreateTalkBoxClose(game_entity_id_type id) -> Buffer;
         static auto CreateTalkBoxClear(const GameNPC& npc) -> Buffer;
 
         static auto CreateTalkBoxAddMenu(const GameNPC& npc, int32_t base, int32_t mouseOver, int32_t menuIndex) -> Buffer;

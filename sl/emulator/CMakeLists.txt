@@ -1,5 +1,9 @@
 add_executable(cebreiro_sl_server_emulator)
 
+target_include_directories(cebreiro_sl_server_emulator PRIVATE ${LUA_INCLUDE_DIR})
+target_link_libraries(cebreiro_sl_server_emulator PRIVATE ${LUA_LIBRARIES})
+target_link_libraries(cebreiro_sl_server_emulator PRIVATE sol2)
+
 target_link_libraries(cebreiro_sl_server_emulator PRIVATE
     cebreiro_sl_pch
     cebreiro_sl_data

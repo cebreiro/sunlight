@@ -142,8 +142,8 @@ namespace sunlight
                 if (!Publish(message))
                 {
                     SUNLIGHT_LOG_WARN(_serviceLocator,
-                        fmt::format("[{}] unhanlded zone community message. player: {}, type: {}",
-                            GetName(), player->GetCId(), ToString(message.type)));
+                        fmt::format("[{}] unhanlded zone community message. player: {}, type: {}, buffer: {}",
+                            GetName(), player->GetCId(), ToString(message.type), message.reader.GetBuffer().ToString()));
                 }
             }
             break;
@@ -166,8 +166,9 @@ namespace sunlight
                 if (!Publish(message))
                 {
                     SUNLIGHT_LOG_WARN(_serviceLocator,
-                        fmt::format("[{}] unhanlded zone message. player: {}, target: [{}, {}], type: {}",
-                            GetName(), player->GetCId(), message.targetId, ToString(message.targetType), ToString(message.type)));
+                        fmt::format("[{}] unhanlded zone message. player: {}, target: [{}, {}], type: {}, buffer: {}",
+                            GetName(), player->GetCId(), message.targetId, ToString(message.targetType), ToString(message.type),
+                            message.reader.GetBuffer().ToString()));
                 }
             }
             break;

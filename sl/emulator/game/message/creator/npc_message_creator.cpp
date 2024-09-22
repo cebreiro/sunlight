@@ -35,9 +35,9 @@ namespace sunlight
         writer.Write<int32_t>(height);
 
         // client 0x49B8F8
-        // to find local player and request npc yaw change
-        writer.Write<int32_t>(static_cast<int32_t>(player.GetId().Unwrap()));
+        // to find local player and send 'npc direction', 'script state'
         writer.Write<int32_t>(static_cast<int32_t>(player.GetType()));
+        writer.Write<int32_t>(static_cast<int32_t>(player.GetId().Unwrap()));
 
         return writer.Flush();
     }
@@ -49,6 +49,18 @@ namespace sunlight
         writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
         writer.Write<int32_t>(0);
         writer.WriteObject(GameEntityNetworkId(npc).ToBuffer());
+        writer.Write(ZoneMessageType::CHARSTATUSMSG);
+
+        return writer.Flush();
+    }
+
+    auto NPCMessageCreator::CreateTalkBoxClose(game_entity_id_type id) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(id, GameEntityType::NPC).ToBuffer());
         writer.Write(ZoneMessageType::CHARSTATUSMSG);
 
         return writer.Flush();

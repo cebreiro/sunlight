@@ -26,6 +26,9 @@ namespace sunlight
     public:
         void Initialize(const std::filesystem::path& assetPath);
 
+        auto GetAssetPath() const -> const std::filesystem::path&;
+        auto GetScriptPath() const -> const std::filesystem::path&;
+
         template <typename T> requires std::derived_from<T, sox::ISoxTable>
         auto Get() const -> const T&;
 
@@ -37,6 +40,8 @@ namespace sunlight
 
     private:
         const ServiceLocator& _serviceLocator;
+        std::filesystem::path _assertPath;
+        std::filesystem::path _scriptPath;
 
         SharedPtrNotNull<AssetDataProvider> _assetDataProvider;
         SharedPtrNotNull<MapDataProvider> _mapDataProvider;

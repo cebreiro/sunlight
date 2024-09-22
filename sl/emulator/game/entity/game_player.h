@@ -18,6 +18,7 @@ namespace sunlight
     class PlayerJobComponent;
     class PlayerSkillComponent;
     class PlayerStatComponent;
+    class PlayerNPCScriptComponent;
     class SceneObjectComponent;
     class EntityMovementComponent;
     class EntityStateComponent;
@@ -73,6 +74,8 @@ namespace sunlight
         auto GetMovementComponent() const -> const EntityMovementComponent&;
         auto GetStateComponent() -> EntityStateComponent&;
         auto GetStateComponent() const -> const EntityStateComponent&;
+        auto GetNPCScriptComponent() -> PlayerNPCScriptComponent&;
+        auto GetNPCScriptComponent() const -> const PlayerNPCScriptComponent&;
 
     private:
         int64_t _cid = 0;

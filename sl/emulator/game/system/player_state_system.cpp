@@ -1,13 +1,20 @@
 #include "player_state_system.h"
 
+#include "sl/emulator/game/script/class/lua_npc.h"
+#include "sl/emulator/game/script/class/lua_player.h"
+#include "sl/emulator/game/entity/game_npc.h"
+
 #include "sl/emulator/game/component/entity_state_component.h"
+#include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
+#include "sl/emulator/game/script/lua_script_engine.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -29,6 +36,12 @@ namespace sunlight
 
     bool PlayerStateSystem::Subscribe(Stage& stage)
     {
+        if (!stage.AddSubscriber(ZoneMessageType::PLAYER_SCRIPTSTATE,
+            std::bind_front(&PlayerStateSystem::HandleScriptState, this)))
+        {
+            return false;
+        }
+
         if (!stage.AddSubscriber(ZoneMessageType::CHAR_STATE,
             std::bind_front(&PlayerStateSystem::HandleCharacterState, this)))
         {
@@ -46,6 +59,119 @@ namespace sunlight
     auto PlayerStateSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<PlayerStateSystem>();
+    }
+
+    void PlayerStateSystem::DisposeNPCTalk(GamePlayer& player)
+    {
+        PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
+        if (!scriptComponent.HasTargetNPC())
+        {
+            return;
+        }
+
+        game_entity_id_type targetId = scriptComponent.GetTargetNPCId();
+        player.Send(NPCMessageCreator::CreateTalkBoxClose(targetId));
+
+        scriptComponent.Clear();
+    }
+
+    void PlayerStateSystem::StartNPCScript(GamePlayer& player, game_entity_id_type target)
+    {
+        do
+        {
+            PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
+            if (scriptComponent.HasTargetNPC())
+            {
+                SUNLIGHT_LOG_WARN(_serviceLocator,
+                    fmt::format("[{}] player has already talk npc. player: {}, prev_npc: {}, new_npc: {}",
+                        GetName(), player.GetCId(), scriptComponent.GetTargetNPCId(), target));
+
+                break;
+            }
+
+            const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, target);
+            if (!entity)
+            {
+                break;
+            }
+
+            GameNPC* npc = entity->Cast<GameNPC>();
+            if (!npc)
+            {
+                assert(false);
+
+                break;
+            }
+
+            LuaNPC luaNPC(*npc);
+            LuaPlayer luaPlayer(*this, player);
+
+            if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaNPC, luaPlayer, 0))
+            {
+                break;
+            }
+
+            scriptComponent.SetTargetNPCId(target);
+
+            return;
+        }
+        while (false);
+
+        player.Send(NPCMessageCreator::CreateTalkBoxClose(target));
+    }
+
+    void PlayerStateSystem::HandleScriptState(const ZoneMessage& message)
+    {
+        const int32_t selection = message.reader.Read<int32_t>();
+        if (selection == 0) // client send to server - exit state
+        {
+            return;
+        }
+
+        GamePlayer& player = message.player;
+        PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
+
+        if (!scriptComponent.HasTargetNPC())
+        {
+            return;
+        }
+
+        do
+        {
+            const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, scriptComponent.GetTargetNPCId());
+            if (!entity)
+            {
+                break;
+            }
+
+            GameNPC* npc = entity->Cast<GameNPC>();
+            if (!npc)
+            {
+                assert(false);
+
+                break;
+            }
+
+            scriptComponent.SetSequence(scriptComponent.GetSequence() + 1);
+            scriptComponent.SetSelection(selection);
+
+            LuaNPC luaNPC(*npc);
+            LuaPlayer luaPlayer(*this, player);
+
+            if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaNPC, luaPlayer, scriptComponent.GetSequence()))
+            {
+                break;
+            }
+
+            return;
+
+        } while (false);
+
+        SUNLIGHT_LOG_WARN(_serviceLocator,
+            fmt::format("[{}] fail to execute script. player: {}",
+                GetName(), player.GetCId()));
+
+        DisposeNPCTalk(player);
     }
 
     bool PlayerStateSystem::HandleCharacterState(const ZoneMessage& message)
@@ -77,11 +203,15 @@ namespace sunlight
             HandlePickGroundItem(player, state.targetId);
         }
         break;
+        case GameEntityStateType::Conversation:
+        {
+            StartNPCScript(player, state.targetId);
+        }
+        break;
         case GameEntityStateType::None:
         case GameEntityStateType::NormalAttack:
         case GameEntityStateType::PlaySkill:
         case GameEntityStateType::DamagedMotion:
-        case GameEntityStateType::Conversation:
         case GameEntityStateType::Dying:
         case GameEntityStateType::Dead:
         case GameEntityStateType::Entering:

@@ -1,5 +1,6 @@
 #pragma once
 #include "sl/emulator/game/entity/game_entity_id_type.h"
+#include "sl/emulator/game/script/class/lua_player.h"
 #include "sl/emulator/game/system/game_system.h"
 
 namespace sunlight
@@ -21,8 +22,11 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 
-    public:
+        void DisposeNPCTalk(GamePlayer& player);
 
+    private:
+        void StartNPCScript(GamePlayer& player, game_entity_id_type target);
+        void HandleScriptState(const ZoneMessage& message);
 
     private:
         bool HandleCharacterState(const ZoneMessage& message);

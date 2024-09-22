@@ -25,6 +25,9 @@ namespace sunlight
 
     void GameDataProvideService::Initialize(const std::filesystem::path& assetPath)
     {
+        _assertPath = assetPath;
+        _scriptPath = assetPath / "Script";
+
         _assetDataProvider = std::make_shared<AssetDataProvider>(assetPath / "Soda.dat");
         _mapDataProvider = std::make_shared<MapDataProvider>(assetPath / "Zone");
         _soxTableSet = std::make_shared<SoxTableSet>(assetPath / "Misc");
@@ -32,6 +35,16 @@ namespace sunlight
         _itemDataProvider = std::make_shared<ItemDataProvider>(_serviceLocator, *_soxTableSet);
         _skillDataProvider = std::make_shared<SkillDataProvider>(_serviceLocator, *_soxTableSet);
         _expDataProvider = std::make_shared<ExpDataProvider>(*_soxTableSet);
+    }
+
+    auto GameDataProvideService::GetAssetPath() const -> const std::filesystem::path&
+    {
+        return _assertPath;
+    }
+
+    auto GameDataProvideService::GetScriptPath() const -> const std::filesystem::path&
+    {
+        return _scriptPath;
     }
 
     auto GameDataProvideService::GetAssetDataProvider() const -> const AssetDataProvider&
