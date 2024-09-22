@@ -7,7 +7,10 @@ namespace sunlight
 {
     struct ZoneMessage;
 
+    class NPCTalkBox;
+
     class GamePlayer;
+    class GameNPC;
 }
 
 namespace sunlight
@@ -22,6 +25,7 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 
+        void CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox);
         void DisposeNPCTalk(GamePlayer& player);
 
     private:

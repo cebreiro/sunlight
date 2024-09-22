@@ -11,7 +11,7 @@ namespace sunlight
     class GamePlayer;
 
     class LuaNPC;
-    class LuaNPCTalkBox;
+    class NPCTalkBox;
 }
 
 namespace sunlight
@@ -21,7 +21,7 @@ namespace sunlight
     public:
         LuaPlayer(PlayerStateSystem& system, GamePlayer& player);
 
-        void Talk(LuaNPC& npc, const LuaNPCTalkBox& talkBox);
+        void Talk(LuaNPC& npc, const NPCTalkBox& talkBox);
 
         void DisposeTalk();
 
@@ -29,9 +29,6 @@ namespace sunlight
 
     public:
         auto GetCId() const -> int64_t;
-
-    public:
-        static void Bind(sol::state& luaState);
 
     private:
         PlayerStateSystem& _system;

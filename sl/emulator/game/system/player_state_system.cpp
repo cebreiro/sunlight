@@ -7,6 +7,7 @@
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/contants/npc/npc_talk_box.h"
 #include "sl/emulator/game/contants/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -59,6 +60,47 @@ namespace sunlight
     auto PlayerStateSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<PlayerStateSystem>();
+    }
+
+    void PlayerStateSystem::CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox)
+    {
+        player.Defer(NPCMessageCreator::CreateTalkBoxClear(npc));
+
+        for (const npc_talk_box_item_type& item : talkBox.GetTalkBoxItems())
+        {
+            std::visit([&]<typename T>(const T & item)
+            {
+                if constexpr (std::is_same_v<T, NPCTalkBoxContent>)
+                {
+                    player.Defer(NPCMessageCreator::CreateTalkBoxAddString(npc, item.tableIndex));
+                }
+                else if constexpr (std::is_same_v<T, NPCTalkBoxContentWithInt>)
+                {
+                    player.Defer(NPCMessageCreator::CreateTalkBoxAddRuntimeIntString(npc, item.tableIndex, item.value));
+                }
+                else if constexpr (std::is_same_v<T, NPCTalkBoxContentWithItem>)
+                {
+                    player.Defer(NPCMessageCreator::CreateTalkBoxAddItemName(npc, item.tableIndex, item.tableIndex));
+                }
+                else if constexpr (std::is_same_v<T, NPCTalkBoxString>)
+                {
+                    player.Defer(NPCMessageCreator::CreateTalkBoxAddString(npc, item.tableIndex));
+                }
+                else if constexpr (std::is_same_v<T, NPCTalkBoxMenu>)
+                {
+                    player.Defer(NPCMessageCreator::CreateTalkBoxAddMenu(npc, item.tableIndexDefault, item.tableIndexMouseOver, item.index));
+                }
+                else
+                {
+                    static_assert(sizeof(T), "not implemented");
+                }
+
+            }, item);
+        }
+
+        player.Defer(NPCMessageCreator::CreateTalkBoxCreate(npc, player,
+            talkBox.GetWidth(), talkBox.GetHeight()));
+        player.FlushDeferred();
     }
 
     void PlayerStateSystem::DisposeNPCTalk(GamePlayer& player)

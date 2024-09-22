@@ -5,7 +5,7 @@
 
 #include "sl/emulator/game/script/class/lua_player.h"
 #include "sl/emulator/game/script/class/lua_npc.h"
-#include "sl/emulator/game/script/class/lua_npc_talk_box.h"
+#include "sl/emulator/game/script/lua_script_binder.h"
 
 namespace sunlight
 {
@@ -15,9 +15,7 @@ namespace sunlight
     {
         try
         {
-            LuaPlayer::Bind(_luaState);
-            LuaNPC::Bind(_luaState);
-            LuaNPCTalkBox::Bind(_luaState);
+            LuaScriptBinder::Bind(_luaState);
 
             InitializeNPCScript(scriptPath / "npc");
         }

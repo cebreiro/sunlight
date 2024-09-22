@@ -1,10 +1,5 @@
 #pragma once
 
-namespace sol
-{
-    class state;
-}
-
 namespace sunlight
 {
     struct NPCTalkBoxContent
@@ -41,18 +36,18 @@ namespace sunlight
         int32_t index = 0;
     };
 
-    using talk_box_item_type = std::variant<NPCTalkBoxContent, NPCTalkBoxContentWithInt, NPCTalkBoxContentWithItem, NPCTalkBoxString, NPCTalkBoxMenu>;
+    using npc_talk_box_item_type = std::variant<NPCTalkBoxContent, NPCTalkBoxContentWithInt, NPCTalkBoxContentWithItem, NPCTalkBoxString, NPCTalkBoxMenu>;
 
-    class LuaNPCTalkBox
+    class NPCTalkBox
     {
     public:
-        LuaNPCTalkBox(const LuaNPCTalkBox& other) = delete;
-        LuaNPCTalkBox(LuaNPCTalkBox&& other) noexcept = delete;
-        LuaNPCTalkBox& operator=(const LuaNPCTalkBox& other) = delete;
-        LuaNPCTalkBox& operator=(LuaNPCTalkBox&& other) noexcept = delete;
+        NPCTalkBox(const NPCTalkBox& other) = delete;
+        NPCTalkBox(NPCTalkBox&& other) noexcept = delete;
+        NPCTalkBox& operator=(const NPCTalkBox& other) = delete;
+        NPCTalkBox& operator=(NPCTalkBox&& other) noexcept = delete;
 
     public:
-        LuaNPCTalkBox(int32_t width, int32_t height);
+        NPCTalkBox(int32_t width, int32_t height);
 
         void SetContent(int32_t tableIndex);
         void SetContentWithInt(int32_t tableIndex, int32_t value);
@@ -62,21 +57,15 @@ namespace sunlight
         void AddMenu(int32_t tableIndexDefault, int32_t tableIndexMouseOver, int32_t index);
 
     public:
-        static void Bind(sol::state& luaState);
-
-    public:
         auto GetWidth() const -> int32_t;
         auto GetHeight() const -> int32_t;
-        auto GetContent() const -> int32_t;
-
-        auto GetTalkBoxItems() const -> const std::vector<talk_box_item_type>&;
+        auto GetTalkBoxItems() const -> const std::vector<npc_talk_box_item_type>&;
 
     private:
         int32_t _width = 0;
         int32_t _height = 0;
         int32_t _content = 0;
 
-
-        std::vector<talk_box_item_type> _talkBoxItems;
+        std::vector<npc_talk_box_item_type> _talkBoxItems;
     };
 }

@@ -16,8 +16,6 @@ namespace sunlight
 {
     class LuaNPC
     {
-        friend class LuaPlayer;
-
     public:
         LuaNPC(const LuaNPC& other) = delete;
         LuaNPC(LuaNPC&& other) noexcept = delete;
@@ -29,9 +27,7 @@ namespace sunlight
 
     public:
         auto GetId() const -> int32_t;
-
-    public:
-        static void Bind(sol::state& luaState);
+        auto GetImpl() const -> GameNPC&;
 
     private:
         GameNPC& _npc;
