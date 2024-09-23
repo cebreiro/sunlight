@@ -393,29 +393,7 @@ namespace sunlight
     {
         std::pair<Eigen::Vector3f, float> result;
         result.first = matrix.block<1, 3>(3, 0).transpose();
-
-        /*result.first.x() = matrix(3, 0);
-        result.first.y() = matrix(1, 3);
-        result.first.z() = matrix(2, 3);*/
-
         result.second = std::atan2f(matrix(1, 0), matrix(0, 0)) * 180.0f / static_cast<float>(std::numbers::pi);
-
-        //Eigen::Matrix3f rotationMatrix = matrix.block<3, 3>(0, 0);
-        //result.first = matrix.block<3, 1>(0, 3);
-
-        //Eigen::Vector3f scale;
-        //scale.x() = rotationMatrix.col(0).norm();
-        //scale.y() = rotationMatrix.col(1).norm();
-        //scale.z() = rotationMatrix.col(2).norm();
-
-        //rotationMatrix.col(0) /= scale.x();
-        //rotationMatrix.col(1) /= scale.y();
-        //rotationMatrix.col(2) /= scale.z();
-
-        //Eigen::Quaternionf rotationQuat = Eigen::Quaternionf(rotationMatrix);
-
-        //Eigen::AngleAxisf axisAngle(rotationQuat);
-        //result.second = axisAngle.angle() * (180.0f / static_cast<float>(std::numbers::pi));
 
         return result;
     }
