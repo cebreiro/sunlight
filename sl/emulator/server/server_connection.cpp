@@ -316,7 +316,7 @@ namespace sunlight
         {
             BufferReader reader(buffer.begin(), buffer.end());
 
-            const int64_t size = reader.Read<uint32_t>();
+            const uint32_t size = reader.Read<uint32_t>();
 
             if (size <= headerSize || size > std::numeric_limits<uint32_t>::max())
             {
@@ -328,7 +328,18 @@ namespace sunlight
                 return false;
             }
 
-            if (reader.Read<uint8_t>() != (size & 0xFF) + (size / 0xFF))
+            if (const int8_t value = reader.Read<int8_t>();
+                value != [](uint32_t size) -> int8_t
+                {
+                    // client 0x518C19
+                    int8_t result = 0;
+                    for (int32_t i = 0; i < 4; ++i)
+                    {
+                        result += *(reinterpret_cast<const int8_t*>(&size) + i);
+                    }
+
+                    return result;
+                }(size))
             {
                 return false;
             }
