@@ -12,7 +12,7 @@ namespace sunlight::db::sp
 
     auto CharacterSetLevel::GetSQL() const -> std::string_view
     {
-        return "CALL character_set_level(?, ?, ?)";
+        return "CALL character_level_set(?, ?, ?)";
     }
 
     auto CharacterSetLevel::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>

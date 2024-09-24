@@ -15,7 +15,7 @@ namespace sunlight::db::sp
 
     auto CharacterSetSkillLevel::GetSQL() const -> std::string_view
     {
-        return "CALL character_set_skill_level(?, ?, ?, ?, ?)";
+        return "CALL character_skill_level_set(?, ?, ?, ?, ?)";
     }
 
     auto CharacterSetSkillLevel::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>

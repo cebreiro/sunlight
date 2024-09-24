@@ -22,7 +22,7 @@ namespace sunlight::db::sp
 
     auto CharacterAddNewJob::GetSQL() const -> std::string_view
     {
-        return "CALL character_add_new_job(?, ?, ?, ?, ?, ?)";
+        return "CALL character_job_add(?, ?, ?, ?, ?, ?)";
     }
 
     auto CharacterAddNewJob::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>

@@ -19,7 +19,7 @@ namespace sunlight::db::sp
 
     auto CharacterSetStat::GetSQL() const -> std::string_view
     {
-        return "CALL character_set_stat(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return "CALL character_stat_set(?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
     auto CharacterSetStat::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>

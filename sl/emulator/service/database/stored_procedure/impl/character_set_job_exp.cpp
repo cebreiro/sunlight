@@ -12,7 +12,7 @@ namespace sunlight::db::sp
 
     auto CharacterSetJobExp::GetSQL() const -> std::string_view
     {
-        return "CALL character_set_job_exp(?, ?, ?)";
+        return "CALL character_job_exp_set(?, ?, ?)";
     }
 
     auto CharacterSetJobExp::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>

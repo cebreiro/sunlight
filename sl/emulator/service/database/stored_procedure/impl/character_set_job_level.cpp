@@ -21,7 +21,7 @@ namespace sunlight::db::sp
 
     auto CharacterSetJobLevel::GetSQL() const -> std::string_view
     {
-        return "CALL character_set_job_level(?, ?, ?, ?, ?)";
+        return "CALL character_job_level_set(?, ?, ?, ?, ?)";
     }
 
     auto CharacterSetJobLevel::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
