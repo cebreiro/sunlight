@@ -220,7 +220,23 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto ItemArchiveMessageCreator::CreateItemRemove(const GamePlayer& player, game_entity_id_type removed, GameEntityType removedType) -> Buffer
+    auto ItemArchiveMessageCreator::CreateItemDecrease(const GamePlayer& player, game_entity_id_type target,
+        GameEntityType targetType, int32_t quantity) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_DECREASEITEM);
+        writer.WriteObject(GameEntityNetworkId(target, targetType).ToBuffer());
+        writer.Write<int32_t>(quantity);
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateItemRemove(const GamePlayer& player, game_entity_id_type target, GameEntityType targetType) -> Buffer
     {
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
@@ -229,7 +245,7 @@ namespace sunlight
         writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
         writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
         writer.Write(ZoneMessageType::ITEMARCHIVE_REMOVEITEM);
-        writer.WriteObject(GameEntityNetworkId(removed, removedType).ToBuffer());
+        writer.WriteObject(GameEntityNetworkId(target, targetType).ToBuffer());
 
         return writer.Flush();
     }

@@ -3,6 +3,7 @@
 #include "sl/emulator/game/debug/game_debug_type.h"
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/game_component.h"
+#include "sl/emulator/game/contants/item/item_remove_result.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/item/inventory_position.h"
 #include "sl/emulator/game/contants/item/item_position.h"
@@ -36,10 +37,13 @@ namespace sunlight
 
     public:
         bool IsEquipped(EquipmentPosition position) const;
+        bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
 
     public:
         bool AddInventoryItem(SharedPtrNotNull<GameItem> item, const InventoryPosition* hint = nullptr);
         bool AddQuickSlotItem(SharedPtrNotNull<GameItem> item, const QuickSlotPosition* hint = nullptr);
+
+        bool TryRemoveInventoryItem(int32_t itemId, int32_t quantity, std::vector<item_remove_result_type>* result);
 
         bool TryStackItem(int32_t itemId, int32_t quantity,
             int32_t& usedQuantity, std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result = nullptr);

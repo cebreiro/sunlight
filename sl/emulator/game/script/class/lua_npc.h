@@ -26,6 +26,9 @@ namespace sunlight
         explicit LuaNPC(GameNPC& npc);
 
     public:
+        static void Bind(sol::state& luaState);
+
+    public:
         auto GetId() const -> int32_t;
         auto GetImpl() const -> GameNPC&;
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "sl/data/sox/item/equipment_type.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
+#include "sl/emulator/game/contants/item/item_remove_result.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/system/game_system.h"
 
@@ -36,6 +37,8 @@ namespace sunlight
         bool GainItem(GamePlayer& player, int32_t itemId, int32_t quantity, int32_t& addedQuantity);
         bool GainItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity);
 
+        bool RemoveInventoryItem(GamePlayer& player, int32_t itemId, int32_t quantity);
+
     public:
         static bool IsValid(EquipmentPosition position, sox::EquipmentType soxType);
 
@@ -68,5 +71,7 @@ namespace sunlight
 
     private:
         const ServiceLocator& _serviceLocator;
+
+        std::vector<item_remove_result_type> _itemRemoveResult;
     };
 }

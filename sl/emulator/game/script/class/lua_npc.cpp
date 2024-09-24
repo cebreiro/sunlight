@@ -11,6 +11,13 @@ namespace sunlight
     {
     }
 
+    void LuaNPC::Bind(sol::state& luaState)
+    {
+        luaState.new_usertype<LuaNPC>("NPC",
+            sol::no_constructor
+        );
+    }
+
     auto LuaNPC::GetId() const -> int32_t
     {
         return static_cast<int32_t>(_npc.GetId().Unwrap());

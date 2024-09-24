@@ -181,6 +181,33 @@ namespace sunlight
         return GetEquipmentItem(position) != nullptr;
     }
 
+    bool PlayerItemComponent::HasInventoryItem(int32_t itemId, int32_t quantity) const
+    {
+        const auto filter = [itemId](const GameItem& item) -> bool
+            {
+                if (item.GetData().GetId() != itemId)
+                {
+                    return false;
+                }
+
+                return item.GetComponent<ItemPositionComponent>().GetPositionType() == ItemPositionType::Inventory;
+            };
+
+        int32_t sum = 0;
+
+        for (const GameItem& item : _items | std::views::values | notnull::reference | std::views::filter(filter))
+        {
+            sum += item.GetQuantity();
+
+            if (sum >= quantity)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool PlayerItemComponent::AddInventoryItem(SharedPtrNotNull<GameItem> item, const InventoryPosition* hint)
     {
         assert(item->GetUId().has_value());
@@ -285,6 +312,100 @@ namespace sunlight
         [[maybe_unused]]
         const bool inserted = _items.try_emplace(id, std::move(item)).second;
         assert(inserted);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::TryRemoveInventoryItem(int32_t itemId, int32_t quantity, std::vector<item_remove_result_type>* result)
+    {
+        if (quantity <= 0)
+        {
+            assert(false);
+
+            return false;
+        }
+
+        const auto filter = [itemId](const GameItem& item) -> bool
+            {
+                if (item.GetData().GetId() != itemId)
+                {
+                    return false;
+                }
+
+                return item.GetComponent<ItemPositionComponent>().GetPositionType() == ItemPositionType::Inventory;
+            };
+
+        std::vector<game_entity_id_type> removes;
+        int32_t sum = 0;
+
+        for (const GameItem& item : _items | std::views::values | notnull::reference | std::views::filter(filter))
+        {
+            sum += item.GetQuantity();
+            removes.push_back(item.GetId());
+
+            if (sum >= quantity)
+            {
+                break;
+            }
+        }
+
+        if (sum < quantity)
+        {
+            return false;
+        }
+
+        for (game_entity_id_type removeItemId : removes)
+        {
+            const auto iter = _items.find(removeItemId);
+            assert(iter != _items.end());
+
+            GameItem& targetItem = *iter->second;
+
+            const int32_t targetItemQuantity = targetItem.GetQuantity();
+
+            if (sum > targetItemQuantity)
+            {
+                sum -= targetItemQuantity;
+
+                AddItemRemoveLog(targetItem);
+
+                const ItemPositionComponent& positionComponent = targetItem.GetComponent<ItemPositionComponent>();
+                assert(positionComponent.GetPositionType() == ItemPositionType::Inventory);
+
+                const ItemSlotRange slotRange{
+                    .x = positionComponent.GetX(),
+                    .y = positionComponent.GetY(),
+                    .xSize = targetItem.GetData().GetWidth(),
+                    .ySize = targetItem.GetData().GetHeight(),
+                };
+
+                GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr, slotRange);
+                SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
+
+                _items.erase(iter);
+            }
+            else if (sum == targetItemQuantity)
+            {
+                if (result)
+                {
+                    result->emplace_back(ItemRemoveResultDecrease{
+                        .itemId = targetItem.GetId(),
+                        .itemType = targetItem.GetType(),
+                        .decreaseQuantity = sum,
+                    });
+                }
+
+                targetItem.SetQuantity(targetItem.GetQuantity() - sum);
+
+                AddItemUpdateQuantityLog(targetItem);
+
+                break;
+            }
+            else
+            {
+                assert(false);
+            }
+        }
 
         return true;
     }

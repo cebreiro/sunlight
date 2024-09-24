@@ -24,7 +24,7 @@ namespace sunlight
     class ServerCommandT : public IServerCommand
     {
     public:
-        bool HandleCommand(GamePlayer& player, const ServerCommandParamReader& reader) const override
+        bool HandleCommand(GamePlayer& player, const ServerCommandParamReader& reader) const final
         {
             using tuple_type = std::tuple<TParams...>;
 

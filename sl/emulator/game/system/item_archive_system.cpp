@@ -289,6 +289,47 @@ namespace sunlight
         return true;
     }
 
+    bool ItemArchiveSystem::RemoveInventoryItem(GamePlayer& player, int32_t itemId, int32_t quantity)
+    {
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+
+        _itemRemoveResult.clear();
+
+        if (!itemComponent.TryRemoveInventoryItem(itemId, quantity, &_itemRemoveResult))
+        {
+            return false;
+        }
+
+        for (const item_remove_result_type& element : _itemRemoveResult)
+        {
+            std::visit([&]<typename T>(const T& result)
+                {
+                    if constexpr (std::is_same_v<T, ItemRemoveResultDecrease>)
+                    {
+                        player.Defer(ItemArchiveMessageCreator::CreateItemDecrease(player,
+                            result.itemId, result.itemType, result.decreaseQuantity));
+                    }
+                    else if constexpr (std::is_same_v<T, ItemRemoveResultRemove>)
+                    {
+                        player.Defer(ItemArchiveMessageCreator::CreateItemRemove(player,
+                            result.itemId, result.itemType));
+                    }
+                    else
+                    {
+                        static_assert(sizeof(T), "not implemented");
+                    }
+
+                }, element);
+        }
+
+        SaveChanges(player);
+
+        assert(player.HasDeferred());
+        player.FlushDeferred();
+
+        return true;
+    }
+
     bool ItemArchiveSystem::IsValid(EquipmentPosition position, sox::EquipmentType soxType)
     {
         switch (position)

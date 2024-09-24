@@ -27,5 +27,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandJobPromote>(system));
 
         system.AddCommand(std::make_shared<ServerCommandTeleport>(system));
+
+        system.AddCommand(std::make_shared<ServerCommandScriptReload>(system));
     }
 }

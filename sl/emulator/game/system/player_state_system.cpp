@@ -16,8 +16,10 @@
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/script/lua_script_engine.h"
+#include "sl/emulator/game/script/class/lua_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 
@@ -33,6 +35,7 @@ namespace sunlight
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<ItemArchiveSystem>());
+        Add(stage.Get<PlayerQuestSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)
@@ -60,6 +63,11 @@ namespace sunlight
     auto PlayerStateSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<PlayerStateSystem>();
+    }
+
+    auto PlayerStateSystem::GetServiceLocator() const -> const ServiceLocator&
+    {
+        return _serviceLocator;
     }
 
     void PlayerStateSystem::CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox)
@@ -145,15 +153,18 @@ namespace sunlight
                 break;
             }
 
+            scriptComponent.SetTargetNPCId(target);
+
+            LuaSystem luaSystem(*this);
             LuaNPC luaNPC(*npc);
             LuaPlayer luaPlayer(*this, player);
 
-            if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaNPC, luaPlayer, 0))
+            if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaSystem, luaNPC, luaPlayer, 0))
             {
+                scriptComponent.Clear();
+
                 break;
             }
-
-            scriptComponent.SetTargetNPCId(target);
 
             return;
         }
@@ -164,17 +175,15 @@ namespace sunlight
 
     void PlayerStateSystem::HandleScriptState(const ZoneMessage& message)
     {
+        // selection == 0 -> exit state
         const int32_t selection = message.reader.Read<int32_t>();
-        if (selection == 0) // client send to server - exit state
-        {
-            return;
-        }
 
         GamePlayer& player = message.player;
         PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
 
         if (!scriptComponent.HasTargetNPC())
         {
+            // npc script is disposed
             return;
         }
 
@@ -197,11 +206,14 @@ namespace sunlight
             scriptComponent.SetSequence(scriptComponent.GetSequence() + 1);
             scriptComponent.SetSelection(selection);
 
+            LuaSystem luaSystem(*this);
             LuaNPC luaNPC(*npc);
             LuaPlayer luaPlayer(*this, player);
 
-            if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaNPC, luaPlayer, scriptComponent.GetSequence()))
+            if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaSystem, luaNPC, luaPlayer, scriptComponent.GetSequence()))
             {
+                scriptComponent.Clear();
+
                 break;
             }
 

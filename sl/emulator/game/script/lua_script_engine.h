@@ -3,6 +3,7 @@
 
 namespace sunlight
 {
+    class LuaSystem;
     class LuaPlayer;
     class LuaNPC;
 }
@@ -23,14 +24,18 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
 
     public:
-        bool ExecuteNPCScript(int32_t scriptId, LuaNPC& npc, LuaPlayer& player, int32_t sequence);
+        bool Reload();
+
+        bool ExecuteNPCScript(int32_t scriptId, LuaSystem& system, LuaNPC& npc, LuaPlayer& player, int32_t sequence);
         
     private:
-        void InitializeNPCScript(const std::filesystem::path& directory);
+        bool InitializeNPCScript(std::unordered_map<int32_t, sol::protected_function>& outNpcScript, const std::filesystem::path& directory);
 
     private:
         const ServiceLocator& _serviceLocator;
-        const std::filesystem::path& _scriptPath;
+        std::filesystem::path _scriptPath;
+        std::filesystem::path _npcScriptPath;
+        
 
         sol::state _luaState;
         std::unordered_map<int32_t, sol::protected_function> _npcScripts;

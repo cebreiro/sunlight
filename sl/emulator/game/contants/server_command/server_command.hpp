@@ -6,3 +6,4 @@
 #include "sl/emulator/game/contants/server_command/impl/server_command_debug.h"
 #include "sl/emulator/game/contants/server_command/impl/server_command_job.h"
 #include "sl/emulator/game/contants/server_command/impl/server_command_movement.h"
+#include "sl/emulator/game/contants/server_command/impl/server_command_script.h"

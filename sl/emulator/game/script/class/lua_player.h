@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/emulator/game/contants/quest/quest.h"
 
 namespace sol
 {
@@ -9,6 +10,7 @@ namespace sunlight
 {
     class PlayerStateSystem;
     class GamePlayer;
+    class QuestChange;
 
     class LuaNPC;
     class NPCTalkBox;
@@ -21,11 +23,25 @@ namespace sunlight
     public:
         LuaPlayer(PlayerStateSystem& system, GamePlayer& player);
 
-        void Talk(LuaNPC& npc, const NPCTalkBox& talkBox);
+        bool IsMale() const;
+        bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
 
+        bool AddItem(int32_t itemId, int32_t quantity);
+        bool RemoveInventoryItem(int32_t itemId, int32_t quantity);
+
+        void Talk(LuaNPC& npc, const NPCTalkBox& talkBox);
         void DisposeTalk();
 
+        void StartQuest(Quest quest);
+        void ChangeQuest(int32_t questId, const QuestChange& change);
+
+        auto FindQuest(int32_t quest) const -> const Quest*;
+
+        auto GetNoviceJobLevel() const -> int32_t;
         auto GetSelection() const -> int32_t;
+
+    public:
+        static void Bind(sol::state& luaState);
 
     public:
         auto GetCId() const -> int64_t;
