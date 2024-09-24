@@ -17,6 +17,18 @@ namespace sunlight
     {
         try
         {
+            const std::initializer_list<sol::lib> libraries{
+                sol::lib::base,
+                sol::lib::math,
+                sol::lib::string,
+                sol::lib::table,
+            };
+
+            for (const sol::lib library : libraries)
+            {
+                _luaState.open_libraries(library);
+            }
+
             LuaScriptBinder::Bind(_luaState);
 
             InitializeNPCScript(_npcScripts, _npcScriptPath);
