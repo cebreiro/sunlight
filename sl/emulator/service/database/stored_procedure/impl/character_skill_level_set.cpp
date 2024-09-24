@@ -1,8 +1,8 @@
-#include "character_set_skill_level.h"
+#include "character_skill_level_set.h"
 
 namespace sunlight::db::sp
 {
-    CharacterSetSkillLevel::CharacterSetSkillLevel(ConnectionPool::Borrowed& conn, int64_t cid, int32_t job,
+    CharacterSkillLevelSet::CharacterSkillLevelSet(ConnectionPool::Borrowed& conn, int64_t cid, int32_t job,
         int32_t skillPoint, int32_t skillId, int32_t skillLevel)
         : StoredProcedure(conn)
         , _cid(cid)
@@ -13,12 +13,12 @@ namespace sunlight::db::sp
     {
     }
 
-    auto CharacterSetSkillLevel::GetSQL() const -> std::string_view
+    auto CharacterSkillLevelSet::GetSQL() const -> std::string_view
     {
         return "CALL character_skill_level_set(?, ?, ?, ?, ?)";
     }
 
-    auto CharacterSetSkillLevel::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
+    auto CharacterSkillLevelSet::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
     {
         boost::container::small_vector<boost::mysql::field, 16> inputs;
         inputs.emplace_back(_cid);
@@ -30,7 +30,7 @@ namespace sunlight::db::sp
         return inputs;
     }
 
-    void CharacterSetSkillLevel::SetOutput(const boost::mysql::results& result)
+    void CharacterSkillLevelSet::SetOutput(const boost::mysql::results& result)
     {
         (void)result;
     }

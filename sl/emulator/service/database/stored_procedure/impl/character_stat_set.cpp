@@ -1,8 +1,8 @@
-#include "character_set_stat.h"
+#include "character_stat_set.h"
 
 namespace sunlight::db::sp
 {
-    CharacterSetStat::CharacterSetStat(ConnectionPool::Borrowed& conn, int64_t cid, int32_t statPoint, int32_t str,
+    CharacterStatSet::CharacterStatSet(ConnectionPool::Borrowed& conn, int64_t cid, int32_t statPoint, int32_t str,
         int32_t dex, int32_t accr, int32_t health, int32_t intell, int32_t wis, int32_t will)
         : StoredProcedure(conn)
         , _cid(cid)
@@ -17,12 +17,12 @@ namespace sunlight::db::sp
     {
     }
 
-    auto CharacterSetStat::GetSQL() const -> std::string_view
+    auto CharacterStatSet::GetSQL() const -> std::string_view
     {
         return "CALL character_stat_set(?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
-    auto CharacterSetStat::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
+    auto CharacterStatSet::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
     {
         boost::container::small_vector<boost::mysql::field, 16> inputs;
         inputs.emplace_back(_cid);
@@ -38,7 +38,7 @@ namespace sunlight::db::sp
         return inputs;
     }
 
-    void CharacterSetStat::SetOutput(const boost::mysql::results& result)
+    void CharacterStatSet::SetOutput(const boost::mysql::results& result)
     {
         (void)result;
     }

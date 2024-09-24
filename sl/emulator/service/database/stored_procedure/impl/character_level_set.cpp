@@ -1,8 +1,8 @@
-#include "character_set_level.h"
+#include "character_level_set.h"
 
 namespace sunlight::db::sp
 {
-    CharacterSetLevel::CharacterSetLevel(ConnectionPool::Borrowed& conn, int64_t cid, int32_t level, int32_t statPoint)
+    CharacterLevelSet::CharacterLevelSet(ConnectionPool::Borrowed& conn, int64_t cid, int32_t level, int32_t statPoint)
         : StoredProcedure(conn)
         , _cid(cid)
         , _level(level)
@@ -10,12 +10,12 @@ namespace sunlight::db::sp
     {
     }
 
-    auto CharacterSetLevel::GetSQL() const -> std::string_view
+    auto CharacterLevelSet::GetSQL() const -> std::string_view
     {
         return "CALL character_level_set(?, ?, ?)";
     }
 
-    auto CharacterSetLevel::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
+    auto CharacterLevelSet::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
     {
         boost::container::small_vector<boost::mysql::field, 16> inputs;
         inputs.emplace_back(_cid);
@@ -25,7 +25,7 @@ namespace sunlight::db::sp
         return inputs;
     }
 
-    void CharacterSetLevel::SetOutput(const boost::mysql::results& result)
+    void CharacterLevelSet::SetOutput(const boost::mysql::results& result)
     {
         (void)result;
     }

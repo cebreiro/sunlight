@@ -3,11 +3,10 @@
 
 namespace sunlight::db::sp
 {
-    class CharacterSetSkillLevel final : public StoredProcedure
+    class CharacterLevelSet final : public StoredProcedure
     {
     public:
-        CharacterSetSkillLevel(ConnectionPool::Borrowed& conn, int64_t cid, int32_t job, int32_t skillPoint,
-            int32_t skillId, int32_t skillLevel);
+        CharacterLevelSet(ConnectionPool::Borrowed& conn, int64_t cid, int32_t level, int32_t statPoint);
 
     private:
         auto GetSQL() const -> std::string_view override;
@@ -16,9 +15,7 @@ namespace sunlight::db::sp
 
     private:
         int64_t _cid = 0;
-        int32_t _job = 0;
-        int32_t _skillPoint = 0;
-        int32_t _skillId = 0;
-        int32_t _skillLevel = 0;
+        int32_t _level = 0;
+        int32_t _statPoint = 0;
     };
 }

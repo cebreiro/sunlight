@@ -1,12 +1,14 @@
 #pragma once
+#include "sl/emulator/service/database/request/skill_create.h"
 #include "sl/emulator/service/database/stored_procedure/stored_procedure.h"
 
 namespace sunlight::db::sp
 {
-    class CharacterSetLevel final : public StoredProcedure
+    class CharacterJobAdd final : public StoredProcedure
     {
     public:
-        CharacterSetLevel(ConnectionPool::Borrowed& conn, int64_t cid, int32_t level, int32_t statPoint);
+        CharacterJobAdd(ConnectionPool::Borrowed& conn, int64_t cid, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint,
+            const std::vector<req::SkillCreate>& skills);
 
     private:
         auto GetSQL() const -> std::string_view override;
@@ -15,7 +17,10 @@ namespace sunlight::db::sp
 
     private:
         int64_t _cid = 0;
+        int32_t _job = 0;
+        int32_t _jobType = 0;
         int32_t _level = 0;
-        int32_t _statPoint = 0;
+        int32_t _skillPoint = 0;
+        std::string _skills;
     };
 }

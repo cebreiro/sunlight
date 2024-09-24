@@ -1,20 +1,20 @@
-#include "character_set_exp.h"
+#include "character_exp_set.h"
 
 namespace sunlight::db::sp
 {
-    CharacterSetExp::CharacterSetExp(ConnectionPool::Borrowed& conn, int64_t cid, int32_t exp)
+    CharacterExpSet::CharacterExpSet(ConnectionPool::Borrowed& conn, int64_t cid, int32_t exp)
         : StoredProcedure(conn)
         , _cid(cid)
         , _exp(exp)
     {
     }
 
-    auto CharacterSetExp::GetSQL() const -> std::string_view
+    auto CharacterExpSet::GetSQL() const -> std::string_view
     {
         return "CALL character_exp_set(?, ?)";
     }
 
-    auto CharacterSetExp::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
+    auto CharacterExpSet::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
     {
         boost::container::small_vector<boost::mysql::field, 16> inputs;
         inputs.emplace_back(_cid);
@@ -23,7 +23,7 @@ namespace sunlight::db::sp
         return inputs;
     }
 
-    void CharacterSetExp::SetOutput(const boost::mysql::results& result)
+    void CharacterExpSet::SetOutput(const boost::mysql::results& result)
     {
         (void)result;
     }

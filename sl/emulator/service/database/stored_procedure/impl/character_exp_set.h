@@ -3,10 +3,10 @@
 
 namespace sunlight::db::sp
 {
-    class CharacterSetExp final : public StoredProcedure
+    class CharacterExpSet final : public StoredProcedure
     {
     public:
-        CharacterSetExp(ConnectionPool::Borrowed& conn, int64_t cid, int32_t exp);
+        CharacterExpSet(ConnectionPool::Borrowed& conn, int64_t cid, int32_t exp);
 
     private:
         auto GetSQL() const -> std::string_view override;

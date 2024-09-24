@@ -4,10 +4,10 @@
 
 namespace sunlight::db::sp
 {
-    class CharacterSetJobLevel final : public StoredProcedure
+    class CharacterJobLevelSet final : public StoredProcedure
     {
     public:
-        CharacterSetJobLevel(ConnectionPool::Borrowed& conn, int64_t cid, int32_t job, int32_t level, int32_t skillPoint,
+        CharacterJobLevelSet(ConnectionPool::Borrowed& conn, int64_t cid, int32_t job, int32_t level, int32_t skillPoint,
             const std::vector<req::SkillCreate>& skills);
 
     private:

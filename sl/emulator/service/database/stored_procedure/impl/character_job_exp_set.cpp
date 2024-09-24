@@ -1,8 +1,8 @@
-#include "character_set_job_exp.h"
+#include "character_job_exp_set.h"
 
 namespace sunlight::db::sp
 {
-    CharacterSetJobExp::CharacterSetJobExp(ConnectionPool::Borrowed& conn, int64_t cid, int32_t job, int32_t exp)
+    CharacterJobExpSet::CharacterJobExpSet(ConnectionPool::Borrowed& conn, int64_t cid, int32_t job, int32_t exp)
         : StoredProcedure(conn)
         , _cid(cid)
         , _job(job)
@@ -10,12 +10,12 @@ namespace sunlight::db::sp
     {
     }
 
-    auto CharacterSetJobExp::GetSQL() const -> std::string_view
+    auto CharacterJobExpSet::GetSQL() const -> std::string_view
     {
         return "CALL character_job_exp_set(?, ?, ?)";
     }
 
-    auto CharacterSetJobExp::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
+    auto CharacterJobExpSet::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
     {
         boost::container::small_vector<boost::mysql::field, 16> inputs;
         inputs.emplace_back(_cid);
@@ -25,7 +25,7 @@ namespace sunlight::db::sp
         return inputs;
     }
 
-    void CharacterSetJobExp::SetOutput(const boost::mysql::results& result)
+    void CharacterJobExpSet::SetOutput(const boost::mysql::results& result)
     {
         (void)result;
     }

@@ -42,16 +42,16 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::AccountAdd accountAdd(conn, std::move(account), std::move(password));
+        db::sp::AccountAdd procedure(conn, std::move(account), std::move(password));
 
-        if (const DatabaseError error = co_await accountAdd.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
             co_return std::nullopt;
         }
 
-        co_return accountAdd.GetResult();
+        co_return procedure.GetResult();
     }
 
     auto DatabaseService::FindAccount(std::string account) -> Future<std::optional<db::dto::Account>>
@@ -63,16 +63,16 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::AccountGet accountGet(conn, account);
+        db::sp::AccountGet procedure(conn, account);
 
-        if (const DatabaseError error = co_await accountGet.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
             co_return std::nullopt;
         }
 
-        co_return accountGet.GetResult();
+        co_return procedure.GetResult();
     }
 
     auto DatabaseService::GetCharacterNamesAll() -> Future<std::vector<std::string>>
@@ -84,16 +84,16 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharactersNameGet charactersNameGet(conn);
+        db::sp::CharactersNameGet procedure(conn);
 
-        if (const DatabaseError error = co_await charactersNameGet.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
             co_return {};
         }
 
-        co_return charactersNameGet.GetResult();
+        co_return procedure.GetResult();
     }
 
     auto DatabaseService::GetLobbyCharacters(int64_t aid, int8_t sid) -> Future<std::optional<std::vector<db::dto::LobbyCharacter>>>
@@ -105,16 +105,16 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::LobbyCharactersGet lobbyCharactersGet(conn, aid, sid);
+        db::sp::LobbyCharactersGet procedure(conn, aid, sid);
 
-        if (const DatabaseError error = co_await lobbyCharactersGet.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
             co_return std::nullopt;
         }
 
-        co_return std::ranges::to<std::vector>(lobbyCharactersGet.GetResult());
+        co_return std::ranges::to<std::vector>(procedure.GetResult());
     }
 
     auto DatabaseService::CreateCharacter(req::CharacterCreate request) -> Future<bool>
@@ -130,9 +130,9 @@ namespace sunlight
         nlohmann::json j;
         to_json(j, request);
 
-        db::sp::CharacterCreate characterCreate(conn, j.dump());
+        db::sp::CharacterCreate procedure(conn, j.dump());
 
-        if (const DatabaseError error = co_await characterCreate.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -151,9 +151,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterDeleteSoft characterDeleteSoft(conn, cid);
+        db::sp::CharacterDeleteSoft procedure(conn, cid);
 
-        if (const DatabaseError error = co_await characterDeleteSoft.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -172,16 +172,16 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterGet characterGet(conn, cid);
+        db::sp::CharacterGet procedure(conn, cid);
 
-        if (const DatabaseError error = co_await characterGet.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
             co_return std::nullopt;
         }
 
-        co_return characterGet.Release();
+        co_return procedure.Release();
     }
 
     auto DatabaseService::AddNewJob(int64_t cid, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills) -> Future<bool>
@@ -193,9 +193,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterAddNewJob characterAddNewJob(conn, cid, job, jobType, level, skillPoint, skills);
+        db::sp::CharacterJobAdd procedure(conn, cid, job, jobType, level, skillPoint, skills);
 
-        if (const DatabaseError error = co_await characterAddNewJob.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -214,9 +214,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterQuestAdd characterQuestAdd(conn, cid, id, state, std::move(flags), std::move(data));
+        db::sp::CharacterQuestAdd procedure(conn, cid, id, state, std::move(flags), std::move(data));
 
-        if (const DatabaseError error = co_await characterQuestAdd.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -235,9 +235,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterSetExp characterSetExp(conn, cid, exp);
+        db::sp::CharacterExpSet procedure(conn, cid, exp);
 
-        if (const DatabaseError error = co_await characterSetExp.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -256,9 +256,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterSetLevel characterSetLevel(conn, cid, level, statPoint);
+        db::sp::CharacterLevelSet procedure(conn, cid, level, statPoint);
 
-        if (const DatabaseError error = co_await characterSetLevel.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -277,9 +277,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterSetJobExp characterSetJobExp(conn, cid, job, exp);
+        db::sp::CharacterJobExpSet procedure(conn, cid, job, exp);
 
-        if (const DatabaseError error = co_await characterSetJobExp.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -298,7 +298,7 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterSetJobLevel characterSetJobLevel(conn, cid, job, level, skillPoint, skills);
+        db::sp::CharacterJobLevelSet characterSetJobLevel(conn, cid, job, level, skillPoint, skills);
 
         if (const DatabaseError error = co_await characterSetJobLevel.ExecuteAsync(); error)
         {
@@ -320,9 +320,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterSetSkillLevel characterSetSkillLevel(conn, cid, job, skillPoint, skillId, skillLevel);
+        db::sp::CharacterSkillLevelSet procedure(conn, cid, job, skillPoint, skillId, skillLevel);
 
-        if (const DatabaseError error = co_await characterSetSkillLevel.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -342,9 +342,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterSetStat characterSetStat(conn, cid, statPoint, str, dex, accr, health, intell, wis, will);
+        db::sp::CharacterStatSet procedure(conn, cid, statPoint, str, dex, accr, health, intell, wis, will);
 
-        if (const DatabaseError error = co_await characterSetStat.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -363,9 +363,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::ItemTransactionExecute itemTransactionExecute(conn, transaction);
+        db::sp::ItemTransactionExecute procedure(conn, transaction);
 
-        if (const DatabaseError error = co_await itemTransactionExecute.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
@@ -400,9 +400,9 @@ namespace sunlight
         assert(ExecutionContext::IsEqualTo(*_executor));
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
-        db::sp::CharacterQuestSet characterQuestSet(conn, cid, id, state, std::move(flags), std::move(data));
+        db::sp::CharacterQuestSet procedure(conn, cid, id, state, std::move(flags), std::move(data));
 
-        if (const DatabaseError error = co_await characterQuestSet.ExecuteAsync(); error)
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
             LogError(__FUNCTION__, error);
 
