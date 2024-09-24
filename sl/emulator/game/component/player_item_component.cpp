@@ -363,9 +363,17 @@ namespace sunlight
 
             const int32_t targetItemQuantity = targetItem.GetQuantity();
 
-            if (sum > targetItemQuantity)
+            if (sum >= targetItemQuantity)
             {
                 sum -= targetItemQuantity;
+
+                if (result)
+                {
+                    result->emplace_back(ItemRemoveResultRemove{
+                        .itemId = targetItem.GetId(),
+                        .itemType = targetItem.GetType(),
+                        });
+                }
 
                 AddItemRemoveLog(targetItem);
 
@@ -384,7 +392,7 @@ namespace sunlight
 
                 _items.erase(iter);
             }
-            else if (sum == targetItemQuantity)
+            else if (sum < targetItemQuantity)
             {
                 if (result)
                 {
@@ -400,10 +408,6 @@ namespace sunlight
                 AddItemUpdateQuantityLog(targetItem);
 
                 break;
-            }
-            else
-            {
-                assert(false);
             }
         }
 
