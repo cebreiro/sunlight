@@ -17,7 +17,10 @@ namespace sunlight
     public:
         explicit LuaSystem(PlayerStateSystem& system);
 
-        void Print(const std::string& str);
+        void Debug(const std::string& str);
+        void Info(const std::string& str);
+        void Warn(const std::string& str);
+        void Error(const std::string& str);
 
         auto GetTimePoint() const -> int64_t;
 

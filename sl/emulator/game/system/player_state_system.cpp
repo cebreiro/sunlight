@@ -78,21 +78,17 @@ namespace sunlight
         {
             std::visit([&]<typename T>(const T & item)
             {
-                if constexpr (std::is_same_v<T, NPCTalkBoxContent>)
+                if constexpr (std::is_same_v<T, NPCTalkBoxString>)
                 {
                     player.Defer(NPCMessageCreator::CreateTalkBoxAddString(npc, item.tableIndex));
                 }
-                else if constexpr (std::is_same_v<T, NPCTalkBoxContentWithInt>)
+                else if constexpr (std::is_same_v<T, NPCTalkBoxStringWithInt>)
                 {
                     player.Defer(NPCMessageCreator::CreateTalkBoxAddRuntimeIntString(npc, item.tableIndex, item.value));
                 }
-                else if constexpr (std::is_same_v<T, NPCTalkBoxContentWithItem>)
+                else if constexpr (std::is_same_v<T, NPCTalkBoxStringWithItem>)
                 {
                     player.Defer(NPCMessageCreator::CreateTalkBoxAddItemName(npc, item.tableIndex, item.tableIndex));
-                }
-                else if constexpr (std::is_same_v<T, NPCTalkBoxString>)
-                {
-                    player.Defer(NPCMessageCreator::CreateTalkBoxAddString(npc, item.tableIndex));
                 }
                 else if constexpr (std::is_same_v<T, NPCTalkBoxMenu>)
                 {

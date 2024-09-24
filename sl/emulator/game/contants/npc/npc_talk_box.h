@@ -2,31 +2,21 @@
 
 namespace sunlight
 {
-    struct NPCTalkBoxContent
+    struct NPCTalkBoxString
     {
         int32_t tableIndex = 0;
     };
 
-    struct NPCTalkBoxAddContent
-    {
-        int32_t tableIndex = 0;
-    };
-
-    struct NPCTalkBoxContentWithInt
+    struct NPCTalkBoxStringWithInt
     {
         int32_t tableIndex = 0;
         int32_t value = 0;
     };
 
-    struct NPCTalkBoxContentWithItem
+    struct NPCTalkBoxStringWithItem
     {
         int32_t tableIndex = 0;
         int32_t itemId = 0;
-    };
-
-    struct NPCTalkBoxString
-    {
-        int32_t tableIndex = 0;
     };
 
     struct NPCTalkBoxMenu
@@ -36,7 +26,7 @@ namespace sunlight
         int32_t index = 0;
     };
 
-    using npc_talk_box_item_type = std::variant<NPCTalkBoxContent, NPCTalkBoxContentWithInt, NPCTalkBoxContentWithItem, NPCTalkBoxString, NPCTalkBoxMenu>;
+    using npc_talk_box_item_type = std::variant<NPCTalkBoxString, NPCTalkBoxStringWithInt, NPCTalkBoxStringWithItem, NPCTalkBoxMenu>;
 
     class NPCTalkBox
     {
@@ -49,11 +39,10 @@ namespace sunlight
     public:
         NPCTalkBox(int32_t width, int32_t height);
 
-        void SetContent(int32_t tableIndex);
-        void SetContentWithInt(int32_t tableIndex, int32_t value);
-        void SetContentWithIntItem(int32_t tableIndex, int32_t itemId);
-
         void AddString(int32_t tableIndex);
+        void AddStringWithInt(int32_t tableIndex, int32_t value);
+        void AddStringWithIntItem(int32_t tableIndex, int32_t itemId);
+
         void AddMenu(int32_t tableIndexDefault, int32_t tableIndexMouseOver, int32_t index);
 
     public:

@@ -25,7 +25,7 @@ namespace sunlight
 
     bool LuaPlayer::IsMale() const
     {
-        return _player.GetStatComponent().GetGender() != 0;
+        return _player.GetStatComponent().GetGender() == 0;
     }
 
     bool LuaPlayer::HasInventoryItem(int32_t itemId, int32_t quantity) const

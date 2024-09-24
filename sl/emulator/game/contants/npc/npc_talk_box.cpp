@@ -8,33 +8,26 @@ namespace sunlight
     {
     }
 
-    void NPCTalkBox::SetContent(int32_t tableIndex)
+    void NPCTalkBox::AddString(int32_t tableIndex)
     {
-        _talkBoxItems.emplace_back(NPCTalkBoxContent{
+        _talkBoxItems.emplace_back(NPCTalkBoxString{
             .tableIndex = tableIndex,
             });
     }
 
-    void NPCTalkBox::SetContentWithInt(int32_t tableIndex, int32_t value)
+    void NPCTalkBox::AddStringWithInt(int32_t tableIndex, int32_t value)
     {
-        _talkBoxItems.emplace_back(NPCTalkBoxContentWithInt{
+        _talkBoxItems.emplace_back(NPCTalkBoxStringWithInt{
             .tableIndex = tableIndex,
             .value = value,
             });
     }
 
-    void NPCTalkBox::SetContentWithIntItem(int32_t tableIndex, int32_t itemId)
+    void NPCTalkBox::AddStringWithIntItem(int32_t tableIndex, int32_t itemId)
     {
-        _talkBoxItems.emplace_back(NPCTalkBoxContentWithItem{
+        _talkBoxItems.emplace_back(NPCTalkBoxStringWithItem{
             .tableIndex = tableIndex,
             .itemId = itemId,
-            });
-    }
-
-    void NPCTalkBox::AddString(int32_t tableIndex)
-    {
-        _talkBoxItems.emplace_back(NPCTalkBoxString{
-            .tableIndex = tableIndex,
             });
     }
 

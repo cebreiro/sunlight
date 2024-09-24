@@ -12,9 +12,27 @@ namespace sunlight
     {
     }
 
-    void LuaSystem::Print(const std::string& str)
+    void LuaSystem::Debug(const std::string& str)
+    {
+        SUNLIGHT_LOG_DEBUG(_system.GetServiceLocator(),
+            fmt::format("[lua_script] {}", str));
+    }
+
+    void LuaSystem::Info(const std::string& str)
     {
         SUNLIGHT_LOG_INFO(_system.GetServiceLocator(),
+            fmt::format("[lua_script] {}", str));
+    }
+
+    void LuaSystem::Warn(const std::string& str)
+    {
+        SUNLIGHT_LOG_WARN(_system.GetServiceLocator(),
+            fmt::format("[lua_script] {}", str));
+    }
+
+    void LuaSystem::Error(const std::string& str)
+    {
+        SUNLIGHT_LOG_ERROR(_system.GetServiceLocator(),
             fmt::format("[lua_script] {}", str));
     }
 
@@ -27,7 +45,10 @@ namespace sunlight
     {
         luaState.new_usertype<LuaSystem>("System",
             sol::no_constructor,
-            "print", &LuaSystem::Print,
+            "debug", &LuaSystem::Debug,
+            "info", &LuaSystem::Info,
+            "warn", &LuaSystem::Warn,
+            "error", &LuaSystem::Error,
             "getTimePoint", &LuaSystem::GetTimePoint
         );
     }

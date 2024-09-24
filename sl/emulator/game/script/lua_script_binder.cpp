@@ -19,21 +19,20 @@ namespace sunlight
 
         luaState.new_usertype<NPCTalkBox>("NPCTalkBox",
             sol::constructors<NPCTalkBox(int32_t, int32_t)>(),
-            "setContent", &NPCTalkBox::SetContent,
-            "setContentWithInt", &NPCTalkBox::SetContentWithInt,
-            "setContentWithItem", &NPCTalkBox::SetContentWithIntItem,
+            "addStringWithInt", &NPCTalkBox::AddStringWithInt,
+            "addStringWithItem", &NPCTalkBox::AddStringWithIntItem,
             "addString", &NPCTalkBox::AddString,
             "addMenu", &NPCTalkBox::AddMenu
         );
 
         luaState.new_usertype<Quest>("Quest",
             sol::constructors<Quest(int32_t)>(),
+            "isExpired", &Quest::IsExpired,
             "hasFlag", &Quest::HasFlag,
-            "hasData", &Quest::HasData,
+            "hasTimeLimit", &Quest::HasTimeLimit,
             "getId", &Quest::GetId,
             "getState", &Quest::GetState,
             "getFlag", &Quest::GetFlag,
-            "getData", &Quest::GetData,
             "setFlag", &Quest::SetFlag
         );
 
@@ -41,7 +40,7 @@ namespace sunlight
             sol::constructors<QuestChange()>(),
             "setNewState", &QuestChange::SetNewState,
             "setFlag", &QuestChange::SetFlag,
-            "setData", &QuestChange::SetData
+            "configureTimeLimit", &QuestChange::ConfigureTimeLimit
         );
     }
 }
