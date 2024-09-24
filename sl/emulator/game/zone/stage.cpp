@@ -21,6 +21,7 @@
 #include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
+#include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
@@ -176,12 +177,15 @@ namespace sunlight
             {
                 // chat message
             }
-            break;
-            default:;
+            default:
+                SUNLIGHT_LOG_WARN(_serviceLocator,
+                    fmt::format("[{}] unhanlded zone message. player: {}, event_type: {}, buffer: {}",
+                        GetName(), player->GetCId(), eventType, reader->GetBuffer().ToString()));
             }
         }
         break;
-        default:;
+        default:
+            assert(false);
         }
 
         GameDebugger::SetInstance(nullptr);
@@ -268,6 +272,7 @@ namespace sunlight
         Add(std::make_shared<PlayerStateSystem>(_serviceLocator));
         Add(std::make_shared<PlayerAppearanceSystem>(_serviceLocator));
         Add(std::make_shared<GameRepositorySystem>(_serviceLocator));
+        Add(std::make_shared<PlayerQuestSystem>());
 
         const auto range = _systems | std::views::values;
 

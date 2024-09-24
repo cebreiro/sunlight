@@ -8,7 +8,7 @@
 #include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
-#include "sl/emulator/game/component/player_npc_script_component.h"
+#include "sl/emulator/game/component/player_quest_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/server/client/game_client.h"
@@ -140,6 +140,25 @@ namespace sunlight
         return result;
     }
 
+    auto CreateQuestComponent(const db::dto::Character& dto) -> UniquePtrNotNull<PlayerQuestComponent>
+    {
+        auto result = std::make_unique<PlayerQuestComponent>();
+
+        for (const db::dto::Character::Quest& dtoQuest : dto.quests)
+        {
+            std::optional<Quest> quest = Quest::CreateFrom(dtoQuest.id, dtoQuest.state, dtoQuest.flags, dtoQuest.data);
+            if (!quest.has_value())
+            {
+                throw std::runtime_error(fmt::format("invalid quest data. player: {}, quest_id: {}",
+                    dto.id, dtoQuest.id));
+            }
+
+            result->AddQuest(std::move(*quest));
+        }
+
+        return result;
+    }
+
     GamePlayer::GamePlayer(SharedPtrNotNull<GameClient> client, const db::dto::Character& dto,
         const GameDataProvideService& dataProvider, GameEntityIdPublisher& idPublisher)
         : GameEntity(idPublisher, TYPE)
@@ -158,6 +177,7 @@ namespace sunlight
         (void)AddComponent(std::make_unique<EntityMovementComponent>());
         (void)AddComponent(std::make_unique<EntityStateComponent>());
         (void)AddComponent(std::make_unique<PlayerNPCScriptComponent>());
+        (void)AddComponent(CreateQuestComponent(dto));
     }
 
     bool GamePlayer::HasDeferred() const
@@ -336,5 +356,15 @@ namespace sunlight
     auto GamePlayer::GetNPCScriptComponent() const -> const PlayerNPCScriptComponent&
     {
         return GetComponent<PlayerNPCScriptComponent>();
+    }
+
+    auto GamePlayer::GetQuestComponent() -> PlayerQuestComponent&
+    {
+        return GetComponent<PlayerQuestComponent>();
+    }
+
+    auto GamePlayer::GetQuestComponent() const -> const PlayerQuestComponent&
+    {
+        return GetComponent<PlayerQuestComponent>();
     }
 }

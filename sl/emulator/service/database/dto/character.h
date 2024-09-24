@@ -71,5 +71,14 @@ namespace sunlight::db::dto
             int8_t y = 0;
         };
         std::vector<Item> items;
+
+        struct Quest
+        {
+            int32_t id = 0;
+            int32_t state = 0;
+            std::string flags;
+            std::string data;
+        };
+        std::vector<Quest> quests;
     };
 }

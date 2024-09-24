@@ -34,7 +34,7 @@ namespace sunlight::db::sp
 
     void CharacterGet::SetOutput(const boost::mysql::results& result)
     {
-        if (result.size() < 5)
+        if (result.size() < 6)
         {
             return;
         }
@@ -44,6 +44,7 @@ namespace sunlight::db::sp
         const boost::mysql::resultset_view& characterJobSet = result.at(2);
         const boost::mysql::resultset_view& characterSkillSet = result.at(3);
         const boost::mysql::resultset_view& characterItemSet = result.at(4);
+        const boost::mysql::resultset_view& characterQuestSet = result.at(5);
 
         if (characterSet.rows().empty())
         {
@@ -103,6 +104,7 @@ namespace sunlight::db::sp
             character.lightning = static_cast<int8_t>(row.at(index++).as_int64());
         }
 
+        character.jobs.reserve(characterJobSet.rows().size());
         for (const boost::mysql::row_view& row : characterJobSet.rows())
         {
             size_t index = 0;
@@ -116,6 +118,7 @@ namespace sunlight::db::sp
             job.skillPoint = static_cast<int32_t>(row.at(index++).as_int64());
         }
 
+        character.skills.reserve(characterSkillSet.rows().size());
         for (const boost::mysql::row_view& row : characterSkillSet.rows())
         {
             size_t index = 0;
@@ -131,6 +134,7 @@ namespace sunlight::db::sp
             skill.y = static_cast<int8_t>(row.at(index++).as_int64());
         }
 
+        character.items.reserve(characterItemSet.rows().size());
         for (const boost::mysql::row_view& row : characterItemSet.rows())
         {
             size_t index = 0;
@@ -144,6 +148,19 @@ namespace sunlight::db::sp
             item.page = static_cast<int8_t>(row.at(index++).as_int64());
             item.x = static_cast<int8_t>(row.at(index++).as_int64());
             item.y = static_cast<int8_t>(row.at(index++).as_int64());
+        }
+
+        character.quests.reserve(characterQuestSet.rows().size());
+        for (const boost::mysql::row_view& row : characterQuestSet.rows())
+        {
+            size_t index = 0;
+
+            dto::Character::Quest& quest = character.quests.emplace_back();
+
+            quest.id = static_cast<int32_t>(row.at(index++).as_int64());
+            quest.state = static_cast<int32_t>(row.at(index++).as_int64());
+            quest.flags = row.at(index++).as_string();
+            quest.data = row.at(index++).as_string();
         }
     }
 }

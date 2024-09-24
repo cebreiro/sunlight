@@ -44,6 +44,7 @@ namespace sunlight
         auto GetCharacter(int64_t cid) -> Future<std::optional<db::dto::Character>>;
 
         auto AddNewJob(int64_t cid, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills) -> Future<bool>;
+        auto AddQuest(int64_t cid, int32_t id, int32_t state, std::string flags, std::string data) -> Future<bool>;
 
         auto SetCharacterExp(int64_t cid, int32_t exp) -> Future<bool>;
         auto SetCharacterLevel(int64_t cid, int32_t level, int32_t statPoint) -> Future<bool>;
@@ -52,6 +53,7 @@ namespace sunlight
         auto SetSkillLevel(int64_t cid, int32_t job, int32_t skillPoint, int32_t skillId, int32_t skillLevel) -> Future<bool>;
 
         auto SetStat(int64_t cid, int32_t statPoint, int32_t str, int32_t dex, int32_t accr, int32_t health, int32_t intell, int32_t wis, int32_t will) -> Future<bool>;
+        auto SetQuest(int64_t cid, int32_t id, int32_t state, std::string flags, std::string data) -> Future<bool>;
 
         auto StartTransaction(db::ItemTransaction transaction) -> Future<bool>;
 

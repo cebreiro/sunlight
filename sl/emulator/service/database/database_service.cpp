@@ -205,6 +205,27 @@ namespace sunlight
         co_return true;
     }
 
+    auto DatabaseService::AddQuest(int64_t cid, int32_t id, int32_t state, std::string flags, std::string data) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterQuestAdd characterQuestAdd(conn, cid, id, state, std::move(flags), std::move(data));
+
+        if (const DatabaseError error = co_await characterQuestAdd.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
     auto DatabaseService::SetCharacterExp(int64_t cid, int32_t exp) -> Future<bool>
     {
         [[maybe_unused]]
@@ -368,5 +389,26 @@ namespace sunlight
                 fmt::format("[{}] {} query error. error: {}",
                     GetName(), function, error.What()));
         }
+    }
+
+    auto DatabaseService::SetQuest(int64_t cid, int32_t id, int32_t state, std::string flags, std::string data) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterQuestSet characterQuestSet(conn, cid, id, state, std::move(flags), std::move(data));
+
+        if (const DatabaseError error = co_await characterQuestSet.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
     }
 }

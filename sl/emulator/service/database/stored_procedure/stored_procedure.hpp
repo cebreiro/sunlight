@@ -13,4 +13,6 @@
 #include "sl/emulator/service/database/stored_procedure/impl/character_set_stat.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_set_skill_level.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_add_new_job.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_quest_add.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_quest_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/item_transaction_execute.h"

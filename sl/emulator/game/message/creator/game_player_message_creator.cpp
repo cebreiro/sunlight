@@ -1,6 +1,8 @@
 #include "game_player_message_creator.h"
 
 #include "sl/emulator/game/component/player_appearance_component.h"
+#include "sl/emulator/game/component/player_quest_component.h"
+#include "sl/emulator/game/contants/quest/quest.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -292,6 +294,158 @@ namespace sunlight
         writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_MSG);
         writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_SKIN_COLOR);
         writer.Write<int32_t>(newColor);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateQuestAllState(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::QUESTARCHIVEMSG);
+        writer.Write(ZoneMessageType::QUESTARCHIVE_CONTAINALL);
+
+        {
+            const auto& quests = player.GetQuestComponent().GetQuests();
+
+            PacketWriter objectWriter;
+            objectWriter.Write<int32_t>(static_cast<int32_t>(std::ssize(quests)));
+
+            for (const Quest& quest : quests | std::views::values)
+            {
+                objectWriter.Write<int32_t>(quest.GetId());
+                objectWriter.Write<int32_t>(quest.GetState());
+
+                const auto& flags = quest.GetFlags();
+                if (flags.empty())
+                {
+                    continue;
+                }
+
+                const int32_t lastIndex = flags.rbegin()->first;
+                const int32_t count = lastIndex + 1;
+
+                objectWriter.Write<int32_t>(count);
+
+                for (int32_t i = 0; i < count; ++i)
+                {
+                    const auto iter = flags.find(i);
+                    if (iter == flags.end())
+                    {
+                        objectWriter.Write<int32_t>(-1);
+                    }
+                    else
+                    {
+                        objectWriter.Write<int32_t>(iter->second);
+                    }
+                }
+
+                //for (const auto [index, flag] : flags)
+                //{
+                //    objectWriter.Write<int32_t>(flag);
+                //    objectWriter.Write<int32_t>(index);
+                //}
+                //// 20 : 0 ok
+                //// 0  : 1
+                //// 0  : 2
+                //// 3  : 3 ok
+                //// 0  : 4 ok
+                //// 4  : 5
+            }
+
+            writer.Write<int32_t>(static_cast<int32_t>(objectWriter.GetWriteSize()));
+            writer.WriteObject(objectWriter);
+        }
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateQuestAdd(const GamePlayer& player, const Quest& quest) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::QUESTARCHIVEMSG);
+        writer.Write(ZoneMessageType::QUESTARCHIVE_NEWQUEST);
+
+        {
+            PacketWriter objectWriter;
+            objectWriter.Write<int32_t>(quest.GetId());
+            objectWriter.Write<int32_t>(quest.GetState());
+
+            /*const auto& flags = quest.GetFlags();
+
+            objectWriter.Write<int32_t>(static_cast<int32_t>(std::ssize(flags) * 2));
+
+            for (const auto [index, flag] : flags)
+            {
+                objectWriter.Write<int32_t>(flag);
+                objectWriter.Write<int32_t>(index);
+            }*/
+
+            const auto& flags = quest.GetFlags();
+            if (!flags.empty())
+            {
+                const int32_t lastIndex = flags.rbegin()->first;
+                const int32_t count = lastIndex + 1;
+
+                objectWriter.Write<int32_t>(count);
+
+                for (int32_t i = 0; i < count; ++i)
+                {
+                    const auto iter = flags.find(i);
+                    if (iter == flags.end())
+                    {
+                        objectWriter.Write<int32_t>(-1);
+                    }
+                    else
+                    {
+                        objectWriter.Write<int32_t>(iter->second);
+                    }
+                }
+            }
+
+            writer.Write<int32_t>(static_cast<int32_t>(objectWriter.GetWriteSize()));
+            writer.WriteObject(objectWriter);
+        }
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateQuestStateChange(const GamePlayer& player, int32_t questId, int32_t oldState, int32_t newState) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::QUESTARCHIVEMSG);
+        writer.Write(ZoneMessageType::QUESTARCHIVE_SETSTATE);
+        writer.Write<int32_t>(questId);
+        writer.Write<int32_t>(oldState);
+        writer.Write<int32_t>(newState);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateQuestFlagSet(const GamePlayer& player, int32_t questId, int32_t state, int32_t index, int32_t flag) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::QUESTARCHIVEMSG);
+        writer.Write(ZoneMessageType::QUESTARCHIVE_SETFLAGDATA);
+        writer.Write<int32_t>(questId);
+        writer.Write<int32_t>(state);
+        writer.Write<int32_t>(index);
+        writer.Write<int32_t>(flag);
 
         return writer.Flush();
     }

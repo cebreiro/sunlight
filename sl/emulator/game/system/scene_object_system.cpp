@@ -9,6 +9,7 @@
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/player_appearance_system.h"
+#include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
@@ -33,6 +34,7 @@ namespace sunlight
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerAppearanceSystem>());
+        Add(stage.Get<PlayerQuestSystem>());
     }
 
     bool SceneObjectSystem::Subscribe(Stage& stage)
@@ -73,6 +75,7 @@ namespace sunlight
         _entities[player->GetType()][player->GetId()] = player;
 
         Get<PlayerStatSystem>().OnInitialize(*player);
+        Get<PlayerQuestSystem>().OnInitialize(*player);
         Get<PlayerAppearanceSystem>().RefreshWeaponMotionCategory(*player);
 
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
@@ -252,6 +255,7 @@ namespace sunlight
     {
         message.player.Send(ZonePacketS2CCreator::CreateObjectVisibleRange(1000.f));
         message.player.Send(GamePlayerMessageCreator::CreateAllState(message.player));
+        message.player.Send(GamePlayerMessageCreator::CreateQuestAllState(message.player));
     }
 
     void SceneObjectSystem::HandlePlayerActivate(const ZoneMessage& message)

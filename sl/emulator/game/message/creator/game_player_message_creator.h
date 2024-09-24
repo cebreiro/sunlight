@@ -4,6 +4,8 @@
 
 namespace sunlight
 {
+    class Quest;
+
     class GamePlayer;
     class GameItem;
 }
@@ -34,5 +36,10 @@ namespace sunlight
         static auto CreatePlayerEquipmentChange(const GamePlayer& player, EquipmentPosition position, int32_t modelId, int32_t modelColor) -> Buffer;
         static auto CreatePlayerHairColorChange(const GamePlayer& player, int32_t newColor) -> Buffer;
         static auto CreatePlayerSkinColorChange(const GamePlayer& player, int32_t newColor) -> Buffer;
+
+        static auto CreateQuestAllState(const GamePlayer& player) -> Buffer;
+        static auto CreateQuestAdd(const GamePlayer& player, const Quest& quest) -> Buffer;
+        static auto CreateQuestStateChange(const GamePlayer& player, int32_t questId, int32_t oldState, int32_t newState) -> Buffer;
+        static auto CreateQuestFlagSet(const GamePlayer& player, int32_t questId, int32_t state, int32_t index, int32_t flag) -> Buffer;
     };
 }
