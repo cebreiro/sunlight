@@ -276,7 +276,7 @@ namespace sunlight
         writer.Write<int32_t>(0);
         writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
         writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_MSG);
-        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_HAIR_COLOR);;
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_HAIR_COLOR);
         writer.Write<int32_t>(newColor);
 
         return writer.Flush();
@@ -290,7 +290,7 @@ namespace sunlight
         writer.Write<int32_t>(0);
         writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
         writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_MSG);
-        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_SKIN_COLOR);;
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_SKIN_COLOR);
         writer.Write<int32_t>(newColor);
 
         return writer.Flush();
