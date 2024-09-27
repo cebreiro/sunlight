@@ -27,13 +27,17 @@ namespace sunlight
 
         auto FindEmpty(int32_t width, int32_t height) const -> std::optional<std::pair<int32_t, int32_t>>;
 
+        auto Get(int32_t x, int32_t y) -> GameItem*;
+        auto Get(int32_t x, int32_t y) const -> const GameItem*;
         void Get(boost::unordered::unordered_flat_set<PtrNotNull<GameItem>>& result, const ItemSlotRange& range);
+
         void Set(GameItem* item, const ItemSlotRange& range);
 
         void Clear();
 
         auto GetWidth() const -> int32_t;
         auto GetHeight() const -> int32_t;
+        auto GetLoadFactor() const -> double;
 
         auto GetDebugString() const -> std::string;
 
@@ -42,5 +46,7 @@ namespace sunlight
         int32_t _height = 0;
 
         std::vector<std::vector<GameItem*>> _slots;
+
+        int32_t _used = 0;
     };
 }

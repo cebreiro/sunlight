@@ -1,10 +1,13 @@
 #pragma once
+#include "sl/emulator/game/contants/npc/npc_item_shop_result.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
+#include "sl/emulator/game/entity/game_entity_type.h"
 
 namespace sunlight
 {
     class GamePlayer;
     class GameNPC;
+    class GameItem;
 }
 
 namespace sunlight
@@ -26,5 +29,12 @@ namespace sunlight
         static auto CreateTalkBoxAddString(const GameNPC& npc, int32_t tableIndex) -> Buffer;
         static auto CreateTalkBoxAddRuntimeIntString(const GameNPC& npc, int32_t tableIndex, int32_t runtimeValue) -> Buffer;
         static auto CreateTalkBoxAddItemName(const GameNPC& npc, int32_t tableIndex, int32_t itemId) -> Buffer;
+
+        static auto CreateShopOpen(const GameNPC& npc) -> Buffer;
+        static auto CreateItemSynchroStart(const GameNPC& npc) -> Buffer;
+
+        static auto CreateNPCItemRemove(const GameNPC& npc, game_entity_id_type targetId, GameEntityType targetType) -> Buffer;
+        static auto CreateNPCItemDecrease(const GameNPC& npc, const GameItem& item, int32_t newQuantity) -> Buffer;
+        static auto CreateNPCItemArchiveResult(const GameNPC& npc, NPCItemShopResult result) -> Buffer;
     };
 }

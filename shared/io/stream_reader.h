@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cassert>
 #include <concepts>
+#include <span>
 #include <string>
 #include <iterator>
 #include <stdexcept>
@@ -41,6 +42,14 @@ namespace sunlight
 
         template <std::floating_point U>
         auto Read() -> U;
+
+        template <std::integral U>
+        auto Peek() const -> U;
+
+        template <std::floating_point U>
+        auto Peek() const -> U;
+
+        void Peek(std::span<char> outBuffer) const;
 
         auto ReadString() -> std::string;
         auto ReadString(int64_t size) -> std::string;
@@ -181,6 +190,59 @@ namespace sunlight
         assert(_remainSize == std::distance(_iter, _end));
 
         return *reinterpret_cast<U*>(buffer.data());
+    }
+
+    template <stream_readable_concept T>
+    template <std::integral U>
+    auto StreamReader<T>::Peek() const -> U
+    {
+        constexpr int64_t size = sizeof(U);
+
+        if (!CanRead(size))
+        {
+            throw std::runtime_error("fail to read stream");
+        }
+
+        std::remove_const_t<U> result = 0;
+        auto iter = _iter;
+
+        for (int64_t i = 0; i < size; ++i)
+        {
+            result += (static_cast<U>(*iter) & 0xFF) << i * 8;
+            ++iter;
+        }
+
+        return result;
+    }
+
+    template <stream_readable_concept T>
+    template <std::floating_point U>
+    auto StreamReader<T>::Peek() const -> U
+    {
+        constexpr int64_t size = sizeof(U);
+
+        if (!CanRead(size))
+        {
+            throw std::runtime_error("fail to read stream");
+        }
+
+        auto iter = _iter;
+
+        std::array<char, size> buffer;
+        std::copy_n(iter, size, buffer.begin());
+
+        return *reinterpret_cast<U*>(buffer.data());
+    }
+
+    template <stream_readable_concept T>
+    void StreamReader<T>::Peek(std::span<char> outBuffer) const
+    {
+        if (!CanRead(std::ssize(outBuffer)))
+        {
+            throw std::runtime_error("fail to read stream");
+        }
+
+        std::copy_n(_iter, std::ssize(outBuffer), outBuffer.begin());
     }
 
     template <stream_readable_concept T>

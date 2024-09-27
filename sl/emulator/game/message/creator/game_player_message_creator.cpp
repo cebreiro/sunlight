@@ -342,18 +342,6 @@ namespace sunlight
                         objectWriter.Write<int32_t>(iter->second);
                     }
                 }
-
-                //for (const auto [index, flag] : flags)
-                //{
-                //    objectWriter.Write<int32_t>(flag);
-                //    objectWriter.Write<int32_t>(index);
-                //}
-                //// 20 : 0 ok
-                //// 0  : 1
-                //// 0  : 2
-                //// 3  : 3 ok
-                //// 0  : 4 ok
-                //// 4  : 5
             }
 
             writer.Write<int32_t>(static_cast<int32_t>(objectWriter.GetWriteSize()));
@@ -377,16 +365,6 @@ namespace sunlight
             PacketWriter objectWriter;
             objectWriter.Write<int32_t>(quest.GetId());
             objectWriter.Write<int32_t>(quest.GetState());
-
-            /*const auto& flags = quest.GetFlags();
-
-            objectWriter.Write<int32_t>(static_cast<int32_t>(std::ssize(flags) * 2));
-
-            for (const auto [index, flag] : flags)
-            {
-                objectWriter.Write<int32_t>(flag);
-                objectWriter.Write<int32_t>(index);
-            }*/
 
             const auto& flags = quest.GetFlags();
             if (!flags.empty())

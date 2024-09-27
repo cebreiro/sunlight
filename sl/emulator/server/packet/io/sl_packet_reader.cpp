@@ -12,6 +12,11 @@ namespace sunlight
     {
     }
 
+    void SlPacketReader::Skip()
+    {
+        ++_index;
+    }
+
     auto SlPacketReader::ReadInt64() -> std::pair<int32_t, int32_t>
     {
         BufferReader& reader = _readers.at(_index);

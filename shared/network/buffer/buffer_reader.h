@@ -10,6 +10,7 @@ namespace sunlight
     {
     public:
         using StreamReader::Read;
+        using StreamReader::Peek;
 
     public:
         BufferReader() = default;

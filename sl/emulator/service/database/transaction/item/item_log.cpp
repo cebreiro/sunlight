@@ -50,6 +50,16 @@ namespace sunlight::db
         };
     }
 
+    void to_json(nlohmann::json& j, const GoldChange& log)
+    {
+        j = nlohmann::json
+        {
+            { "type", log.type },
+            { "cid", log.cid },
+            { "gold", log.gold },
+        };
+    }
+
     void to_json(nlohmann::json& j, const ItemLog& log)
     {
         std::visit([&]<typename T>(const T& item)
@@ -67,6 +77,10 @@ namespace sunlight::db
                     to_json(j, item);
                 }
                 else if constexpr (std::is_same_v<T, ItemLogRemove>)
+                {
+                    to_json(j, item);
+                }
+                else if constexpr (std::is_same_v<T, GoldChange>)
                 {
                     to_json(j, item);
                 }

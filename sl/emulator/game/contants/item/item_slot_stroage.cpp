@@ -80,6 +80,30 @@ namespace sunlight
         return std::nullopt;
     }
 
+    auto ItemSlotStorage::Get(int32_t x, int32_t y) -> GameItem*
+    {
+        assert(Contains(ItemSlotRange{
+            .x = x,
+            .y = y,
+            .xSize = 1,
+            .ySize = 1
+            }));
+
+        return _slots[y][x];
+    }
+
+    auto ItemSlotStorage::Get(int32_t x, int32_t y) const -> const GameItem*
+    {
+        assert(Contains(ItemSlotRange{
+            .x = x,
+            .y = y,
+            .xSize = 1,
+            .ySize = 1
+            }));
+
+        return _slots[y][x];
+    }
+
     void ItemSlotStorage::Get(boost::unordered::unordered_flat_set<PtrNotNull<GameItem>>& result, const ItemSlotRange& range)
     {
         assert(Contains(range));
@@ -108,9 +132,25 @@ namespace sunlight
 
             for (int32_t x = range.x; x < range.x + range.xSize; ++x)
             {
+                GameItem* prev = container[x];
+
                 container[x] = item;
+
+                if (prev != item)
+                {
+                    if (item)
+                    {
+                        ++_used;
+                    }
+                    else
+                    {
+                        --_used;
+                    }
+                }
             }
         }
+
+        assert(_used >= 0 && _used <= _width * _height);
     }
 
     void ItemSlotStorage::Clear()
@@ -129,6 +169,11 @@ namespace sunlight
     auto ItemSlotStorage::GetHeight() const -> int32_t
     {
         return _height;
+    }
+
+    auto ItemSlotStorage::GetLoadFactor() const -> double
+    {
+        return (double)_used / (double)(_width * _height);
     }
 
     auto ItemSlotStorage::GetDebugString() const -> std::string

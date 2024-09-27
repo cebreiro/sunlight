@@ -3,6 +3,7 @@
 #include <boost/container/static_vector.hpp>
 
 #include "sl/data/map/map_stage.h"
+#include "sl/data/map/map_stage_room.h"
 #include "sl/data/map/map_stage_terrain.h"
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/scene_object_component.h"
@@ -25,79 +26,88 @@ namespace sunlight
         {
             _width = stageData.terrain->width * static_cast<int32_t>(GameConstant::STAGE_TERRAIN_BLOCK_SIZE);
             _height = stageData.terrain->height * static_cast<int32_t>(GameConstant::STAGE_TERRAIN_BLOCK_SIZE);
-
-            _xSize = (_width / cell_size) + 1;
-            _ySize = (_height / cell_size) + 1;
-
-            const int32_t size = _xSize * _ySize;
-
-            _cells.reserve(size);
-            _sectors.reserve(size);
-
-            [[maybe_unused]] const size_t cellsCapacity = _cells.capacity();
-            [[maybe_unused]] const size_t sectorsCapacity = _sectors.capacity();
-
-            for (int32_t y = 0; y < _ySize; ++y)
-            {
-                for (int32_t x = 0; x < _xSize; ++x)
-                {
-                    _sectors.emplace_back(std::make_unique<GameSpatialSector>(game_spatial_sector_id_type(x, y)));
-                }
-            }
-
-            auto getAdjacentSectors = [this](int32_t x, int32_t y) -> boost::container::static_vector<PtrNotNull<GameSpatialSector>, 9>
-                {
-                    boost::container::static_vector<PtrNotNull<GameSpatialSector>, 9> result;
-
-                    for (int32_t j = y - 1; j <= y + 1; ++j)
-                    {
-                        if (j < 0 || j >= _ySize)
-                        {
-                            continue;
-                        }
-
-                        for (int32_t i = x - 1; i <= x + 1; ++i)
-                        {
-                            if (i < 0 || i >= _xSize)
-                            {
-                                continue;
-                            }
-
-                            GameSpatialSector& sector = GetSector(i, j);
-
-                            result.push_back(&sector);
-                        }
-                    }
-
-                    return result;
-                };
-
-            for (int32_t y = 0; y < _ySize; ++y)
-            {
-                const double minY = y * cell_size;
-                const double maxY = minY + cell_size;
-
-                for (int32_t x = 0; x < _xSize; ++x)
-                {
-                    const double minX = x * cell_size;
-                    const double maxX = minX + cell_size;
-
-                    const GameSpatialMBR mbr(Eigen::Vector2d(minX, minY), Eigen::Vector2d(maxX, maxY));
-
-                    GameSpatialCell& cell = *_cells.emplace_back(std::make_unique<GameSpatialCell>(game_spatial_cell_id_type(x, y), mbr));
-
-                    for (PtrNotNull<GameSpatialSector> sector : getAdjacentSectors(x, y))
-                    {
-                        sector->AddCell(&cell);
-                    }
-                }
-            }
-
-            assert(cellsCapacity == _cells.capacity());
-            assert(cellsCapacity == _cells.size());
-            assert(sectorsCapacity == _sectors.capacity());
-            assert(sectorsCapacity == _sectors.size());
         }
+
+        if (stageData.room)
+        {
+            _width = stageData.room->width * static_cast<int32_t>(GameConstant::STAGE_TERRAIN_BLOCK_SIZE);
+            _height = stageData.room->height * static_cast<int32_t>(GameConstant::STAGE_TERRAIN_BLOCK_SIZE);
+        }
+
+        assert(_width > 0);
+        assert(_height > 0);
+
+        _xSize = (_width / cell_size) + 1;
+        _ySize = (_height / cell_size) + 1;
+
+        const int32_t size = _xSize * _ySize;
+
+        _cells.reserve(size);
+        _sectors.reserve(size);
+
+        [[maybe_unused]] const size_t cellsCapacity = _cells.capacity();
+        [[maybe_unused]] const size_t sectorsCapacity = _sectors.capacity();
+
+        for (int32_t y = 0; y < _ySize; ++y)
+        {
+            for (int32_t x = 0; x < _xSize; ++x)
+            {
+                _sectors.emplace_back(std::make_unique<GameSpatialSector>(game_spatial_sector_id_type(x, y)));
+            }
+        }
+
+        auto getAdjacentSectors = [this](int32_t x, int32_t y) -> boost::container::static_vector<PtrNotNull<GameSpatialSector>, 9>
+        {
+            boost::container::static_vector<PtrNotNull<GameSpatialSector>, 9> result;
+
+            for (int32_t j = y - 1; j <= y + 1; ++j)
+            {
+                if (j < 0 || j >= _ySize)
+                {
+                    continue;
+                }
+
+                for (int32_t i = x - 1; i <= x + 1; ++i)
+                {
+                    if (i < 0 || i >= _xSize)
+                    {
+                        continue;
+                    }
+
+                    GameSpatialSector& sector = GetSector(i, j);
+
+                    result.push_back(&sector);
+                }
+            }
+
+            return result;
+        };
+
+        for (int32_t y = 0; y < _ySize; ++y)
+        {
+            const double minY = y * cell_size;
+            const double maxY = minY + cell_size;
+
+            for (int32_t x = 0; x < _xSize; ++x)
+            {
+                const double minX = x * cell_size;
+                const double maxX = minX + cell_size;
+
+                const GameSpatialMBR mbr(Eigen::Vector2d(minX, minY), Eigen::Vector2d(maxX, maxY));
+
+                GameSpatialCell& cell = *_cells.emplace_back(std::make_unique<GameSpatialCell>(game_spatial_cell_id_type(x, y), mbr));
+
+                for (PtrNotNull<GameSpatialSector> sector : getAdjacentSectors(x, y))
+                {
+                    sector->AddCell(&cell);
+                }
+            }
+        }
+
+        assert(cellsCapacity == _cells.capacity());
+        assert(cellsCapacity == _cells.size());
+        assert(sectorsCapacity == _sectors.capacity());
+        assert(sectorsCapacity == _sectors.size());
     }
 
     EntityViewRangeSystem::~EntityViewRangeSystem()

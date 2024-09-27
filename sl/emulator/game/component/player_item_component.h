@@ -40,6 +40,10 @@ namespace sunlight
         bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
 
     public:
+        void AddOrSubGold(int32_t value);
+        void SetGold(int32_t value);
+
+    public:
         bool AddInventoryItem(SharedPtrNotNull<GameItem> item, const InventoryPosition* hint = nullptr);
         bool AddQuickSlotItem(SharedPtrNotNull<GameItem> item, const QuickSlotPosition* hint = nullptr);
 
@@ -71,7 +75,7 @@ namespace sunlight
 
         bool AddNewPickedItem(SharedPtrNotNull<GameItem> item);
         bool RemoveItem(game_entity_id_type id);
-        auto ReleaseItem(game_entity_id_type id) -> SharedPtrNotNull<GameItem>;
+        auto ReleaseItem(game_entity_id_type id) -> std::shared_ptr<GameItem>;
 
     public:
         auto FindItem(game_entity_id_type id) const -> const GameItem*;
@@ -103,6 +107,7 @@ namespace sunlight
         void AddItemUpdateQuantityLog(const GameItem& item);
         void AddItemAddLog(const GameItem& item);
         void AddItemRemoveLog(const GameItem& item);
+        void AddGoldChangeLog(int32_t newGold);
 
     private:
         int64_t _cid = 0;

@@ -5,27 +5,31 @@
 #include "sl/data/map/map_stage_room.h"
 #include "sl/data/map/map_stage_terrain.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/component/npc_item_shop_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
-#include "sl/emulator/game/message/zone_message_router.h"
+#include "sl/emulator/game/message/zone_message_hooker.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/message/zone_request.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_appearance_system.h"
-#include "sl/emulator/game/system/player_state_system.h"
-#include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
+#include "sl/emulator/game/system/player_state_system.h"
+#include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
-#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/time/game_time_service.h"
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/shop/npc_shop_data_provider.h"
 
 namespace sunlight
 {
@@ -34,10 +38,8 @@ namespace sunlight
         , _zoneId(zoneId)
         , _stageData(stageData)
         , _name(fmt::format("stage_{}_{}", _zoneId, _stageData.id))
-        , _zoneMessageRouter(std::make_unique<ZoneMessageRouter>(*this))
+        , _zoneMessageHooker(std::make_unique<ZoneMessageHooker>(*this))
     {
-        _zoneMessageRouter->Subscribe();
-
         InitializeSystem();
 
         if (stageData.terrain)
@@ -273,6 +275,7 @@ namespace sunlight
         Add(std::make_shared<PlayerAppearanceSystem>(_serviceLocator));
         Add(std::make_shared<GameRepositorySystem>(_serviceLocator));
         Add(std::make_shared<PlayerQuestSystem>());
+        Add(std::make_shared<NPCShopSystem>(_serviceLocator));
 
         const auto range = _systems | std::views::values;
 
@@ -299,6 +302,7 @@ namespace sunlight
 
     void Stage::InitializeNPC(const std::vector<MapProp>& props)
     {
+        const NPCShopDataProvider& npcShopDataProvider = _serviceLocator.Get<GameDataProvideService>().GetNPCShopDataProvider();
         GameEntityIdPublisher& entityIdPublisher = _serviceLocator.Get<GameEntityIdPublisher>();
 
         for (const MapProp& prop : props)
@@ -318,7 +322,17 @@ namespace sunlight
 
                 if (prop.unk2)
                 {
-                    // merchant
+                    if (const ItemShopData* itemShopData = npcShopDataProvider.FindItemShopData(prop.unk2); itemShopData)
+                    {
+                        npc->AddComponent(std::make_unique<NPCItemShopComponent>(*itemShopData));
+
+                        Get<NPCShopSystem>().InitializeItemShop(*npc);
+                    }
+
+                    if (const HairShopData* hairShopData = npcShopDataProvider.FindHairShopData(prop.unk2); hairShopData)
+                    {
+                        
+                    }
                 }
 
                 Get<SceneObjectSystem>().SpawnNPC(std::move(npc));
@@ -328,6 +342,7 @@ namespace sunlight
 
     void Stage::InitializeNPC(const std::vector<MapTerrainProp>& props)
     {
+        const NPCShopDataProvider& npcShopDataProvider = _serviceLocator.Get<GameDataProvideService>().GetNPCShopDataProvider();
         GameEntityIdPublisher& entityIdPublisher = _serviceLocator.Get<GameEntityIdPublisher>();
 
         for (const MapTerrainProp& prop : props)
@@ -345,9 +360,19 @@ namespace sunlight
                 auto npc = std::make_shared<GameNPC>(game_entity_id_type(prop.id), prop.pnx);
                 npc->AddComponent(std::move(sceneObjectComponent));
 
-                if (prop.unk2)
+                if (prop.unk6)
                 {
-                    // merchant
+                    if (const ItemShopData* itemShopData = npcShopDataProvider.FindItemShopData(prop.unk6); itemShopData)
+                    {
+                        npc->AddComponent(std::make_unique<NPCItemShopComponent>(*itemShopData));
+
+                        Get<NPCShopSystem>().InitializeItemShop(*npc);
+                    }
+
+                    if (const HairShopData* hairShopData = npcShopDataProvider.FindHairShopData(prop.unk6); hairShopData)
+                    {
+
+                    }
                 }
 
                 Get<SceneObjectSystem>().SpawnNPC(std::move(npc));
@@ -370,6 +395,11 @@ namespace sunlight
 
     bool Stage::Publish(const ZoneMessage& message)
     {
+        if (_zoneMessageHooker->ProcessEvent(message))
+        {
+            return true;
+        }
+
         const auto iter = _zoneMessageSubscribers.find(message.type);
         if (iter == _zoneMessageSubscribers.end())
         {

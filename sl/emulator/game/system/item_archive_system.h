@@ -2,6 +2,7 @@
 #include "sl/data/sox/item/equipment_type.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/item/item_remove_result.h"
+#include "sl/emulator/game/contants/npc/npc_item_shop_result.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/system/game_system.h"
 
@@ -13,6 +14,7 @@ namespace sunlight
     class GameEntityIdPool;
     class GameItem;
     class GamePlayer;
+    class GameNPC;
 }
 
 namespace sunlight
@@ -31,6 +33,9 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
+        void Purchase(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId, int32_t itemId, int32_t page, int32_t x, int32_t y, int32_t quantity);
+        void SellOwnItem(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId);
+
         bool AddItem(GamePlayer& player, int32_t itemId, int32_t quantity);
         bool AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item);
 

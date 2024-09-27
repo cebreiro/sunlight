@@ -19,6 +19,7 @@
 #include "sl/emulator/game/script/class/lua_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -36,6 +37,7 @@ namespace sunlight
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<ItemArchiveSystem>());
         Add(stage.Get<PlayerQuestSystem>());
+        Add(stage.Get<NPCShopSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)

@@ -21,6 +21,8 @@ namespace sunlight
         static constexpr int32_t INVENTORY_HEIGHT = 9;
         static constexpr int32_t MAX_INVENTORY_PAGE_SIZE = 5;
 
+        static constexpr int32_t MAX_NPC_ITEM_SHOP_PAGE_SIZE = 6;
+
         static constexpr int32_t QUICK_SLOT_WIDTH = 4;
         static constexpr int32_t QUICK_SLOT_HEIGHT = 2;
         static constexpr int32_t MAX_QUICK_SLOT_PAGE_SIZE = 10;

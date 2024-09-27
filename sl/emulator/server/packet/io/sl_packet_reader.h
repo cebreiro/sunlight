@@ -20,10 +20,15 @@ namespace sunlight
         auto Read() -> T;
 
         template <typename T> requires ((std::integral<T> || std::same_as<T, float>) && sizeof(T) <= 4)
-        auto Peek() -> T;
+        auto Peek() const -> T;
 
         template <typename T> requires std::is_enum_v<T>
         auto Read() -> T;
+
+        template <typename T> requires std::is_enum_v<T>
+        auto Peek() const -> T;
+
+        void Skip();
 
         auto ReadInt64() -> std::pair<int32_t, int32_t>;
         auto ReadUInt64() -> std::pair<uint32_t, uint32_t>;
@@ -58,14 +63,17 @@ namespace sunlight
     }
 
     template <typename T> requires ((std::integral<T> || std::same_as<T, float>) && sizeof(T) <= 4)
-    auto SlPacketReader::Peek() -> T
+    auto SlPacketReader::Peek() const -> T
     {
-        BufferReader reader = _readers.at(_index);
+        const BufferReader& reader = _readers.at(_index);
 
         constexpr uint8_t expected = detail::PacketValueTraits<T>::type_value;
-        ThrowIfInvalidRead(expected, reader.Read<uint8_t>());
+        ThrowIfInvalidRead(expected, reader.Peek<uint8_t>());
 
-        return reader.Read<T>();
+        std::array<char, sizeof(uint8_t) + sizeof(T)> buffer;
+        reader.Peek(buffer);
+
+        return *reinterpret_cast<const T*>(buffer.data() + 1);
     }
 
     template <typename T> requires std::is_enum_v<T>
@@ -81,5 +89,11 @@ namespace sunlight
         reader.Read<T>(result);
 
         return result;
+    }
+
+    template <typename T> requires std::is_enum_v<T>
+    auto SlPacketReader::Peek() const -> T
+    {
+        return static_cast<T>(Peek<std::underlying_type_t<T>>());
     }
 }

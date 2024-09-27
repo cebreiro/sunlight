@@ -208,6 +208,20 @@ namespace sunlight
         return false;
     }
 
+    void PlayerItemComponent::AddOrSubGold(int32_t value)
+    {
+        _gold += value;
+
+        AddGoldChangeLog(_gold);
+    }
+
+    void PlayerItemComponent::SetGold(int32_t value)
+    {
+        _gold = value;
+
+        AddGoldChangeLog(_gold);
+    }
+
     bool PlayerItemComponent::AddInventoryItem(SharedPtrNotNull<GameItem> item, const InventoryPosition* hint)
     {
         assert(item->GetUId().has_value());
@@ -1051,7 +1065,7 @@ namespace sunlight
         return true;
     }
 
-    auto PlayerItemComponent::ReleaseItem(game_entity_id_type id) -> SharedPtrNotNull<GameItem>
+    auto PlayerItemComponent::ReleaseItem(game_entity_id_type id) -> std::shared_ptr<GameItem>
     {
         const auto iter = _items.find(id);
         if (iter == _items.end())
@@ -1322,6 +1336,14 @@ namespace sunlight
     {
         _itemLogs.emplace_back(db::ItemLogRemove{
             .id = item.GetUId().value(),
+            });
+    }
+
+    void PlayerItemComponent::AddGoldChangeLog(int32_t newGold)
+    {
+        _itemLogs.emplace_back(db::GoldChange{
+            .cid = _cid,
+            .gold = newGold,
             });
     }
 }

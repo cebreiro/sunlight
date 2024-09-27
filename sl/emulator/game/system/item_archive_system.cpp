@@ -4,15 +4,18 @@
 
 #include "sl/emulator/game/component/item_ownership_component.h"
 #include "sl/emulator/game/component/item_position_component.h"
+#include "sl/emulator/game/component/npc_item_shop_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
+#include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
@@ -25,6 +28,7 @@
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
+#include "sl/emulator/service/gamedata/shop/item_shop_data.h"
 
 namespace sunlight
 {
@@ -60,6 +64,199 @@ namespace sunlight
     auto ItemArchiveSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<ItemArchiveSystem>();
+    }
+
+    void ItemArchiveSystem::Purchase(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId, int32_t itemId, int32_t page, int32_t x, int32_t y, int32_t quantity)
+    {
+        PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+
+        NPCItemShopResult result = NPCItemShopResult::JustFail;
+
+        do
+        {
+            if (playerItemComponent.GetPickedItem())
+            {
+                result = NPCItemShopResult::JustFail;
+
+                break;
+            }
+
+            NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
+
+            if (!itemShopComponent.Contains(page, x, y))
+            {
+                SUNLIGHT_LOG_WARN(_serviceLocator,
+                    fmt::format("[{}] client invalid request invalid buy item position. player: {}, pos: [{}, {}, {}]",
+                        GetName(), player.GetCId(), page, x, y));
+
+                result = NPCItemShopResult::JustFail;
+
+                break;
+            }
+
+            if (quantity <= 0)
+            {
+                SUNLIGHT_LOG_CRITICAL(_serviceLocator,
+                    fmt::format("[{}] client hack request. player: {}, quantity: {}",
+                        GetName(), player.GetCId(), quantity));
+
+                result = NPCItemShopResult::JustFail;
+
+                break;
+            }
+
+            GameItem* targetItem = itemShopComponent.FindItem(static_cast<int8_t>(page), x, y);
+            if (!targetItem)
+            {
+                result = NPCItemShopResult::AlreadySold;
+
+                break;
+            }
+
+            if (targetItem->GetId() != targetId || targetItem->GetData().GetId() != itemId || targetItem->GetQuantity() < quantity)
+            {
+                result = NPCItemShopResult::AlreadySold;
+
+                break;
+            }
+
+            const int32_t price = static_cast<int32_t>(std::round(
+                static_cast<double>(targetItem->GetData().GetPrice())
+                / static_cast<double>(targetItem->GetData().GetMaxOverlapCount())
+                * static_cast<double>(quantity)
+                * static_cast<double>(itemShopComponent.GetData().sellingFactor)));
+
+            if (playerItemComponent.GetGold() < price)
+            {
+                result = NPCItemShopResult::NotEnoughGold;
+
+                break;
+            }
+
+            if (targetItem->GetQuantity() == quantity)
+            {
+                itemShopComponent.Synchronize(NPCMessageCreator::CreateNPCItemRemove(npc,
+                    targetItem->GetId(), targetItem->GetType()));
+
+                SharedPtrNotNull<GameItem> targetItemShared = itemShopComponent.ReleaseItem(targetItem->GetId());
+                assert(targetItem == targetItemShared.get());
+
+                player.Send(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *targetItemShared));
+
+                if (!targetItemShared->HasUId())
+                {
+                    targetItemShared->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+                }
+
+                [[maybe_unused]]
+                const bool added = playerItemComponent.AddNewPickedItem(std::move(targetItemShared));
+                assert(added);
+            }
+            else
+            {
+                assert(targetItem->GetQuantity() > quantity);
+
+                const int32_t newQuantity = targetItem->GetQuantity() - quantity;
+
+                itemShopComponent.Synchronize(NPCMessageCreator::CreateNPCItemDecrease(npc,
+                    *targetItem, newQuantity));
+
+                targetItem->SetQuantity(newQuantity);
+
+                auto item = std::make_shared<GameItem>(_serviceLocator.Get<GameEntityIdPublisher>(), targetItem->GetData(), quantity);
+                item->AddComponent(std::make_unique<ItemPositionComponent>());
+
+                player.Send(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *item));
+
+                item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+                playerItemComponent.AddNewPickedItem(std::move(item));
+            }
+
+            result = NPCItemShopResult::Success;
+
+            player.Send(ItemArchiveMessageCreator::CreateGoldAddOrSub(player, -price));
+            playerItemComponent.AddOrSubGold(-price);
+            assert(playerItemComponent.GetGold() > 0);
+
+        } while (false);
+
+        if (result == NPCItemShopResult::Success)
+        {
+            SaveChanges(player);
+        }
+
+        player.Defer(NPCMessageCreator::CreateNPCItemArchiveResult(npc, result));
+        player.FlushDeferred();
+    }
+
+    void ItemArchiveSystem::SellOwnItem(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId)
+    {
+        NPCItemShopResult result = NPCItemShopResult::JustFail;
+
+        boost::scope::scope_exit exit([&]()
+            {
+                if (result == NPCItemShopResult::Success)
+                {
+                    SaveChanges(player);
+                }
+
+                player.Defer(NPCMessageCreator::CreateNPCItemArchiveResult(npc, result));
+                player.FlushDeferred();
+            });
+
+        PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+
+        const GameItem* pickedItem = playerItemComponent.GetPickedItem();
+        if (!pickedItem)
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] player has no picked item. player: {}",
+                    GetName(), player.GetCId()));
+
+            result = NPCItemShopResult::JustFail;
+
+            return;
+        }
+
+        if (pickedItem->GetId() != targetId)
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] player invalid sell item request. player: {}, target: {}, picked: {}",
+                    GetName(), player.GetCId(), targetId, pickedItem->GetId()));
+
+            result = NPCItemShopResult::JustFail;
+
+            return;
+        }
+
+        if (!pickedItem->GetData().IsAbleToSell())
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] player item sell request. item is not able to sell. player: {}, item: {}",
+                    GetName(), player.GetCId(), pickedItem->GetData().GetId()));
+
+            result = NPCItemShopResult::JustFail;
+
+            return;
+        }
+
+        result = NPCItemShopResult::Success;
+
+        [[maybe_unused]]
+        const std::shared_ptr<GameItem> released = playerItemComponent.ReleaseItem(pickedItem->GetId());
+        assert(released.get() == pickedItem);
+
+        player.Defer(ItemArchiveMessageCreator::CreateItemRemove(player, pickedItem->GetId(), pickedItem->GetType()));
+
+        const ItemShopData& shopData = npc.GetComponent<NPCItemShopComponent>().GetData();
+
+        const int32_t price = static_cast<int32_t>(std::round(static_cast<double>(pickedItem->GetData().GetPrice())
+            / static_cast<double>(pickedItem->GetData().GetMaxOverlapCount())
+            * static_cast<double>(pickedItem->GetQuantity())
+            * static_cast<double>(shopData.buyingFactor)));
+
+        playerItemComponent.AddOrSubGold(price);
+        player.Defer(ItemArchiveMessageCreator::CreateGoldAddOrSub(player, price));
     }
 
     bool ItemArchiveSystem::AddItem(GamePlayer& player, int32_t itemId, int32_t quantity)

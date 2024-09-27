@@ -2,9 +2,10 @@
 
 #include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
-#include "sl/emulator/game/entity/game_player.h"
-#include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
+#include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_npc.h"
+#include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/server/packet/zone_packet_s2c.h"
@@ -246,6 +247,20 @@ namespace sunlight
         writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
         writer.Write(ZoneMessageType::ITEMARCHIVE_REMOVEITEM);
         writer.WriteObject(GameEntityNetworkId(target, targetType).ToBuffer());
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateGoldAddOrSub(const GamePlayer& player, int32_t value) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ITEMARCHIVEMSG);
+        writer.Write(ZoneMessageType::ITEMARCHIVE_ADD_SUB_GOLD);
+        writer.Write<int32_t>(value);
 
         return writer.Flush();
     }

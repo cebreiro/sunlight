@@ -30,9 +30,10 @@ namespace sunlight
         static auto CreateItemDecrease(const GamePlayer& player, game_entity_id_type target, GameEntityType targetType, int32_t quantity) -> Buffer;
         static auto CreateItemRemove(const GamePlayer& player, game_entity_id_type target, GameEntityType targetType) -> Buffer;
 
+        static auto CreateGoldAddOrSub(const GamePlayer& player, int32_t value) -> Buffer;
         static auto CreateArchiveResult(const GamePlayer& player, bool result, ZoneMessageType archiveMessage) -> Buffer;
 
-    private:
+    public:
         using item_object_buffer_type = boost::container::static_vector<char, 23>;
 
         static auto CreateItemObject(const GameItem& item) -> boost::container::static_vector<char, 23>;

@@ -12,6 +12,7 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/script/class/lua_npc.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
 
@@ -53,6 +54,11 @@ namespace sunlight
         _system.DisposeNPCTalk(_player);
     }
 
+    void LuaPlayer::OpenShop(LuaNPC& npc)
+    {
+        _system.Get<NPCShopSystem>().OpenItemShop(_player, npc.GetImpl());
+    }
+
     void LuaPlayer::StartQuest(Quest quest)
     {
         _system.Get<PlayerQuestSystem>().StartQuest(_player, quest);
@@ -90,6 +96,7 @@ namespace sunlight
             "removeInventoryItem", &LuaPlayer::RemoveInventoryItem,
             "talk", &LuaPlayer::Talk,
             "disposeTalk", &LuaPlayer::DisposeTalk,
+            "openShop", &LuaPlayer::OpenShop,
             "startQuest", &LuaPlayer::StartQuest,
             "changeQuest", &LuaPlayer::ChangeQuest,
             "findQuest", &LuaPlayer::FindQuest,

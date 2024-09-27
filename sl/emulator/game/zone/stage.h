@@ -17,7 +17,7 @@ namespace sunlight
     class GameEntity;
     class GamePlayer;
     class GameItem;
-    class ZoneMessageRouter;
+    class ZoneMessageHooker;
 }
 
 namespace sunlight
@@ -72,7 +72,7 @@ namespace sunlight
         const MapStage& _stageData;
         std::string _name;
 
-        UniquePtrNotNull<ZoneMessageRouter> _zoneMessageRouter;
+        UniquePtrNotNull<ZoneMessageHooker> _zoneMessageHooker;
 
         std::unordered_map<game_system_id_type, SharedPtrNotNull<GameSystem>> _systems;
         std::vector<PtrNotNull<GameSystem>> _updateSystems;

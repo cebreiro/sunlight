@@ -1,0 +1,14 @@
+#pragma once
+
+namespace sunlight
+{
+    // client 0x454FE9
+    ENUM_CLASS(NPCItemShopResult, int32_t,
+        (Success, 0)
+        (RemovePickedItem, 1)
+        (NotEnoughGold, 2)
+        (NotEnoughInventory, 3)
+        (AlreadySold, 4)
+        (JustFail, 11)
+    )
+}

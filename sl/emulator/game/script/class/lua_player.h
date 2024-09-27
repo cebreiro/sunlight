@@ -31,6 +31,7 @@ namespace sunlight
 
         void Talk(LuaNPC& npc, const NPCTalkBox& talkBox);
         void DisposeTalk();
+        void OpenShop(LuaNPC& npc);
 
         void StartQuest(Quest quest);
         void ChangeQuest(int32_t questId, const QuestChange& change);

@@ -8,6 +8,7 @@ namespace sunlight::db
         (UpdateQuantity, 2)
         (Add, 3)
         (Remove, 4)
+        (GoldChange, 5)
     )
 
     struct ItemLogUpdatePosition
@@ -58,8 +59,18 @@ namespace sunlight::db
         friend void to_json(nlohmann::json& j, const ItemLogRemove& log);
     };
 
+    struct GoldChange
+    {
+        static constexpr auto type = ItemLogType::GoldChange;
+
+        int64_t cid = 0;
+        int32_t gold = 0;
+
+        friend void to_json(nlohmann::json& j, const GoldChange& log);
+    };
+
     using ItemLog = std::variant<
-        ItemLogUpdatePosition, ItemLogUpdateQuantity, ItemLogAdd, ItemLogRemove>;
+        ItemLogUpdatePosition, ItemLogUpdateQuantity, ItemLogAdd, ItemLogRemove, GoldChange>;
 
     void to_json(nlohmann::json& j, const ItemLog& log);
 }
