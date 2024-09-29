@@ -2,6 +2,7 @@
 
 #include <sol/state.hpp>
 
+#include "sl/emulator/game/contants/event_script/event_script.h"
 #include "sl/emulator/game/contants/npc/npc_talk_box.h"
 #include "sl/emulator/game/contants/quest/quest_change.h"
 #include "sl/emulator/game/component/player_item_component.h"
@@ -43,6 +44,11 @@ namespace sunlight
     bool LuaPlayer::RemoveInventoryItem(int32_t itemId, int32_t quantity)
     {
         return _system.Get<ItemArchiveSystem>().RemoveInventoryItem(_player, itemId, quantity);
+    }
+
+    void LuaPlayer::Show(const EventScript& eventScript)
+    {
+        _system.ShowEventScript(_player, eventScript);
     }
 
     void LuaPlayer::Talk(LuaNPC& npc, const NPCTalkBox& talkBox)
@@ -110,6 +116,7 @@ namespace sunlight
             "hasInventoryItem", &LuaPlayer::HasInventoryItem,
             "addItem", &LuaPlayer::AddItem,
             "removeInventoryItem", &LuaPlayer::RemoveInventoryItem,
+            "show", &LuaPlayer::Show,
             "talk", &LuaPlayer::Talk,
             "disposeTalk", &LuaPlayer::DisposeTalk,
             "openShop", &LuaPlayer::OpenShop,

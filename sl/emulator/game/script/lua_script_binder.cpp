@@ -2,6 +2,7 @@
 
 #include <sol/sol.hpp>
 
+#include "sl/emulator/game/contants/event_script/event_script.h"
 #include "sl/emulator/game/contants/npc/npc_talk_box.h"
 #include "sl/emulator/game/contants/quest/quest.h"
 #include "sl/emulator/game/contants/quest/quest_change.h"
@@ -44,6 +45,13 @@ namespace sunlight
             "setNewState", &QuestChange::SetNewState,
             "setFlag", &QuestChange::SetFlag,
             "configureTimeLimit", &QuestChange::ConfigureTimeLimit
+        );
+
+        luaState.new_usertype<EventScript>("EventScript",
+            sol::default_constructor,
+            "addString", &EventScript::AddString,
+            "addStringWithInt", &EventScript::AddStringWithInt,
+            "addStringWithItem", &EventScript::AddStringWithIntItem
         );
     }
 

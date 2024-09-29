@@ -14,6 +14,7 @@ namespace sunlight
 
     class LuaNPC;
     class NPCTalkBox;
+    class EventScript;
 
     class SlPacketWriter;
 }
@@ -31,6 +32,7 @@ namespace sunlight
         bool AddItem(int32_t itemId, int32_t quantity);
         bool RemoveInventoryItem(int32_t itemId, int32_t quantity);
 
+        void Show(const EventScript& eventScript);
         void Talk(LuaNPC& npc, const NPCTalkBox& talkBox);
         void DisposeTalk();
         void OpenShop(LuaNPC& npc);

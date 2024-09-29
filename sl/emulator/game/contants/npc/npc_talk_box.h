@@ -32,9 +32,9 @@ namespace sunlight
     {
     public:
         NPCTalkBox(const NPCTalkBox& other) = delete;
-        NPCTalkBox(NPCTalkBox&& other) noexcept = delete;
+        NPCTalkBox(NPCTalkBox&& other) noexcept = default;
         NPCTalkBox& operator=(const NPCTalkBox& other) = delete;
-        NPCTalkBox& operator=(NPCTalkBox&& other) noexcept = delete;
+        NPCTalkBox& operator=(NPCTalkBox&& other) noexcept = default;
 
     public:
         NPCTalkBox(int32_t width, int32_t height);

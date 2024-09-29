@@ -41,5 +41,11 @@ namespace sunlight
         static auto CreateQuestAdd(const GamePlayer& player, const Quest& quest) -> Buffer;
         static auto CreateQuestStateChange(const GamePlayer& player, int32_t questId, int32_t oldState, int32_t newState) -> Buffer;
         static auto CreateQuestFlagSet(const GamePlayer& player, int32_t questId, int32_t state, int32_t index, int32_t flag) -> Buffer;
+
+        static auto CreateEventScriptAddString(const GamePlayer& player, int32_t index) -> Buffer;
+        static auto CreateEventScriptAddStringWithInt(const GamePlayer& player, int32_t index, int32_t value) -> Buffer;
+        static auto CreateEventScriptAddStringWithItem(const GamePlayer& player, int32_t index, int32_t itemId) -> Buffer;
+        static auto CreateEventScriptClear(const GamePlayer& player) -> Buffer;
+        static auto CreateEventScriptShow(const GamePlayer& player) -> Buffer;
     };
 }

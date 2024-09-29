@@ -7,6 +7,7 @@
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/contants/event_script/event_script.h"
 #include "sl/emulator/game/contants/npc/npc_talk_box.h"
 #include "sl/emulator/game/contants/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
@@ -72,11 +73,43 @@ namespace sunlight
         return _serviceLocator;
     }
 
+    void PlayerStateSystem::ShowEventScript(GamePlayer& player, const EventScript& eventScript)
+    {
+        player.Defer(GamePlayerMessageCreator::CreateEventScriptClear(player));
+
+        for (const event_script_item_type& element : eventScript.GetItems())
+        {
+            std::visit([&]<typename T>(const T& item)
+                {
+                    if constexpr (std::is_same_v<T, EventScriptString>)
+                    {
+                        player.Defer(GamePlayerMessageCreator::CreateEventScriptAddString(player, item.tableIndex));
+                    }
+                    else if constexpr (std::is_same_v<T, EventScriptStringWithInt>)
+                    {
+                        player.Defer(GamePlayerMessageCreator::CreateEventScriptAddStringWithInt(player, item.tableIndex, item.value));
+                    }
+                    else if constexpr (std::is_same_v<T, EventScriptStringWithItem>)
+                    {
+                        player.Defer(GamePlayerMessageCreator::CreateEventScriptAddStringWithItem(player, item.tableIndex, item.itemId));
+                    }
+                    else
+                    {
+                        static_assert(sizeof(T), "not implemented");
+                    }
+
+                }, element);
+        }
+
+        player.Defer(GamePlayerMessageCreator::CreateEventScriptShow(player));
+        player.FlushDeferred();
+    }
+
     void PlayerStateSystem::CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox)
     {
         player.Defer(NPCMessageCreator::CreateTalkBoxClear(npc));
 
-        for (const npc_talk_box_item_type& item : talkBox.GetTalkBoxItems())
+        for (const npc_talk_box_item_type& element : talkBox.GetTalkBoxItems())
         {
             std::visit([&]<typename T>(const T & item)
             {
@@ -101,7 +134,7 @@ namespace sunlight
                     static_assert(sizeof(T), "not implemented");
                 }
 
-            }, item);
+            }, element);
         }
 
         player.Defer(NPCMessageCreator::CreateTalkBoxCreate(npc, player,

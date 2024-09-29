@@ -427,4 +427,74 @@ namespace sunlight
 
         return writer.Flush();
     }
+
+    auto GamePlayerMessageCreator::CreateEventScriptAddString(const GamePlayer& player, int32_t index) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::EVENTSCRIPT_MESSAGE);
+        writer.Write(ZoneMessageType::EVENTSCRIPTMSG_ADDSTR);
+        writer.Write<int32_t>(index);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateEventScriptAddStringWithInt(const GamePlayer& player, int32_t index, int32_t value) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::EVENTSCRIPT_MESSAGE);
+        writer.Write(ZoneMessageType::EVENTSCRIPTMSG_ADDINT);
+        writer.Write<int32_t>(index);
+        writer.Write<int32_t>(value);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateEventScriptAddStringWithItem(const GamePlayer& player, int32_t index, int32_t itemId) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::EVENTSCRIPT_MESSAGE);
+        writer.Write(ZoneMessageType::EVENTSCRIPTMSG_ADDITEM);
+        writer.Write<int32_t>(index);
+        writer.Write<int32_t>(itemId);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateEventScriptClear(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::EVENTSCRIPT_MESSAGE);
+        writer.Write(ZoneMessageType::EVENTSCRIPTMSG_CLEAR);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateEventScriptShow(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::EVENTSCRIPT_MESSAGE);
+        writer.Write(ZoneMessageType::EVENTSCRIPTMSG_SHOW);
+
+        return writer.Flush();
+    }
 }
