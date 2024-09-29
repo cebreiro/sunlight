@@ -2,14 +2,16 @@
 
 #include <boost/unordered/unordered_flat_set.hpp>
 
-#include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/npc_item_shop_component.h"
+#include "sl/emulator/game/component/player_npc_shop_component.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -27,6 +29,7 @@ namespace sunlight
     void NPCShopSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<ItemArchiveSystem>());
+        Add(stage.Get<SceneObjectSystem>());
     }
 
     bool NPCShopSystem::Subscribe(Stage& stage)
@@ -50,9 +53,9 @@ namespace sunlight
     {
         const ItemDataProvider& itemDataProvider = _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider();
 
-        NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
-
         std::unordered_map<int32_t, std::unordered_map<int32_t, NPCShopItemBucket>> temp;
+
+        NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
 
         for (int32_t itemId : itemShopComponent.GetData().saleItems)
         {
@@ -76,6 +79,190 @@ namespace sunlight
 
         auto range = temp | std::views::values | std::views::join | std::views::values | std::views::as_rvalue;
         itemShopComponent.Initialize(std::ranges::to<std::vector>(range));
+
+        CreateShopItems(npc);
+    }
+
+    bool NPCShopSystem::Roll(GameNPC& npc)
+    {
+        NPCItemShopComponent* itemShopComponent = npc.FindComponent<NPCItemShopComponent>();
+        if (!itemShopComponent)
+        {
+            return false;
+        }
+
+        if (itemShopComponent->GetSynchronizePlayerCount() > 0)
+        {
+            for (const GameItem& item : itemShopComponent->GetItemRange())
+            {
+                itemShopComponent->Synchronize(NPCMessageCreator::CreateNPCItemRemove(npc, item.GetId(), item.GetType()));
+            }
+        }
+
+        itemShopComponent->ClearItems();
+        
+        CreateShopItems(npc);
+
+        return true;
+    }
+
+    void NPCShopSystem::OnStageExit(GamePlayer& player)
+    {
+        const PlayerNPCShopComponent& playerNPCShopComponent = player.GetNPCShopComponent();
+
+        if (!playerNPCShopComponent.HasShoppingNPC())
+        {
+            return;
+        }
+
+        GameNPC& npc = playerNPCShopComponent.GetShoppingNPC();
+
+        NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
+        itemShopComponent.RemoveSyncPlayer(player);
+    }
+
+    void NPCShopSystem::OpenItemShop(GamePlayer& player, GameNPC& npc)
+    {
+        PlayerNPCShopComponent& playerNPCShopComponent = player.GetNPCShopComponent();
+
+        if (playerNPCShopComponent.HasShoppingNPC())
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] player already is looking a npc shop. player: {}, old: {}, new: {}",
+                    GetName(), player.GetCId(), playerNPCShopComponent.GetShoppingNPC().GetId(), npc.GetId()));
+
+            return;
+        }
+
+        playerNPCShopComponent.SetShoppingNPC(&npc);
+
+        NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
+        itemShopComponent.AddSyncPlayer(player);
+
+        player.Send(NPCMessageCreator::CreateShopOpen(npc));
+
+        if (!itemShopComponent.IsVisitedAfterRoll())
+        {
+            itemShopComponent.SetVisitedAfterRoll(true);
+
+            ConfigureNPCShopRollTimer(npc);
+        }
+    }
+
+    void NPCShopSystem::OnShopSynchronizeRequest(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+
+        PlayerNPCShopComponent& playerNPCShopComponent = player.GetNPCShopComponent();
+
+        if (!playerNPCShopComponent.HasShoppingNPC())
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] client inaccesable npc shop open request. player: {}",
+                    GetName(), player.GetCId()));
+
+            return;
+        }
+
+        player.Send(NPCMessageCreator::CreateItemSynchroStart(playerNPCShopComponent.GetShoppingNPC()));
+    }
+
+    void NPCShopSystem::OnShopSynchronizeStop(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+
+        PlayerNPCShopComponent& playerNPCShopComponent = player.GetNPCShopComponent();
+
+        if (!playerNPCShopComponent.HasShoppingNPC())
+        {
+            return;
+        }
+
+        GameNPC& npc = playerNPCShopComponent.GetShoppingNPC();
+        playerNPCShopComponent.SetShoppingNPC(nullptr);
+
+        npc.GetComponent<NPCItemShopComponent>().RemoveSyncPlayer(player);
+    }
+
+    void NPCShopSystem::OnPlayerBuyShopItem(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        // ZoneMessage.targetId that is sent from client is target npc id
+        // but use server-side data for protecting against cheat
+        PlayerNPCShopComponent& playerNPCShopComponent = player.GetNPCShopComponent();
+
+        if (!playerNPCShopComponent.HasShoppingNPC())
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] client inaccesable npc item shop buy request. player: {}",
+                    GetName(), player.GetCId()));
+
+            return;
+        }
+
+        const int32_t page = reader.Read<int32_t>();
+        const int32_t x = reader.Read<int32_t>();
+        const int32_t y = reader.Read<int32_t>();
+
+        const int32_t unk = reader.Read<int32_t>();
+        const int32_t quantity = reader.Read<int32_t>();
+
+        BufferReader itemObjectReader = reader.ReadObject();
+
+        itemObjectReader.Skip(8);
+        const int32_t itemId = itemObjectReader.Read<int32_t>();
+
+        itemObjectReader.Skip(148);
+
+        const game_entity_id_type targetItemId(itemObjectReader.Read<int32_t>());
+        const GameEntityType type = static_cast<GameEntityType>(itemObjectReader.Read<int32_t>());
+
+        if (type != GameEntityType::Item)
+        {
+            SUNLIGHT_LOG_DEBUG(_serviceLocator,
+                fmt::format("[{}] unexpecetd item type. player: {}, target_id: {}, target_type: {}, pos: [{}, {}, {}]",
+                    GetName(), player.GetCId(), targetItemId, static_cast<int32_t>(type), page, x, y));
+        }
+
+        Get<ItemArchiveSystem>().Purchase(player, playerNPCShopComponent.GetShoppingNPC(), targetItemId, itemId, page, x, y, quantity);
+
+        if (unk == 1) // client 0x42A5B0
+        {
+            SUNLIGHT_LOG_DEBUG(_serviceLocator,
+                fmt::format("[{}] unk value 1 found. player: {}, npc: {}, item_id, quantity: {}",
+                    GetName(), player.GetCId(), playerNPCShopComponent.GetShoppingNPC().GetId(), itemId, quantity));
+        }
+    }
+
+    void NPCShopSystem::OnPlayerSellOwnItem(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        PlayerNPCShopComponent& playerNPCShopComponent = player.GetNPCShopComponent();
+
+        if (!playerNPCShopComponent.HasShoppingNPC())
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] client inaccesable npc item shop buy request. player: {}",
+                    GetName(), player.GetCId()));
+
+            return;
+        }
+
+        [[maybe_unused]]
+        const auto [targetItemId, targetItemType] = reader.ReadInt64();
+
+        Get<ItemArchiveSystem>().SellOwnItem(player, playerNPCShopComponent.GetShoppingNPC(), game_entity_id_type(targetItemId));
+    }
+
+    void NPCShopSystem::CreateShopItems(GameNPC& npc)
+    {
+        NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
+
+        const bool shouldSynchronize = itemShopComponent.GetItemStorageCount() > 0;
 
         const std::vector<NPCShopItemBucket>& buckets = itemShopComponent.GetItemBuckets();
         const auto makeBucketIndexes = [&buckets]() -> std::vector<int64_t>
@@ -132,138 +319,82 @@ namespace sunlight
                     : std::uniform_int_distribution(1, itemData->GetMaxOverlapCount())(_mt19937);
 
                 auto item = std::make_shared<GameItem>(idPublisher, *itemData, quantity);
+                auto itemPtr = item.get();
 
                 itemShopComponent.AddItem(std::move(item), *optPosition);
+
+                if (shouldSynchronize)
+                {
+                    itemShopComponent.Synchronize(NPCMessageCreator::CreateNPCItemAdd(npc, *itemPtr));
+                }
             }
         }
     }
 
-    void NPCShopSystem::OnStageExit(GamePlayer& player)
+    void NPCShopSystem::ConfigureNPCShopRollTimer(GameNPC& npc)
     {
-        const auto iter1 = _targetNPC.find(&player);
-        if (iter1 == _targetNPC.end())
-        {
-            return;
-        }
-
-        GameNPC& npc = *iter1->second;
-
         NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
-        itemShopComponent.RemoveSyncPlayer(player);
+        assert(!itemShopComponent.HasRollTimer());
+
+        std::uniform_int_distribution rollTimeDist(45, 90);
+        const std::chrono::minutes nextRollTime(rollTimeDist(_mt19937));
+
+        itemShopComponent.SetRollTimer(true);
+        itemShopComponent.SetNextRollTimePoint(GameTimeService::Now() + nextRollTime);;
+
+        Delay(nextRollTime).Then(*ExecutionContext::GetExecutor(),
+            [weak = weak_from_this(), npcId = npc.GetId()]()
+            {
+                const auto self = weak.lock();
+                if (!self)
+                {
+                    return;
+                }
+
+                self->OnRollTimerEnd(npcId);
+            });
     }
 
-    void NPCShopSystem::OpenItemShop(GamePlayer& player, GameNPC& npc)
+    void NPCShopSystem::OnRollTimerEnd(game_entity_id_type npcId)
     {
-        if (!_targetNPC.try_emplace(&player, &npc).second)
-        {
-            SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] player already is looking a npc shop. player: {}",
-                    GetName(), player.GetCId()));
-
-            return;
-        }
-
-        NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
-        itemShopComponent.AddSyncPlayer(player);
-
-        player.Send(NPCMessageCreator::CreateShopOpen(npc));
-    }
-
-    void NPCShopSystem::OnShopSynchronizeRequest(const ZoneMessage& message)
-    {
-        GamePlayer& player = message.player;
-
-        const auto iter = _targetNPC.find(&player);
-        if (iter == _targetNPC.end())
-        {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] client inaccesable npc shop open request. player: {}",
-                    GetName(), player.GetCId()));
-
-            return;
-        }
-
-        player.Send(NPCMessageCreator::CreateItemSynchroStart(*iter->second));
-    }
-
-    void NPCShopSystem::OnShopSynchronizeStop(const ZoneMessage& message)
-    {
-        GamePlayer& player = message.player;
-
-        const auto iter = _targetNPC.find(&player);
-        if (iter == _targetNPC.end())
+        const std::shared_ptr<GameEntity>& npc = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, npcId);
+        if (!npc)
         {
             return;
         }
 
-        NPCItemShopComponent& itemShopComponent = iter->second->GetComponent<NPCItemShopComponent>();
-        itemShopComponent.RemoveSyncPlayer(player);
+        NPCItemShopComponent& itemShopComponent = npc->GetComponent<NPCItemShopComponent>();
+        assert(itemShopComponent.HasRollTimer());
 
-        _targetNPC.erase(iter);
-    }
-
-    void NPCShopSystem::OnPlayerBuyShopItem(const ZoneMessage& message)
-    {
-        GamePlayer& player = message.player;
-        SlPacketReader& reader = message.reader;
-
-        // ZoneMessage.targetId that is sent from client is target npc id
-        // but use server-side data for protecting against cheat
-        const auto iter = _targetNPC.find(&player);
-        if (iter == _targetNPC.end())
+        if (itemShopComponent.HasSyncPlayer())
         {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] client inaccesable npc item shop buy request. player: {}",
-                    GetName(), player.GetCId()));
+            // client 0x454EC6
+            // when client receives NPC 'ITEMARCHIVE_ADDITEM' message,
+            // ignores server's item position, calculates item position 'greedy' until a page has no empty space and use that.
+            // because of absent of needs that fit to client behavior, shop item rolling is deferred until no sync player
+
+            constexpr auto delay = std::chrono::minutes(1);
+            itemShopComponent.SetNextRollTimePoint(itemShopComponent.GetNextRollTimePoint() + delay);
+
+            Delay(delay).Then(*ExecutionContext::GetExecutor(),
+                [weak = weak_from_this(), npcId = npc->GetId()]()
+                {
+                    const auto self = weak.lock();
+                    if (!self)
+                    {
+                        return;
+                    }
+
+                    self->OnRollTimerEnd(npcId);
+                });
 
             return;
         }
 
-        const int32_t page = reader.Read<int32_t>();
-        const int32_t x = reader.Read<int32_t>();
-        const int32_t y = reader.Read<int32_t>();
+        itemShopComponent.SetVisitedAfterRoll(false);
+        itemShopComponent.SetRollTimer(false);
+        itemShopComponent.SetNextRollTimePoint(game_time_point_type::max());
 
-        [[maybe_unused]] const int32_t unk = reader.Read<int32_t>();
-        const int32_t quantity = reader.Read<int32_t>();
-
-        BufferReader itemObjectReader = reader.ReadObject();
-
-        itemObjectReader.Skip(8);
-        const int32_t itemId = itemObjectReader.Read<int32_t>();
-
-        itemObjectReader.Skip(148);
-
-        const game_entity_id_type targetItemId(itemObjectReader.Read<int32_t>());
-        const GameEntityType type = static_cast<GameEntityType>(itemObjectReader.Read<int32_t>());
-
-        if (type != GameEntityType::Item)
-        {
-            SUNLIGHT_LOG_DEBUG(_serviceLocator,
-                fmt::format("[{}] unexpecetd item type. player: {}, target_id: {}, target_type: {}, pos: [{}, {}, {}]",
-                    GetName(), player.GetCId(), targetItemId, static_cast<int32_t>(type), page, x, y));
-        }
-
-        Get<ItemArchiveSystem>().Purchase(player, *iter->second, targetItemId, itemId, page, x, y, quantity);
-    }
-
-    void NPCShopSystem::OnPlayerSellOwnItem(const ZoneMessage& message)
-    {
-        GamePlayer& player = message.player;
-        SlPacketReader& reader = message.reader;
-
-        const auto iter = _targetNPC.find(&player);
-        if (iter == _targetNPC.end())
-        {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] client inaccesable npc item shop buy request. player: {}",
-                    GetName(), player.GetCId()));
-
-            return;
-        }
-
-        [[maybe_unused]]
-        const auto [targetItemId, targetItemType] = reader.ReadInt64();
-
-        Get<ItemArchiveSystem>().SellOwnItem(player, *iter->second, game_entity_id_type(targetItemId));
+        Roll(*npc->Cast<GameNPC>());
     }
 }

@@ -155,10 +155,12 @@ namespace sunlight
 
     void ItemSlotStorage::Clear()
     {
-        for (auto& container : _slots)
+        for (GameItem*& slot : _slots | std::views::join)
         {
-            container.clear();
+            slot = nullptr;
         }
+
+        _used = 0;
     }
 
     auto ItemSlotStorage::GetWidth() const -> int32_t

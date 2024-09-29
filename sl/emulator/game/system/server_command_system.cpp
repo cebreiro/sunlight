@@ -9,6 +9,7 @@
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -29,6 +30,7 @@ namespace sunlight
         Add(stage.Get<PlayerJobSystem>());
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<EntityMovementSystem>());
+        Add(stage.Get<NPCShopSystem>());
 
         ServerCommandRegister::Register(*this);
     }

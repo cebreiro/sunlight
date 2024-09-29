@@ -33,6 +33,7 @@ namespace sunlight
         static auto CreateShopOpen(const GameNPC& npc) -> Buffer;
         static auto CreateItemSynchroStart(const GameNPC& npc) -> Buffer;
 
+        static auto CreateNPCItemAdd(const GameNPC& npc, const GameItem& item) -> Buffer;
         static auto CreateNPCItemRemove(const GameNPC& npc, game_entity_id_type targetId, GameEntityType targetType) -> Buffer;
         static auto CreateNPCItemDecrease(const GameNPC& npc, const GameItem& item, int32_t newQuantity) -> Buffer;
         static auto CreateNPCItemArchiveResult(const GameNPC& npc, NPCItemShopResult result) -> Buffer;

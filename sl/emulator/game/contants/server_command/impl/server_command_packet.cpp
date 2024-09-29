@@ -1,10 +1,15 @@
 #include "server_command_packet.h"
 
+#include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/zone_message_deliver_type.h"
+#include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
+#include "sl/emulator/server/packet/zone_packet_s2c.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
+#include "sl/emulator/server/packet/io/sl_packet_writer.h"
 
 namespace sunlight
 {
@@ -67,6 +72,30 @@ namespace sunlight
     {
         _system.Get<EntityViewRangeSystem>().Broadcast(player,
             GamePlayerMessageCreator::CreatePlayerSkinColorChange(player, color), true);
+
+        return true;
+    }
+
+    auto ServerCommandPacketTest::GetName() const -> std::string_view
+    {
+        return "packet_test";
+    }
+
+    auto ServerCommandPacketTest::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandPacketTest::Execute(GamePlayer& player) const
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write<int32_t>(0x3F2);
+
+        player.Send(writer.Flush());
 
         return true;
     }

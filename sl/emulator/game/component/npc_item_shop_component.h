@@ -6,6 +6,7 @@
 #include "sl/emulator/game/contants/item/item_slot_stroage.h"
 #include "sl/emulator/game/debug/game_debug_type.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
+#include "sl/emulator/game/time/game_time.h"
 
 namespace sunlight
 {
@@ -26,12 +27,22 @@ namespace sunlight
         void Initialize(std::vector<NPCShopItemBucket> itemBuckets);
 
     public:
+        bool IsVisitedAfterRoll() const;
+        bool HasRollTimer() const;
+        bool HasSyncPlayer() const;
         bool ContainsSyncPlayer(GamePlayer& player) const;
 
         void AddSyncPlayer(GamePlayer& player);
         void RemoveSyncPlayer(GamePlayer& player);
 
         void Synchronize(const Buffer& buffer);
+
+        auto GetSynchronizePlayerCount() const -> int64_t;
+        auto GetNextRollTimePoint() const -> game_time_point_type;
+
+        void SetVisitedAfterRoll(bool value);
+        void SetRollTimer(bool value);
+        void SetNextRollTimePoint(game_time_point_type timePoint);
 
     public:
         bool Contains(int32_t page, int32_t x, int32_t y) const;
@@ -44,12 +55,15 @@ namespace sunlight
         auto FindItem(int8_t page, int32_t x, int32_t y) const -> const GameItem*;
         auto FindEmptyPosition(int8_t page, int32_t width, int32_t height) const -> std::optional<InventoryPosition>;
 
+        void ClearItems();
+
         auto GetData() const -> const ItemShopData&;
         auto GetItemBuckets() const -> const std::vector<NPCShopItemBucket>&;
 
         auto GetItemCount() const -> int64_t;
         auto GetItemStorageCount() const -> int8_t;
         auto GetItemStorageLoadFactor(int8_t page) const -> double;
+        auto GetItemSlotDebugString(int8_t page) const -> std::string;
 
         inline auto GetItemRange() const;
 
@@ -58,6 +72,10 @@ namespace sunlight
         auto GetItemSlotStorage(int8_t page) const -> const ItemSlotStorage&;
 
     private:
+        bool _visitedAfterRoll = false;
+        bool _hasRollTimer = false;
+        game_time_point_type _nextRollTimePoint = game_time_point_type::max();
+
         const ItemShopData& _itemShopData;
         std::vector<NPCShopItemBucket> _itemBuckets;
 

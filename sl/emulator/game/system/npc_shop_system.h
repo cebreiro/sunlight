@@ -12,7 +12,9 @@ namespace sunlight
 
 namespace sunlight
 {
-    class NPCShopSystem final : public GameSystem
+    class NPCShopSystem final
+        : public GameSystem
+        , public std::enable_shared_from_this<NPCShopSystem>
     {
     public:
         explicit NPCShopSystem(const ServiceLocator& serviceLocator);
@@ -25,6 +27,8 @@ namespace sunlight
     public:
         void InitializeItemShop(GameNPC& npc);
 
+        bool Roll(GameNPC& npc);
+
         void OnStageExit(GamePlayer& player);
 
         void OpenItemShop(GamePlayer& player, GameNPC& npc);
@@ -36,10 +40,14 @@ namespace sunlight
         void OnPlayerSellOwnItem(const ZoneMessage& message);
 
     private:
+        void CreateShopItems(GameNPC& npc);
+
+        void ConfigureNPCShopRollTimer(GameNPC& npc);
+        void OnRollTimerEnd(game_entity_id_type npcId);
+
+    private:
         const ServiceLocator& _serviceLocator;
 
         std::mt19937 _mt19937;
-
-        std::unordered_map<PtrNotNull<GamePlayer>, PtrNotNull<GameNPC>> _targetNPC;
     };
 }

@@ -16,6 +16,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandPacketObjectLeave>());
         system.AddCommand(std::make_shared<ServerCommandPacketHairColorChange>(system));
         system.AddCommand(std::make_shared<ServerCommandPacketSkinColorChange>(system));
+        system.AddCommand(std::make_shared<ServerCommandPacketTest>());
 
         system.AddCommand(std::make_shared<ServerCommandExpGain>(system));
         system.AddCommand(std::make_shared<ServerCommandExpCharacterGain>(system));
@@ -29,5 +30,8 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandTeleport>(system));
 
         system.AddCommand(std::make_shared<ServerCommandScriptReload>(system));
+
+        system.AddCommand(std::make_shared<ServerCommandNPCShopRoll>(system));
+        system.AddCommand(std::make_shared<ServerCommandNPCShopDebugSlot>(system));
     }
 }

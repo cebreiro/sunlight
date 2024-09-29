@@ -47,4 +47,14 @@ namespace sunlight
     private:
         ServerCommandSystem& _system;
     };
+
+    class ServerCommandPacketTest final : public ServerCommandT<>
+    {
+    public:
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+    public:
+        bool Execute(GamePlayer& player) const override;
+    };
 }

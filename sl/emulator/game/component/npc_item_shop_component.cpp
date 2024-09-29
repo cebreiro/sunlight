@@ -22,6 +22,21 @@ namespace sunlight
         _itemBuckets = std::move(itemBuckets);
     }
 
+    bool NPCItemShopComponent::IsVisitedAfterRoll() const
+    {
+        return _visitedAfterRoll;
+    }
+
+    bool NPCItemShopComponent::HasRollTimer() const
+    {
+        return _hasRollTimer;
+    }
+
+    bool NPCItemShopComponent::HasSyncPlayer() const
+    {
+        return !_syncPlayers.empty();
+    }
+
     bool NPCItemShopComponent::ContainsSyncPlayer(GamePlayer& player) const
     {
         return _syncPlayers.contains(&player);
@@ -49,6 +64,31 @@ namespace sunlight
         }
     }
 
+    auto NPCItemShopComponent::GetSynchronizePlayerCount() const -> int64_t
+    {
+        return std::ssize(_syncPlayers);
+    }
+
+    auto NPCItemShopComponent::GetNextRollTimePoint() const -> game_time_point_type
+    {
+        return _nextRollTimePoint;
+    }
+
+    void NPCItemShopComponent::SetVisitedAfterRoll(bool value)
+    {
+        _visitedAfterRoll = value;
+    }
+
+    void NPCItemShopComponent::SetRollTimer(bool value)
+    {
+        _hasRollTimer = value;
+    }
+
+    void NPCItemShopComponent::SetNextRollTimePoint(game_time_point_type timePoint)
+    {
+        _nextRollTimePoint = timePoint;
+    }
+
     bool NPCItemShopComponent::Contains(int32_t page, int32_t x, int32_t y) const
     {
         if (page < 0 || page >= std::ssize(_itemStorages))
@@ -71,6 +111,8 @@ namespace sunlight
 
     void NPCItemShopComponent::AddItem(SharedPtrNotNull<GameItem> item, const InventoryPosition& position)
     {
+        assert(!_items.contains(item->GetId()));
+
         if (!item->HasComponent<ItemPositionComponent>())
         {
             item->AddComponent(std::make_unique<ItemPositionComponent>());
@@ -171,6 +213,16 @@ namespace sunlight
         return std::nullopt;
     }
 
+    void NPCItemShopComponent::ClearItems()
+    {
+        _items.clear();
+
+        for (ItemSlotStorage& itemSlotStorage : _itemStorages | notnull::reference)
+        {
+            itemSlotStorage.Clear();
+        }
+    }
+
     auto NPCItemShopComponent::GetData() const -> const ItemShopData&
     {
         return _itemShopData;
@@ -194,6 +246,11 @@ namespace sunlight
     auto NPCItemShopComponent::GetItemStorageLoadFactor(int8_t page) const -> double
     {
         return GetItemSlotStorage(page).GetLoadFactor();
+    }
+
+    auto NPCItemShopComponent::GetItemSlotDebugString(int8_t page) const -> std::string
+    {
+        return GetItemSlotStorage(page).GetDebugString();
     }
 
     auto NPCItemShopComponent::GetItemSlotStorage(int8_t page) -> ItemSlotStorage&
