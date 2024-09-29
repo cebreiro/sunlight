@@ -16,20 +16,19 @@ namespace sunlight
     {
         (void)type;
 
-        game_entity_id_type result = game_entity_id_type(NULL_ID);
+        if (_nextValue < 1000 || _recycleQueue.empty())
+        {
+            const game_entity_id_type result = game_entity_id_type(++_nextValue);
 
-        if (_recycleQueue.empty())
-        {
-            while (result == game_entity_id_type(NULL_ID))
-            {
-                result = game_entity_id_type(++_nextValue);
-            }
+            assert(result != game_entity_id_type(NULL_ID));
+
+            return result;
         }
-        else
-        {
-            result = _recycleQueue.front();
-            _recycleQueue.pop();
-        }
+
+        assert(!_recycleQueue.empty());
+
+        const game_entity_id_type result = _recycleQueue.front();
+        _recycleQueue.pop();
 
         return result;
     }
@@ -43,72 +42,77 @@ namespace sunlight
 
     auto GameEntityIdPublisher::PublishSceneObjectId(GameEntityType type) -> int32_t
     {
-        (void)type;
-        // client 590CA0
-        //if (type == GameEntityType::Unk)
-        //{
-        // range: 0x2FFFFFFF ~ 0x20000000
-        // client: if ((id & 0x30000000) == 0x20000000) -> rotate on fixed position
-        //}
-
-        int32_t result = 0;
-
-        if (_recycleQueueSceneObjectId.empty())
+        if (IsDynamicEntity(type))
         {
-            // if scene object id is 1100 (GameEntityType::Player),
-            // a local player disappears when receives that object remove packet
-            while (result == 0 || IsEntityType(result))
+            if (_recycleIdQueueDynamicEntity.empty())
             {
-                result = ++_nextSceneObjectId;
+                return ++_nextDynamicEntityId;
             }
-        }
-        else
-        {
-            result = _recycleQueueSceneObjectId.front();
-            _recycleQueueSceneObjectId.pop();
+
+            const int32_t result = _recycleIdQueueDynamicEntity.front();
+            _recycleIdQueueDynamicEntity.pop();
+
+            return result;
         }
 
-        return result;
+        if (IsStaticEntity(type))
+        {
+            if (_recycleIdQueueStaticEntity.empty())
+            {
+                return ++_nextStaticEntityId;
+            }
+
+            const int32_t result = _recycleIdQueueStaticEntity.front();
+            _recycleIdQueueStaticEntity.pop();
+
+            return result;
+        }
+
+
+        return ++_nextUnknownEntityId;
     }
 
     void GameEntityIdPublisher::ReturnSceneObjectId(GameEntityType type, int32_t id)
     {
-        (void)type;
-
-        if (id != 0)
+        if (IsDynamicEntity(type))
         {
-            _recycleQueueSceneObjectId.push(id);
+            _recycleIdQueueDynamicEntity.push(id);
+
+            return;
+        }
+
+        if (IsStaticEntity(type))
+        {
+            _recycleIdQueueStaticEntity.push(id);
         }
     }
 
-    bool GameEntityIdPublisher::IsEntityType(int32_t value)
+    bool GameEntityIdPublisher::IsDynamicEntity(GameEntityType type)
     {
-        switch (static_cast<GameEntityType>(value))
+        switch (type)
         {
         case GameEntityType::Player:
         case GameEntityType::NPC:
         case GameEntityType::Enemy:
         case GameEntityType::EnemyChild:
-        case GameEntityType::FX:
-        case GameEntityType::House:
+        case GameEntityType::Summon:
+        case GameEntityType::Pet:
+            return true;
+        }
+
+        return false;
+    }
+
+    bool GameEntityIdPublisher::IsStaticEntity(GameEntityType type)
+    {
+        switch (type)
+        {
         case GameEntityType::Prop:
         case GameEntityType::PropChild:
         case GameEntityType::Item:
         case GameEntityType::ItemChild:
-        case GameEntityType::EventObj:
-        case GameEntityType::Stage:
-        case GameEntityType::StageTerrain:
-        case GameEntityType::StageRoom:
-        case GameEntityType::Widget:
-        case GameEntityType::Unk1940:
-        case GameEntityType::Unk2100:
-        case GameEntityType::Unk2300:
-        case GameEntityType::Unk2400:
-        case GameEntityType::Unk3100:
-        case GameEntityType::Unk3200:
+        case GameEntityType::MiniPK:
             return true;
-        case GameEntityType::None:;
-        default:;
         }
 
         return false;

@@ -7,22 +7,22 @@ namespace sunlight
         (Player, 1100)
         (NPC, 1200)
         (Enemy, 1300)
-        (EnemyChild, 1310)
+        (EnemyChild, 1310) // old 4EF450, Boss
         (FX, 1400)
         (House, 1500)
         (Prop, 1600)
         (PropChild, 1610)
         (Item, 1700)
-        (ItemChild, 1710) // 0x004D4BC9 -> unk
+        (ItemChild, 1710) // old 0x4EFCf0, StoreItem
         (EventObj, 1800)
         (Stage, 1900)
         (StageTerrain, 1910)
         (StageRoom, 1920)
         (Widget, 200)
         (Unk1940, 0x794)
-        (Unk2100, 0x834)
-        (Unk2300, 0x8FC)
-        (Unk2400, 0x960)
+        (Summon, 2100)  // old 0x4EF690
+        (Pet, 2300)     // old 0x4EF8D0
+        (MiniPK, 2400)  // old 0x4EFEd0
         (Unk3100, 0xC1C)
         (Unk3200, 0xC80)
     )
