@@ -7,6 +7,20 @@ namespace sunlight
     {
     }
 
+    bool ServerCommandParamReader::Get(int64_t index, std::string& result) const
+    {
+        assert(index >= 0);
+
+        if (index >= std::ssize(_params))
+        {
+            return false;
+        }
+
+        result = _params[index];
+
+        return true;
+    }
+
     auto ServerCommandParamReader::GetParamSize() const -> int64_t
     {
         return std::ssize(_params);

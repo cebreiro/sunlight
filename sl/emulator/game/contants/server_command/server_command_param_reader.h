@@ -21,6 +21,8 @@ namespace sunlight
         template <typename T> requires std::is_arithmetic_v<T>
         bool TryParse(int64_t index, T& result) const;
 
+        bool Get(int64_t index, std::string& result) const;
+
         auto GetParamSize() const -> int64_t;
 
     private:

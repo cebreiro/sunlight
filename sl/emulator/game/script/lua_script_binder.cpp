@@ -8,6 +8,7 @@
 #include "sl/emulator/game/script/class/lua_npc.h"
 #include "sl/emulator/game/script/class/lua_player.h"
 #include "sl/emulator/game/script/class/lua_system.h"
+#include "sl/emulator/server/packet/io/sl_packet_writer.h"
 
 namespace sunlight
 {
@@ -16,6 +17,8 @@ namespace sunlight
         LuaPlayer::Bind(luaState);
         LuaNPC::Bind(luaState);
         LuaSystem::Bind(luaState);
+
+        BindPacket(luaState);
 
         luaState.new_usertype<NPCTalkBox>("NPCTalkBox",
             sol::constructors<NPCTalkBox(int32_t, int32_t)>(),
@@ -41,6 +44,34 @@ namespace sunlight
             "setNewState", &QuestChange::SetNewState,
             "setFlag", &QuestChange::SetFlag,
             "configureTimeLimit", &QuestChange::ConfigureTimeLimit
+        );
+    }
+
+    void LuaScriptBinder::BindPacket(sol::state& luaState)
+    {
+        luaState.new_usertype<PacketWriter>("PacketWriter",
+            sol::default_constructor,
+            "writeInt8", sol::overload(static_cast<void(PacketWriter::*)(int8_t)>(&PacketWriter::Write)),
+            "writeInt16", sol::overload(static_cast<void(PacketWriter::*)(int16_t)>(&PacketWriter::Write)),
+            "writeInt32", sol::overload(static_cast<void(PacketWriter::*)(int32_t)>(&PacketWriter::Write)),
+            "writeUInt8", sol::overload(static_cast<void(PacketWriter::*)(uint8_t)>(&PacketWriter::Write)),
+            "writeUInt16", sol::overload(static_cast<void(PacketWriter::*)(uint16_t)>(&PacketWriter::Write)),
+            "writeUInt32", sol::overload(static_cast<void(PacketWriter::*)(uint32_t)>(&PacketWriter::Write)),
+            "writeString", &PacketWriter::WriteString,
+            "writeZeroBytes", &PacketWriter::WriteZeroBytes
+        );
+
+        luaState.new_usertype<SlPacketWriter>("SlPacketWriter",
+            sol::default_constructor,
+            "writeInt8", &SlPacketWriter::Write<int8_t>,
+            "writeInt16", &SlPacketWriter::Write<int16_t>,
+            "writeInt32", &SlPacketWriter::Write<int32_t>,
+            "writeInt64", &SlPacketWriter::WriteInt64,
+            "writeUInt8", &SlPacketWriter::Write<uint8_t>,
+            "writeUInt16", &SlPacketWriter::Write<uint16_t>,
+            "writeUInt32", &SlPacketWriter::Write<uint32_t>,
+            "writeString", &SlPacketWriter::WriteString,
+            "writeObject", sol::resolve<void(PacketWriter&)>(&SlPacketWriter::WriteObject)
         );
     }
 }

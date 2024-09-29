@@ -13,5 +13,8 @@ namespace sunlight
         LuaScriptBinder() = delete;
 
         static void Bind(sol::state& luaState);
+
+    private:
+        static void BindPacket(sol::state& luaState);
     };
 }

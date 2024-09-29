@@ -13,6 +13,7 @@ namespace sunlight
     LuaScriptEngine::LuaScriptEngine(const ServiceLocator& serviceLocator, const std::filesystem::path& scriptPath)
         : _serviceLocator(serviceLocator)
         , _scriptPath(scriptPath)
+        , _commandScriptPath(_scriptPath / "command")
         , _npcScriptPath(_scriptPath / "npc")
     {
         try
@@ -31,6 +32,7 @@ namespace sunlight
 
             LuaScriptBinder::Bind(_luaState);
 
+            InitializeCommandScript(_commandScripts, _npcScriptPath);
             InitializeNPCScript(_npcScripts, _npcScriptPath);
         }
         catch (const std::exception& e)
@@ -53,13 +55,56 @@ namespace sunlight
 
     bool LuaScriptEngine::Reload()
     {
+        decltype(_commandScripts) newCommandScripts;
+        if (!InitializeCommandScript(newCommandScripts, _commandScriptPath))
+        {
+            return false;
+        }
+
         decltype(_npcScripts) newScript;
         if (!InitializeNPCScript(newScript, _npcScriptPath))
         {
             return false;
         }
 
+        std::swap(_commandScripts, newCommandScripts);
         std::swap(_npcScripts, newScript);
+
+        return true;
+    }
+
+    bool LuaScriptEngine::ReloadCommandScript()
+    {
+        decltype(_commandScripts) newCommandScripts;
+        if (!InitializeCommandScript(newCommandScripts, _commandScriptPath))
+        {
+            return false;
+        }
+
+        std::swap(_commandScripts, newCommandScripts);
+
+        return true;
+    }
+
+    bool LuaScriptEngine::ExecuteCommandScript(const std::string& name, LuaPlayer& player)
+    {
+        const auto iter = _commandScripts.find(name);
+        if (iter == _commandScripts.end())
+        {
+            return false;
+        }
+
+        sol::protected_function_result result = iter->second(&player);
+        if (!result.valid())
+        {
+            const sol::error error = result;
+
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] fail to execute script. player: {}, script: {}, error: {}",
+                    GetName(), player.GetCId(), name, error.what()));
+
+            return false;
+        }
 
         return true;
     }
@@ -87,7 +132,65 @@ namespace sunlight
         return true;
     }
 
-    bool LuaScriptEngine::InitializeNPCScript(std::unordered_map<int32_t, sol::protected_function>& outNpcScript, const std::filesystem::path& directory)
+    bool LuaScriptEngine::InitializeCommandScript(std::unordered_map<std::string, sol::protected_function>& outScript, const std::filesystem::path& directory)
+    {
+        bool success = true;
+
+        for (const auto& entry : std::filesystem::directory_iterator(directory))
+        {
+            const std::filesystem::path& path = entry.path();
+            if (!path.has_extension() || ::_stricmp(path.extension().string().c_str(), ".lua") != 0)
+            {
+                continue;
+            }
+
+            const std::string& name = path.stem().string();
+
+            sol::load_result script = _luaState.load_file(path.string());
+            if (!script.valid())
+            {
+                success = false;
+                const sol::error error = script;
+
+                SUNLIGHT_LOG_CRITICAL(_serviceLocator,
+                    fmt::format("[{}] fail to load file. path: {}, error: {}",
+                        GetName(), path.string(), error.what()));
+
+                continue;
+            }
+
+            sol::protected_function_result result = script();
+            if (!result.valid())
+            {
+                success = false;
+                const sol::error error = result;
+
+                SUNLIGHT_LOG_CRITICAL(_serviceLocator,
+                    fmt::format("[{}] fail to file. path: {}, error: {}",
+                        GetName(), path.string(), error.what()));
+
+                continue;
+            }
+
+            sol::protected_function function = result;
+            if (!function.valid())
+            {
+                success = false;
+
+                SUNLIGHT_LOG_CRITICAL(_serviceLocator,
+                    fmt::format("[{}] npc talk script does't return function. path: {}",
+                        GetName(), path.string()));
+
+                continue;
+            }
+
+            outScript[name] = function;
+        }
+
+        return success;
+    }
+
+    bool LuaScriptEngine::InitializeNPCScript(std::unordered_map<int32_t, sol::protected_function>& outScript, const std::filesystem::path& directory)
     {
         bool success = true;
 
@@ -139,7 +242,7 @@ namespace sunlight
                 continue;
             }
 
-            outNpcScript[npcId] = function;
+            outScript[npcId] = function;
         }
 
         return success;

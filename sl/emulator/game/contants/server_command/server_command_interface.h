@@ -30,9 +30,23 @@ namespace sunlight
 
             tuple_type tuple;
 
-            const auto build = [&reader]<size_t...I>(tuple_type & tuple, std::index_sequence<I...>) -> bool
+            const auto parse = [&reader]<typename T>(T& value, int64_t index) -> bool
                 {
-                    return (... && reader.TryParse<I, std::tuple_element_t<I, tuple_type>>(std::get<I>(tuple)));
+                    if constexpr (std::is_same_v<T, std::string>)
+                    {
+                        reader.Get(index, value);
+
+                        return true;
+                    }
+                    else
+                    {
+                        return reader.TryParse<T>(index, value);
+                    }
+                };
+
+            const auto build = [&]<size_t...I>(tuple_type & tuple, std::index_sequence<I...>) -> bool
+                {
+                    return (... && parse(std::get<I>(tuple), static_cast<int64_t>(I)));
                 };
 
             const bool result = build(tuple, std::make_index_sequence<sizeof...(TParams)>());

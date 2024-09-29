@@ -30,6 +30,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandTeleport>(system));
 
         system.AddCommand(std::make_shared<ServerCommandScriptReload>(system));
+        system.AddCommand(std::make_shared<ServerCommandScriptExecute>(system));
 
         system.AddCommand(std::make_shared<ServerCommandNPCShopRoll>(system));
         system.AddCommand(std::make_shared<ServerCommandNPCShopDebugSlot>(system));

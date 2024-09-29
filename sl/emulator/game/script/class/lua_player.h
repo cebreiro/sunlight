@@ -14,6 +14,8 @@ namespace sunlight
 
     class LuaNPC;
     class NPCTalkBox;
+
+    class SlPacketWriter;
 }
 
 namespace sunlight
@@ -38,6 +40,10 @@ namespace sunlight
 
         auto FindQuest(int32_t quest) const -> const Quest*;
 
+        void Send(SlPacketWriter& writer);
+
+        auto GetId() const -> int32_t;
+        auto GetTypeValue() const -> int32_t;
         auto GetNoviceJobLevel() const -> int32_t;
         auto GetSelection() const -> int32_t;
 

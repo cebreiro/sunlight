@@ -15,6 +15,7 @@
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
+#include "sl/emulator/server/packet/io/sl_packet_writer.h"
 
 namespace sunlight
 {
@@ -74,6 +75,21 @@ namespace sunlight
         return _player.GetQuestComponent().FindQuest(quest);
     }
 
+    void LuaPlayer::Send(SlPacketWriter& writer)
+    {
+        _player.Send(writer.Flush());
+    }
+
+    auto LuaPlayer::GetId() const -> int32_t
+    {
+        return static_cast<int32_t>(_player.GetId().Unwrap());
+    }
+
+    auto LuaPlayer::GetTypeValue() const -> int32_t
+    {
+        return static_cast<int32_t>(_player.GetType());
+    }
+
     auto LuaPlayer::GetNoviceJobLevel() const -> int32_t
     {
         const Job* novice = _player.GetJobComponent().Find(JobType::Novice);
@@ -100,6 +116,9 @@ namespace sunlight
             "startQuest", &LuaPlayer::StartQuest,
             "changeQuest", &LuaPlayer::ChangeQuest,
             "findQuest", &LuaPlayer::FindQuest,
+            "send", &LuaPlayer::Send,
+            "getId", &LuaPlayer::GetId,
+            "getTypeValue", &LuaPlayer::GetTypeValue,
             "getNoviceJobLevel", &LuaPlayer::GetNoviceJobLevel,
             "getSelection", &LuaPlayer::GetSelection
         );
