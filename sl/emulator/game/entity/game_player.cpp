@@ -6,10 +6,11 @@
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
+#include "sl/emulator/game/component/player_npc_shop_component.h"
+#include "sl/emulator/game/component/player_profile_component.h"
+#include "sl/emulator/game/component/player_quest_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
-#include "sl/emulator/game/component/player_quest_component.h"
-#include "sl/emulator/game/component/player_npc_shop_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/server/client/game_client.h"
@@ -180,6 +181,7 @@ namespace sunlight
         (void)AddComponent(std::make_unique<PlayerNPCScriptComponent>());
         (void)AddComponent(CreateQuestComponent(dto));
         (void)AddComponent(std::make_unique<PlayerNPCShopComponent>());
+        (void)AddComponent(std::make_unique<PlayerProfileComponent>());
     }
 
     bool GamePlayer::HasDeferred() const
@@ -378,5 +380,15 @@ namespace sunlight
     auto GamePlayer::GetNPCShopComponent() const -> const PlayerNPCShopComponent&
     {
         return GetComponent<PlayerNPCShopComponent>();
+    }
+
+    auto GamePlayer::GetProfileComponent() -> PlayerProfileComponent&
+    {
+        return GetComponent<PlayerProfileComponent>();
+    }
+
+    auto GamePlayer::GetProfileComponent() const -> const PlayerProfileComponent&
+    {
+        return GetComponent<PlayerProfileComponent>();
     }
 }

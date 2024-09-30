@@ -65,7 +65,9 @@ namespace sunlight
             "writeUInt8", sol::overload(static_cast<void(PacketWriter::*)(uint8_t)>(&PacketWriter::Write)),
             "writeUInt16", sol::overload(static_cast<void(PacketWriter::*)(uint16_t)>(&PacketWriter::Write)),
             "writeUInt32", sol::overload(static_cast<void(PacketWriter::*)(uint32_t)>(&PacketWriter::Write)),
+            "writeFloat", sol::overload(static_cast<void(PacketWriter::*)(float)>(&PacketWriter::Write)),
             "writeString", &PacketWriter::WriteString,
+            "writeFixedSizeString", &PacketWriter::WriteFixeSizeString,
             "writeZeroBytes", &PacketWriter::WriteZeroBytes
         );
 

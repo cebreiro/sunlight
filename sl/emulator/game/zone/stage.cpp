@@ -4,11 +4,12 @@
 #include "sl/data/map/map_stage.h"
 #include "sl/data/map/map_stage_room.h"
 #include "sl/data/map/map_stage_terrain.h"
-#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/component/npc_item_shop_component.h"
+#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/character_message.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/zone_message_hooker.h"
@@ -21,6 +22,7 @@
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
+#include "sl/emulator/game/system/player_profile_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
@@ -175,10 +177,24 @@ namespace sunlight
                 }
             }
             break;
-            case 2:
+            case 3:
             {
-                // chat message
+                CharacterMessage message{
+                    .player = *player,
+                    .reader = *reader
+                };
+                message.targetName = reader->ReadString();
+                message.type = static_cast<CharacterMessageType>(reader->Read<int32_t>());
+
+                if (!Publish(message))
+                {
+                    SUNLIGHT_LOG_WARN(_serviceLocator,
+                        fmt::format("[{}] unhanlded character message. player: {}, target: {}, type: {}, buffer: {}",
+                            GetName(), player->GetCId(), message.targetName, ToString(message.type),
+                            message.reader.GetBuffer().ToString()));
+                }
             }
+            break;
             default:
                 SUNLIGHT_LOG_WARN(_serviceLocator,
                     fmt::format("[{}] unhanlded zone message. player: {}, event_type: {}, buffer: {}",
@@ -206,7 +222,8 @@ namespace sunlight
 
         GameTimeService::SetNow(game_clock_type::now());
 
-        Get<SceneObjectSystem>().SpawnPlayer(std::move(player));
+        Get<SceneObjectSystem>().SpawnPlayer(player);
+        Get<PlayerProfileSystem>().OnStageEnter(*player);
 
         GameDebugger::SetInstance(nullptr);
     }
@@ -224,6 +241,11 @@ namespace sunlight
     bool Stage::AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneCommunityMessage&)>& subscriber)
     {
         return _zoneCommunityMessageSubscribers.try_emplace(type, subscriber).second;
+    }
+
+    bool Stage::AddSubscriber(CharacterMessageType type, const std::function<void(const CharacterMessage&)>& subscriber)
+    {
+        return _characterMessageSubscriber.try_emplace(type, subscriber).second;
     }
 
     auto Stage::GetId() const -> int32_t
@@ -276,6 +298,7 @@ namespace sunlight
         Add(std::make_shared<GameRepositorySystem>(_serviceLocator));
         Add(std::make_shared<PlayerQuestSystem>());
         Add(std::make_shared<NPCShopSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerProfileSystem>(_serviceLocator, _zoneId));
 
         const auto range = _systems | std::views::values;
 
@@ -415,6 +438,19 @@ namespace sunlight
     {
         const auto iter = _zoneCommunityMessageSubscribers.find(message.type);
         if (iter == _zoneCommunityMessageSubscribers.end())
+        {
+            return false;
+        }
+
+        iter->second(message);
+
+        return true;
+    }
+
+    bool Stage::Publish(const CharacterMessage& message)
+    {
+        const auto iter = _characterMessageSubscriber.find(message.type);
+        if (iter == _characterMessageSubscriber.end())
         {
             return false;
         }

@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/emulator/game/message/character_message_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/server/client/game_client_id.h"
 #include "sl/emulator/server/packet/zone_packet_c2s.h"
@@ -10,6 +11,7 @@ namespace sunlight
     struct MapProp;
     struct MapTerrainProp;
     struct MapStage;
+    struct CharacterMessage;
     struct ZoneRequest;
     struct ZoneMessage;
     struct ZoneCommunityMessage;
@@ -43,6 +45,7 @@ namespace sunlight
         bool AddSubscriber(ZonePacketC2S type, const std::function<void(const ZoneRequest&)>& subscriber);
         bool AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneMessage&)>& subscriber);
         bool AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneCommunityMessage&)>& subscriber);
+        bool AddSubscriber(CharacterMessageType type, const std::function<void(const CharacterMessage&)>& subscriber);
 
         auto GetId() const -> int32_t;
         auto GetName() const -> const std::string&;
@@ -62,6 +65,7 @@ namespace sunlight
         bool Publish(const ZoneRequest& request);
         bool Publish(const ZoneMessage& message);
         bool Publish(const ZoneCommunityMessage& message);
+        bool Publish(const CharacterMessage& message);
 
     private:
         static auto ExtractPositionAndYaw(const Eigen::Matrix4f& matrix) -> std::pair<Eigen::Vector3f, float>;
@@ -80,6 +84,7 @@ namespace sunlight
         std::unordered_map<ZonePacketC2S, std::function<void(const ZoneRequest&)>> _zoneRequestSubscribers;
         std::unordered_map<ZoneMessageType, std::function<void(const ZoneMessage&)>> _zoneMessageSubscribers;
         std::unordered_map<ZoneMessageType, std::function<void(const ZoneCommunityMessage&)>> _zoneCommunityMessageSubscribers;
+        std::unordered_map<CharacterMessageType, std::function<void(const CharacterMessage&)>> _characterMessageSubscriber;
 
         std::unordered_map<game_client_id_type, SharedPtrNotNull<GamePlayer>> _players;
     };

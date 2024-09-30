@@ -12,21 +12,26 @@ namespace sunlight
     {
         (void)player;
 
-        // 0x00482A50
+        // client 0x482A50
+        // client has no reference to 'SLBUDDYLIST.WND'(global asset id: 0x700030DB) and even that file is not exists.
+        // player can't open 'friend' window and other player profile's 'friend add' button has no action (client 0x43715F)
+        // I think it is nature that all bytes is 0.
 
         PacketWriter writer;
 
         const std::string str("unk_0x00482A50");
-        const int32_t unk1Size = 0;
-        const int32_t unk2Size = 0;
+        const int32_t groupSize = 0;
+        const int32_t buddySize = 0;
         const int32_t unk3Size = static_cast<int32_t>(std::ssize(str));
 
-        writer.Write<int32_t>(unk1Size);
-        writer.Write<int32_t>(unk2Size);
+        writer.Write<int32_t>(groupSize);
+        writer.Write<int32_t>(buddySize);
         writer.Write<int32_t>(unk3Size);
 
-        for (int32_t i = 0; i < unk1Size; ++i) // 72 byte 
+        for (int32_t i = 0; i < groupSize; ++i) // 72 byte 
         {
+            writer.Write<int32_t>(0); // index 0~
+            writer.Write<int32_t>(0); // group names start
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
@@ -42,23 +47,21 @@ namespace sunlight
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
-            writer.Write<int32_t>(0);
-            writer.Write<int32_t>(0);
-            writer.Write<int32_t>(0);
+            writer.Write<int32_t>(0); // v3[17] requires greater then 0 -> client 0x4C3020
         }
 
-        for (int32_t i = 0; i < unk2Size; ++i) // 40 byte
+        for (int32_t i = 0; i < buddySize; ++i) // 40 byte
         {
+            writer.Write<int32_t>(0); // index 0~
+            writer.Write<int32_t>(0); // friend names start
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
             writer.Write<int32_t>(0);
-            writer.Write<int32_t>(0);
-            writer.Write<int32_t>(0);
-            writer.Write<int32_t>(0);
-            writer.Write<int32_t>(0);
+            writer.Write<int32_t>(0); // player name end
+            writer.Write<int32_t>(1); // *(v3 + 36) requires greater then 0 -> client 0x4C2E5F
         }
 
         writer.WriteBuffer(std::span(str.data(), unk3Size));
@@ -236,7 +239,10 @@ namespace sunlight
     {
         (void)player;
 
-        // 0x00484D60
+        // client 0x484D60
+        // client has no reference to 'SLPET.WND'(global asset id: 0x700030F9) and even that file is not exists.
+        // so player can't open 'pet summon' window.
+        // I think it is nature that all bytes is 0.
 
         PacketWriter writer;
         writer.Write<int32_t>(0);

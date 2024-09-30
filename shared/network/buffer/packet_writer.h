@@ -20,6 +20,8 @@ namespace sunlight
         void WriteBuffer(std::span<const char> buffer);
         void WriteZeroBytes(int64_t count);
 
+        void WriteFixeSizeString(const std::string& str, int64_t size);
+
         template <std::integral T>
         void Write(T value, int64_t offset);
 
