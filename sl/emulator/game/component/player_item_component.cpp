@@ -1002,6 +1002,24 @@ namespace sunlight
         return true;
     }
 
+    bool PlayerItemComponent::RemovePickedItem()
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        AddItemRemoveLog(*_pickItem);
+
+        const auto iter = _items.find(_pickItem->GetId());
+        assert(iter != _items.end());
+
+        _pickItem = nullptr;
+        _items.erase(iter);
+
+        return true;
+    }
+
     bool PlayerItemComponent::RemoveItem(game_entity_id_type id)
     {
         const auto iter = _items.find(id);
@@ -1127,6 +1145,17 @@ namespace sunlight
         _items.erase(iter);
 
         return result;
+    }
+
+    auto PlayerItemComponent::FindItemShared(game_entity_id_type id) -> std::shared_ptr<GameItem>
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            return nullptr;
+        }
+
+        return iter->second;
     }
 
     auto PlayerItemComponent::FindItem(game_entity_id_type id) const -> const GameItem*

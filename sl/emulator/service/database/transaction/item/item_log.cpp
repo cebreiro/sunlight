@@ -60,6 +60,30 @@ namespace sunlight::db
         };
     }
 
+    void to_json(nlohmann::json& j, const ItemLogAccountStorageAdd& log)
+    {
+        j = nlohmann::json
+        {
+            { "type", log.type },
+            { "id", log.id },
+            { "aid", log.aid },
+            { "itemId", log.itemId },
+            { "quantity", log.quantity },
+            { "page", log.page },
+            { "x", log.x },
+            { "y", log.y },
+        };
+    }
+
+    void to_json(nlohmann::json& j, const ItemLogAccountStorageRemove& log)
+    {
+        j = nlohmann::json
+        {
+            { "type", log.type },
+            { "id", log.id },
+        };
+    }
+
     void to_json(nlohmann::json& j, const ItemLog& log)
     {
         std::visit([&]<typename T>(const T& item)
@@ -81,6 +105,14 @@ namespace sunlight::db
                     to_json(j, item);
                 }
                 else if constexpr (std::is_same_v<T, GoldChange>)
+                {
+                    to_json(j, item);
+                }
+                else if constexpr (std::is_same_v<T, ItemLogAccountStorageAdd>)
+                {
+                    to_json(j, item);
+                }
+                else if constexpr (std::is_same_v<T, ItemLogAccountStorageRemove>)
                 {
                     to_json(j, item);
                 }

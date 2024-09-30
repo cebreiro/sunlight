@@ -184,6 +184,27 @@ namespace sunlight
         co_return procedure.Release();
     }
 
+    auto DatabaseService::GetAccountStorage(int64_t aid) -> Future<std::optional<db::dto::AccountStorage>>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::AccountStorageGet procedure(conn, aid);
+
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return std::nullopt;
+        }
+
+        co_return std::move(procedure.GetResult());
+    }
+
     auto DatabaseService::AddNewJob(int64_t cid, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills) -> Future<bool>
     {
         [[maybe_unused]]

@@ -5,6 +5,7 @@
 #include "sl/emulator/game/component/item_ownership_component.h"
 #include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/npc_item_shop_component.h"
+#include "sl/emulator/game/component/player_account_storage_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
@@ -48,6 +49,12 @@ namespace sunlight
     bool ItemArchiveSystem::Subscribe(Stage& stage)
     {
         if (!stage.AddSubscriber(ZoneMessageType::ITEMARCHIVEMSG,
+            std::bind_front(&ItemArchiveSystem::HandleMessage, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::ACCOUNTSTORAGE_ARCHIVEMSG,
             std::bind_front(&ItemArchiveSystem::HandleMessage, this)))
         {
             return false;
@@ -527,6 +534,36 @@ namespace sunlight
         return true;
     }
 
+    void ItemArchiveSystem::OpenAccountStorage(GamePlayer& player)
+    {
+        PlayerAccountStorageComponent* accountStorageComponent = player.FindComponent<PlayerAccountStorageComponent>();
+        if (!accountStorageComponent)
+        {
+            auto temp = std::make_unique<PlayerAccountStorageComponent>();
+            assert(temp->IsLoadPending());
+
+            accountStorageComponent = temp.get();
+            player.AddComponent(std::move(temp));
+
+            Get<GameRepositorySystem>().LoadAccountStorage(player,
+                [this, cid = player.GetCId()](const db::dto::AccountStorage& storage)
+                {
+                    OnCompleteLoadAccountStorage(cid, storage);
+                });
+
+            player.Send(ItemArchiveMessageCreator::CreateAccountStorageOpening(player));
+
+            return;
+        }
+
+        if (accountStorageComponent->IsLoadPending())
+        {
+            return;
+        }
+
+        player.Send(ItemArchiveMessageCreator::CreateAccountStorageInit(player));
+    }
+
     bool ItemArchiveSystem::IsValid(EquipmentPosition position, sox::EquipmentType soxType)
     {
         switch (position)
@@ -579,6 +616,27 @@ namespace sunlight
         Get<EntityViewRangeSystem>().Broadcast(player, GamePlayerMessageCreator::CreateRemovePlayerWeaponChange(player), true);
     }
 
+    void ItemArchiveSystem::OnCompleteLoadAccountStorage(int64_t cid, const db::dto::AccountStorage& dto)
+    {
+        GamePlayer* player = Get<SceneObjectSystem>().FindPlayerByCid(cid);
+        if (!player)
+        {
+            return;
+        }
+
+        PlayerAccountStorageComponent* accountStorageComponent = player->FindComponent<PlayerAccountStorageComponent>();
+        if (!accountStorageComponent || !accountStorageComponent->IsLoadPending())
+        {
+            return;
+        }
+
+        accountStorageComponent->Initialize(
+            _serviceLocator.Get<GameEntityIdPublisher>(),
+            _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider(), dto);
+
+        player->Send(ItemArchiveMessageCreator::CreateAccountStorageInit(*player));
+    }
+
     void ItemArchiveSystem::HandleMessage(const ZoneMessage& message)
     {
         GamePlayer& player = message.player;
@@ -596,7 +654,20 @@ namespace sunlight
                     SaveChanges(player);
                 }
 
-                player.Defer(ItemArchiveMessageCreator::CreateArchiveResult(player, success, subType));
+                switch (message.type)
+                {
+                case ZoneMessageType::ITEMARCHIVEMSG:
+                {
+                    player.Defer(ItemArchiveMessageCreator::CreateArchiveResult(player, success, subType));
+                }
+                break;
+                case ZoneMessageType::ACCOUNTSTORAGE_ARCHIVEMSG:
+                {
+                    player.Defer(ItemArchiveMessageCreator::CreateAccountStorageUnlock(player));
+                }
+                break;
+                }
+
                 player.FlushDeferred();
             });
 
@@ -681,18 +752,22 @@ namespace sunlight
             success = HandleDropPickedItem(player, game_entity_id_type(pickedItemId));
         }
         break;
-        case ZoneMessageType::ITEMARCHIVE_ADDITEM:
-        case ZoneMessageType::ITEMARCHIVE_USEITEM:
-        case ZoneMessageType::ITEMARCHIVE_ADD_SUB_GOLD:
-        case ZoneMessageType::ITEMARCHIVE_REMOVEITEM:
-        case ZoneMessageType::ITEMARCHIVE_RESULT:
-        case ZoneMessageType::ITEMARCHIVE_LORDITEM:
-        case ZoneMessageType::ITEMARCHIVE_ALLINVEN:
-        case ZoneMessageType::ITEMARCHIVE_DROPMONEY:
-        case ZoneMessageType::ITEMARCHIVE_DECREASEITEM:
-        case ZoneMessageType::ITEMARCHIVE_ADDINVENITEM:
-        case ZoneMessageType::ITEMARCHIVE_REALIGNITEM:
-        case ZoneMessageType::ITEMARCHIVE_LOCAL_USE_ITEM:
+        case ZoneMessageType::ACCOUNTSTORAGE_ARCHIVE_LOWERITEM:
+        {
+            const int32_t page = reader.Read<int32_t>();
+            const int32_t x = reader.Read<int32_t>();
+            const int32_t y = reader.Read<int32_t>();
+
+            const auto [pickedItemId, pickedItemType] = reader.ReadInt64();
+
+            success = HandleAccountStorageLowerItem(player,
+                static_cast<int8_t>(page),
+                static_cast<int8_t>(x),
+                static_cast<int8_t>(y),
+                game_entity_id_type(pickedItemId));
+
+        }
+        break;
         default:
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}] unhandled zone message. player: {}, type: {}, target: [{}, {}]",
@@ -1070,6 +1145,87 @@ namespace sunlight
         return true;
     }
 
+    bool ItemArchiveSystem::HandleAccountStorageLowerItem(GamePlayer& player, int8_t page, int8_t x, int8_t y, game_entity_id_type pickedItemId)
+    {
+        PlayerAccountStorageComponent* accountStorageComponent = player.FindComponent<PlayerAccountStorageComponent>();
+        if (!accountStorageComponent || accountStorageComponent->IsLoadPending())
+        {
+            return false;
+        }
+
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+        const GameItem* pickedItem = itemComponent.GetPickedItem();
+
+        if (pickedItem)
+        {
+            if (pickedItem->GetId() != pickedItemId)
+            {
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] invalid picked item id. player: {}, request: {}, real: {}",
+                        GetName(), player.GetCId(), pickedItemId, pickedItem->GetId()));
+
+                return false;
+            }
+
+            std::shared_ptr<GameItem> shared = itemComponent.FindItemShared(pickedItemId);
+            assert(shared);
+
+            std::shared_ptr<GameItem> outLifted;
+            if (!accountStorageComponent->LowerItem(std::move(shared), page, x, y, outLifted))
+            {
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] fail to lower item to account storage. player: {}, picked: {}, pos: [{}, {}, {}]",
+                        GetName(), player.GetCId(), pickedItemId, page, x, y));
+
+                return false;
+            }
+
+            player.Defer(ItemArchiveMessageCreator::CreateItemRemove(player, pickedItem->GetId(), pickedItem->GetType()));
+
+            [[maybe_unused]]
+            const bool removed = itemComponent.RemovePickedItem();
+            assert(removed);
+
+            if (outLifted)
+            {
+                player.Defer(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *outLifted));
+
+                [[maybe_unused]]
+                const bool added = itemComponent.AddNewPickedItem(outLifted);
+                assert(added);
+            }
+        }
+        else
+        {
+            if (pickedItemId != game_entity_id_type(0))
+            {
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] invalid picked item id. player: {}, request: {}",
+                        GetName(), player.GetCId(), pickedItemId));
+
+                return false;
+            }
+
+            std::shared_ptr<GameItem> liftedItem = accountStorageComponent->LiftItem(page, x, y);
+            if (!liftedItem)
+            {
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] fail to lift item to account storage. player: {}, pos: [{}, {}, {}]",
+                        GetName(), player.GetCId(), page, x, y));
+
+                return false;
+            }
+
+            player.Defer(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *liftedItem));
+
+            [[maybe_unused]]
+            const bool added = itemComponent.AddNewPickedItem(liftedItem);
+            assert(added);
+        }
+
+        return true;
+    }
+
     auto ItemArchiveSystem::CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>
     {
         assert(quantity > 0);
@@ -1082,15 +1238,24 @@ namespace sunlight
 
     void ItemArchiveSystem::SaveChanges(GamePlayer& player)
     {
-        PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+        db::ItemTransaction transaction;
 
-        if (!playerItemComponent.HasItemLog())
+        if (PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+            playerItemComponent.HasItemLog())
+        {
+            playerItemComponent.FlushItemLogTo(transaction.logs);
+        }
+
+        if (PlayerAccountStorageComponent* accountStorageComponent = player.FindComponent<PlayerAccountStorageComponent>();
+            accountStorageComponent && accountStorageComponent->HasItemLog())
+        {
+            accountStorageComponent->FlushItemLogTo(transaction.logs);
+        }
+
+        if (transaction.logs.empty())
         {
             return;
         }
-            
-        db::ItemTransaction transaction;
-        playerItemComponent.FlushItemLogTo(transaction.logs);
 
         Get<GameRepositorySystem>().Save(player, std::move(transaction));
     }

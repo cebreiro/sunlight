@@ -74,10 +74,13 @@ namespace sunlight
         bool DecreaseItemQuantity(game_entity_id_type id, int32_t quantity);
 
         bool AddNewPickedItem(SharedPtrNotNull<GameItem> item);
+        bool RemovePickedItem();
         bool RemoveItem(game_entity_id_type id);
         auto ReleaseItem(game_entity_id_type id) -> std::shared_ptr<GameItem>;
 
     public:
+        auto FindItemShared(game_entity_id_type id) -> std::shared_ptr<GameItem>;
+
         auto FindItem(game_entity_id_type id) const -> const GameItem*;
         auto FindEquipmentItem(EquipmentPosition position) const -> const GameItem*;
         auto FindInventoryItem(game_entity_id_type id) const -> const GameItem*;

@@ -3,6 +3,11 @@
 #include "sl/emulator/service/database/request/skill_create.h"
 #include "sl/emulator/service/database/transaction/item/item_transaction.h"
 
+namespace sunlight::db::dto
+{
+    struct AccountStorage;
+}
+
 namespace sunlight
 {
     class Quest;
@@ -23,9 +28,13 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 
+        // TODO: Join
+
     public:
         bool IsPending() const;
         bool IsPendingSaves(const GamePlayer& player) const;
+
+        void LoadAccountStorage(const GamePlayer& player, const std::function<void(const db::dto::AccountStorage&)>& callback);
 
         void Save(const GamePlayer& player, db::ItemTransaction transaction);
         void SaveCharacterExp(const GamePlayer& player, int32_t exp);

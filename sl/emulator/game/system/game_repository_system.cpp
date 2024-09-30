@@ -44,6 +44,28 @@ namespace sunlight
         return _pending.contains(player.GetCId());
     }
 
+    void GameRepositorySystem::LoadAccountStorage(const GamePlayer& player, const std::function<void(const db::dto::AccountStorage&)>& callback)
+    {
+        ++_pending[player.GetCId()].first;
+
+        const auto handler = [this, cid = player.GetCId(), callback](const std::optional<db::dto::AccountStorage>& result)
+            {
+                if (result.has_value())
+                {
+                    OnComplete(cid);
+
+                    callback(*result);
+                }
+                else
+                {
+                    OnError(cid);
+                }
+            };
+
+        _serviceLocator.Get<DatabaseService>().GetAccountStorage(player.GetAId())
+            .Then(*ExecutionContext::GetExecutor(), handler);
+    }
+
     void GameRepositorySystem::Save(const GamePlayer& player, db::ItemTransaction transaction)
     {
         ++_pending[player.GetCId()].first;

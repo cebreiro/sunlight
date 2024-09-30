@@ -133,6 +133,11 @@ namespace sunlight
         {
             player->FlushDeferred();
         }
+
+        const int64_t cid = player->GetCId();
+        assert(!_players.contains(cid));
+
+        _players[cid] = std::move(player);
     }
 
     bool SceneObjectSystem::SpawnNPC(SharedPtrNotNull<GameNPC> npc)
@@ -215,6 +220,13 @@ namespace sunlight
         viewRangeSystem.Remove(entity);
 
         iter1->second.erase(iter2);
+    }
+
+    auto SceneObjectSystem::FindPlayerByCid(int64_t cid) -> GamePlayer*
+    {
+        const auto iter = _players.find(cid);
+
+        return iter != _players.end() ? iter->second.get() : nullptr;
     }
 
     auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&

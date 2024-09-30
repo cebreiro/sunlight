@@ -1,6 +1,7 @@
 #include "item_archive_message_creator.h"
 
 #include "sl/emulator/game/component/item_position_component.h"
+#include "sl/emulator/game/component/player_account_storage_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_item.h"
@@ -276,6 +277,81 @@ namespace sunlight
         writer.Write(ZoneMessageType::ITEMARCHIVE_RESULT);
         writer.Write<int32_t>(result);
         writer.Write(archiveMessage);
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateAccountStorageOpening(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::PLAYER_OPEN_STORAGE);
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateAccountStorageInit(const GamePlayer& player) -> Buffer
+    {
+        // client 0x453250
+
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ACCOUNTSTORAGE_ARCHIVEMSG);
+        writer.Write(ZoneMessageType::ACCOUNTSTORAGE_ARCHIVE_INIT);
+
+        const PlayerAccountStorageComponent* accountStorageComponent = player.FindComponent<PlayerAccountStorageComponent>();
+        if (!accountStorageComponent)
+        {
+            assert(false);
+
+            return writer.Flush();
+        }
+
+        writer.Write<int32_t>(accountStorageComponent->GetPage());
+        writer.Write<int32_t>(accountStorageComponent->GetGold());
+
+        const auto itemRange = accountStorageComponent->GetItemRange();
+        writer.Write<int32_t>(static_cast<int32_t>(std::ssize(itemRange)));
+
+        {
+            PacketWriter objectWriter;
+
+            for (const GameItem& item : itemRange)
+            {
+                const ItemPositionComponent& itemPositionComponent = item.GetComponent<ItemPositionComponent>();
+
+                objectWriter.Write<int32_t>(itemPositionComponent.GetPage());
+                objectWriter.Write<int32_t>(itemPositionComponent.GetX());
+                objectWriter.Write<int32_t>(itemPositionComponent.GetY());
+
+                const item_object_buffer_type buffer = CreateItemObject(item);
+
+                objectWriter.Write<int32_t>(static_cast<int32_t>(std::ssize(buffer)));
+                objectWriter.WriteBuffer(buffer);
+            }
+
+            writer.Write<int32_t>(static_cast<int32_t>(objectWriter.GetWriteSize()));
+            writer.WriteObject(objectWriter);
+        }
+
+        return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateAccountStorageUnlock(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ACCOUNTSTORAGE_ARCHIVEMSG);
+        writer.Write(ZoneMessageType::ACCOUNTSTORAGE_ARCHIVE_RESULT);
 
         return writer.Flush();
     }

@@ -2,9 +2,13 @@
 #include "sl/data/sox/item/equipment_type.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/item/item_remove_result.h"
-#include "sl/emulator/game/contants/npc/npc_item_shop_result.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/system/game_system.h"
+
+namespace sunlight::db::dto
+{
+    struct AccountStorage;
+}
 
 namespace sunlight
 {
@@ -44,11 +48,16 @@ namespace sunlight
 
         bool RemoveInventoryItem(GamePlayer& player, int32_t itemId, int32_t quantity);
 
+        void OpenAccountStorage(GamePlayer& player);
+
     public:
         static bool IsValid(EquipmentPosition position, sox::EquipmentType soxType);
 
     public:
         void OnWeaponSwap(const ZoneMessage& message);
+
+    private:
+        void OnCompleteLoadAccountStorage(int64_t cid, const db::dto::AccountStorage& dto);
 
     private:
         void HandleMessage(const ZoneMessage& message);
@@ -64,6 +73,8 @@ namespace sunlight
 
         bool HandleDestroyPickedItem(GamePlayer& player, game_entity_id_type pickedItemId);
         bool HandleDropPickedItem(GamePlayer& player, game_entity_id_type pickedItemId);
+
+        bool HandleAccountStorageLowerItem(GamePlayer& player, int8_t page, int8_t x, int8_t y, game_entity_id_type pickedItemId);
 
     private:
         auto CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>;

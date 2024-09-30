@@ -1,6 +1,7 @@
 #pragma once
 #include "sl/emulator/service/emulation_service_interface.h"
 #include "sl/emulator/service/database/dto/account.h"
+#include "sl/emulator/service/database/dto/account_storage.h"
 #include "sl/emulator/service/database/dto/character.h"
 #include "sl/emulator/service/database/dto/lobby_character.h"
 #include "sl/emulator/service/database/request/character_create.h"
@@ -42,6 +43,7 @@ namespace sunlight
         auto DeleteCharacterSoft(int64_t cid) -> Future<bool>;
 
         auto GetCharacter(int64_t cid) -> Future<std::optional<db::dto::Character>>;
+        auto GetAccountStorage(int64_t aid) -> Future<std::optional<db::dto::AccountStorage>>;
 
         auto AddNewJob(int64_t cid, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills) -> Future<bool>;
         auto AddQuest(int64_t cid, int32_t id, int32_t state, std::string flags, std::string data) -> Future<bool>;

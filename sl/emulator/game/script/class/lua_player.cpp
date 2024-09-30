@@ -66,6 +66,11 @@ namespace sunlight
         _system.Get<NPCShopSystem>().OpenItemShop(_player, npc.GetImpl());
     }
 
+    void LuaPlayer::OpenAccountStorage()
+    {
+        _system.Get<ItemArchiveSystem>().OpenAccountStorage(_player);
+    }
+
     void LuaPlayer::StartQuest(Quest quest)
     {
         _system.Get<PlayerQuestSystem>().StartQuest(_player, quest);
@@ -120,6 +125,7 @@ namespace sunlight
             "talk", &LuaPlayer::Talk,
             "disposeTalk", &LuaPlayer::DisposeTalk,
             "openShop", &LuaPlayer::OpenShop,
+            "openAccountStorage", &LuaPlayer::OpenAccountStorage,
             "startQuest", &LuaPlayer::StartQuest,
             "changeQuest", &LuaPlayer::ChangeQuest,
             "findQuest", &LuaPlayer::FindQuest,

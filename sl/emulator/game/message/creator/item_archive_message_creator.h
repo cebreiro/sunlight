@@ -33,6 +33,10 @@ namespace sunlight
         static auto CreateGoldAddOrSub(const GamePlayer& player, int32_t value) -> Buffer;
         static auto CreateArchiveResult(const GamePlayer& player, bool result, ZoneMessageType archiveMessage) -> Buffer;
 
+        static auto CreateAccountStorageOpening(const GamePlayer& player) -> Buffer;
+        static auto CreateAccountStorageInit(const GamePlayer& player) -> Buffer;
+        static auto CreateAccountStorageUnlock(const GamePlayer& player) -> Buffer;
+
     public:
         using item_object_buffer_type = boost::container::static_vector<char, 23>;
 
