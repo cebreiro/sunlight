@@ -534,6 +534,27 @@ namespace sunlight
         return true;
     }
 
+    bool ItemArchiveSystem::Charge(GamePlayer& player, int32_t cost)
+    {
+        if (cost <= 0)
+        {
+            assert(false);
+
+            return false;
+        }
+
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+        if (itemComponent.GetGold() < cost)
+        {
+            return false;
+        }
+
+        itemComponent.AddOrSubGold(-cost);
+        player.Send(ItemArchiveMessageCreator::CreateGoldAddOrSub(player, -cost));
+
+        return true;
+    }
+
     void ItemArchiveSystem::OpenAccountStorage(GamePlayer& player)
     {
         PlayerAccountStorageComponent* accountStorageComponent = player.FindComponent<PlayerAccountStorageComponent>();
@@ -770,8 +791,8 @@ namespace sunlight
         break;
         default:
             SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] unhandled zone message. player: {}, type: {}, target: [{}, {}]",
-                    GetName(), player.GetCId(), ToString(subType), targetId, ToString(targetType)));
+                fmt::format("[{}] unhandled zone message. player: {}, type: {}, target: [{}, {}], buffer: {}",
+                    GetName(), player.GetCId(), ToString(subType), targetId, ToString(targetType), reader.GetBuffer().ToString()));
         }
     }
 

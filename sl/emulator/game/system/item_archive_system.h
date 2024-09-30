@@ -48,6 +48,8 @@ namespace sunlight
 
         bool RemoveInventoryItem(GamePlayer& player, int32_t itemId, int32_t quantity);
 
+        bool Charge(GamePlayer& player, int32_t gold);
+
         void OpenAccountStorage(GamePlayer& player);
 
     public:

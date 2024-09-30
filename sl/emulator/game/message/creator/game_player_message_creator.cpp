@@ -284,6 +284,21 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto GamePlayerMessageCreator::CreatePlayerHairChange(const GamePlayer& player, int32_t newHair, bool hasHat) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_MSG);
+        writer.Write(ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_HAIR);
+        writer.Write<int32_t>(newHair);
+        writer.Write<int8_t>(hasHat ? 1 : 0);
+
+        return writer.Flush();
+    }
+
     auto GamePlayerMessageCreator::CreatePlayerSkinColorChange(const GamePlayer& player, int32_t newColor) -> Buffer
     {
         SlPacketWriter writer;

@@ -3,6 +3,8 @@
 
 namespace sunlight
 {
+    struct ZoneMessage;
+
     class GamePlayer;
 }
 
@@ -19,6 +21,12 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
         void RefreshWeaponMotionCategory(GamePlayer& player);
+
+    private:
+        void HandleMultiPlayerSyncMessage(const ZoneMessage& message);
+
+        void HandleHairColorChange(GamePlayer& player, int32_t newColor);
+        void HandleHairChange(GamePlayer& player, int32_t newHair);
 
     private:
         auto GetWeaponMotionCategory(const GamePlayer& player) const -> int32_t;

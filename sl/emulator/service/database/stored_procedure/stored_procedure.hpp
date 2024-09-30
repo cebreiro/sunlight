@@ -7,6 +7,8 @@
 #include "sl/emulator/service/database/stored_procedure/impl/character_delete_soft.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_exp_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_get.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_hair_color_set.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_hair_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_job_add.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_job_exp_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_job_level_set.h"

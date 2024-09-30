@@ -63,6 +63,14 @@ namespace sunlight
 
                 return true;
             }
+            case ZoneMessageType::BARBER_PAYMENT:
+            {
+                reader.Skip();
+
+                _stage.Get<NPCShopSystem>().OnBarberPayment(message);
+
+                return true;
+            }
             default:;
             }
 

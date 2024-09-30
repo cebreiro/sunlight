@@ -432,4 +432,46 @@ namespace sunlight
 
         co_return true;
     }
+
+    auto DatabaseService::SetHair(int64_t cid, int32_t hair) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterHairSet procedure(conn, cid, hair);
+
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
+    auto DatabaseService::SetHairColor(int64_t cid, int32_t hairColor) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterHairColorSet procedure(conn, cid, hairColor);
+
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
 }

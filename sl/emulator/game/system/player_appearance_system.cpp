@@ -6,6 +6,11 @@
 #include "sl/emulator/game/data/sox/item_weapon.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/zone_message.h"
+#include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
 
 namespace sunlight
@@ -17,12 +22,17 @@ namespace sunlight
 
     void PlayerAppearanceSystem::InitializeSubSystem(Stage& stage)
     {
-        (void)stage;
+        Add(stage.Get<EntityViewRangeSystem>());
+        Add(stage.Get<GameRepositorySystem>());
     }
 
     bool PlayerAppearanceSystem::Subscribe(Stage& stage)
     {
-        (void)stage;
+        if (!stage.AddSubscriber(ZoneMessageType::MULTIPLAYER_SYNC_MSG,
+            std::bind_front(&PlayerAppearanceSystem::HandleMultiPlayerSyncMessage, this)))
+        {
+            return false;
+        }
 
         return true;
     }
@@ -42,6 +52,76 @@ namespace sunlight
         const int32_t weaponMotion = GetWeaponMotionCategory(player);
 
         player.GetAppearanceComponent().SetWeaponMotionCategory(weaponMotion);
+    }
+
+    void PlayerAppearanceSystem::HandleMultiPlayerSyncMessage(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+        game_entity_id_type targetId = message.targetId;
+        GameEntityType targetType = message.targetType;
+
+        const auto subType = reader.Read<ZoneMessageType>();
+
+        switch (subType)
+        {
+        case ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_HAIR_COLOR:
+        {
+            const int32_t newColor = reader.Read<int32_t>();
+
+            HandleHairColorChange(player, newColor);
+        }
+        break;
+        case ZoneMessageType::MULTIPLAYER_SYNC_CHANGE_HAIR:
+        {
+            const int32_t newHair = reader.Read<int32_t>();
+
+            HandleHairChange(player, newHair);
+        }
+        break;
+        default:
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] multiplayer message. player: {}, type: {}, target: [{}, {}], buffer: {}",
+                    GetName(), player.GetCId(), ToString(subType), targetId, ToString(targetType), reader.GetBuffer().ToString()));
+        }
+
+    }
+
+    void PlayerAppearanceSystem::HandleHairColorChange(GamePlayer& player, int32_t newColor)
+    {
+        // barber payment should precede and confirm it, but it is quite trivial
+
+        PlayerAppearanceComponent& appearanceComponent = player.GetAppearanceComponent();
+        if (appearanceComponent.GetHairColor() == newColor)
+        {
+            return;
+        }
+
+        appearanceComponent.SetHairColor(newColor);
+
+        Get<EntityViewRangeSystem>().Broadcast(player,
+            GamePlayerMessageCreator::CreatePlayerHairColorChange(player, newColor), false);
+
+        Get<GameRepositorySystem>().SaveHairColor(player, newColor);
+    }
+
+    void PlayerAppearanceSystem::HandleHairChange(GamePlayer& player, int32_t newHair)
+    {
+        // barber payment should precede and confirm it, but it is quite trivial
+
+        PlayerAppearanceComponent& appearanceComponent = player.GetAppearanceComponent();
+        if (appearanceComponent.GetHair() == newHair)
+        {
+            return;
+        }
+
+        appearanceComponent.SetHair(newHair);
+        const bool hasHat = appearanceComponent.GetHatModelId() != 0;
+
+        Get<EntityViewRangeSystem>().Broadcast(player,
+            GamePlayerMessageCreator::CreatePlayerHairChange(player, newHair, hasHat), false);
+
+        Get<GameRepositorySystem>().SaveHair(player, newHair);
     }
 
     auto PlayerAppearanceSystem::GetWeaponMotionCategory(const GamePlayer& player) const -> int32_t

@@ -39,6 +39,8 @@ namespace sunlight
         void OnPlayerBuyShopItem(const ZoneMessage& message);
         void OnPlayerSellOwnItem(const ZoneMessage& message);
 
+        void OnBarberPayment(const ZoneMessage& message);
+
     private:
         void CreateShopItems(GameNPC& npc);
 

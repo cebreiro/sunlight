@@ -136,16 +136,18 @@ namespace sunlight
 
         playerNPCShopComponent.SetShoppingNPC(&npc);
 
-        NPCItemShopComponent& itemShopComponent = npc.GetComponent<NPCItemShopComponent>();
-        itemShopComponent.AddSyncPlayer(player);
-
         player.Send(NPCMessageCreator::CreateShopOpen(npc));
 
-        if (!itemShopComponent.IsVisitedAfterRoll())
+        if (NPCItemShopComponent* itemShopComponent = npc.FindComponent<NPCItemShopComponent>(); itemShopComponent)
         {
-            itemShopComponent.SetVisitedAfterRoll(true);
+            itemShopComponent->AddSyncPlayer(player);
 
-            ConfigureNPCShopRollTimer(npc);
+            if (!itemShopComponent->IsVisitedAfterRoll())
+            {
+                itemShopComponent->SetVisitedAfterRoll(true);
+
+                ConfigureNPCShopRollTimer(npc);
+            }
         }
     }
 
@@ -181,7 +183,10 @@ namespace sunlight
         GameNPC& npc = playerNPCShopComponent.GetShoppingNPC();
         playerNPCShopComponent.SetShoppingNPC(nullptr);
 
-        npc.GetComponent<NPCItemShopComponent>().RemoveSyncPlayer(player);
+        if (NPCItemShopComponent* itemShopComponent = npc.FindComponent<NPCItemShopComponent>(); itemShopComponent)
+        {
+            itemShopComponent->RemoveSyncPlayer(player);
+        }
     }
 
     void NPCShopSystem::OnPlayerBuyShopItem(const ZoneMessage& message)
@@ -256,6 +261,31 @@ namespace sunlight
         const auto [targetItemId, targetItemType] = reader.ReadInt64();
 
         Get<ItemArchiveSystem>().SellOwnItem(player, playerNPCShopComponent.GetShoppingNPC(), game_entity_id_type(targetItemId));
+    }
+
+    void NPCShopSystem::OnBarberPayment(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const int32_t cost = reader.Read<int32_t>();
+        if (cost > 0)
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] cost cheat detected. player: {}, gold: {}",
+                    GetName(), player.GetCId(), cost));
+        }
+        else if (cost == 0)
+        {
+            return;
+        }
+
+        if (!Get<ItemArchiveSystem>().Charge(player, -cost))
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] fail to charge barber payment. player: {}, value: {}",
+                    GetName(), player.GetCId(), cost));
+        }
     }
 
     void NPCShopSystem::CreateShopItems(GameNPC& npc)

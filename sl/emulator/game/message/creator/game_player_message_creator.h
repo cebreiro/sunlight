@@ -35,6 +35,7 @@ namespace sunlight
 
         static auto CreatePlayerEquipmentChange(const GamePlayer& player, EquipmentPosition position, int32_t modelId, int32_t modelColor) -> Buffer;
         static auto CreatePlayerHairColorChange(const GamePlayer& player, int32_t newColor) -> Buffer;
+        static auto CreatePlayerHairChange(const GamePlayer& player, int32_t newHair, bool hasHat) -> Buffer;
         static auto CreatePlayerSkinColorChange(const GamePlayer& player, int32_t newColor) -> Buffer;
 
         static auto CreateQuestAllState(const GamePlayer& player) -> Buffer;

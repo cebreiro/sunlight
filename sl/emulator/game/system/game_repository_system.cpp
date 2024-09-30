@@ -229,6 +229,42 @@ namespace sunlight
                 });
     }
 
+    void GameRepositorySystem::SaveHair(const GamePlayer& player, int32_t hair)
+    {
+        ++_pending[player.GetCId()].first;
+
+        _serviceLocator.Get<DatabaseService>().SetHair(player.GetCId(), hair)
+            .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(cid);
+                    }
+                    else
+                    {
+                        OnError(cid);
+                    }
+                });
+    }
+
+    void GameRepositorySystem::SaveHairColor(const GamePlayer& player, int32_t hairColor)
+    {
+        ++_pending[player.GetCId()].first;
+
+        _serviceLocator.Get<DatabaseService>().SetHairColor(player.GetCId(), hairColor)
+            .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(cid);
+                    }
+                    else
+                    {
+                        OnError(cid);
+                    }
+                });
+    }
+
     void GameRepositorySystem::SaveStat(const GamePlayer& player, int32_t statPoint, int32_t str, int32_t dex,
         int32_t accr, int32_t health, int32_t intell, int32_t wis, int32_t will)
     {
