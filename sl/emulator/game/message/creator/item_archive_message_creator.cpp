@@ -356,6 +356,20 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto ItemArchiveMessageCreator::CreateAccountStorageGoldAddOrSub(const GamePlayer& player, int32_t value) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::ACCOUNTSTORAGE_ARCHIVEMSG);
+        writer.Write(ZoneMessageType::ACCOUNTSTORAGE_ARCHIVE_ADD_SUB_GOLD);
+        writer.Write<int32_t>(value);
+
+        return writer.Flush();
+    }
+
     auto ItemArchiveMessageCreator::CreateItemObject(const GameItem& item) -> item_object_buffer_type
     {
         item_object_buffer_type result = {};

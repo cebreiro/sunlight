@@ -789,6 +789,11 @@ namespace sunlight
 
         }
         break;
+        case ZoneMessageType::ACCOUNTSTORAGE_ARCHIVE_TERMINATE:
+        {
+            // do nothing
+        }
+        break;
         default:
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}] unhandled zone message. player: {}, type: {}, target: [{}, {}], buffer: {}",
