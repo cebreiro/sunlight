@@ -46,6 +46,8 @@ namespace sunlight
         auto FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&;
         auto FindEntity(GameEntityType type, game_entity_id_type id) const -> const std::shared_ptr<GameEntity>&;
 
+        auto GetDebugStatus() const -> std::string;
+
     private:
         void HandlePlayerAllState(const ZoneMessage& message);
         void HandlePlayerActivate(const ZoneMessage& message);

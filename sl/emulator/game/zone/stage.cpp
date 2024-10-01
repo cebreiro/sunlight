@@ -71,6 +71,11 @@ namespace sunlight
 
         GameTimeService::SetNow(game_clock_type::now());
 
+        SUNLIGHT_GAME_DEBUG_REPORT_INTERVAL(
+            GameDebugType::SceneStatus,
+            std::chrono::seconds(30),
+            Get<SceneObjectSystem>().GetDebugStatus());
+
         for (GameSystem& system : _updateSystems | notnull::reference)
         {
             system.Update();

@@ -263,6 +263,38 @@ namespace sunlight
         return iter2->second;
     }
 
+    auto SceneObjectSystem::GetDebugStatus() const -> std::string
+    {
+        std::ostringstream oss;
+
+        oss << fmt::format("-------------------------------------\n");
+        oss << fmt::format("stage: {}\n", _stageId);
+        oss << fmt::format("players_size: {}\n", std::ssize(_players));
+        oss << fmt::format("entities: {}\n", [this]() -> std::string
+            {
+                std::ostringstream oss2;
+
+                for (const auto& [type, entities] : _entities)
+                {
+                    oss2 << fmt::format("{{ type: {}, size: {} }}, ", ToString(type), std::ssize(entities));
+                }
+
+                std::string result = oss2.str();
+                if (std::ssize(result) > 1)
+                {
+                    result.pop_back();
+                    result.pop_back();
+                }
+
+                return result;
+
+            }());
+
+        oss << fmt::format("-------------------------------------\n");
+
+        return oss.str();
+    }
+
     void SceneObjectSystem::HandlePlayerAllState(const ZoneMessage& message)
     {
         message.player.Send(ZonePacketS2CCreator::CreateObjectVisibleRange(1000.f));

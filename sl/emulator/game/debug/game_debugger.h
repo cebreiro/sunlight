@@ -1,5 +1,6 @@
 #pragma once
 #include "sl/emulator/game/debug/game_debug_type.h"
+#include "sl/emulator/game/time/game_time.h"
 
 namespace sunlight
 {
@@ -12,6 +13,8 @@ namespace sunlight
         bool HasDebugTarget() const;
         bool IsDebugTarget(GameDebugType type) const;
 
+        bool UpdateLastReportTimePoint(GameDebugType type, std::chrono::milliseconds interval);
+
         void Log(const std::string& str);
 
         void SetState(GameDebugType type, bool value);
@@ -20,6 +23,7 @@ namespace sunlight
     public:
         static bool IsActive();
         static bool IsWatchTo(GameDebugType type);
+        static bool UpdateTimePoint(GameDebugType type, std::chrono::milliseconds interval);
 
         static void Report(const std::string& str);
 
@@ -28,6 +32,7 @@ namespace sunlight
 
     private:
         std::unordered_set<GameDebugType> _targets;
+        std::unordered_map<GameDebugType, game_time_point_type> _lastReportTimePoints;
 
         static thread_local GameDebugger* _instance;
     };
@@ -35,4 +40,8 @@ namespace sunlight
 
 #define SUNLIGHT_GAME_DEBUG_REPORT(type, str)\
 if (GameDebugger::IsActive() && GameDebugger::IsWatchTo(type)) \
+    GameDebugger::Report(str)
+
+#define SUNLIGHT_GAME_DEBUG_REPORT_INTERVAL(type, interval, str)\
+if (GameDebugger::IsActive() && GameDebugger::IsWatchTo(type) && GameDebugger::UpdateTimePoint(type, interval) ) \
     GameDebugger::Report(str)

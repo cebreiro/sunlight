@@ -1,5 +1,7 @@
 #include "game_debugger.h"
 
+#include "sl/emulator/game/time/game_time_service.h"
+
 namespace sunlight
 {
     thread_local GameDebugger* GameDebugger::_instance = nullptr;
@@ -17,6 +19,28 @@ namespace sunlight
     bool GameDebugger::IsDebugTarget(GameDebugType type) const
     {
         return _targets.contains(type);
+    }
+
+    bool GameDebugger::UpdateLastReportTimePoint(GameDebugType type, std::chrono::milliseconds interval)
+    {
+        const game_time_point_type now = GameTimeService::Now();
+
+        const auto iter = _lastReportTimePoints.find(type);
+        if (iter == _lastReportTimePoints.end())
+        {
+            _lastReportTimePoints[type] = now;
+
+            return true;
+        }
+
+        if (now >= iter->second + interval)
+        {
+            iter->second = now;
+
+            return true;
+        }
+
+        return false;
     }
 
     void GameDebugger::Log(const std::string& str)
@@ -51,6 +75,13 @@ namespace sunlight
         assert(_instance);
 
         return _instance->IsDebugTarget(type);
+    }
+
+    bool GameDebugger::UpdateTimePoint(GameDebugType type, std::chrono::milliseconds interval)
+    {
+        assert(_instance);
+
+        return _instance->UpdateLastReportTimePoint(type, interval);
     }
 
     void GameDebugger::Report(const std::string& str)
