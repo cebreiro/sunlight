@@ -28,6 +28,8 @@ namespace sunlight
 
         auto SpawnPlayer(SharedPtrNotNull<GameClient> client, db::dto::Character dto) -> Future<bool>;
         auto DespawnPlayer(game_client_id_type id, StageExitType exitType) -> Future<void>;
+        auto ChangePlayerStage(GamePlayer& player, int32_t destStageId, int32_t destX, int32_t destY) -> Future<bool>;
+        auto ChangePlayerStage(game_client_id_type id, int32_t destStageId, int32_t destX, int32_t destY) -> Future<bool>;
 
         void HandleClientDisconnect(game_client_id_type id);
         void HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader);

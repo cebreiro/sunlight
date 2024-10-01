@@ -12,6 +12,7 @@
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/script/class/lua_npc.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
@@ -91,6 +92,11 @@ namespace sunlight
         _player.Send(writer.Flush());
     }
 
+    void LuaPlayer::Broadcast(SlPacketWriter& writer, bool includeSelf)
+    {
+        _system.Get<EntityViewRangeSystem>().Broadcast(_player, writer.Flush(), includeSelf);
+    }
+
     auto LuaPlayer::GetId() const -> int32_t
     {
         return static_cast<int32_t>(_player.GetId().Unwrap());
@@ -130,6 +136,7 @@ namespace sunlight
             "changeQuest", &LuaPlayer::ChangeQuest,
             "findQuest", &LuaPlayer::FindQuest,
             "send", &LuaPlayer::Send,
+            "broadcast", &LuaPlayer::Broadcast,
             "getId", &LuaPlayer::GetId,
             "getTypeValue", &LuaPlayer::GetTypeValue,
             "getNoviceJobLevel", &LuaPlayer::GetNoviceJobLevel,

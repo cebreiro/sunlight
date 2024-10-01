@@ -1,6 +1,7 @@
 #include "scene_object_system.h"
 
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/contants/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -79,17 +80,19 @@ namespace sunlight
         Get<PlayerAppearanceSystem>().RefreshWeaponMotionCategory(*player);
 
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
-        sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(player->GetType()));
 
         switch (enterType)
         {
         case StageEnterType::Login:
         {
+            sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(player->GetType()));
+
             player->Defer(ZonePacketS2CCreator::CreateLoginAccept(*player, _stageId));
         }
         break;
         case StageEnterType::StageChange:
         {
+            player->Send(ZonePacketS2CCreator::CreateObjectRoomChange(_stageId));
             player->Defer(ZonePacketS2CCreator::CreateObjectForceMove(*player));
         }
         break;
@@ -227,19 +230,25 @@ namespace sunlight
         {
         case StageExitType::Logout:
         {
-
+            Get<EntityViewRangeSystem>().Broadcast(player,
+                SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::Leaving, }), false);
         }
         break;
         case StageExitType::ZoneChange:
         {
-
+            Get<EntityViewRangeSystem>().Broadcast(player,
+                SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::ChangingZone, }), true);
         }
         break;
         case StageExitType::StageChange:
         {
+            Get<EntityViewRangeSystem>().Broadcast(player,
+                SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::ChangingRoom, }), true);
         }
         break;
         }
+
+        Get<EntityViewRangeSystem>().Remove(player);
 
         [[maybe_unused]]
         const size_t erased = _players.erase(player.GetCId());

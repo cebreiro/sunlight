@@ -23,6 +23,13 @@ namespace sunlight
     {
         assert(entity.HasComponent<EntityStateComponent>());
 
+        return CreateState(entity, entity.GetComponent<EntityStateComponent>().GetState());
+    }
+
+    auto SceneObjectPacketCreator::CreateState(const GameEntity& entity, const GameEntityState& state) -> Buffer
+    {
+        assert(entity.HasComponent<EntityStateComponent>());
+
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
         writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
@@ -31,8 +38,6 @@ namespace sunlight
         writer.Write(ZoneMessageType::CHAR_STATE);
 
         {
-            const GameEntityState& state = entity.GetComponent<EntityStateComponent>().GetState();
-
             PacketWriter objectWriter;
             objectWriter.Write<uint8_t>(state.bitmask1);
             objectWriter.Write<uint8_t>(state.bitmask2);

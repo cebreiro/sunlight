@@ -256,9 +256,8 @@ namespace sunlight
         GameDebugger::SetInstance(nullptr);
 
         co_await WaitAll(*ExecutionContext::GetExecutor(),
-            Delay(std::chrono::milliseconds(2000)), // to ignore client network message during exit
+            Delay(std::chrono::milliseconds(1000)), // to ignore client network message during exit
             Get<GameRepositorySystem>().WaitForSaveCompletion(*player));
-
 
         co_return player;
     }

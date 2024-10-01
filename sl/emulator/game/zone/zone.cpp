@@ -1,11 +1,14 @@
 #include "zone.h"
 
+#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/creator/normal_message_creator.h"
 #include "sl/emulator/game/script/lua_script_engine.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
+#include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -30,6 +33,7 @@ namespace sunlight
         _serviceLocator.Add<GameDebugger>(std::make_shared<GameDebugger>());
         _serviceLocator.Add<GameItemUniqueIdPublisher>(std::make_shared<GameItemUniqueIdPublisher>(_id, *snowflakeValue));
         _serviceLocator.Add<GameEntityIdPublisher>(std::make_shared<GameEntityIdPublisher>(_id));
+        _serviceLocator.Add<ZoneChangeService>(std::make_shared<ZoneChangeService>(*this));
 
         const MapDataProvider& mapDataProvider = _serviceLocator.Get<GameDataProvideService>().GetMapDataProvider();
         if (_mapData = mapDataProvider.FindMap(id); !_mapData)
@@ -128,6 +132,91 @@ namespace sunlight
         const std::shared_ptr<GamePlayer> player = co_await stage.DespawnPlayer(id, StageExitType::Logout);
 
         co_return;
+    }
+
+    auto Zone::ChangePlayerStage(GamePlayer& player, int32_t destStageId, int32_t destX, int32_t destY) -> Future<bool>
+    {
+        assert(ExecutionContext::IsEqualTo(*_strand));
+
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        Stage* destStage = FindStage(destStageId);
+        if (!destStage)
+        {
+            co_return false;
+        }
+
+        const auto iter = _playerStages.find(player.GetClientId());
+        if (iter == _playerStages.end())
+        {
+            assert(false);
+
+            co_return false;
+        }
+
+        Stage& srcStage = *iter->second;
+
+        std::shared_ptr<GamePlayer> instance = co_await srcStage.DespawnPlayer(player.GetClientId(), StageExitType::StageChange);
+        if (!instance)
+        {
+            assert(false);
+
+            co_return false;
+        }
+
+        assert(instance.get() == &player);
+
+        SceneObjectComponent& sceneObjectComponent = player.GetSceneObjectComponent();
+        sceneObjectComponent.SetPosition(Eigen::Vector2f(static_cast<float>(destX), static_cast<float>(destY)));
+        sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
+
+        destStage->SpawnPlayer(std::move(instance), StageEnterType::StageChange);
+
+        co_return true;
+    }
+
+    auto Zone::ChangePlayerStage(game_client_id_type id, int32_t destStageId, int32_t destX, int32_t destY) -> Future<bool>
+    {
+        assert(ExecutionContext::IsEqualTo(*_strand));
+
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        Stage* destStage = FindStage(destStageId);
+        if (!destStage)
+        {
+            co_return false;
+        }
+
+        const auto iter = _playerStages.find(id);
+        if (iter == _playerStages.end())
+        {
+            assert(false);
+
+            co_return false;
+        }
+
+        Stage& srcStage = *iter->second;
+
+        std::shared_ptr<GamePlayer> instance = co_await srcStage.DespawnPlayer(id, StageExitType::StageChange);
+        if (!instance)
+        {
+            assert(false);
+
+            co_return false;
+        }
+
+        instance->Send(NormalMessageCreator::CreateChangeRoom(destStageId, destX, destY));
+
+        SceneObjectComponent& sceneObjectComponent = instance->GetSceneObjectComponent();
+        sceneObjectComponent.SetPosition(Eigen::Vector2f(static_cast<float>(destX), static_cast<float>(destY)));
+        sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
+
+        destStage->SpawnPlayer(std::move(instance), StageEnterType::StageChange);
+        iter->second = destStage;
+
+        co_return true;
     }
 
     void Zone::HandleClientDisconnect(game_client_id_type id)

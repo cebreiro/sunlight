@@ -2,6 +2,8 @@
 
 namespace sunlight
 {
+    struct GameEntityState;
+
     class GameEntity;
     class GamePlayer;
     class GameNPC;
@@ -16,6 +18,7 @@ namespace sunlight
         SceneObjectPacketCreator() = delete;
 
         static auto CreateState(const GameEntity& entity) -> Buffer;
+        static auto CreateState(const GameEntity& entity, const GameEntityState& state) -> Buffer;
 
         static auto CreateInformation(const GamePlayer& player, bool showSpawnEffect) -> Buffer;
         static auto CreateInformation(const GameNPC& npc) -> Buffer;
