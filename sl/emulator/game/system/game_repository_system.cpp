@@ -1,5 +1,6 @@
 #include "game_repository_system.h"
 
+#include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/contants/quest/quest.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/server/client/game_client.h"
@@ -292,6 +293,28 @@ namespace sunlight
         ++_pending[player.GetCId()].first;
 
         _serviceLocator.Get<DatabaseService>().SetStat(player.GetCId(), statPoint, str, dex, accr, health, intell, wis, will)
+            .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(cid);
+                    }
+                    else
+                    {
+                        OnError(cid);
+                    }
+                });
+    }
+
+    void GameRepositorySystem::SaveState(const GamePlayer& player, int32_t zone, int32_t stage, float x, float y, float yaw)
+    {
+        ++_pending[player.GetCId()].first;
+
+        const PlayerStatComponent& statComponent = player.GetStatComponent();
+        const int32_t hp = statComponent.GetFinalStat(RecoveryStatType::HP).As<int32_t>();
+        const int32_t sp = statComponent.GetFinalStat(RecoveryStatType::SP).As<int32_t>();
+
+        _serviceLocator.Get<DatabaseService>().SaveState(player.GetCId(), zone, stage, x, y, yaw, player.IsArmed(), player.IsRunning(), hp, sp)
             .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
                 {
                     if (success)

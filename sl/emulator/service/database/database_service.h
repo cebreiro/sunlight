@@ -60,6 +60,8 @@ namespace sunlight
         auto SetHair(int64_t cid, int32_t hair) -> Future<bool>;
         auto SetHairColor(int64_t cid, int32_t hairColor) -> Future<bool>;
 
+        auto SaveState(int64_t cid, int32_t zone, int32_t stage, float x, float y, float yaw, int8_t arms, int8_t running, int32_t hp, int32_t sp) -> Future<bool>;
+
         auto StartTransaction(db::ItemTransaction transaction) -> Future<bool>;
 
     private:

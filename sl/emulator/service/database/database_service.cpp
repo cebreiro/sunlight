@@ -474,4 +474,25 @@ namespace sunlight
 
         co_return true;
     }
+
+    auto DatabaseService::SaveState(int64_t cid, int32_t zone, int32_t stage, float x, float y, float yaw, int8_t arms, int8_t running, int32_t hp, int32_t sp)  -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterStateSave procedure(conn, cid, zone, stage, x, y, yaw, arms, running, hp, sp);
+
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
 }

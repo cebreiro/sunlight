@@ -16,6 +16,7 @@
 #include "sl/emulator/service/database/stored_procedure/impl/character_quest_add.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_quest_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_skill_level_set.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_state_save.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_stat_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/item_transaction_execute.h"
 #include "sl/emulator/service/database/stored_procedure/impl/lobby_characters_get.h"
