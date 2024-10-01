@@ -16,8 +16,6 @@ namespace sunlight
 
             auto ToString() const -> std::string;
 
-            static auto From(const std::string& str) -> std::optional<Key>;
-
             friend bool operator==(const Key& lhs, const Key& rhs);
             friend bool operator!=(const Key& lhs, const Key& rhs);
 
@@ -41,8 +39,10 @@ namespace sunlight
         auto GetAccountId() const -> int64_t;
         auto GetClientId() const -> game_client_id_type;
         auto GetSid() const -> int8_t;
+        auto GetPlayerName() const -> const std::string&;
 
         void SetSid(int8_t sid);
+        void SetPlayerName(std::string name);
 
     private:
         Key _key;
@@ -50,6 +50,7 @@ namespace sunlight
         game_client_id_type _clientId = {};
 
         int8_t _sid = 0;
+        std::string _playerName;
     };
 }
 

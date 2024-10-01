@@ -24,6 +24,7 @@ namespace sunlight
         auto Extract(int64_t accountId) -> Future<std::shared_ptr<AuthenticationToken>>;
 
         auto Find(AuthenticationToken::Key key) const -> Future<std::shared_ptr<AuthenticationToken>>;
+        auto FindByPlayerName(uint32_t keyLowValue, const std::string& playerName) -> Future<std::shared_ptr<AuthenticationToken>>;
 
     private:
         const ServiceLocator& _serviceLocator;
@@ -33,5 +34,6 @@ namespace sunlight
 
         std::unordered_map<std::string, SharedPtrNotNull<AuthenticationToken>> _tokens;
         std::unordered_map<int64_t, SharedPtrNotNull<AuthenticationToken>> _tokenAccountIndex;
+        std::unordered_multimap<uint32_t, SharedPtrNotNull<AuthenticationToken>> _zoneTokenIndex;
     };
 }

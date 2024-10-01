@@ -478,12 +478,15 @@ namespace sunlight
             co_return;
         }
 
-        constexpr int32_t unused = 0;
-        const std::string& key = authToken->GetKey().ToString();
+        authToken->SetPlayerName(iter->name);
+
+        const uint32_t auth = authToken->GetKey().GetLow();
+        const std::string& playerName = authToken->GetPlayerName();
 
         client->SetState(GameClientState::LobbyAndZoneConnecting);
         client->SetCid(iter->cid);
 
-        connection.Send(LobbyPacketS2CCreator::CreateCharacterSelectSuccess(unused, key, LobbyS2CEndpoint(opt->first, opt->second)));
+        connection.Send(LobbyPacketS2CCreator::CreateCharacterSelectSuccess(
+            auth, playerName, LobbyS2CEndpoint(opt->first, opt->second)));
     }
 }

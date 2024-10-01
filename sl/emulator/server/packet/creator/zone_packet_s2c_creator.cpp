@@ -3,6 +3,7 @@
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/server/packet/io/sl_packet_writer.h"
 #include "sl/emulator/server/packet/zone_packet_s2c.h"
@@ -170,6 +171,24 @@ namespace sunlight
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_VISIBLE_RANGE);
         writer.Write<float>(range);
+
+        return writer.Flush();
+    }
+
+    auto ZonePacketS2CCreator::CreateZoneChange(const std::string& address, int32_t port, uint32_t auth) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHANGE_CLIENT_ZONE_TO);
+        writer.Write<uint32_t>(auth);
+
+        {
+            PacketWriter objectWriter;
+            objectWriter.Write<int32_t>(port);
+            objectWriter.WriteString(address);
+
+            writer.WriteObject(objectWriter);
+        }
 
         return writer.Flush();
     }

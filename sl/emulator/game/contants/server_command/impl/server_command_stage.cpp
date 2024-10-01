@@ -22,8 +22,6 @@ namespace sunlight
 
     bool ServerCommandStageChange::Execute(GamePlayer& player, int32_t destStageId, int32_t destX, int32_t destY) const
     {
-        (void)_system.GetServiceLocator().Get<ZoneChangeService>().StartStageChange(player, destStageId, destX, destY);
-
-        return true;
+        return _system.GetServiceLocator().Get<ZoneChangeService>().StartStageChange(player, destStageId, destX, destY);
     }
 }

@@ -27,5 +27,7 @@ namespace sunlight
         static auto CreateObjectForceMove(const GameEntity& entity) -> Buffer;
         static auto CreateObjectRoomChange(int32_t roomId) -> Buffer;
         static auto CreateObjectVisibleRange(float range) -> Buffer;
+
+        static auto CreateZoneChange(const std::string& address, int32_t port, uint32_t auth) -> Buffer;
     };
 }

@@ -45,9 +45,29 @@ namespace sunlight
         break;
         case GameClientState::LobbyAndZoneAuthenticated:
         {
-            handled = true;
+            switch (opcode)
+            {
+            case ZonePacketC2S::NMC_LOGOUT:
+            {
+                handled = true;
 
-            Delegate(connection, opcode, std::move(reader));
+                SUNLIGHT_LOG_INFO(_serviceLocator,
+                    fmt::format("[{}] client logout request. zone: {}",
+                        GetName(), _zoneServer.GetZone().GetId()));
+
+                if (const GameClient* clientPtr = connection.GetGameClientPtr(); clientPtr)
+                {
+                    _zoneServer.GetZone().LogoutPlayer(clientPtr->GetId());
+                }
+            }
+            break;
+            default:
+            {
+                handled = true;
+
+                Delegate(connection, opcode, std::move(reader));
+            }
+            }
         }
         break;
         }
@@ -72,29 +92,23 @@ namespace sunlight
         // unk
         (void)reader.ReadObject();
 
+        // SlPacket format
         BufferReader bufferReader = reader.ReadObject();
-        bufferReader.Skip(5); // maybe... some object serialize/deserialize protocol
+        bufferReader.Skip(2); // buffer size
+        bufferReader.Skip(2); // item count
 
-        const std::string str = bufferReader.ReadString();
+        bufferReader.Skip(1); // string type value -> 7 + length
+        const std::string playerName = bufferReader.ReadString();
 
-        const std::optional<AuthenticationToken::Key> opt = AuthenticationToken::Key::From(str);
-        if (!opt.has_value())
-        {
-            SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] fail to create auth_token_key from string. session: {}, str: {}",
-                    GetName(), connection.GetSession().GetId(), str));
+        bufferReader.Skip(1); // int type value -> 3
+        const uint32_t auth = bufferReader.Read<uint32_t>();
 
-            connection.Stop();
-
-            co_return;
-        }
-
-        std::shared_ptr<AuthenticationToken> token = co_await _serviceLocator.Get<AuthenticationService>().Find(*opt);
+        std::shared_ptr<AuthenticationToken> token = co_await _serviceLocator.Get<AuthenticationService>().FindByPlayerName(auth, playerName);
         if (!token)
         {
             SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] fail to find auth_token. session: {}, key: {}",
-                    GetName(), connection.GetSession().GetId(), opt->ToString()));
+                fmt::format("[{}] fail to find auth_token. session: {}",
+                    GetName(), connection.GetSession().GetId()));
 
             connection.Stop();
 
@@ -105,19 +119,20 @@ namespace sunlight
         if (!client)
         {
             SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] fail to find game_client. session: {}, key: {}, client_id: {}",
-                    GetName(), connection.GetSession().GetId(), opt->ToString(), token->GetClientId()));
+                fmt::format("[{}] fail to find game_client. session: {}, client_id: {}",
+                    GetName(), connection.GetSession().GetId(), token->GetClientId()));
 
             connection.Stop();
 
             co_return;
         }
 
-        if (client->GetState() != GameClientState::LobbyAndZoneConnecting)
+        if (client->GetState() != GameClientState::LobbyAndZoneConnecting &&
+            client->GetState() != GameClientState::ZoneChaning)
         {
             SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] invalid request. session: {}, key: {}, client_id: {}, state: {}",
-                    GetName(), connection.GetSession().GetId(), opt->ToString(), token->GetClientId(), ToString(client->GetState())));
+                fmt::format("[{}] invalid request. session: {}, client_id: {}, state: {}",
+                    GetName(), connection.GetSession().GetId(), token->GetClientId(), ToString(client->GetState())));
 
             connection.Stop();
 
@@ -133,8 +148,8 @@ namespace sunlight
         if (!dto.has_value())
         {
             SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] fail to find character. session: {}, key: {}, client_id: {}, cid: {}",
-                    GetName(), connection.GetSession().GetId(), opt->ToString(), token->GetClientId(), client->GetCid()));
+                fmt::format("[{}] fail to find character. session: {}, client_id: {}, cid: {}",
+                    GetName(), connection.GetSession().GetId(), token->GetClientId(), client->GetCid()));
 
             connection.Stop();
 

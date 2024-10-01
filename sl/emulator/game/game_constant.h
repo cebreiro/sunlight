@@ -11,6 +11,7 @@ namespace sunlight
         static constexpr float START_ZONE_X = 9685.f;
         static constexpr float START_ZONE_Y = 8652.f;
 
+        static constexpr int32_t STAGE_MAIN = 10000;
         static constexpr float STAGE_TERRAIN_BLOCK_SIZE = 256.f;
 
         // client 0x486748 0x48674F

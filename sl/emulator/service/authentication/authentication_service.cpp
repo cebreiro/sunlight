@@ -71,6 +71,7 @@ namespace sunlight
                 iter->second = std::make_shared<AuthenticationToken>(key, accountId, clientId);
 
                 (void)_tokenAccountIndex.try_emplace(accountId, iter->second);
+                (void)_zoneTokenIndex.emplace(key.GetLow(), iter->second);
 
                 co_return iter->second;
             }
@@ -102,6 +103,19 @@ namespace sunlight
                     GetName(), *token));
 
             co_return false;
+        }
+
+        if (const auto [begin, end] = _zoneTokenIndex.equal_range(token->GetKey().GetLow());
+            begin != end)
+        {
+            const auto iter = std::find_if(begin, end, [&token](const auto& pair)
+                {
+                    return token.get() == pair.second.get();
+                });
+            if (iter != end)
+            {
+                _zoneTokenIndex.erase(iter);
+            }
         }
 
         co_return true;
@@ -140,5 +154,26 @@ namespace sunlight
         const auto iter = _tokens.find(key.ToString());
 
         co_return iter != _tokens.end() ? iter->second : std::shared_ptr<AuthenticationToken>{};
+    }
+
+    auto AuthenticationService::FindByPlayerName(uint32_t keyLowValue, const std::string& playerName) -> Future<std::shared_ptr<AuthenticationToken>>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_strand;
+        assert(ExecutionContext::IsEqualTo(*_strand));
+
+        const auto [begin, end] = _zoneTokenIndex.equal_range(keyLowValue);
+
+        const auto iter = std::find_if(begin, end,
+            [keyLowValue, &playerName](const auto& pair) -> bool
+            {
+                const AuthenticationToken& token = *pair.second;
+
+                return token.GetKey().GetLow() == keyLowValue && token.GetPlayerName() == playerName;
+            });
+
+        co_return iter != end ? iter->second : nullptr;
     }
 }

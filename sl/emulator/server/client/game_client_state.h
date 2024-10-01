@@ -10,5 +10,6 @@ namespace sunlight
         (LobbyAuthenticated)
         (LobbyAndZoneConnecting)
         (LobbyAndZoneAuthenticated)
+        (ZoneChaning)
     )
 }

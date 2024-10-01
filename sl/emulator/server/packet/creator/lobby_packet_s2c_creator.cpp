@@ -178,7 +178,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto LobbyPacketS2CCreator::CreateCharacterSelectSuccess(int32_t unused, const std::string& key, const LobbyS2CEndpoint& endpoint) -> Buffer
+    auto LobbyPacketS2CCreator::CreateCharacterSelectSuccess(uint32_t auth, const std::string& playerName, const LobbyS2CEndpoint& endpoint) -> Buffer
     {
         constexpr bool success = true;
 
@@ -186,8 +186,8 @@ namespace sunlight
 
         writer.Write(LobbyPacketS2C::CharacterSelect);
         writer.Write<int32_t>(!success);
-        writer.Write<int32_t>(unused);
-        writer.WriteString(key);
+        writer.Write<uint32_t>(auth);
+        writer.WriteString(playerName);
         writer.WriteObject(endpoint.Serialize());
 
         return writer.Flush();

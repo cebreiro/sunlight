@@ -14,9 +14,10 @@
 
 namespace sunlight
 {
-    ZoneServer::ZoneServer(execution::AsioExecutor& executor, execution::IExecutor& gameExecutor, int32_t zoneId)
+    ZoneServer::ZoneServer(execution::AsioExecutor& executor, execution::IExecutor& gameExecutor, int8_t worldId, int32_t zoneId)
         : Server(std::string(GetName()), executor)
         , _gameExecutor(gameExecutor.SharedFromThis())
+        , _worldId(worldId)
         , _zoneId(zoneId)
     {
     }
@@ -31,7 +32,7 @@ namespace sunlight
 
         _serviceLocator = serviceLocator;
         _handler = std::make_shared<ZonePacketC2SHandler>(serviceLocator, *this);
-        _zone = (std::make_shared<Zone>(serviceLocator, *_gameExecutor, _zoneId));
+        _zone = (std::make_shared<Zone>(serviceLocator, *_gameExecutor, _worldId, _zoneId));
     }
 
     void ZoneServer::StartUp(uint16_t listenPort)
@@ -39,6 +40,11 @@ namespace sunlight
         Server::StartUp(listenPort);
 
         _zone->Start();
+    }
+
+    auto ZoneServer::GetWorldId() const -> int8_t
+    {
+        return _worldId;
     }
 
     auto ZoneServer::GetZoneId() const -> int32_t
@@ -162,6 +168,11 @@ namespace sunlight
                 }
 
                 _zone->HandleClientDisconnect(client->GetId());
+            }
+            break;
+            case GameClientState::ZoneChaning:
+            {
+                // do nothing
             }
             break;
             default:

@@ -25,31 +25,6 @@ namespace sunlight
         return fmt::format("{}:{}", _low, _high);
     }
 
-    auto AuthenticationToken::Key::From(const std::string& str) -> std::optional<Key>
-    {
-        const size_t i = str.find_first_of(":");
-        if (i == std::string::npos || i == str.size())
-        {
-            return std::nullopt;
-        }
-
-        try
-        {
-            const std::string_view left(str.data(), i);
-            const std::string_view right(str.begin() + static_cast<int64_t>(i) + 1, str.end());
-
-            const auto low = boost::lexical_cast<uint32_t>(left);
-            const auto high = boost::lexical_cast<uint32_t>(right);
-
-            return Key(low, high);
-        }
-        catch (...)
-        {
-        }
-
-        return std::nullopt;
-    }
-
     AuthenticationToken::AuthenticationToken(const Key& key, int64_t accountId, game_client_id_type clientId)
         : _key(key)
         , _accountId(accountId)
@@ -82,6 +57,11 @@ namespace sunlight
         _sid = sid;
     }
 
+    void AuthenticationToken::SetPlayerName(std::string name)
+    {
+        _playerName = std::move(name);
+    }
+
     bool operator==(const AuthenticationToken::Key& lhs, const AuthenticationToken::Key& rhs)
     {
         return lhs._low == rhs._low && lhs._high == rhs._high;
@@ -90,5 +70,10 @@ namespace sunlight
     bool operator!=(const AuthenticationToken::Key& lhs, const AuthenticationToken::Key& rhs)
     {
         return !(lhs == rhs);
+    }
+
+    auto AuthenticationToken::GetPlayerName() const -> const std::string&
+    {
+        return _playerName;
     }
 }

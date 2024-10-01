@@ -19,7 +19,7 @@ namespace sunlight
     class Zone final : public std::enable_shared_from_this<Zone>
     {
     public:
-        Zone(const ServiceLocator& serviceLocator, execution::IExecutor& executor, int32_t id);
+        Zone(const ServiceLocator& serviceLocator, execution::IExecutor& executor, int8_t worldId, int32_t id);
         ~Zone();
 
         void Start();
@@ -27,9 +27,11 @@ namespace sunlight
         void Join();
 
         auto SpawnPlayer(SharedPtrNotNull<GameClient> client, db::dto::Character dto) -> Future<bool>;
+        auto LogoutPlayer(game_client_id_type id) -> Future<bool>;
+        auto RemovePlayerByZoneChange(game_client_id_type id, int32_t destZoneId, float x, float y, float yaw) -> Future<bool>;
         auto ChangePlayerStage(game_client_id_type id, int32_t destStageId, int32_t destX, int32_t destY) -> Future<bool>;
 
-        auto HandleClientDisconnect(game_client_id_type id) -> Future<void>;
+        void HandleClientDisconnect(game_client_id_type id);
         void HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader);
 
     private:
@@ -38,10 +40,13 @@ namespace sunlight
     public:
         auto FindStage(int32_t id) -> Stage*;
         auto FindStage(int32_t id) const -> const Stage*;
+        auto FindClient(game_client_id_type id) -> GameClient*;
+        auto FindClient(game_client_id_type id) const -> const GameClient*;
 
         auto GetServiceLocator() const -> const ServiceLocator&;
         auto GetStrand() -> Strand&;
         auto GetStrand() const -> const Strand&;
+        auto GetWorldId() const -> int8_t;
         auto GetId() const -> int32_t;
 
     private:
@@ -51,6 +56,7 @@ namespace sunlight
         ServiceLocator _serviceLocator;
         SharedPtrNotNull<Strand> _strand;
 
+        int8_t _worldId = 0;
         int32_t _id = 0;
         PtrNotNull<const MapFile> _mapData = nullptr;
 
@@ -59,5 +65,6 @@ namespace sunlight
 
         std::vector<UniquePtrNotNull<Stage>> _stages;
         std::unordered_map<game_client_id_type, PtrNotNull<Stage>> _playerStages;
+        std::unordered_map<game_client_id_type, SharedPtrNotNull<GameClient>> _clients;
     };
 }

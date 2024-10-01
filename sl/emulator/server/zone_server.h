@@ -17,13 +17,14 @@ namespace sunlight
         static constexpr ServerType TYPE = ServerType::Zone;
 
     public:
-        ZoneServer(execution::AsioExecutor& executor, execution::IExecutor& gameExecutor, int32_t zoneId);
+        ZoneServer(execution::AsioExecutor& executor, execution::IExecutor& gameExecutor, int8_t worldId, int32_t zoneId);
         ~ZoneServer();
 
         void Initialize(ServiceLocator& serviceLocator) override;
         void StartUp(uint16_t listenPort) override;
 
     public:
+        auto GetWorldId() const -> int8_t;
         auto GetZoneId() const -> int32_t;
         auto GetZone() -> Zone&;
         auto GetZone() const -> const Zone&;
@@ -38,6 +39,7 @@ namespace sunlight
     private:
         ServiceLocator _serviceLocator;
         SharedPtrNotNull<execution::IExecutor> _gameExecutor;
+        int8_t _worldId = 0;
         int32_t _zoneId = 0;
         SharedPtrNotNull<Zone> _zone;
 

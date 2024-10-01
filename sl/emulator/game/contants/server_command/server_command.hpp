@@ -9,3 +9,4 @@
 #include "sl/emulator/game/contants/server_command/impl/server_command_script.h"
 #include "sl/emulator/game/contants/server_command/impl/server_command_npc.h"
 #include "sl/emulator/game/contants/server_command/impl/server_command_stage.h"
+#include "sl/emulator/game/contants/server_command/impl/server_command_zone.h"

@@ -235,7 +235,7 @@ namespace sunlight
 
             for (const sl::emulator::ZoneConfig& zoneConfig : worldConfig.zoneConfig)
             {
-                auto zoneServer = std::make_shared<ZoneServer>(*_ioExecutor, *_gameExecutor, zoneConfig.zoneId);
+                auto zoneServer = std::make_shared<ZoneServer>(*_ioExecutor, *_gameExecutor, worldConfig.id, zoneConfig.zoneId);
 
                 zoneServer->Initialize(GetServiceLocator());
                 zoneServer->StartUp(zoneConfig.port);

@@ -1,5 +1,6 @@
 #include "zone.h"
 
+#include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -18,9 +19,10 @@
 
 namespace sunlight
 {
-    Zone::Zone(const ServiceLocator& serviceLocator, execution::IExecutor& executor, int32_t id)
+    Zone::Zone(const ServiceLocator& serviceLocator, execution::IExecutor& executor, int8_t worldId, int32_t id)
         : _serviceLocator(serviceLocator)
         , _strand(std::make_shared<Strand>(executor.SharedFromThis()))
+        , _worldId(worldId)
         , _id(id)
     {
         std::optional<int32_t> snowflakeValue = _serviceLocator.Get<SnowflakeService>().Publish(SnowflakeCategory::Item).Get();
@@ -96,7 +98,12 @@ namespace sunlight
             }
 
             stage->SpawnPlayer(player, StageEnterType::Login);
+
+            assert(!_playerStages.contains(client->GetId()));
+            assert(!_clients.contains(client->GetId()));
+
             _playerStages[client->GetId()] = stage;
+            _clients[client->GetId()] = client;
         }
         catch (const std::exception& e)
         {
@@ -108,6 +115,82 @@ namespace sunlight
 
             co_return false;
         }
+
+        co_return true;
+    }
+
+    auto Zone::LogoutPlayer(game_client_id_type id) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_strand;
+        assert(_strand);
+
+        const auto iter = _playerStages.find(id);
+        if (iter == _playerStages.end())
+        {
+            co_return false;
+        }
+
+        Stage& stage = *iter->second;
+
+        const std::shared_ptr<GamePlayer> player = co_await stage.DespawnPlayer(id, StageExitType::Logout);
+        if (!player)
+        {
+            co_return false;
+        }
+
+        const SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
+        const Eigen::Vector2f& position = sceneObjectComponent.GetPosition();
+
+        GameRepositorySystem& repositorySystem = stage.Get<GameRepositorySystem>();
+        repositorySystem.SaveState(*player, _id, stage.GetId(), position.x(), position.y(), sceneObjectComponent.GetYaw());
+
+        co_await repositorySystem.WaitForSaveCompletion(*player);
+
+        [[maybe_unused]]
+        const size_t erased = _clients.erase(id);
+        assert(erased > 0);
+
+        co_return true;
+    }
+
+    auto Zone::RemovePlayerByZoneChange(game_client_id_type id, int32_t destZoneId, float x, float y, float yaw) -> Future<bool>
+    {
+        assert(ExecutionContext::IsEqualTo(*_strand));
+
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        const auto iter = _playerStages.find(id);
+        if (iter == _playerStages.end())
+        {
+            assert(false);
+
+            co_return false;
+        }
+
+        Stage& stage = *iter->second;
+
+        std::shared_ptr<GamePlayer> player = co_await stage.DespawnPlayer(id, StageExitType::ZoneChange);
+        if (!player)
+        {
+            assert(false);
+
+            co_return false;
+        }
+
+        _playerStages.erase(iter);
+
+        GameRepositorySystem& repositorySystem = stage.Get<GameRepositorySystem>();
+        repositorySystem.SaveState(*player, destZoneId, GameConstant::STAGE_MAIN, x, y, yaw);
+
+        co_await repositorySystem.WaitForSaveCompletion(*player);
+
+        [[maybe_unused]]
+        const size_t erased =_clients.erase(id);
+        assert(erased > 0);
 
         co_return true;
     }
@@ -135,55 +218,29 @@ namespace sunlight
 
         Stage& srcStage = *iter->second;
 
-        std::shared_ptr<GamePlayer> instance = co_await srcStage.DespawnPlayer(id, StageExitType::StageChange);
-        if (!instance)
+        std::shared_ptr<GamePlayer> player = co_await srcStage.DespawnPlayer(id, StageExitType::StageChange);
+        if (!player)
         {
             assert(false);
 
             co_return false;
         }
 
-        instance->Send(NormalMessageCreator::CreateChangeRoom(destStageId, destX, destY));
+        player->Send(NormalMessageCreator::CreateChangeRoom(destStageId, destX, destY));
 
-        SceneObjectComponent& sceneObjectComponent = instance->GetSceneObjectComponent();
+        SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
         sceneObjectComponent.SetPosition(Eigen::Vector2f(static_cast<float>(destX), static_cast<float>(destY)));
         sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
 
-        destStage->SpawnPlayer(std::move(instance), StageEnterType::StageChange);
+        destStage->SpawnPlayer(std::move(player), StageEnterType::StageChange);
         iter->second = destStage;
 
         co_return true;
     }
 
-    auto Zone::HandleClientDisconnect(game_client_id_type id) -> Future<void>
+    void Zone::HandleClientDisconnect(game_client_id_type id)
     {
-        [[maybe_unused]]
-        const auto self = shared_from_this();
-
-        co_await *_strand;
-        assert(_strand);
-
-        const auto iter = _playerStages.find(id);
-        if (iter == _playerStages.end())
-        {
-            co_return;
-        }
-
-        Stage& stage = *iter->second;
-
-        const std::shared_ptr<GamePlayer> player = co_await stage.DespawnPlayer(id, StageExitType::Logout);
-        if (!player)
-        {
-            co_return;
-        }
-
-        const SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
-        const Eigen::Vector2f& position = sceneObjectComponent.GetPosition();
-
-        GameRepositorySystem& repositorySystem = stage.Get<GameRepositorySystem>();
-        repositorySystem.SaveState(*player, _id, stage.GetId(), position.x(), position.y(), sceneObjectComponent.GetYaw());
-
-        co_return;
+        LogoutPlayer(id);
     }
 
     void Zone::HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader)
@@ -240,6 +297,20 @@ namespace sunlight
         return iter != _stages.end() ? iter->get() : nullptr;
     }
 
+    auto Zone::FindClient(game_client_id_type id) -> GameClient*
+    {
+        const auto iter = _clients.find(id);
+
+        return iter != _clients.end() ? iter->second.get() : nullptr;
+    }
+
+    auto Zone::FindClient(game_client_id_type id) const -> const GameClient*
+    {
+        const auto iter = _clients.find(id);
+
+        return iter != _clients.end() ? iter->second.get() : nullptr;
+    }
+
     auto Zone::GetServiceLocator() const -> const ServiceLocator&
     {
         return _serviceLocator;
@@ -253,6 +324,11 @@ namespace sunlight
     auto Zone::GetStrand() const -> const Strand&
     {
         return *_strand;
+    }
+
+    auto Zone::GetWorldId() const -> int8_t
+    {
+        return _worldId;
     }
 
     auto Zone::GetId() const -> int32_t

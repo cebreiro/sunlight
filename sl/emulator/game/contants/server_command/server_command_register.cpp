@@ -36,5 +36,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandNPCShopDebugSlot>(system));
 
         system.AddCommand(std::make_shared<ServerCommandStageChange>(system));
+
+        system.AddCommand(std::make_shared<ServerCommandZoneChange>(system));
     }
 }

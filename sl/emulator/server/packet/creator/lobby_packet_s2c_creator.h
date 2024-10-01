@@ -25,7 +25,7 @@ namespace sunlight
         static auto CreateCharacterNameCheckResult(bool success, const std::string& name)  -> Buffer;
         static auto CreateCharacterCreateResult(bool success) -> Buffer;
         static auto CreateCharacterDeleteResult(bool success) -> Buffer;
-        static auto CreateCharacterSelectSuccess(int32_t unused, const std::string& key, const LobbyS2CEndpoint& endpoint) -> Buffer;
+        static auto CreateCharacterSelectSuccess(uint32_t auth, const std::string& playerName, const LobbyS2CEndpoint& endpoint) -> Buffer;
         static auto CreateCharacterSelectFail() -> Buffer;
     };
 }
