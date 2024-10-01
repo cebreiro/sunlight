@@ -34,6 +34,8 @@ namespace sunlight
         bool IsPending() const;
         bool IsPendingSaves(const GamePlayer& player) const;
 
+        auto WaitForSaveCompletion(const GamePlayer& player) -> Future<void>;
+
         void LoadAccountStorage(const GamePlayer& player, const std::function<void(const db::dto::AccountStorage&)>& callback);
 
         void Save(const GamePlayer& player, db::ItemTransaction transaction);
@@ -60,5 +62,6 @@ namespace sunlight
         const ServiceLocator& _serviceLocator;
 
         std::unordered_map<int64_t, std::pair<int32_t, WeakPtrNotNull<GameClient>>> _pending;
+        std::unordered_map<int64_t, Promise<void>> _saveCompletionPromise;
     };
 }

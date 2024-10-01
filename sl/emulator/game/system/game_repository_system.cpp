@@ -44,6 +44,27 @@ namespace sunlight
         return _pending.contains(player.GetCId());
     }
 
+    auto GameRepositorySystem::WaitForSaveCompletion(const GamePlayer& player) -> Future<void>
+    {
+        const int64_t cid = player.GetCId();
+
+        if (!_pending.contains(cid))
+        {
+            co_return;
+        }
+
+        assert(!_saveCompletionPromise.contains(cid));
+
+        Promise<void> promise;
+        Future<void> future = promise.GetFuture();
+
+        _saveCompletionPromise[cid] = std::move(promise);
+
+        co_await future;
+
+        co_return;
+    }
+
     void GameRepositorySystem::LoadAccountStorage(const GamePlayer& player, const std::function<void(const db::dto::AccountStorage&)>& callback)
     {
         ++_pending[player.GetCId()].first;
@@ -297,6 +318,16 @@ namespace sunlight
         if (const int32_t count = --iter->second.first; count == 0)
         {
             _pending.erase(iter);
+
+            const auto iter2 = _saveCompletionPromise.find(cid);
+            if (iter2 != _saveCompletionPromise.end())
+            {
+                Promise<void>& promise = iter2->second;
+
+                promise.Set();
+
+                _saveCompletionPromise.erase(iter2);
+            }
         }
     }
 
@@ -316,6 +347,16 @@ namespace sunlight
         if (const int32_t count = --pendingCount; count == 0)
         {
             _pending.erase(iter);
+
+            const auto iter2 = _saveCompletionPromise.find(cid);
+            if (iter2 != _saveCompletionPromise.end())
+            {
+                Promise<void>& promise = iter2->second;
+
+                promise.Set();
+
+                _saveCompletionPromise.erase(iter2);
+            }
         }
 
         SUNLIGHT_LOG_CRITICAL(_serviceLocator,

@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/emulator/game/zone/stage_exit_type.h"
 #include "sl/emulator/server/client/game_client_id.h"
 #include "sl/emulator/server/packet/zone_packet_c2s.h"
 #include "sl/emulator/server/packet/io/sl_packet_reader.h"
@@ -26,6 +27,9 @@ namespace sunlight
         void Join();
 
         auto SpawnPlayer(SharedPtrNotNull<GameClient> client, db::dto::Character dto) -> Future<bool>;
+        auto DespawnPlayer(game_client_id_type id, StageExitType exitType) -> Future<void>;
+
+        void HandleClientDisconnect(game_client_id_type id);
         void HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader);
 
     private:

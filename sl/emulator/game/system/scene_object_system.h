@@ -5,6 +5,8 @@
 #include "sl/emulator/game/entity/game_entity_type.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/system/game_system.h"
+#include "sl/emulator/game/zone/stage_enter_type.h"
+#include "sl/emulator/game/zone/stage_exit_type.h"
 
 namespace sunlight
 {
@@ -34,10 +36,11 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        void SpawnPlayer(SharedPtrNotNull<GamePlayer> player);
+        void SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType);
         bool SpawnNPC(SharedPtrNotNull<GameNPC> npc);
         void SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos);
 
+        bool DespawnPlayer(game_entity_id_type id, StageExitType exitType);
         void RemoveItem(game_entity_id_type id);
 
     public:

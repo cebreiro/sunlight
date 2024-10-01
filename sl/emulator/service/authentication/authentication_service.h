@@ -20,7 +20,7 @@ namespace sunlight
 
     public:
         auto Add(int64_t accountId, game_client_id_type id) -> Future<std::shared_ptr<AuthenticationToken>>;
-        auto Remove(SharedPtrNotNull<AuthenticationToken> token) -> Future<void>;
+        auto Remove(SharedPtrNotNull<AuthenticationToken> token) -> Future<bool>;
         auto Extract(int64_t accountId) -> Future<std::shared_ptr<AuthenticationToken>>;
 
         auto Find(AuthenticationToken::Key key) const -> Future<std::shared_ptr<AuthenticationToken>>;

@@ -1,9 +1,12 @@
 #pragma once
 #include "sl/emulator/game/message/character_message_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
+#include "sl/emulator/game/zone/stage_enter_type.h"
+#include "sl/emulator/game/zone/stage_exit_type.h"
 #include "sl/emulator/server/client/game_client_id.h"
 #include "sl/emulator/server/packet/zone_packet_c2s.h"
 #include "sl/emulator/game/system/game_system.h"
+#include "sl/emulator/game/time/game_time.h"
 #include "sl/emulator/server/packet/io/sl_packet_reader.h"
 
 namespace sunlight
@@ -40,7 +43,8 @@ namespace sunlight
 
         void HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader);
 
-        void SpawnPlayer(SharedPtrNotNull<GamePlayer> player);
+        void SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType);
+        auto DespawnPlayer(game_client_id_type clientId, StageExitType exitType) -> Future<std::shared_ptr<GamePlayer>>;
 
         bool AddSubscriber(ZonePacketC2S type, const std::function<void(const ZoneRequest&)>& subscriber);
         bool AddSubscriber(ZoneMessageType type, const std::function<void(const ZoneMessage&)>& subscriber);

@@ -70,7 +70,7 @@ namespace sunlight
         return GameSystem::GetClassId<SceneObjectSystem>();
     }
 
-    void SceneObjectSystem::SpawnPlayer(SharedPtrNotNull<GamePlayer> player)
+    void SceneObjectSystem::SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType)
     {
         _entities[player->GetType()][player->GetId()] = player;
 
@@ -81,7 +81,19 @@ namespace sunlight
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
         sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(player->GetType()));
 
-        player->Defer(ZonePacketS2CCreator::CreateLoginAccept(*player, _stageId));
+        switch (enterType)
+        {
+        case StageEnterType::Login:
+        {
+            player->Defer(ZonePacketS2CCreator::CreateLoginAccept(*player, _stageId));
+        }
+        break;
+        case StageEnterType::StageChange:
+        {
+            player->Defer(ZonePacketS2CCreator::CreateObjectForceMove(*player));
+        }
+        break;
+        }
 
         EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
 
@@ -193,6 +205,49 @@ namespace sunlight
                 player.FlushDeferred();
             });
         viewRangeSystem.Add(*item);
+    }
+
+    bool SceneObjectSystem::DespawnPlayer(game_entity_id_type id, StageExitType exitType)
+    {
+        const auto iter1 = _entities.find(GameEntityType::Player);
+        if (iter1 == _entities.end())
+        {
+            return false;
+        }
+
+        const auto iter2 = iter1->second.find(id);
+        if (iter2 == iter1->second.end())
+        {
+            return false;
+        }
+
+        GamePlayer& player = *iter2->second->Cast<GamePlayer>();
+
+        switch (exitType)
+        {
+        case StageExitType::Logout:
+        {
+
+        }
+        break;
+        case StageExitType::ZoneChange:
+        {
+
+        }
+        break;
+        case StageExitType::StageChange:
+        {
+        }
+        break;
+        }
+
+        [[maybe_unused]]
+        const size_t erased = _players.erase(player.GetCId());
+        assert(erased > 0);
+
+        iter1->second.erase(iter2);
+
+        return true;
     }
 
     void SceneObjectSystem::RemoveItem(game_entity_id_type id)

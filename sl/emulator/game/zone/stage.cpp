@@ -89,10 +89,6 @@ namespace sunlight
         const auto iter = _players.find(id);
         if (iter == _players.end())
         {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}_{}_{}] fail to find player. client_id: {}, opcode: {}",
-                    __FUNCTION__, _zoneId, _stageData.id, id, ToString(opcode)));
-
             return;
         }
 
@@ -214,7 +210,7 @@ namespace sunlight
         GameDebugger::SetInstance(nullptr);
     }
 
-    void Stage::SpawnPlayer(SharedPtrNotNull<GamePlayer> player)
+    void Stage::SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType)
     {
         assert(!_players.contains(player->GetClientId()));
 
@@ -227,10 +223,44 @@ namespace sunlight
 
         GameTimeService::SetNow(game_clock_type::now());
 
-        Get<SceneObjectSystem>().SpawnPlayer(player);
+        Get<SceneObjectSystem>().SpawnPlayer(player, enterType);
         Get<PlayerProfileSystem>().OnStageEnter(*player);
 
         GameDebugger::SetInstance(nullptr);
+    }
+
+    auto Stage::DespawnPlayer(game_client_id_type clientId, StageExitType exitType) -> Future<std::shared_ptr<GamePlayer>>
+    {
+        std::shared_ptr<GamePlayer> player;
+
+        const auto iter = _players.find(clientId);
+        if (iter == _players.end())
+        {
+            co_return player;
+        }
+
+        player = std::move(iter->second);
+        _players.erase(iter);
+
+        if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
+        {
+            GameDebugger::SetInstance(debugger);
+        }
+
+        GameTimeService::SetNow(game_clock_type::now());
+
+        Get<SceneObjectSystem>().DespawnPlayer(player->GetId(), exitType);
+        Get<NPCShopSystem>().OnStageExit(*player);
+        Get<PlayerProfileSystem>().OnStageExit(*player);
+
+        GameDebugger::SetInstance(nullptr);
+
+        co_await WaitAll(*ExecutionContext::GetExecutor(),
+            Delay(std::chrono::milliseconds(2000)), // to ignore client network message during exit
+            Get<GameRepositorySystem>().WaitForSaveCompletion(*player));
+
+
+        co_return player;
     }
 
     bool Stage::AddSubscriber(ZonePacketC2S type, const std::function<void(const ZoneRequest&)>& subscriber)

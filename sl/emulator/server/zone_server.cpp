@@ -158,6 +158,8 @@ namespace sunlight
                 {
                     _serviceLocator.Get<AuthenticationService>().Remove(std::move(token));
                 }
+
+                _zone->HandleClientDisconnect(client->GetId());
             }
             break;
             default:

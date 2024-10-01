@@ -90,7 +90,7 @@ namespace sunlight
                 throw std::runtime_error(fmt::format("fail to find stage. stage: {}", dto.stage));
             }
 
-            stage->SpawnPlayer(player);
+            stage->SpawnPlayer(player, StageEnterType::Login);
             _playerStages[client->GetId()] = stage;
         }
         catch (const std::exception& e)
@@ -105,6 +105,34 @@ namespace sunlight
         }
 
         co_return true;
+    }
+
+    auto Zone::DespawnPlayer(game_client_id_type id, StageExitType exitType) -> Future<void>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_strand;
+        assert(_strand);
+
+        const auto iter = _playerStages.find(id);
+        if (iter == _playerStages.end())
+        {
+            co_return;
+        }
+
+        Stage& stage = *iter->second;
+
+        // it is possible that instance is null because player can exit zone by zone change
+        [[maybe_unused]]
+        const std::shared_ptr<GamePlayer> player = co_await stage.DespawnPlayer(id, StageExitType::Logout);
+
+        co_return;
+    }
+
+    void Zone::HandleClientDisconnect(game_client_id_type id)
+    {
+        DespawnPlayer(id, StageExitType::Logout);
     }
 
     void Zone::HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader)
@@ -122,6 +150,8 @@ namespace sunlight
 
         while (true)
         {
+            // TODO: await(or slow down tick interval) player entrance if zone has no player
+
             for (Stage& stage : _stages | notnull::reference)
             {
                 stage.Update();

@@ -77,11 +77,11 @@ namespace sunlight
         }
     }
 
-    auto AuthenticationService::Remove(SharedPtrNotNull<AuthenticationToken> token) -> Future<void>
+    auto AuthenticationService::Remove(SharedPtrNotNull<AuthenticationToken> token) -> Future<bool>
     {
         if (!token)
         {
-            co_return;
+            co_return false;
         }
 
         [[maybe_unused]]
@@ -92,9 +92,7 @@ namespace sunlight
 
         if (const size_t count = _tokens.erase(token->GetKey().ToString()); count <= 0)
         {
-            SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] fail to remove token. token: {}",
-                    GetName(), *token));
+            co_return false;
         }
 
         if (const size_t count = _tokenAccountIndex.erase(token->GetAccountId()); count <= 0)
@@ -102,9 +100,11 @@ namespace sunlight
             SUNLIGHT_LOG_CRITICAL(_serviceLocator,
                 fmt::format("[{}] fail to remove token from account index. token: {}",
                     GetName(), *token));
+
+            co_return false;
         }
 
-        co_return;
+        co_return true;
     }
 
     auto AuthenticationService::Extract(int64_t accountId) -> Future<std::shared_ptr<AuthenticationToken>>
