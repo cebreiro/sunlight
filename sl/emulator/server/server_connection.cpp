@@ -46,6 +46,7 @@ namespace sunlight
         if (_shutdown.compare_exchange_strong(expected, true))
         {
             _session->Close();
+            _receiveChannel->Close();
         }
     }
 
@@ -100,14 +101,14 @@ namespace sunlight
         return *_session;
     }
 
-    auto ServerConnection::GetGameClient() -> GameClient*
+    auto ServerConnection::GetGameClientPtr() -> GameClient*
     {
-        return _client;
+        return _client.get();
     }
 
-    auto ServerConnection::GetGameClient() const -> const GameClient*
+    auto ServerConnection::GetGameClientPtr() const -> const GameClient*
     {
-        return _client;
+        return _client.get();
     }
 
     auto ServerConnection::GetStorage() -> std::any&
@@ -115,9 +116,9 @@ namespace sunlight
         return _storage;
     }
 
-    void ServerConnection::SetGameClient(GameClient* client)
+    void ServerConnection::SetGameClient(std::shared_ptr<GameClient> client)
     {
-        _client = client;
+        _client = std::move(client);
     }
 
     auto ServerConnection::Run() -> Future<void>
@@ -135,7 +136,7 @@ namespace sunlight
 
             Buffer header;
 
-            while (asyncEnumerable.HasNext() && !_shutdown.load())
+            while (asyncEnumerable.HasNext())
             {
                 Buffer received = co_await asyncEnumerable;
                 assert(ExecutionContext::IsEqualTo(*_strand));
@@ -192,6 +193,12 @@ namespace sunlight
                     header.Clear();
                 }
             }
+        }
+        catch (const AsyncEnumerableClosedException& e)
+        {
+            SUNLIGHT_LOG_DEBUG(_serviceLocator,
+                fmt::format("[{}] server connection is stopped. session: {}, e: {}",
+                    ToString(_type), _session->GetId(), e.what()));
         }
         catch (const std::exception& e)
         {

@@ -31,6 +31,7 @@ namespace sunlight
         };
 
         _channel->Send(std::move(event), channel::ChannelSignal::NotifyOne);
+        _channel->Close();
     }
 
     void Session::StartReceive()
@@ -55,7 +56,6 @@ namespace sunlight
             {
                 boost::system::error_code ec;
                 self->_socket.close(ec);
-                self->_channel->Close();
 
                 if (ec)
                 {

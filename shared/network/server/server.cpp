@@ -226,10 +226,14 @@ namespace sunlight
             {
                 HandleSessionEvent(co_await enumerable);
             }
+            catch (const AsyncEnumerableClosedException&)
+            {
+            }
             catch (const std::exception& e)
             {
-                SUNLIGHT_LOG_WARN(_locator, fmt::format("[{}] session event handler throw an exception. exception: {}",
+                SUNLIGHT_LOG_ERROR(_locator, fmt::format("[{}] session event handler throw an exception. exception: {}",
                     GetName(), e.what()));
+
                 co_return;
             }
         }

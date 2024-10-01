@@ -59,7 +59,7 @@ namespace sunlight
             co_return;
         }
 
-        const GameClient* client = connection.GetGameClient();
+        const GameClient* client = connection.GetGameClientPtr();
         const GameClientState state = client ? client->GetState() : GameClientState::None;
 
         const auto [begin, end] = _allows.equal_range(state);
@@ -137,7 +137,7 @@ namespace sunlight
             client->SetConnection(LobbyServer::TYPE, connection.shared_from_this());
             client->SetState(GameClientState::LobbyAuthenticated);
 
-            connection.SetGameClient(client.get());
+            connection.SetGameClient(std::move(client));
 
             success = true;
 
@@ -161,7 +161,7 @@ namespace sunlight
     {
         (void)reader;
 
-        GameClient* client = connection.GetGameClient();
+        GameClient* client = connection.GetGameClientPtr();
         if (!client)
         {
             assert(false);
@@ -201,7 +201,7 @@ namespace sunlight
 
     auto LobbyPacketC2SHandler::HandleCharacterNameCheck(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
     {
-        GameClient* client = connection.GetGameClient();
+        GameClient* client = connection.GetGameClientPtr();
         if (!client)
         {
             assert(false);
@@ -227,7 +227,7 @@ namespace sunlight
 
     auto LobbyPacketC2SHandler::HandleCharacterCreate(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
     {
-        GameClient* client = connection.GetGameClient();
+        GameClient* client = connection.GetGameClientPtr();
         if (!client)
         {
             assert(false);
@@ -357,7 +357,7 @@ namespace sunlight
                 connection.Send(LobbyPacketS2CCreator::CreateCharacterDeleteResult(success));
             });
 
-        GameClient* client = connection.GetGameClient();
+        GameClient* client = connection.GetGameClientPtr();
         if (!client)
         {
             assert(false);
@@ -423,7 +423,7 @@ namespace sunlight
 
     auto LobbyPacketC2SHandler::HandleCharacterSelect(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
     {
-        GameClient* client = connection.GetGameClient();
+        GameClient* client = connection.GetGameClientPtr();
         if (!client)
         {
             assert(false);

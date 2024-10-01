@@ -21,7 +21,7 @@ namespace sunlight
     {
         assert(ExecutionContext::IsEqualTo(connection.GetStrand()));
 
-        GameClient* client = connection.GetGameClient();
+        GameClient* client = connection.GetGameClientPtr();
         assert(client);
 
         const auto* handlers = [&]() -> const std::unordered_map<LoginPacketC2S, std::function<Future<void>(GameClient&, BufferReader&)>>*

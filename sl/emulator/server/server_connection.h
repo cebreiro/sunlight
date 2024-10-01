@@ -40,11 +40,11 @@ namespace sunlight
         auto GetStrand() const -> const Strand&;
         auto GetSession() -> Session&;
         auto GetSession() const -> const Session&;
-        auto GetGameClient() -> GameClient*;
-        auto GetGameClient() const -> const GameClient*;
+        auto GetGameClientPtr() -> GameClient*;
+        auto GetGameClientPtr() const -> const GameClient*;
         auto GetStorage() -> std::any&;
 
-        void SetGameClient(GameClient* client);
+        void SetGameClient(std::shared_ptr<GameClient> client);
 
         auto MakePacketHeader(const Buffer& body) -> Buffer;
 
@@ -73,7 +73,7 @@ namespace sunlight
 
         Buffer _sendPacketHeaderBuffer;
 
-        GameClient* _client = nullptr;
+        SharedPtrNotNull<GameClient> _client;
         std::any _storage;
     };
 }

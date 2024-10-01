@@ -26,7 +26,7 @@ namespace sunlight
 
         const ZonePacketC2S opcode = reader->Read<ZonePacketC2S>();
 
-        const GameClient* client = connection.GetGameClient();
+        const GameClient* client = connection.GetGameClientPtr();
         const GameClientState state = client ? client->GetState() : GameClientState::None;
 
         bool handled = false;
@@ -127,7 +127,7 @@ namespace sunlight
         client->SetConnection(ZoneServer::TYPE, connection.shared_from_this());
         client->SetState(GameClientState::LobbyAndZoneAuthenticated);
 
-        connection.SetGameClient(client.get());
+        connection.SetGameClient(client);
 
         std::optional<db::dto::Character> dto = co_await _serviceLocator.Get<DatabaseService>().GetCharacter(client->GetCid());
         if (!dto.has_value())
@@ -147,7 +147,7 @@ namespace sunlight
 
     void ZonePacketC2SHandler::Delegate(ServerConnection& connection, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader) const
     {
-        GameClient* client = connection.GetGameClient();
+        GameClient* client = connection.GetGameClientPtr();
         if (!client)
         {
             assert(false);

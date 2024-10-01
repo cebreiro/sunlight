@@ -146,8 +146,10 @@ namespace sunlight
             return;
         }
 
-        if (GameClient* client = connection->GetGameClient(); client)
+        if (GameClient* client = connection->GetGameClientPtr(); client)
         {
+            client->SetConnection(TYPE, std::shared_ptr<ServerConnection>{});
+
             switch (client->GetState())
             {
             case GameClientState::LobbyAndZoneAuthenticated:
@@ -167,9 +169,10 @@ namespace sunlight
                     fmt::format("[{}] invalid game client state. session: {}, client_id: {}, state: {}",
                         GetName(), session, client->GetId(), ToString(client->GetState())));
             }
-
-            client->SetConnection(TYPE, std::shared_ptr<ServerConnection>{});
         }
+
+        connection->Stop();
+        connection->SetGameClient(std::shared_ptr<GameClient>());
     }
 
     auto ZoneServer::GetName() -> std::string_view

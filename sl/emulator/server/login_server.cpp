@@ -59,7 +59,7 @@ namespace sunlight
         client->SetState(GameClientState::LoginConnected);
 
         client->SetConnection(TYPE, connection);
-        connection->SetGameClient(client.get());
+        connection->SetGameClient(client);
 
         GameClientStorage& clientStorage = _serviceLocator.Get<GameClientStorage>();
 
@@ -112,9 +112,9 @@ namespace sunlight
             if (_connections.find(accessor, session.GetId()))
             {
                 connection = std::move(accessor->second);
-            }
 
-            _connections.erase(accessor);
+                _connections.erase(accessor);
+            }
         }
 
         if (!connection)
@@ -122,8 +122,10 @@ namespace sunlight
             return;
         }
 
-        if (GameClient* client = connection->GetGameClient(); client)
+        if (GameClient* client = connection->GetGameClientPtr(); client)
         {
+            client->SetConnection(TYPE, std::shared_ptr<ServerConnection>{});
+
             switch (client->GetState())
             {
             case GameClientState::LoginConnected:
@@ -149,9 +151,10 @@ namespace sunlight
                     fmt::format("[{}] invalid game client state. session: {}, client_id: {}, state: {}",
                         GetName(), session, client->GetId(), ToString(client->GetState())));
             }
-
-            client->SetConnection(TYPE, std::shared_ptr<ServerConnection>{});
         }
+
+        connection->Stop();
+        connection->SetGameClient(std::shared_ptr<GameClient>());
     }
 
     auto LoginServer::GetName() -> std::string_view
