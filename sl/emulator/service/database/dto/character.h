@@ -20,6 +20,7 @@ namespace sunlight::db::dto
         int32_t stage = 0;
         float x = 0.f;
         float y = 0.f;
+        float yaw = 0.f;
 
         int8_t gender = 0;
         std::optional<int32_t> hp = std::nullopt;

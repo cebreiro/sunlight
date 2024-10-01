@@ -75,6 +75,7 @@ namespace sunlight::db::sp
             character.stage = static_cast<int32_t>(row.at(index++).as_int64());;
             character.x = row.at(index++).as_float();
             character.y = row.at(index++).as_float();
+            character.yaw = row.at(index++).as_float();
         }
 
         {

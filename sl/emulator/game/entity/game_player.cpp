@@ -138,6 +138,7 @@ namespace sunlight
         auto result = std::make_unique<SceneObjectComponent>();
 
         result->SetPosition(Eigen::Vector2f(dto.x, dto.y));
+        result->SetYaw(dto.yaw);
 
         return result;
     }
