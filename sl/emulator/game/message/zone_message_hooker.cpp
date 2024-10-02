@@ -5,6 +5,7 @@
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
+#include "sl/emulator/game/system/player_profile_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/zone/stage.h"
 
@@ -74,6 +75,24 @@ namespace sunlight
             default:;
             }
 
+        }
+        break;
+        case ZoneMessageType::PGROUP_MSG:
+        {
+            const ZoneMessageType subType = reader.Peek<ZoneMessageType>();
+
+            switch (subType)
+            {
+            case ZoneMessageType::PROFILE_SETTING_CHANGE:
+            {
+                reader.Skip();
+
+                _stage.Get<PlayerProfileSystem>().OnProfileSettingChange(message);
+
+                return true;
+            }
+            break;
+            }
         }
         break;
         case ZoneMessageType::SLV2_MSG:

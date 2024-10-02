@@ -2,13 +2,14 @@
 
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
+#include "sl/emulator/game/component/player_profile_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/entity/game_player.h"
 
 namespace sunlight
 {
-    auto ZoneDataTransferObjectCreator::CreatePlayerUnkState(const GamePlayer& player) -> Buffer
+    auto ZoneDataTransferObjectCreator::CreatePlayerGroupState(const GamePlayer& player) -> Buffer
     {
         (void)player;
 
@@ -65,7 +66,7 @@ namespace sunlight
         }
 
         writer.WriteBuffer(std::span(str.data(), unk3Size));
-        writer.Write<int32_t>(0); // unk
+        writer.Write<int32_t>(player.GetProfileComponent().GetBitmask());
 
         return writer.Flush();
     }

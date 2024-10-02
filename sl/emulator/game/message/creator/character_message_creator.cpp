@@ -16,7 +16,7 @@ namespace sunlight
 {
     auto CharacterMessageCreator::CreateProfile(const GamePlayer& targetPlayer, const sox::Zone& zone) -> Buffer
     {
-        const bool isPrivateProfile = targetPlayer.GetProfileComponent().IsPrivate();
+        const bool isPrivateProfile = targetPlayer.GetProfileComponent().IsConfigured(PlayerProfileSetting::Private);
 
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);

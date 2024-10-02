@@ -1,10 +1,12 @@
 #include "game_repository_system.h"
 
+#include "sl/emulator/game/component/player_profile_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/contants/quest/quest.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/database/database_service.h"
+#include "sl/emulator/service/database/dto/profile_introduction.h"
 
 namespace sunlight
 {
@@ -85,6 +87,42 @@ namespace sunlight
             };
 
         _serviceLocator.Get<DatabaseService>().GetAccountStorage(player.GetAId())
+            .Then(*ExecutionContext::GetExecutor(), handler);
+    }
+
+    void GameRepositorySystem::LoadProfileIntroduction(const GamePlayer& player, const std::function<void(PlayerProfileIntroduction&)>& callback)
+    {
+        (void)player;
+
+        ++_pending[player.GetCId()].first;
+
+        const auto handler = [this, cid = player.GetCId(), callback](std::pair<bool, std::optional<db::dto::ProfileIntroduction>> result)
+            {
+                if (result.first)
+                {
+                    OnComplete(cid);
+
+                    std::optional<db::dto::ProfileIntroduction>& dto = result.second;
+
+                    PlayerProfileIntroduction param;
+
+                    if (dto.has_value())
+                    {
+                        param.age = std::move(dto->age);
+                        param.sex = std::move(dto->sex);
+                        param.mail = std::move(dto->mail);
+                        param.message = std::move(dto->message);
+                    }
+
+                    callback(param);
+                }
+                else
+                {
+                    OnError(cid);
+                }
+            };
+
+        _serviceLocator.Get<DatabaseService>().GetProfileIntroduction(player.GetCId())
             .Then(*ExecutionContext::GetExecutor(), handler);
     }
 
@@ -285,6 +323,38 @@ namespace sunlight
                         OnError(cid);
                     }
                 });
+    }
+
+    void GameRepositorySystem::SaveProfile(const GamePlayer& player)
+    {
+        ++_pending[player.GetCId()].first;
+
+        const PlayerProfileComponent& profileComponent = player.GetProfileComponent();
+
+        const int8_t refusePartyInvite = profileComponent.IsConfigured(PlayerProfileSetting::RefusePartyInvite) ? 1 : 0;
+        const int8_t refuseChannelInvite = profileComponent.IsConfigured(PlayerProfileSetting::RefuseChannelInvite) ? 1 : 0;
+        const int8_t refuseGuildInvite = profileComponent.IsConfigured(PlayerProfileSetting::RefuseGuildInvite) ? 1 : 0;
+        const int8_t privateProfile = profileComponent.IsConfigured(PlayerProfileSetting::Private) ? 1 : 0;
+        const std::optional<PlayerProfileIntroduction>& introduction = profileComponent.GetIntroduction();
+
+        Future<bool> future = _serviceLocator.Get<DatabaseService>().SetProfile(player.GetCId(),
+            refusePartyInvite, refuseChannelInvite, refuseGuildInvite, privateProfile,
+            introduction.has_value() ? introduction->age : "",
+            introduction.has_value() ? introduction->sex : "",
+            introduction.has_value() ? introduction->mail : "",
+            introduction.has_value() ? introduction->message : "");
+
+        future.Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+            {
+                if (success)
+                {
+                    OnComplete(cid);
+                }
+                else
+                {
+                    OnError(cid);
+                }
+            });
     }
 
     void GameRepositorySystem::SaveStat(const GamePlayer& player, int32_t statPoint, int32_t str, int32_t dex,

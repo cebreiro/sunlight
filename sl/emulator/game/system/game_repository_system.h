@@ -11,6 +11,7 @@ namespace sunlight::db::dto
 namespace sunlight
 {
     class Quest;
+    struct PlayerProfileIntroduction;
 
     class GameClient;
     class GamePlayer;
@@ -37,6 +38,7 @@ namespace sunlight
         auto WaitForSaveCompletion(const GamePlayer& player) -> Future<void>;
 
         void LoadAccountStorage(const GamePlayer& player, const std::function<void(const db::dto::AccountStorage&)>& callback);
+        void LoadProfileIntroduction(const GamePlayer& player, const std::function<void(PlayerProfileIntroduction&)>& callback);
 
         void Save(const GamePlayer& player, db::ItemTransaction transaction);
         void SaveCharacterExp(const GamePlayer& player, int32_t exp);
@@ -50,6 +52,8 @@ namespace sunlight
 
         void SaveHair(const GamePlayer& player, int32_t hair);
         void SaveHairColor(const GamePlayer& player, int32_t hairColor);
+
+        void SaveProfile(const GamePlayer& player);
 
         void SaveStat(const GamePlayer& player, int32_t statPoint, int32_t str, int32_t dex, int32_t accr,
             int32_t health, int32_t intell, int32_t wis, int32_t will);

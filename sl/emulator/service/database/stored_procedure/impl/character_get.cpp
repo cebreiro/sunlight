@@ -34,7 +34,7 @@ namespace sunlight::db::sp
 
     void CharacterGet::SetOutput(const boost::mysql::results& result)
     {
-        if (result.size() < 6)
+        if (result.size() < 7)
         {
             return;
         }
@@ -45,6 +45,7 @@ namespace sunlight::db::sp
         const boost::mysql::resultset_view& characterSkillSet = result.at(3);
         const boost::mysql::resultset_view& characterItemSet = result.at(4);
         const boost::mysql::resultset_view& characterQuestSet = result.at(5);
+        const boost::mysql::resultset_view& characterProfileSettingSet = result.at(6);
 
         if (characterSet.rows().empty())
         {
@@ -162,6 +163,16 @@ namespace sunlight::db::sp
             quest.state = static_cast<int32_t>(row.at(index++).as_int64());
             quest.flags = row.at(index++).as_string();
             quest.data = row.at(index++).as_string();
+        }
+
+        {
+            const boost::mysql::row_view& row = characterProfileSettingSet.rows().at(0);
+
+            size_t index = 0;
+            character.profileSetting.refusePartyInvite = static_cast<int8_t>(row.at(index++).as_int64());
+            character.profileSetting.refuseChannelInvite = static_cast<int8_t>(row.at(index++).as_int64());
+            character.profileSetting.refuseGuildInvite = static_cast<int8_t>(row.at(index++).as_int64());
+            character.profileSetting.privateProfile = static_cast<int8_t>(row.at(index++).as_int64());
         }
     }
 }

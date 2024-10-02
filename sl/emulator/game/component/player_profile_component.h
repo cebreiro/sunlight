@@ -1,4 +1,6 @@
 #pragma once
+#include "sl/emulator/game/contants/profile/player_profile_setting.h"
+#include "sl/emulator/game/contants/profile/player_profile_introduction.h"
 #include "sl/emulator/game/component/game_component.h"
 
 namespace sunlight
@@ -6,12 +8,27 @@ namespace sunlight
     class PlayerProfileComponent final : public GameComponent
     {
     public:
-        bool IsPrivate() const;
+        bool IsConfigured(PlayerProfileSetting setting) const;
+        bool IsLoadPendingIntroduction() const;
 
+        void Configure(PlayerProfileSetting setting, bool turnOn);
 
-        void SetPrivate(bool value);
+        void AddIntroductionLoadingWaiter(const std::string& playerName);
+        void ClearIntroductionLoadingWaiters();
+
+        auto GetBitmask() const -> int8_t;
+        auto GetIntroduction() const -> const std::optional<PlayerProfileIntroduction>&;
+        auto GetIntroductionLoadingWaiters() const -> const std::vector<std::string>&;
+
+        void SetBitmask(int8_t value);
+        void SetLoadPendingIntroduction(bool value);
+        void SetIntroduction(PlayerProfileIntroduction introduction);
 
     private:
-        bool _private = false;
+        int8_t _bitmask = 0;
+        bool _loadPendingIntroduction = false;
+
+        std::optional<PlayerProfileIntroduction> _introduction = std::nullopt;
+        std::vector<std::string> _introductionLoadWaitPlayerNames;
     };
 }

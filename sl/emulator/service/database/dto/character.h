@@ -81,5 +81,15 @@ namespace sunlight::db::dto
             std::string data;
         };
         std::vector<Quest> quests;
+
+        struct ProfileSetting
+        {
+            int8_t refusePartyInvite = 0;
+            int8_t refuseChannelInvite = 0;
+            int8_t refuseGuildInvite = 0;
+            int8_t privateProfile = 0;
+        };
+
+        ProfileSetting profileSetting = {};
     };
 }

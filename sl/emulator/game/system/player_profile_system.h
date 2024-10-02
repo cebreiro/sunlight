@@ -8,7 +8,9 @@ namespace sunlight::sox
 
 namespace sunlight
 {
+    struct PlayerProfileIntroduction;
     struct CharacterMessage;
+    struct ZoneMessage;
 
     class GamePlayer;
 }
@@ -28,9 +30,23 @@ namespace sunlight
     public:
         void OnStageEnter(GamePlayer& player);
         void OnStageExit(const GamePlayer& player);
+        void OnZoneExit(const GamePlayer& player);
+
+    public:
+        void OnProfileSettingChange(const ZoneMessage& message);
+
+    public:
+        void HandleShowYou(const CharacterMessage& message);
+        void HandleProfileMessage(const ZoneMessage& message);
+
+        void HandleProfileIntroductionRequest(GamePlayer& player, const std::string& targetName);
+        void OnProfileIntroductionLoadComplete(const std::string& playerName, const std::string& targetName, PlayerProfileIntroduction& introduction);
+
+        void HandleProfileIntroductionSave(const ZoneMessage& message);
 
     private:
-        void HandleShowYou(const CharacterMessage& message);
+        auto FindPlayer(const std::string& name) -> GamePlayer*;
+        auto FindPlayer(const std::string& name) const -> const GamePlayer*;
 
     private:
         const ServiceLocator& _serviceLocator;

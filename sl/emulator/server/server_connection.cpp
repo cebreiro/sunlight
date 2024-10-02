@@ -307,6 +307,8 @@ namespace sunlight
 
     bool ServerConnection::IsValidPacketHeader(const Buffer& buffer) const
     {
+        // client Send 0x518940
+
         const int64_t headerSize = GetPacketHeadSize(_type);
         assert(buffer.GetSize() >= headerSize);
 
@@ -330,8 +332,13 @@ namespace sunlight
                 return false;
             }
 
-            if (reader.Read<uint32_t>() != size - 9)
+            const uint32_t bodySize = reader.Read<uint32_t>();
+            if (bodySize != size - 9)
             {
+                // client bug 0x5189BA when trying to send packet greater than 1024 bytes
+                // client make an incorrect packet size so sends only a portion of the front of packet and discards all the rest
+                // to fix this bug, change a byte at address 0x5189C0 to 0xEB (JNZ -> JMP)
+
                 return false;
             }
 
@@ -351,7 +358,7 @@ namespace sunlight
                 return false;
             }
 
-            if (reader.Read<uint16_t>() != ((size - 9) & 0xFFFF))
+            if (reader.Read<uint16_t>() != (bodySize & 0xFFFF))
             {
                 return false;
             }

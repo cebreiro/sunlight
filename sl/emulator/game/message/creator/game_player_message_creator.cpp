@@ -1,6 +1,7 @@
 #include "game_player_message_creator.h"
 
 #include "sl/emulator/game/component/player_appearance_component.h"
+#include "sl/emulator/game/component/player_profile_component.h"
 #include "sl/emulator/game/component/player_quest_component.h"
 #include "sl/emulator/game/contants/quest/quest.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
@@ -23,7 +24,7 @@ namespace sunlight
         writer.Write<int32_t>(0);
         writer.WriteObject(GameEntityNetworkId(player).ToBuffer()); // virtual function handler by entity type. client 0x4EC3F3
         writer.Write(ZoneMessageType::CONTAIN_ALL_STATE);
-        writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerUnkState(player));
+        writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerGroupState(player));
         writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerAppearance(player));
         writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerInformation(player));
         writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerPet(player));
@@ -509,6 +510,76 @@ namespace sunlight
         writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
         writer.Write(ZoneMessageType::EVENTSCRIPT_MESSAGE);
         writer.Write(ZoneMessageType::EVENTSCRIPTMSG_SHOW);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateProfileSettingChangeResult(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::PGROUP_MSG);
+        writer.Write(ZoneMessageType::PROFILE_SETTING_CHANGE_RESULT);
+        writer.Write<int8_t>(player.GetProfileComponent().GetBitmask());
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateProfileIntroduction(const GamePlayer& player, const PlayerProfileIntroduction& introduction) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::PROFILE_ARCHIVE_MSG);
+        writer.Write(ZoneMessageType::PROFILE_ARCHIVE_REQUEST_USER_DATA);
+        writer.Write<int8_t>(1);
+
+        {
+            // client 0x46CD40
+
+            PacketWriter objectWriter;
+            objectWriter.WriteFixeSizeString("", 128); // is not displayed
+            objectWriter.WriteFixeSizeString(introduction.age, 128);
+            objectWriter.WriteFixeSizeString(introduction.sex, 128);
+            objectWriter.WriteFixeSizeString("", 128); // is not displayed
+            objectWriter.WriteFixeSizeString(introduction.mail, 128);
+            objectWriter.WriteFixeSizeString(introduction.message, 1024);
+
+            writer.WriteObject(objectWriter);
+        }
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateProfileIntroductionFail(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::PROFILE_ARCHIVE_MSG);
+        writer.Write(ZoneMessageType::PROFILE_ARCHIVE_REQUEST_USER_DATA);
+        writer.Write<int8_t>(0);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreateProfileIntroductionSaveResult(const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::PROFILE_ARCHIVE_MSG);
+        writer.Write(ZoneMessageType::PROFILE_ARCHIVE_SAVE_USER_DATA);
+        writer.Write<int8_t>(0); // no usage
 
         return writer.Flush();
     }

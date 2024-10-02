@@ -162,6 +162,18 @@ namespace sunlight
         return result;
     }
 
+    auto CreateProfileComponent(const db::dto::Character& dto) -> UniquePtrNotNull<PlayerProfileComponent>
+    {
+        auto result = std::make_unique<PlayerProfileComponent>();
+
+        result->Configure(PlayerProfileSetting::RefusePartyInvite, dto.profileSetting.refusePartyInvite != 0);
+        result->Configure(PlayerProfileSetting::RefuseChannelInvite, dto.profileSetting.refuseChannelInvite != 0);
+        result->Configure(PlayerProfileSetting::RefuseGuildInvite, dto.profileSetting.refuseGuildInvite != 0);
+        result->Configure(PlayerProfileSetting::Private, dto.profileSetting.privateProfile != 0);
+
+        return result;
+    }
+
     GamePlayer::GamePlayer(SharedPtrNotNull<GameClient> client, const db::dto::Character& dto,
         const GameDataProvideService& dataProvider, GameEntityIdPublisher& idPublisher)
         : GameEntity(idPublisher, TYPE)
@@ -182,7 +194,7 @@ namespace sunlight
         (void)AddComponent(std::make_unique<PlayerNPCScriptComponent>());
         (void)AddComponent(CreateQuestComponent(dto));
         (void)AddComponent(std::make_unique<PlayerNPCShopComponent>());
-        (void)AddComponent(std::make_unique<PlayerProfileComponent>());
+        (void)AddComponent(CreateProfileComponent(dto));
     }
 
     bool GamePlayer::HasDeferred() const
@@ -344,13 +356,11 @@ namespace sunlight
     auto GamePlayer::GetStateComponent() -> EntityStateComponent&
     {
         return GetComponent<EntityStateComponent>();
-
     }
 
     auto GamePlayer::GetStateComponent() const -> const EntityStateComponent&
     {
         return GetComponent<EntityStateComponent>();
-
     }
 
     auto GamePlayer::GetNPCScriptComponent() -> PlayerNPCScriptComponent&

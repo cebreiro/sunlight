@@ -12,7 +12,7 @@ namespace sunlight
     public:
         ZoneDataTransferObjectCreator() = delete;
 
-        static auto CreatePlayerUnkState(const GamePlayer& player) -> Buffer;
+        static auto CreatePlayerGroupState(const GamePlayer& player) -> Buffer;
         static auto CreatePlayerAppearance(const GamePlayer& player) -> Buffer;
         static auto CreatePlayerInformation(const GamePlayer& player) -> Buffer;
         static auto CreatePlayerPet(const GamePlayer& player) -> Buffer;

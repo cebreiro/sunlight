@@ -13,6 +13,8 @@
 #include "sl/emulator/service/database/stored_procedure/impl/character_job_exp_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_job_level_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_level_set.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_profile_introduction_get.h"
+#include "sl/emulator/service/database/stored_procedure/impl/character_profile_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_quest_add.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_quest_set.h"
 #include "sl/emulator/service/database/stored_procedure/impl/character_skill_level_set.h"

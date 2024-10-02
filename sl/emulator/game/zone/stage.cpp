@@ -253,6 +253,18 @@ namespace sunlight
         Get<NPCShopSystem>().OnStageExit(*player);
         Get<PlayerProfileSystem>().OnStageExit(*player);
 
+        switch (exitType)
+        {
+        case StageExitType::Logout:
+        case StageExitType::ZoneChange:
+        {
+            Get<PlayerProfileSystem>().OnZoneExit(*player);
+        }
+        break;
+        case StageExitType::StageChange:
+            break;
+        }
+
         GameDebugger::SetInstance(nullptr);
 
         // to ignore client network message during exit

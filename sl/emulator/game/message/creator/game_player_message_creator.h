@@ -5,6 +5,7 @@
 namespace sunlight
 {
     class Quest;
+    struct PlayerProfileIntroduction;
 
     class GamePlayer;
     class GameItem;
@@ -48,5 +49,10 @@ namespace sunlight
         static auto CreateEventScriptAddStringWithItem(const GamePlayer& player, int32_t index, int32_t itemId) -> Buffer;
         static auto CreateEventScriptClear(const GamePlayer& player) -> Buffer;
         static auto CreateEventScriptShow(const GamePlayer& player) -> Buffer;
+
+        static auto CreateProfileSettingChangeResult(const GamePlayer& player) -> Buffer;
+        static auto CreateProfileIntroduction(const GamePlayer& player, const PlayerProfileIntroduction& introduction) -> Buffer;
+        static auto CreateProfileIntroductionFail(const GamePlayer& player) -> Buffer;
+        static auto CreateProfileIntroductionSaveResult(const GamePlayer& player) -> Buffer;
     };
 }

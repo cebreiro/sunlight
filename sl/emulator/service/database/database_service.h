@@ -4,6 +4,7 @@
 #include "sl/emulator/service/database/dto/account_storage.h"
 #include "sl/emulator/service/database/dto/character.h"
 #include "sl/emulator/service/database/dto/lobby_character.h"
+#include "sl/emulator/service/database/dto/profile_introduction.h"
 #include "sl/emulator/service/database/request/character_create.h"
 #include "sl/emulator/service/database/transaction/transaction.hpp"
 
@@ -44,6 +45,7 @@ namespace sunlight
 
         auto GetCharacter(int64_t cid) -> Future<std::optional<db::dto::Character>>;
         auto GetAccountStorage(int64_t aid) -> Future<std::optional<db::dto::AccountStorage>>;
+        auto GetProfileIntroduction(int64_t cid) -> Future<std::pair<bool, std::optional<db::dto::ProfileIntroduction>>>;
 
         auto AddNewJob(int64_t cid, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills) -> Future<bool>;
         auto AddQuest(int64_t cid, int32_t id, int32_t state, std::string flags, std::string data) -> Future<bool>;
@@ -59,6 +61,10 @@ namespace sunlight
 
         auto SetHair(int64_t cid, int32_t hair) -> Future<bool>;
         auto SetHairColor(int64_t cid, int32_t hairColor) -> Future<bool>;
+
+        auto SetProfile(int64_t cid,
+            int8_t refusePartyInvite, int8_t refuseChannelInvite, int8_t refuseGuildInvite, int8_t privateProfile,
+            std::string age, std::string sex, std::string mail, std::string message) -> Future<bool>;
 
         auto SaveState(int64_t cid, int32_t zone, int32_t stage, float x, float y, float yaw, int8_t arms, int8_t running, int32_t hp, int32_t sp) -> Future<bool>;
 

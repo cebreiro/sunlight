@@ -205,6 +205,27 @@ namespace sunlight
         co_return std::move(procedure.GetResult());
     }
 
+    auto DatabaseService::GetProfileIntroduction(int64_t cid) -> Future<std::pair<bool, std::optional<db::dto::ProfileIntroduction>>>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterProfileIntroductionGet procedure(conn, cid);
+
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return std::make_pair(false, std::optional<db::dto::ProfileIntroduction>());
+        }
+
+        co_return std::make_pair(true, std::move(procedure.GetResult()));
+    }
+
     auto DatabaseService::AddNewJob(int64_t cid, int32_t job, int32_t jobType, int32_t level, int32_t skillPoint, std::vector<req::SkillCreate> skills) -> Future<bool>
     {
         [[maybe_unused]]
@@ -464,6 +485,30 @@ namespace sunlight
 
         db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
         db::sp::CharacterHairColorSet procedure(conn, cid, hairColor);
+
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
+    auto DatabaseService::SetProfile(int64_t cid, int8_t refusePartyInvite, int8_t refuseChannelInvite,
+        int8_t refuseGuildInvite, int8_t privateProfile, std::string age, std::string sex, std::string mail,
+        std::string message) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterProfileSet procedure(conn, cid, refusePartyInvite, refuseChannelInvite, refuseGuildInvite, privateProfile,
+            age, sex, mail, message);
 
         if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
         {
