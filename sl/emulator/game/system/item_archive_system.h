@@ -12,6 +12,8 @@ namespace sunlight::db::dto
 
 namespace sunlight
 {
+    enum class ZoneMessageType : int32_t;
+
     struct ZoneMessage;
 
     class ItemData;
@@ -86,6 +88,9 @@ namespace sunlight
 
     private:
         void LogHandleItemError(const char* func, const std::string& message) const;
+
+        bool IsExternItemTransactionRunning(const GamePlayer& player) const;
+        bool IsAllowed(const GamePlayer& player, ZoneMessageType itemMessage) const;
 
     private:
         const ServiceLocator& _serviceLocator;

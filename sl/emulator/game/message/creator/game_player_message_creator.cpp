@@ -583,4 +583,20 @@ namespace sunlight
 
         return writer.Flush();
     }
+
+    auto GamePlayerMessageCreator::CreatePlayerStateProposition(const GamePlayer& player, const std::string& title, int32_t groupId, GameGroupType groupType, int32_t unk2) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::STATE_PROPOSITION);
+        writer.WriteString(title);
+        writer.Write<int32_t>(groupId);
+        writer.Write(groupType);
+        writer.Write<int32_t>(unk2);
+
+        return writer.Flush();
+    }
 }

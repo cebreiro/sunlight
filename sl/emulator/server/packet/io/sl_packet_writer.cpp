@@ -65,9 +65,16 @@ namespace sunlight
 
     void SlPacketWriter::WriteObject(PacketWriter& objectWriter)
     {
-        Buffer buffer = objectWriter.Flush();
+        if (objectWriter.GetWriteSize() == 0)
+        {
+            WriteObject(Buffer{});
+        }
+        else
+        {
+            Buffer buffer = objectWriter.Flush();
 
-        WriteObject(buffer);
+            WriteObject(buffer);
+        }
     }
 
     void SlPacketWriter::WriteObject(const Buffer& buffer)

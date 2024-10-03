@@ -19,8 +19,10 @@
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/item_trade_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_appearance_system.h"
+#include "sl/emulator/game/system/player_group_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_profile_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
@@ -252,6 +254,7 @@ namespace sunlight
         Get<SceneObjectSystem>().DespawnPlayer(player->GetId(), exitType);
         Get<NPCShopSystem>().OnStageExit(*player);
         Get<PlayerProfileSystem>().OnStageExit(*player);
+        Get<PlayerGroupSystem>().OnStageExit(*player);
 
         switch (exitType)
         {
@@ -344,6 +347,8 @@ namespace sunlight
         Add(std::make_shared<PlayerQuestSystem>());
         Add(std::make_shared<NPCShopSystem>(_serviceLocator));
         Add(std::make_shared<PlayerProfileSystem>(_serviceLocator, _zoneId));
+        Add(std::make_shared<PlayerGroupSystem>(_serviceLocator));
+        Add(std::make_shared<ItemTradeSystem>(_serviceLocator));
 
         const auto range = _systems | std::views::values;
 

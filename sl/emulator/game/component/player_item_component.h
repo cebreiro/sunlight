@@ -14,6 +14,8 @@
 
 namespace sunlight
 {
+    struct ItemSlotRange;
+
     class GameEntityIdPublisher;
     class GameItem;
     class GameEntityIdPool;
@@ -36,6 +38,7 @@ namespace sunlight
         void FlushItemLogTo(std::vector<db::ItemLog>& dest);
 
     public:
+        bool IsEmpty(int8_t page, const ItemSlotRange& range) const;
         bool IsEquipped(EquipmentPosition position) const;
         bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
 
@@ -77,6 +80,7 @@ namespace sunlight
         bool RemovePickedItem();
         bool RemoveItem(game_entity_id_type id);
         auto ReleaseItem(game_entity_id_type id) -> std::shared_ptr<GameItem>;
+        auto ReleaseItemByUId(int64_t id) -> std::shared_ptr<GameItem>;
 
     public:
         auto FindItemShared(game_entity_id_type id) -> std::shared_ptr<GameItem>;
@@ -101,6 +105,7 @@ namespace sunlight
         auto Mutable(EquipmentPosition position) -> GameItem*&;
 
         auto GetInventorySlotStorage(int8_t page) -> ItemSlotStorage*;
+        auto GetInventorySlotStorage(int8_t page) const -> const ItemSlotStorage*;
         auto GetQuickSlotStorage(int8_t page) -> ItemSlotStorage*;
 
     private:
@@ -119,6 +124,7 @@ namespace sunlight
         int32_t _gold = 0;
 
         std::unordered_map<game_entity_id_type, SharedPtrNotNull<GameItem>> _items;
+        std::unordered_map<int64_t, PtrNotNull<GameItem>> _itemsUIdIndex;
 
         int32_t _inventoryPage = 0;
         std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_INVENTORY_PAGE_SIZE> _inventorySlot;

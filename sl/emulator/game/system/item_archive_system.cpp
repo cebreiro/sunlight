@@ -7,6 +7,7 @@
 #include "sl/emulator/game/component/npc_item_shop_component.h"
 #include "sl/emulator/game/component/player_account_storage_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
+#include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
@@ -25,6 +26,7 @@
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
+#include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
@@ -81,6 +83,17 @@ namespace sunlight
 
         do
         {
+            if (IsExternItemTransactionRunning(player))
+            {
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] invalid purchase. extern transaction is running. player: {}",
+                        GetName(), player.GetCId()));
+
+                result = NPCItemShopResult::JustFail;
+
+                break;
+            }
+
             if (playerItemComponent.GetPickedItem())
             {
                 result = NPCItemShopResult::JustFail;
@@ -211,6 +224,17 @@ namespace sunlight
                 player.FlushDeferred();
             });
 
+        if (IsExternItemTransactionRunning(player))
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] player invalid request. extern transaction is running. player: {}",
+                    GetName(), player.GetCId()));
+
+            result = NPCItemShopResult::JustFail;
+
+            return;
+        }
+
         PlayerItemComponent& playerItemComponent = player.GetItemComponent();
 
         const GameItem* pickedItem = playerItemComponent.GetPickedItem();
@@ -284,6 +308,15 @@ namespace sunlight
     {
         assert(item->GetQuantity() <= item->GetData().GetMaxOverlapCount());
 
+        if (IsExternItemTransactionRunning(player))
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] fail to add item. extern transaction is running. player: {}, item_id: {}",
+                    GetName(), player.GetCId(), item->GetData().GetId()));
+
+            return false;
+        }
+
         if (!item->HasComponent<ItemPositionComponent>())
         {
             item->AddComponent<ItemPositionComponent>(std::make_unique<ItemPositionComponent>());
@@ -335,6 +368,15 @@ namespace sunlight
     bool ItemArchiveSystem::GainItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity)
     {
         assert(item->GetQuantity() <= item->GetData().GetMaxOverlapCount());
+
+        if (IsExternItemTransactionRunning(player))
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] fail to gain item. extern transaction is running. player: {}, item_id: {}",
+                    GetName(), player.GetCId(), item->GetData().GetId()));
+
+            return false;
+        }
 
         if (!item->HasComponent<ItemPositionComponent>())
         {
@@ -495,6 +537,15 @@ namespace sunlight
 
     bool ItemArchiveSystem::RemoveInventoryItem(GamePlayer& player, int32_t itemId, int32_t quantity)
     {
+        if (IsExternItemTransactionRunning(player))
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] fail to remove item. extern transaction is running. player: {}, item_id: {}",
+                    GetName(), player.GetCId(), itemId));
+
+            return false;
+        }
+
         PlayerItemComponent& itemComponent = player.GetItemComponent();
 
         _itemRemoveResult.clear();
@@ -536,6 +587,15 @@ namespace sunlight
 
     bool ItemArchiveSystem::Charge(GamePlayer& player, int32_t cost)
     {
+        if (IsExternItemTransactionRunning(player))
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] fail to charge item. extern transaction is running. player: {}, cost: {}",
+                    GetName(), player.GetCId(), cost));
+
+            return false;
+        }
+
         if (cost <= 0)
         {
             assert(false);
@@ -557,6 +617,15 @@ namespace sunlight
 
     void ItemArchiveSystem::OpenAccountStorage(GamePlayer& player)
     {
+        if (IsExternItemTransactionRunning(player))
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] fail to open account storage. extern transaction is running. player: {}",
+                    GetName(), player.GetCId()));
+
+            return;
+        }
+
         PlayerAccountStorageComponent* accountStorageComponent = player.FindComponent<PlayerAccountStorageComponent>();
         if (!accountStorageComponent)
         {
@@ -668,9 +737,20 @@ namespace sunlight
         bool success = true;
         const auto subType = reader.Read<ZoneMessageType>();
 
+        if (!IsAllowed(player, subType))
+        {
+            SUNLIGHT_LOG_ERROR(_serviceLocator,
+                fmt::format("[{}] player request unallowable item message. player: {}, type: {}, buffer: {}",
+                    GetName(), player.GetCId(), ToString(subType), reader.GetBuffer().ToString()));
+
+            player.GetClient().Disconnect();
+
+            return;
+        }
+
         boost::scope::scope_exit exit([&]()
             {
-                if (success)
+                if (success && !IsExternItemTransactionRunning(player))
                 {
                     SaveChanges(player);
                 }
@@ -1291,5 +1371,42 @@ namespace sunlight
         SUNLIGHT_LOG_ERROR(_serviceLocator,
             fmt::format("[{}] error. function: {}, message: {}",
                 GetName(), func, message));
+    }
+
+    bool ItemArchiveSystem::IsExternItemTransactionRunning(const GamePlayer& player) const
+    {
+        const PlayerGroupComponent& groupComponent = player.GetGroupComponent();
+
+        if (!groupComponent.HasGroup())
+        {
+            return false;
+        }
+
+        switch (groupComponent.GetGroupType())
+        {
+        case GameGroupType::Trade:
+        case GameGroupType::StreetVendor:
+            return true;
+        }
+
+        return false;
+    }
+
+    bool ItemArchiveSystem::IsAllowed(const GamePlayer& player, ZoneMessageType itemMessage) const
+    {
+        if (IsExternItemTransactionRunning(player))
+        {
+            switch (itemMessage)
+            {
+            case ZoneMessageType::ITEMARCHIVE_LIFTITEM:
+            case ZoneMessageType::ITEMARCHIVE_LOWERITEM:
+                return true;
+            default:;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

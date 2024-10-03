@@ -38,6 +38,7 @@ namespace sunlight
             _items[itemEntity->GetId()] = itemEntity;
 
             itemEntity->SetUId(dtoItem.id);
+            _itemsUIdIndex[dtoItem.id] = itemEntity.get();
 
             auto positionComponent = new ItemPositionComponent();
             positionComponent->SetPage(dtoItem.page);
@@ -176,6 +177,17 @@ namespace sunlight
         _itemLogs.clear();
     }
 
+    bool PlayerItemComponent::IsEmpty(int8_t page, const ItemSlotRange& range) const
+    {
+        const ItemSlotStorage* slotStorage = GetInventorySlotStorage(page);
+        if (!slotStorage)
+        {
+            return false;
+        }
+
+        return slotStorage->HasEmptySlot(range);
+    }
+
     bool PlayerItemComponent::IsEquipped(EquipmentPosition position) const
     {
         return GetEquipmentItem(position) != nullptr;
@@ -269,6 +281,8 @@ namespace sunlight
 
         AddItemAddLog(*item);
 
+        _itemsUIdIndex.try_emplace(item->GetUId().value(), item.get());
+
         const game_entity_id_type id = item->GetId();
 
         [[maybe_unused]]
@@ -320,6 +334,8 @@ namespace sunlight
         SUNLIGHT_GAME_DEBUG_REPORT(debug_type, slotStorage->GetDebugString());
 
         AddItemAddLog(*item);
+
+        _itemsUIdIndex.try_emplace(item->GetUId().value(), item.get());
 
         const game_entity_id_type id = item->GetId();
 
@@ -404,6 +420,7 @@ namespace sunlight
                 GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr, slotRange);
                 SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
 
+                _itemsUIdIndex.erase(iter->second->GetUId().value());
                 _items.erase(iter);
             }
             else if (sum < targetItemQuantity)
@@ -991,6 +1008,8 @@ namespace sunlight
         }
 
         _pickItem = item.get();
+
+        _itemsUIdIndex.try_emplace(_pickItem->GetUId().value(), _pickItem);
         _items[_pickItem->GetId()] = std::move(item);
 
         ItemPositionComponent& positionComponent = _pickItem->GetComponent<ItemPositionComponent>();
@@ -1015,6 +1034,8 @@ namespace sunlight
         assert(iter != _items.end());
 
         _pickItem = nullptr;
+
+        _itemsUIdIndex.erase(iter->second->GetUId().value());
         _items.erase(iter);
 
         return true;
@@ -1078,6 +1099,7 @@ namespace sunlight
 
         AddItemRemoveLog(*iter->second);
 
+        _itemsUIdIndex.erase(iter->second->GetUId().value());
         _items.erase(iter);
 
         return true;
@@ -1142,9 +1164,21 @@ namespace sunlight
 
         SharedPtrNotNull<GameItem> result = std::move(iter->second);
 
+        _itemsUIdIndex.erase(result->GetUId().value());
         _items.erase(iter);
 
         return result;
+    }
+
+    auto PlayerItemComponent::ReleaseItemByUId(int64_t id) -> std::shared_ptr<GameItem>
+    {
+        const auto iter = _itemsUIdIndex.find(id);
+        if (iter == _itemsUIdIndex.end())
+        {
+            return {};
+        }
+
+        return ReleaseItem(iter->second->GetId());
     }
 
     auto PlayerItemComponent::FindItemShared(game_entity_id_type id) -> std::shared_ptr<GameItem>
@@ -1283,6 +1317,16 @@ namespace sunlight
     }
 
     auto PlayerItemComponent::GetInventorySlotStorage(int8_t page) -> ItemSlotStorage*
+    {
+        if (page < 0 || page >= std::ssize(_inventorySlot))
+        {
+            return nullptr;
+        }
+
+        return _inventorySlot[page].get();
+    }
+
+    auto PlayerItemComponent::GetInventorySlotStorage(int8_t page) const -> const ItemSlotStorage*
     {
         if (page < 0 || page >= std::ssize(_inventorySlot))
         {

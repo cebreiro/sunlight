@@ -3,6 +3,7 @@
 #include "sl/emulator/game/component/entity_movement_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
+#include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
@@ -195,6 +196,7 @@ namespace sunlight
         (void)AddComponent(CreateQuestComponent(dto));
         (void)AddComponent(std::make_unique<PlayerNPCShopComponent>());
         (void)AddComponent(CreateProfileComponent(dto));
+        (void)AddComponent(std::make_unique<PlayerGroupComponent>());
     }
 
     bool GamePlayer::HasDeferred() const
@@ -401,5 +403,15 @@ namespace sunlight
     auto GamePlayer::GetProfileComponent() const -> const PlayerProfileComponent&
     {
         return GetComponent<PlayerProfileComponent>();
+    }
+
+    auto GamePlayer::GetGroupComponent() -> PlayerGroupComponent&
+    {
+        return GetComponent<PlayerGroupComponent>();
+    }
+
+    auto GamePlayer::GetGroupComponent() const -> const PlayerGroupComponent&
+    {
+        return GetComponent<PlayerGroupComponent>();
     }
 }
