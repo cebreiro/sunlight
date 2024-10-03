@@ -161,6 +161,19 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto ItemTradeMessageCreator::CreateTradeConfirm(int32_t groupId) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_NORMAL_MESSAGE);
+        writer.Write(ZoneMessageType::GROUP_MSG);
+        writer.Write<int32_t>(groupId);
+        writer.Write<int32_t>(900);
+        writer.Write<int32_t>(1005);
+
+        return writer.Flush();
+    }
+
     auto ItemTradeMessageCreator::CreateTradeSuccess(int32_t groupId) -> Buffer
     {
         SlPacketWriter writer;

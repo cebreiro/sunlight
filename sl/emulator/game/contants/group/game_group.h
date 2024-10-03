@@ -23,6 +23,8 @@ namespace sunlight
         void AddGuest(GamePlayer& player);
         bool RemoveGuest(const GamePlayer& player);
 
+        void AddTradeConfirmPlayer(const GamePlayer& player);
+
         void Broadcast(Buffer buffer, std::optional<game_entity_id_type> exceptEntityId);
 
         auto GetId() const -> int32_t;
@@ -31,11 +33,15 @@ namespace sunlight
         auto GetHost() const -> GamePlayer&;
         auto GetGuests() const -> const std::vector<PtrNotNull<GamePlayer>>&;
 
+        auto GetTradeConfirmPlayerCount() const -> int64_t;
+
     private:
         int32_t _id = 0;
         GameGroupType _type = GameGroupType::Null;
         GamePlayer& _host;
 
         std::vector<PtrNotNull<GamePlayer>> _guests;
+
+        std::unordered_set<int64_t> _tradeConfirmPlayers;
     };
 }

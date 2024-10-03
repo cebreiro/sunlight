@@ -16,6 +16,7 @@ namespace sunlight
     public:
         explicit ItemTradeSystem(const ServiceLocator& serviceLocator);
 
+        void InitializeSubSystem(Stage& stage) override;
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 

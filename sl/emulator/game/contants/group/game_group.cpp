@@ -38,12 +38,26 @@ namespace sunlight
         const auto iter = std::ranges::find(_guests, &player);
         if (iter != _guests.end())
         {
+            _tradeConfirmPlayers.erase(player.GetCId());
+
             _guests.erase(iter);
 
             return true;
         }
 
         return false;
+    }
+
+    void GameGroup::AddTradeConfirmPlayer(const GamePlayer& player)
+    {
+        if (!IsHost(player) && !IsGuest(player))
+        {
+            assert(false);
+
+            return;
+        }
+
+        _tradeConfirmPlayers.emplace(player.GetCId());
     }
 
     void GameGroup::Broadcast(Buffer buffer, std::optional<game_entity_id_type> exceptEntityId)
@@ -87,5 +101,10 @@ namespace sunlight
     auto GameGroup::GetGuests() const -> const std::vector<PtrNotNull<GamePlayer>>&
     {
         return _guests;
+    }
+
+    auto GameGroup::GetTradeConfirmPlayerCount() const -> int64_t
+    {
+        return std::ssize(_tradeConfirmPlayers);
     }
 }

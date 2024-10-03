@@ -7,6 +7,7 @@
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/item/inventory_position.h"
 #include "sl/emulator/game/contants/item/item_position.h"
+#include "sl/emulator/game/contants/item/item_slot_storage_base.h"
 #include "sl/emulator/game/contants/quick_slot/quick_slot_position.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/service/database/dto/character.h"
@@ -14,8 +15,6 @@
 
 namespace sunlight
 {
-    struct ItemSlotRange;
-
     class GameEntityIdPublisher;
     class GameItem;
     class GameEntityIdPool;
@@ -81,6 +80,8 @@ namespace sunlight
         bool RemoveItem(game_entity_id_type id);
         auto ReleaseItem(game_entity_id_type id) -> std::shared_ptr<GameItem>;
         auto ReleaseItemByUId(int64_t id) -> std::shared_ptr<GameItem>;
+
+        auto GetInventoryMasks() const -> std::vector<ItemSlotStorageBase<bool>>;
 
     public:
         auto FindItemShared(game_entity_id_type id) -> std::shared_ptr<GameItem>;

@@ -8,6 +8,8 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/message/creator/item_trade_message_creator.h"
+#include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/service/database/transaction/item/item_transaction.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
@@ -17,6 +19,11 @@ namespace sunlight
     ItemTradeSystem::ItemTradeSystem(const ServiceLocator& serviceLocator)
         : _serviceLocator(serviceLocator)
     {
+    }
+
+    void ItemTradeSystem::InitializeSubSystem(Stage& stage)
+    {
+        Add(stage.Get<GameRepositorySystem>());
     }
 
     auto ItemTradeSystem::GetName() const -> std::string_view
@@ -235,10 +242,156 @@ namespace sunlight
 
     bool ItemTradeSystem::Commit(GamePlayer& host, GamePlayer& guest)
     {
-        (void)host;
-        (void)guest;
+        assert(host.HasComponent<PlayerItemTradeComponent>());
+        assert(guest.HasComponent<PlayerItemTradeComponent>());
 
-        return false;
+        PlayerItemTradeComponent& hostTradeComponent = host.GetComponent<PlayerItemTradeComponent>();
+        PlayerItemTradeComponent& guestTradeComponent = guest.GetComponent<PlayerItemTradeComponent>();
+        PlayerItemComponent& hostItemComponent = host.GetItemComponent();
+        PlayerItemComponent& guestItemComponent = guest.GetItemComponent();
+
+        if (hostItemComponent.GetGold() < hostTradeComponent.GetGold() ||
+            guestItemComponent.GetGold() < guestTradeComponent.GetGold())
+        {
+            return false;
+        }
+
+        using add_position_container_type = std::unordered_map<game_entity_id_type, InventoryPosition>;
+
+        const auto buildPositionContainer = [](add_position_container_type& result,
+            std::vector<ItemSlotStorageBase<bool>> masks, const PlayerItemTradeComponent& tradeComponent) -> bool
+            {
+                assert(!masks.empty());
+
+                int64_t index = 0;
+
+                for (const auto& [item, range] : tradeComponent.GetItems() | std::views::values)
+                {
+                    std::optional<InventoryPosition> position = std::nullopt;
+
+                    while (index < std::ssize(masks))
+                    {
+                        ItemSlotStorageBase<bool>& mask = masks[index];
+
+                        if (const std::optional<std::pair<int32_t, int32_t>> opt = mask.FindEmpty(range.xSize, range.ySize);
+                            opt.has_value())
+                        {
+                            position = InventoryPosition{
+                                .page = static_cast<int8_t>(index),
+                                .x = static_cast<int8_t>(opt->first),
+                                .y = static_cast<int8_t>(opt->second),
+                            };
+
+                            mask.Set(true, ItemSlotRange{
+                                .x = static_cast<int8_t>(opt->first),
+                                .y = static_cast<int8_t>(opt->second),
+                                .xSize = range.xSize,
+                                .ySize = range.ySize,
+                                });
+
+                            break;
+                        }
+
+                        ++index;
+                    }
+
+                    if (!position.has_value())
+                    {
+                        return false;
+                    }
+
+                    [[maybe_unused]]
+                    const bool inserted = result.try_emplace(item->GetId(), *position).second;
+                    assert(inserted);
+                }
+
+                return true;
+            };
+
+        add_position_container_type hostInventoryAddPositions;
+        if (!buildPositionContainer(hostInventoryAddPositions, hostItemComponent.GetInventoryMasks(), guestTradeComponent))
+        {
+            return false;
+        }
+
+        add_position_container_type guestInventoryAddPositions;
+        if (!buildPositionContainer(guestInventoryAddPositions, guestItemComponent.GetInventoryMasks(), hostTradeComponent))
+        {
+            return false;
+        }
+
+        std::vector<Buffer> hostSyncPackets;
+        hostSyncPackets.reserve(hostInventoryAddPositions.size());
+
+        std::vector<Buffer> guestSyncPackets;
+        guestSyncPackets.reserve(guestInventoryAddPositions.size());
+
+        db::ItemTransaction transaction;
+        hostItemComponent.FlushItemLogTo(transaction.logs);
+        guestItemComponent.FlushItemLogTo(transaction.logs);
+
+        bool added = false;
+
+        for (const auto& [itemId, position] : hostInventoryAddPositions)
+        {
+            std::shared_ptr<GameItem> tradeItem = guestTradeComponent.Release(itemId);
+            assert(tradeItem);
+
+            GameItem* tradeItemPtr = tradeItem.get();
+
+            added = hostItemComponent.AddInventoryItem(std::move(tradeItem), &position);
+            assert(added);
+
+            hostSyncPackets.emplace_back(ItemArchiveMessageCreator::CreateInventoryItemAdd(host, *tradeItemPtr));
+        }
+
+        for (const auto& [itemId, position] : guestInventoryAddPositions)
+        {
+            std::shared_ptr<GameItem> tradeItem = hostTradeComponent.Release(itemId);
+            assert(tradeItem);
+
+            GameItem* tradeItemPtr = tradeItem.get();
+
+            added = guestItemComponent.AddInventoryItem(std::move(tradeItem), &position);
+            assert(added);
+
+            guestSyncPackets.emplace_back(ItemArchiveMessageCreator::CreateInventoryItemAdd(guest, *tradeItemPtr));
+        }
+
+        if (hostTradeComponent.GetGold() > 0 || guestTradeComponent.GetGold() > 0)
+        {
+            const int32_t hostAddGold = guestTradeComponent.GetGold() - hostTradeComponent.GetGold();
+            const int32_t guestAddGold = -hostAddGold;
+
+            hostItemComponent.AddOrSubGold(hostAddGold);
+            guestItemComponent.AddOrSubGold(guestAddGold);
+
+            host.Defer(ItemArchiveMessageCreator::CreateGoldAddOrSub(host, hostAddGold));
+            guest.Defer(ItemArchiveMessageCreator::CreateGoldAddOrSub(guest, guestAddGold));
+        }
+
+        hostItemComponent.FlushItemLogTo(transaction.logs);
+        guestItemComponent.FlushItemLogTo(transaction.logs);
+
+        Get<GameRepositorySystem>().SaveTrade(host, guest, std::move(transaction));
+
+        for (Buffer& buffer : hostSyncPackets)
+        {
+            host.Defer(std::move(buffer));
+        }
+
+        for (Buffer& buffer : guestSyncPackets)
+        {
+            guest.Defer(std::move(buffer));
+        }
+
+        host.FlushDeferred();
+        guest.FlushDeferred();
+
+        host.RemoveComponent<PlayerItemTradeComponent>();
+        guest.RemoveComponent<PlayerItemTradeComponent>();
+
+        return true;
     }
 
     bool ItemTradeSystem::LiftItem(GameGroup& group, GamePlayer& player, game_entity_id_type itemId)

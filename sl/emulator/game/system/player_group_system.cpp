@@ -290,6 +290,38 @@ namespace sunlight
                 }
             }
             break;
+            case 1005:
+            {
+                group.Broadcast(ItemTradeMessageCreator::CreateTradeConfirm(group.GetId()), player.GetId());
+
+                group.AddTradeConfirmPlayer(player);
+
+                if (group.GetTradeConfirmPlayerCount() >= 2)
+                {
+                    GamePlayer& host = group.GetHost();
+                    GamePlayer& guest = *group.GetGuests()[0];
+
+                    ItemTradeSystem& itemTradeSystem = Get<ItemTradeSystem>();
+
+                    if (itemTradeSystem.Commit(host, guest))
+                    {
+                        group.Broadcast(ItemTradeMessageCreator::CreateTradeSuccess(group.GetId()), std::nullopt);
+                    }
+                    else
+                    {
+                        ProcessTradeFail(group, host);
+                        ProcessTradeFail(group, guest);
+                    }
+
+                    host.GetGroupComponent().Clear();
+                    guest.GetGroupComponent().Clear();
+
+                    _gameGroups.erase(group.GetId());
+
+                    return;
+                }
+            }
+            break;
             }
         }
         break;
@@ -306,34 +338,12 @@ namespace sunlight
 
         if (group.GetType() == GameGroupType::Trade)
         {
-            ItemTradeSystem& tradeSystem = Get<ItemTradeSystem>();
-            Buffer buffer = ItemTradeMessageCreator::CreateTradeFail(group.GetId());
-
             for (GamePlayer& guest : group.GetGuests() | notnull::reference)
             {
-                if (tradeSystem.Rollback(guest))
-                {
-                    guest.Send(buffer.DeepCopy());
-                }
-                else
-                {
-                    guest.GetClient().Disconnect();
-                }
-
-                PlayerGroupComponent& groupComponent = guest.GetGroupComponent();
-
-                groupComponent.SetGroupId(std::nullopt);
-                groupComponent.SetGroupType(GameGroupType::Null);
+                ProcessTradeFail(group, guest);
             }
 
-            if (tradeSystem.Rollback(host))
-            {
-                host.Send(std::move(buffer));
-            }
-            else
-            {
-                host.GetClient().Disconnect();
-            }
+            ProcessTradeFail(group, host);
         }
         else
         {
@@ -341,11 +351,6 @@ namespace sunlight
         }
 
         _gameGroups.erase(group.GetId());
-
-        PlayerGroupComponent& groupComponent = host.GetGroupComponent();
-
-        groupComponent.SetGroupId(std::nullopt);
-        groupComponent.SetGroupType(GameGroupType::Null);
     }
 
     void PlayerGroupSystem::OnGuestExit(GameGroup& group, GamePlayer& guest)
@@ -354,31 +359,31 @@ namespace sunlight
 
         if (group.GetType() == GameGroupType::Trade)
         {
-            // TODO notify to host
+            ProcessTradeFail(group, guest);
 
-            if (Get<ItemTradeSystem>().Rollback(guest))
-            {
-                [[maybe_unused]]
-                const bool removed = group.RemoveGuest(guest);
-                assert(removed);
+            group.RemoveGuest(guest);
 
-                GamePlayer& host = group.GetHost();
+            GamePlayer& host = group.GetHost();
 
-                host.Send(ItemTradeMessageCreator::CreateGroupGuestExit(group.GetId(), host));
-            }
-            else
-            {
-                guest.GetClient().Disconnect();
-            }
+            host.Send(ItemTradeMessageCreator::CreateGroupGuestExit(group.GetId(), host));
         }
         else
         {
             assert(false);
         }
+    }
 
-        PlayerGroupComponent& groupComponent = guest.GetGroupComponent();
+    void PlayerGroupSystem::ProcessTradeFail(GameGroup& group, GamePlayer& player)
+    {
+        if (Get<ItemTradeSystem>().Rollback(player))
+        {
+            player.Send(ItemTradeMessageCreator::CreateTradeFail(group.GetId()));
+        }
+        else
+        {
+            player.GetClient().Disconnect();
+        }
 
-        groupComponent.SetGroupId(std::nullopt);
-        groupComponent.SetGroupType(GameGroupType::Null);
+        player.GetGroupComponent().Clear();
     }
 }

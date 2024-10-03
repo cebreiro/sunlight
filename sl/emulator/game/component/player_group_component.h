@@ -9,6 +9,8 @@ namespace sunlight
     public:
         bool HasGroup() const;
 
+        void Clear();
+
         auto GetGroupType() const -> GameGroupType;
         auto GetGroupId() const -> int32_t;
 

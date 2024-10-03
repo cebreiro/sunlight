@@ -35,6 +35,8 @@ namespace sunlight
         void OnHostExit(GameGroup& group, GamePlayer& host);
         void OnGuestExit(GameGroup& group, GamePlayer& guest);
 
+        void ProcessTradeFail(GameGroup& group, GamePlayer& player);
+
     private:
         const ServiceLocator& _serviceLocator;
 

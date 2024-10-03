@@ -31,6 +31,8 @@ namespace sunlight
         static auto CreateLiftItemResult(int32_t groupId) -> Buffer;
         static auto CreateLowerItemResult(int32_t groupId) -> Buffer;
 
+        static auto CreateTradeConfirm(int32_t groupId) -> Buffer;
+
         static auto CreateTradeSuccess(int32_t groupId) -> Buffer;
         static auto CreateTradeFail(int32_t groupId) -> Buffer;
     };

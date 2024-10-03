@@ -21,10 +21,13 @@ namespace sunlight
         bool LowerItem(SharedPtrNotNull<GameItem> item, const ItemSlotRange& slotRange, std::shared_ptr<GameItem>& liftedItem);
         auto LiftItem(game_entity_id_type itemId) -> std::shared_ptr<GameItem>;
 
+        auto Release(game_entity_id_type itemId) -> std::shared_ptr<GameItem>;
+
         auto GetItem(int32_t x, int32_t y) const -> const std::shared_ptr<GameItem>&;
 
         auto GetGold() const -> int32_t;
         auto GetItems() -> std::unordered_map<game_entity_id_type, std::pair<SharedPtrNotNull<GameItem>, ItemSlotRange>>&;
+        auto GetItems() const -> const std::unordered_map<game_entity_id_type, std::pair<SharedPtrNotNull<GameItem>, ItemSlotRange>>&;
 
         void SetGold(int32_t gold);
 

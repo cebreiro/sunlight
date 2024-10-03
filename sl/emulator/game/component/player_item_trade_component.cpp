@@ -89,6 +89,22 @@ namespace sunlight
         return item;
     }
 
+    auto PlayerItemTradeComponent::Release(game_entity_id_type itemId) -> std::shared_ptr<GameItem>
+    {
+        const auto iter = _items.find(itemId);
+        if (iter == _items.end())
+        {
+            return {};
+        }
+
+        SharedPtrNotNull<GameItem> item = std::move(iter->second.first);
+        _slotStorage.Set(nullptr, iter->second.second);
+
+        _items.erase(iter);
+
+        return item;
+    }
+
     auto PlayerItemTradeComponent::GetItem(int32_t x, int32_t y) const -> const std::shared_ptr<GameItem>&
     {
         const GameItem* item = _slotStorage.Get(x, y);
@@ -109,6 +125,11 @@ namespace sunlight
     }
 
     auto PlayerItemTradeComponent::GetItems() -> std::unordered_map<game_entity_id_type, std::pair<SharedPtrNotNull<GameItem>, ItemSlotRange>>&
+    {
+        return _items;
+    }
+
+    auto PlayerItemTradeComponent::GetItems() const -> const std::unordered_map<game_entity_id_type, std::pair<SharedPtrNotNull<GameItem>, ItemSlotRange>>&
     {
         return _items;
     }

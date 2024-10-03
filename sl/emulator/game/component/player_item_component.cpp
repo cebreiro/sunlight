@@ -1181,6 +1181,19 @@ namespace sunlight
         return ReleaseItem(iter->second->GetId());
     }
 
+    auto PlayerItemComponent::GetInventoryMasks() const -> std::vector<ItemSlotStorageBase<bool>>
+    {
+        std::vector<ItemSlotStorageBase<bool>> result;
+        result.reserve(_inventoryPage);
+
+        for (int64_t i = 0; i < _inventoryPage; ++i)
+        {
+            result.emplace_back(_inventorySlot[i]->GetMask());
+        }
+
+        return result;
+    }
+
     auto PlayerItemComponent::FindItemShared(game_entity_id_type id) -> std::shared_ptr<GameItem>
     {
         const auto iter = _items.find(id);

@@ -144,6 +144,27 @@ namespace sunlight
                 });
     }
 
+    void GameRepositorySystem::SaveTrade(const GamePlayer& host, const GamePlayer& guest, db::ItemTransaction transaction)
+    {
+        ++_pending[host.GetCId()].first;
+        ++_pending[guest.GetCId()].first;
+
+        _serviceLocator.Get<DatabaseService>().StartTransaction(std::move(transaction))
+            .Then(*ExecutionContext::GetExecutor(), [this, hostId = host.GetCId(), guestId = guest.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(hostId);
+                        OnComplete(guestId);
+                    }
+                    else
+                    {
+                        OnError(hostId);
+                        OnError(guestId);
+                    }
+                });
+    }
+
     void GameRepositorySystem::SaveCharacterExp(const GamePlayer& player, int32_t exp)
     {
         ++_pending[player.GetCId()].first;

@@ -14,6 +14,9 @@ namespace sunlight
     template <typename T>
     class ItemSlotStorageBase
     {
+        template <typename U>
+        friend class ItemSlotStorageBase;
+
     public:
         ItemSlotStorageBase(int32_t width, int32_t height);
 
@@ -30,6 +33,8 @@ namespace sunlight
 
         void Clear();
 
+        auto GetMask() const -> ItemSlotStorageBase<bool>;
+
         auto GetWidth() const -> int32_t;
         auto GetHeight() const -> int32_t;
         auto GetLoadFactor() const -> double;
@@ -37,10 +42,13 @@ namespace sunlight
         auto GetDebugString() const -> std::string;
 
     private:
+        auto CalculateIndex(int32_t x, int32_t y) const -> int32_t;
+
+    private:
         int32_t _width = 0;
         int32_t _height = 0;
 
-        std::vector<std::vector<T>> _slots;
+        std::vector<T> _slots;
 
         int32_t _used = 0;
     };
@@ -56,7 +64,7 @@ namespace sunlight
                 _width, _height));
         }
 
-        _slots.resize(_height, std::vector<T>(_width));
+        _slots.resize(_width * _height);
     }
 
     template <typename T>
@@ -82,11 +90,9 @@ namespace sunlight
 
         for (int32_t y = range.y; y < range.y + range.ySize; ++y)
         {
-            const std::vector<T>& container = _slots[y];
-
             for (int32_t x = range.x; x < range.x + range.xSize; ++x)
             {
-                if (T item = container[x]; item)
+                if (T item = _slots[CalculateIndex(x, y)]; item)
                 {
                     return false;
                 }
@@ -137,7 +143,7 @@ namespace sunlight
             .ySize = 1
             }));
 
-        return _slots[y][x];
+        return _slots[CalculateIndex(x, y)];
     }
 
     template <typename T>
@@ -150,7 +156,7 @@ namespace sunlight
             .ySize = 1
             }));
 
-        return _slots[y][x];
+        return _slots[CalculateIndex(x, y)];
     }
 
     template <typename T>
@@ -160,11 +166,9 @@ namespace sunlight
 
         for (int32_t j = range.y; j < range.y + range.ySize; ++j)
         {
-            std::vector<T>& container = _slots[j];
-
             for (int32_t i = range.x; i < range.x + range.xSize; ++i)
             {
-                if (T item = container[i]; item)
+                if (T item = _slots[CalculateIndex(i, j)]; item)
                 {
                     (void)result.emplace(item);
                 }
@@ -179,13 +183,12 @@ namespace sunlight
 
         for (int32_t y = range.y; y < range.y + range.ySize; ++y)
         {
-            std::vector<T>& container = _slots[y];
-
             for (int32_t x = range.x; x < range.x + range.xSize; ++x)
             {
-                T prev = container[x];
-
-                container[x] = item;
+                const int32_t index = CalculateIndex(x, y);
+                
+                T prev = _slots[index];
+                _slots[index] = item;
 
                 if (prev != item)
                 {
@@ -207,7 +210,7 @@ namespace sunlight
     template <typename T>
     void ItemSlotStorageBase<T>::Clear()
     {
-        for (T& slot : _slots | std::views::join)
+        for (T& slot : _slots)
         {
             slot = T();
         }
@@ -234,6 +237,20 @@ namespace sunlight
     }
 
     template <typename T>
+    auto ItemSlotStorageBase<T>::GetMask() const -> ItemSlotStorageBase<bool>
+    {
+        ItemSlotStorageBase<bool> result(_width, _height);
+        result._used = _used;
+
+        for (int64_t i = 0; i < (_width * _height); ++i)
+        {
+            result._slots[i] = _slots[i] ? true : false;
+        }
+
+        return result;
+    }
+
+    template <typename T>
     auto ItemSlotStorageBase<T>::GetDebugString() const -> std::string
     {
         std::unordered_map<T, char> typeMap;
@@ -247,7 +264,7 @@ namespace sunlight
         {
             for (int32_t x = 0; x < _width; ++x)
             {
-                if (T item = _slots[y][x]; item)
+                if (T item = _slots[CalculateIndex(x, y)]; item)
                 {
                     const char value = [&]() -> char
                         {
@@ -277,5 +294,17 @@ namespace sunlight
         oss << "--------------------------------------------------\n";
 
         return oss.str();
+    }
+
+    template <typename T>
+    auto ItemSlotStorageBase<T>::CalculateIndex(int32_t x, int32_t y) const -> int32_t
+    {
+        assert(_width > 0);
+        assert(_height > 0);
+
+        const int32_t result = x + (y * _width);
+        assert(result >= 0 && result < _width * _height);
+
+        return result;
     }
 }
