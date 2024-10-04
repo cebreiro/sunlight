@@ -52,4 +52,19 @@ namespace sunlight
     private:
         ServerCommandSystem& _system;
     };
+
+    class ServerCommandItemStoredSpawn final : public ServerCommandT<int32_t, int32_t, int32_t>
+    {
+    public:
+        explicit ServerCommandItemStoredSpawn(ServerCommandSystem& system);
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+    public:
+        bool Execute(GamePlayer& player, int32_t itemId, int32_t quantity, int32_t groupId) const override;
+
+    private:
+        ServerCommandSystem& _system;
+    };
 }

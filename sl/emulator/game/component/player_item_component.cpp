@@ -153,6 +153,30 @@ namespace sunlight
                 _pickItem = itemEntity.get();
             }
             break;
+            case db::ItemPosType::Vendor:
+            {
+                positionComponent->SetPositionType(ItemPositionType::Vendor);
+
+                const int32_t index = positionComponent->GetPage();
+
+                if (index < 0 || index >= std::ssize(_vendorSaleItems))
+                {
+                    assert(false);
+
+                    continue;
+                }
+
+                GameItem*& vendorSaleItem = _vendorSaleItems[index];
+                if (vendorSaleItem)
+                {
+                    assert(false);
+
+                    continue;
+                }
+
+                vendorSaleItem = itemEntity.get();
+            }
+            break;
             }
         }
     }
@@ -175,6 +199,11 @@ namespace sunlight
 
         dest.insert_range(dest.end(), _itemLogs);
         _itemLogs.clear();
+    }
+
+    bool PlayerItemComponent::IsValidVendorPage(int8_t page) const
+    {
+        return page >= 0 && page < std::ssize(_vendorSaleItems);
     }
 
     bool PlayerItemComponent::IsEmpty(int8_t page, const ItemSlotRange& range) const
@@ -218,6 +247,13 @@ namespace sunlight
         }
 
         return false;
+    }
+
+    bool PlayerItemComponent::HasVendorSaleItem(int8_t page) const
+    {
+        assert(IsValidVendorPage(page));
+
+        return _vendorSaleItems[page] != nullptr;
     }
 
     void PlayerItemComponent::AddOrSubGold(int32_t value)
@@ -914,6 +950,93 @@ namespace sunlight
         return true;
     }
 
+    bool PlayerItemComponent::LiftVendorItem(int8_t page)
+    {
+        if (_pickItem)
+        {
+            return false;
+        }
+
+        if (page < 0 || page >= std::ssize(_vendorSaleItems))
+        {
+            return false;
+        }
+
+        GameItem*& vendorSaleItem = _vendorSaleItems[page];
+        if (!vendorSaleItem)
+        {
+            return false;
+        }
+
+        ItemPositionComponent& itemPositionComponent = vendorSaleItem->GetComponent<ItemPositionComponent>();
+        itemPositionComponent.SetPositionType(ItemPositionType::Pick);
+        itemPositionComponent.ResetPosition();
+
+        std::swap(_pickItem, vendorSaleItem);
+
+        AddItemUpdatePositionLog(*_pickItem);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::LowerPickedItemToVendor(int8_t page)
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        if (page < 0 || page >= std::ssize(_vendorSaleItems))
+        {
+            return false;
+        }
+
+        GameItem*& vendorSaleItem = _vendorSaleItems[page];
+        if (vendorSaleItem)
+        {
+            return false;
+        }
+
+        ItemPositionComponent& positionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        positionComponent.SetPositionType(ItemPositionType::Vendor);
+        positionComponent.SetPage(page);
+
+        vendorSaleItem = _pickItem;
+        _pickItem = nullptr;
+
+        AddItemUpdatePositionLog(*vendorSaleItem);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::SwapPickedItemToVendor(int8_t page)
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        if (page < 0 || page >= std::ssize(_vendorSaleItems))
+        {
+            return false;
+        }
+
+        GameItem*& vendorSaleItem = _vendorSaleItems[page];
+        if (!vendorSaleItem)
+        {
+            return false;
+        }
+
+        _pickItem->GetComponent<ItemPositionComponent>().SwapPosition(
+            vendorSaleItem->GetComponent<ItemPositionComponent>());
+        std::swap(_pickItem, vendorSaleItem);
+
+        AddItemUpdatePositionLog(*_pickItem);
+        AddItemUpdatePositionLog(*vendorSaleItem);
+
+        return true;
+    }
+
     bool PlayerItemComponent::SwapWeaponItem()
     {
         GameItem*& mainWeapon = Mutable(EquipmentPosition::Weapon1);
@@ -1324,6 +1447,16 @@ namespace sunlight
         return _equipments[static_cast<int32_t>(position)];
     }
 
+    auto PlayerItemComponent::GetVendorSaleItem(int32_t page) const -> const GameItem*
+    {
+        if (page < 0 || page >= std::ssize(_vendorSaleItems))
+        {
+            return nullptr;
+        }
+
+        return _vendorSaleItems[page];
+    }
+
     auto PlayerItemComponent::Mutable(EquipmentPosition position) -> GameItem*&
     {
         return _equipments[static_cast<int32_t>(position)];
@@ -1371,6 +1504,8 @@ namespace sunlight
             return db::ItemPosType::QuickSlot;
         case ItemPositionType::Pick:
             return db::ItemPosType::Pick;
+        case ItemPositionType::Vendor:
+            return db::ItemPosType::Vendor;
         default:;
         }
 

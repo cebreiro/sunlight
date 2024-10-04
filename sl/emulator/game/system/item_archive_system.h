@@ -50,9 +50,12 @@ namespace sunlight
 
         bool RemoveInventoryItem(GamePlayer& player, int32_t itemId, int32_t quantity);
 
-        bool Charge(GamePlayer& player, int32_t gold);
+        bool Charge(GamePlayer& player, int32_t cost);
 
         void OpenAccountStorage(GamePlayer& player);
+
+    public:
+        bool OnVendorSaleStorageClick(GamePlayer& player, int32_t index);
 
     public:
         static bool IsValid(EquipmentPosition position, sox::EquipmentType soxType);

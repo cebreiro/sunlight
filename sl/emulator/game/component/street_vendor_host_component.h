@@ -1,0 +1,37 @@
+#pragma once
+#include "sl/emulator/game/game_constant.h"
+#include "sl/emulator/game/game_constant.h"
+#include "sl/emulator/game/component/game_component.h"
+#include "sl/emulator/game/entity/game_entity_id_type.h"
+
+namespace sunlight
+{
+    class StreetVendorHostComponent final : public GameComponent
+    {
+    public:
+        bool IsOpen() const;
+        bool IsValid(int32_t page) const;
+
+        bool IsEmpty() const;
+        bool IsItemPriceConfiguredAll() const;
+
+        auto GetEmptyStoredItemSlot() const -> std::optional<int32_t>;
+
+        void AddStoredItem(int64_t slot, game_entity_id_type id);
+        void RemoveStoredItem(const game_entity_id_type id);
+
+        auto GetItemPrice(int32_t page) const -> int32_t;
+        auto GetStoredItem(int64_t slot) const -> std::optional<game_entity_id_type>;
+
+        void SetOpen(bool value);
+        void SetItem(int32_t page);
+        void SetItemPrice(int32_t page, int32_t price);
+
+    private:
+        bool _open = false;
+
+        std::array<std::optional<int32_t>, GameConstant::MAX_STREET_VENDOR_PAGE_SIZE> _prices = {};
+
+        std::array<std::optional<game_entity_id_type>, GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE> _storedItems;
+    };
+}

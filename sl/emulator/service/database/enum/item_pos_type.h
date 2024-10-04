@@ -8,6 +8,7 @@ namespace sunlight::db
         Equipment,
         QuickSlot,
         Pick,
+        Vendor,
     };
 
     inline auto ToString(ItemPosType type) -> const char*
@@ -22,6 +23,8 @@ namespace sunlight::db
             return "quick_slot";
         case ItemPosType::Pick:
             return "pick";
+        case ItemPosType::Vendor:
+            return "vendor";
         }
 
         assert(false);
@@ -46,6 +49,10 @@ namespace sunlight::db
         else if (str == "pick")
         {
             return ItemPosType::Pick;
+        }
+        else if (str == "vendor")
+        {
+            return ItemPosType::Vendor;
         }
 
         throw std::runtime_error(__FUNCTION__);

@@ -23,6 +23,8 @@ namespace sunlight
         (InteractWithPlayer, 21)
         (Resurrection, 24)
         (ChangingZone, 25)
+        (StreetVendor, 26)
+        (PickStreetVendorItem, 27)
         (Hang, 28)
         (ChangingRoom, 29)
         (Sitting, 31)

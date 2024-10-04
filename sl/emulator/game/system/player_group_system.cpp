@@ -2,16 +2,23 @@
 
 #include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
+#include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/component/street_vendor_host_component.h"
 #include "sl/emulator/game/contants/group/game_group.h"
+#include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/entity/game_stored_item.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
-#include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/message/creator/item_trade_message_creator.h"
+#include "sl/emulator/game/message/creator/street_vendor_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/item_trade_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/server/client/game_client.h"
 
 namespace sunlight
@@ -29,6 +36,8 @@ namespace sunlight
     {
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<ItemTradeSystem>());
+        Add(stage.Get<ItemArchiveSystem>());
+        Add(stage.Get<SceneObjectSystem>());
     }
 
     bool PlayerGroupSystem::Subscribe(Stage& stage)
@@ -148,15 +157,30 @@ namespace sunlight
             Get<ItemTradeSystem>().Start(player);
         }
         break;
+        case GameGroupType::StreetVendor:
+        {
+            const int32_t groupId = ++_nextGroupId;
+            _gameGroups[groupId] = std::make_unique<GameGroup>(groupId, groupType, player);
+
+            groupComponent.SetGroupId(groupId);
+            groupComponent.SetGroupType(groupType);
+
+            assert(!player.HasComponent<StreetVendorHostComponent>());
+            player.AddComponent(std::make_unique<StreetVendorHostComponent>());
+
+            player.Defer(StreetVendorMessageCreator::CreateGroupCreate(groupId));
+            player.Defer(StreetVendorMessageCreator::CreatePageItemDisplay(groupId, 0, player));
+            player.FlushDeferred();
+        }
+        break;
         case GameGroupType::Unk04:
         case GameGroupType::Unk05:
         case GameGroupType::ItemMix:
-        case GameGroupType::StreetVendor:
         case GameGroupType::Interior:
         default:
             SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] unhandled player group. player: {}, group: {}",
-                    GetName(), player.GetCId(), ToString(groupType)));
+                fmt::format("[{}] unhandled player group. player: {}, group: {}, buffer: {}",
+                    GetName(), player.GetCId(), ToString(groupType), reader.GetBuffer().ToString()));
         }
     }
 
@@ -175,6 +199,8 @@ namespace sunlight
         }
 
         GameGroup& group = *iter->second;
+
+        bool handled = false;
 
         switch (messageType)
         {
@@ -211,6 +237,8 @@ namespace sunlight
 
                     Get<ItemTradeSystem>().Start(player);
                 }
+
+                handled = true;
             }
             break;
             case GameGroupType::Null:
@@ -219,113 +247,38 @@ namespace sunlight
             case GameGroupType::ItemMix:
             case GameGroupType::StreetVendor:
             case GameGroupType::Interior:
-            default:
-                assert(false);
+            default:;
             }
         }
         break;
         case 900:
         {
-            if (group.GetType() != GameGroupType::Trade)
+            switch (group.GetType())
             {
-                assert(false);
-
-                return;
-            }
-
-            const int32_t tradeMessage = reader.Read<int32_t>();
-            switch (tradeMessage)
+            case GameGroupType::Trade:
             {
-            case 1601:
-            {
-                if (group.IsHost(player))
-                {
-                    OnHostExit(group, player);
-
-                    return;
-                }
-                else
-                {
-                    OnGuestExit(group, player);
-
-                    return;
-                }
+                handled = HandleTradeMessage(group, player, reader);
             }
             break;
-            case 1001: // lift item
+            case GameGroupType::StreetVendor:
             {
-                const auto [targetItemId, targetItemType] = reader.ReadInt64();
-
-                if (!Get<ItemTradeSystem>().LiftItem(group, player, game_entity_id_type(targetItemId)))
-                {
-                    player.GetClient().Disconnect();
-
-                    return;
-                }
+                handled = HandleStreetVendorMessage(group, player, reader);
             }
             break;
-            case 1002: // lower item
-            {
-                const int32_t x = reader.Read<int32_t>();
-                const int32_t y = reader.Read<int32_t>();
-                const auto [targetItemId, targetItemType] = reader.ReadInt64();
-
-                if (!Get<ItemTradeSystem>().LowerItem(group, player, x, y, game_entity_id_type(targetItemId)))
-                {
-                    player.GetClient().Disconnect();
-
-                    return;
-                }
-            }
-            break;
-            case 1003:
-            {
-                const int32_t gold = reader.Read<int32_t>();
-
-                if (!Get<ItemTradeSystem>().ChangeGold(group, player, gold))
-                {
-                    player.GetClient().Disconnect();
-
-                    return;
-                }
-            }
-            break;
-            case 1005:
-            {
-                group.Broadcast(ItemTradeMessageCreator::CreateTradeConfirm(group.GetId()), player.GetId());
-
-                group.AddTradeConfirmPlayer(player);
-
-                if (group.GetTradeConfirmPlayerCount() >= 2)
-                {
-                    GamePlayer& host = group.GetHost();
-                    GamePlayer& guest = *group.GetGuests()[0];
-
-                    ItemTradeSystem& itemTradeSystem = Get<ItemTradeSystem>();
-
-                    if (itemTradeSystem.Commit(host, guest))
-                    {
-                        group.Broadcast(ItemTradeMessageCreator::CreateTradeSuccess(group.GetId()), std::nullopt);
-                    }
-                    else
-                    {
-                        ProcessTradeFail(group, host);
-                        ProcessTradeFail(group, guest);
-                    }
-
-                    host.GetGroupComponent().Clear();
-                    guest.GetGroupComponent().Clear();
-
-                    _gameGroups.erase(group.GetId());
-
-                    return;
-                }
-            }
-            break;
+            case GameGroupType::Null:
+            case GameGroupType::Unk04:
+            case GameGroupType::Unk05:
+            case GameGroupType::ItemMix:
+            case GameGroupType::Interior:
+            default:;
             }
         }
         break;
-        default:
+        default:;
+        }
+
+        if (!handled)
+        {
             SUNLIGHT_LOG_WARN(_serviceLocator,
                 fmt::format("[{}] unhandled group message. player: {}, group: {}, message_type: {}, buffer: {}",
                     GetName(), player.GetCId(), groupId, messageType, reader.GetBuffer().ToString()));
@@ -344,6 +297,24 @@ namespace sunlight
             }
 
             ProcessTradeFail(group, host);
+        }
+        else if (group.GetType() == GameGroupType::StreetVendor)
+        {
+            host.GetGroupComponent().Clear();
+
+            StreetVendorHostComponent& streetVendorHostComponent = host.GetComponent<StreetVendorHostComponent>();
+
+            for (int64_t i = 0; i < GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE; ++i)
+            {
+                if (const std::optional<game_entity_id_type> id = streetVendorHostComponent.GetStoredItem(i); id.has_value())
+                {
+                    [[maybe_unused]]
+                    const bool removed = Get<SceneObjectSystem>().RemoveStoredItem(*id);
+                    assert(removed);
+                }
+            }
+
+            host.RemoveComponent<StreetVendorHostComponent>();
         }
         else
         {
@@ -367,10 +338,102 @@ namespace sunlight
 
             host.Send(ItemTradeMessageCreator::CreateGroupGuestExit(group.GetId(), host));
         }
+        else if (group.GetType() == GameGroupType::StreetVendor)
+        {
+            assert(false);
+        }
         else
         {
             assert(false);
         }
+    }
+
+    bool PlayerGroupSystem::HandleTradeMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader)
+    {
+        const int32_t tradeMessage = reader.Read<int32_t>();
+        switch (tradeMessage)
+        {
+        case 1601:
+        {
+            if (group.IsHost(player))
+            {
+                OnHostExit(group, player);
+            }
+            else
+            {
+                OnGuestExit(group, player);
+            }
+
+            return true;
+        }
+        case 1001: // lift item
+        {
+            const auto [targetItemId, targetItemType] = reader.ReadInt64();
+
+            if (!Get<ItemTradeSystem>().LiftItem(group, player, game_entity_id_type(targetItemId)))
+            {
+                player.GetClient().Disconnect();
+            }
+            return true;
+        }
+        case 1002: // lower item
+        {
+            const int32_t x = reader.Read<int32_t>();
+            const int32_t y = reader.Read<int32_t>();
+            const auto [targetItemId, targetItemType] = reader.ReadInt64();
+
+            if (!Get<ItemTradeSystem>().LowerItem(group, player, x, y, game_entity_id_type(targetItemId)))
+            {
+                player.GetClient().Disconnect();
+            }
+
+            return true;
+        }
+        case 1003:
+        {
+            const int32_t gold = reader.Read<int32_t>();
+
+            if (!Get<ItemTradeSystem>().ChangeGold(group, player, gold))
+            {
+                player.GetClient().Disconnect();
+            }
+
+            return true;
+        }
+        case 1005:
+        {
+            group.Broadcast(ItemTradeMessageCreator::CreateTradeConfirm(group.GetId()), player.GetId());
+
+            group.AddTradeConfirmPlayer(player);
+
+            if (group.GetTradeConfirmPlayerCount() >= 2)
+            {
+                GamePlayer& host = group.GetHost();
+                GamePlayer& guest = *group.GetGuests()[0];
+
+                ItemTradeSystem& itemTradeSystem = Get<ItemTradeSystem>();
+
+                if (itemTradeSystem.Commit(host, guest))
+                {
+                    group.Broadcast(ItemTradeMessageCreator::CreateTradeSuccess(group.GetId()), std::nullopt);
+                }
+                else
+                {
+                    ProcessTradeFail(group, host);
+                    ProcessTradeFail(group, guest);
+                }
+
+                host.GetGroupComponent().Clear();
+                guest.GetGroupComponent().Clear();
+
+                _gameGroups.erase(group.GetId());
+            }
+
+            return true;
+        }
+        }
+
+        return false;
     }
 
     void PlayerGroupSystem::ProcessTradeFail(GameGroup& group, GamePlayer& player)
@@ -385,5 +448,175 @@ namespace sunlight
         }
 
         player.GetGroupComponent().Clear();
+    }
+
+    bool PlayerGroupSystem::HandleStreetVendorMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader)
+    {
+        const int32_t tradeMessage = reader.Read<int32_t>();
+        switch (tradeMessage)
+        {
+        case 1601:
+        {
+            if (group.IsHost(player))
+            {
+                OnHostExit(group, player);
+            }
+            else
+            {
+                OnGuestExit(group, player);
+            }
+
+            return true;
+        }
+        case 1302:
+        {
+            const int32_t index = reader.Read<int32_t>();
+
+            if (player.GetComponent<StreetVendorHostComponent>().IsOpen())
+            {
+                player.Send(StreetVendorMessageCreator::CreatePageItemDisplay(group.GetId(), index / 2 * 2, player));
+
+                return true;
+            }
+
+            if (!Get<ItemArchiveSystem>().OnVendorSaleStorageClick(player, index))
+            {
+                return true;
+            }
+
+            const int32_t page = (index / 2) * 2;
+
+            player.Send(StreetVendorMessageCreator::CreatePageItemDisplay(group.GetId(), page, player));
+
+            return true;
+        }
+        case 1304: // change current page
+        {
+            const int32_t page = reader.Read<int32_t>();
+
+            player.Send(StreetVendorMessageCreator::CreatePageItemDisplay(group.GetId(), (page / 2) * 2, player));
+
+            return true;
+        }
+        case 1305:
+        {
+            const int32_t index = reader.Read<int32_t>();
+            const int32_t price = reader.Read<int32_t>();
+
+            StreetVendorHostComponent& hostComponent = player.GetComponent<StreetVendorHostComponent>();
+
+            if (hostComponent.IsOpen())
+            {
+                player.Send(StreetVendorMessageCreator::CreatePageItemDisplay(group.GetId(), index / 2 * 2, player));
+
+                return true;
+            }
+
+            if (!hostComponent.IsValid(index))
+            {
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] fail to configure item price. invalid index. player: {}, group: {}, index: {}, price: {}",
+                        GetName(), player.GetCId(), group.GetId(), index, price));
+
+                return true;
+            }
+
+            hostComponent.SetItemPrice(index, price);
+
+            player.Send(StreetVendorMessageCreator::CreateItemPriceChange(group.GetId(), index, price));
+
+            return true;
+        }
+        case 1306:
+        {
+            const PlayerItemComponent& itemComponent = player.GetItemComponent();
+            StreetVendorHostComponent& hostComponent = player.GetComponent<StreetVendorHostComponent>();
+
+            std::array<std::pair<const GameItem*, int32_t>, GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE> storedItemData = {};
+            int32_t k = 0;
+
+            int32_t nullItemCount = 0;
+
+            for (int32_t i = 0; i < GameConstant::MAX_STREET_VENDOR_PAGE_SIZE; ++i)
+            {
+                if (const GameItem* saleItem = itemComponent.GetVendorSaleItem(i); saleItem)
+                {
+                    const int32_t price = hostComponent.GetItemPrice(i);
+                    if (price <= 0)
+                    {
+                        player.Send(StreetVendorMessageCreator::CreateOpenResult(group.GetId(), StreetVendorStartResult::NoSaleItemPrice));
+
+                        return true;
+                    }
+
+                    if (k < std::ssize(storedItemData))
+                    {
+                        storedItemData[k++] = std::pair{ saleItem, price };
+                    }
+                }
+                else
+                {
+                    ++nullItemCount;
+                }
+            }
+
+            if (nullItemCount >= GameConstant::MAX_STREET_VENDOR_PAGE_SIZE)
+            {
+                player.Send(StreetVendorMessageCreator::CreateOpenResult(group.GetId(), StreetVendorStartResult::NoSaleItem));
+
+                return true;
+            }
+
+            const SceneObjectComponent& playerSceneObjectComponent = player.GetSceneObjectComponent();
+            const Eigen::Vector2f& playerPosition = playerSceneObjectComponent.GetPosition();
+            const float playerYaw = playerSceneObjectComponent.GetYaw();
+
+            for (int64_t i = 0; i < std::ssize(storedItemData); ++i)
+            {
+                const auto [saleItem, price] = storedItemData[i];
+                if (saleItem)
+                {
+                    auto storedItem = std::make_shared<GameStoredItem>(_serviceLocator.Get<GameEntityIdPublisher>(),
+                        saleItem->GetData(), saleItem->GetQuantity(), group.GetId(), price);
+
+                    const auto [pos, yaw] = CalculateStoredItemPosition(playerPosition, playerYaw, i);
+
+                    auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
+                    sceneObjectComponent->SetPosition(pos);
+                    sceneObjectComponent->SetDestPosition(pos);
+                    sceneObjectComponent->SetYaw(yaw);
+
+                    storedItem->AddComponent(std::move(sceneObjectComponent));
+
+                    hostComponent.AddStoredItem(i, storedItem->GetId());
+                    Get<SceneObjectSystem>().SpawnItem(std::move(storedItem));
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            hostComponent.SetOpen(true);
+
+            player.Send(StreetVendorMessageCreator::CreateOpenResult(group.GetId(), StreetVendorStartResult::Success));
+
+            return true;
+        }
+        }
+
+        return false;
+    }
+
+    auto PlayerGroupSystem::CalculateStoredItemPosition(Eigen::Vector2f ownerPos, float ownerYaw, int64_t slot) -> std::pair<Eigen::Vector2f, float>
+    {
+        assert(slot >= 0 && slot < GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE);
+
+        const Eigen::AngleAxisf axis((ownerYaw - 90.f + (static_cast<float>(slot - 1) * 45.f)) * static_cast<float>(std::numbers::pi) / 180.f, Eigen::Vector3f::UnitZ());
+        const auto rotation = axis.toRotationMatrix();
+
+        const auto pos = rotation * Eigen::Vector3f(0.f, 30.f, 0.f);
+
+        return std::make_pair(ownerPos + Eigen::Vector2f(pos.x(), pos.y()), ownerYaw);
     }
 }

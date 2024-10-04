@@ -17,6 +17,7 @@ namespace sunlight
     class GamePlayer;
     class GameNPC;
     class GameItem;
+    class GameStoredItem;
 
     class GameSpatialSector;
     class GameSpatialCell;
@@ -39,9 +40,11 @@ namespace sunlight
         void SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType);
         bool SpawnNPC(SharedPtrNotNull<GameNPC> npc);
         void SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos);
+        void SpawnItem(SharedPtrNotNull<GameStoredItem> item);
 
         bool DespawnPlayer(game_entity_id_type id, StageExitType exitType);
         void RemoveItem(game_entity_id_type id);
+        bool RemoveStoredItem(game_entity_id_type id);
 
     public:
         auto FindPlayerByCid(int64_t cid) -> GamePlayer*;

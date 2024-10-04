@@ -7,6 +7,7 @@ namespace sunlight
         (Equipment)
         (QuickSlot)
         (Pick)
+        (Vendor)
 
         (Count)
     )

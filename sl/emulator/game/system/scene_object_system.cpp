@@ -5,6 +5,7 @@
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/entity/game_stored_item.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
@@ -136,6 +137,15 @@ namespace sunlight
                     player->Defer(SceneObjectPacketCreator::CreateItemDisplay(item, player->GetCId()));
                 }
                 break;
+                case GameEntityType::ItemChild:
+                {
+                    const GameStoredItem& item = *entity.Cast<GameStoredItem>();
+
+                    player->Defer(ZonePacketS2CCreator::CreateObjectMove(item));
+                    player->Defer(SceneObjectPacketCreator::CreateInformation(item));
+                    player->Defer(SceneObjectPacketCreator::CreateItemDisplay(item));
+                }
+                break;
                 case GameEntityType::Enemy:
                 default:
                     assert(false);
@@ -204,6 +214,28 @@ namespace sunlight
                 player.Defer(ZonePacketS2CCreator::CreateObjectMove(*item));
                 player.Defer(SceneObjectPacketCreator::CreateInformation(*item));
                 player.Defer(SceneObjectPacketCreator::CreateItemSpawn(*item, player.GetCId(), originPos));
+
+                player.FlushDeferred();
+            });
+        viewRangeSystem.Add(*item);
+    }
+
+    void SceneObjectSystem::SpawnItem(SharedPtrNotNull<GameStoredItem> item)
+    {
+        assert(item->HasComponent<SceneObjectComponent>());
+
+        _entities[item->GetType()][item->GetId()] = item;
+
+        SceneObjectComponent& sceneObjectComponent = item->GetComponent<SceneObjectComponent>();
+        sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(item->GetType()));
+
+        EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
+
+        viewRangeSystem.VisitPlayer(sceneObjectComponent.GetPosition(), [&](GamePlayer& player)
+            {
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(*item));
+                player.Defer(SceneObjectPacketCreator::CreateInformation(*item));
+                player.Defer(SceneObjectPacketCreator::CreateItemDisplay(*item));
 
                 player.FlushDeferred();
             });
@@ -284,6 +316,31 @@ namespace sunlight
         viewRangeSystem.Remove(entity);
 
         iter1->second.erase(iter2);
+    }
+
+    bool SceneObjectSystem::RemoveStoredItem(game_entity_id_type id)
+    {
+        const auto iter1 = _entities.find(GameStoredItem::TYPE);
+        if (iter1 == _entities.end())
+        {
+            return false;
+        }
+
+        const auto iter2 = iter1->second.find(id);
+        if (iter2 == iter1->second.end())
+        {
+            return false;
+        }
+
+        GameEntity& entity = *iter2->second;
+        EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
+
+        viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectLeave(entity), false);
+        viewRangeSystem.Remove(entity);
+
+        iter1->second.erase(iter2);
+
+        return true;
     }
 
     auto SceneObjectSystem::FindPlayerByCid(int64_t cid) -> GamePlayer*

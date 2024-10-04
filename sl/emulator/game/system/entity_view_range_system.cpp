@@ -13,6 +13,7 @@
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/entity/game_stored_item.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
@@ -261,6 +262,14 @@ namespace sunlight
 
                                 player->Defer(SceneObjectPacketCreator::CreateInformation(item));
                                 player->Defer(SceneObjectPacketCreator::CreateItemDisplay(item, player->GetCId()));
+                            }
+                            break;
+                            case GameEntityType::ItemChild:
+                            {
+                                const GameStoredItem& item = *target.Cast<GameStoredItem>();
+
+                                player->Defer(SceneObjectPacketCreator::CreateInformation(item));
+                                player->Defer(SceneObjectPacketCreator::CreateItemDisplay(item));
                             }
                             break;
                             case GameEntityType::Enemy:

@@ -654,6 +654,76 @@ namespace sunlight
         player.Send(ItemArchiveMessageCreator::CreateAccountStorageInit(player));
     }
 
+    bool ItemArchiveSystem::OnVendorSaleStorageClick(GamePlayer& player, int32_t index)
+    {
+        if (IsExternItemTransactionRunning(player))
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] fail to lower item to vendor sale storage. extern transaction is running. player: {}",
+                    GetName(), player.GetCId()));
+
+            return false;
+        }
+
+        bool result = false;
+        const int8_t page = static_cast<int8_t>(index);
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+
+        do
+        {
+            if (!itemComponent.IsValidVendorPage(page))
+            {
+                break;
+            }
+
+            if (const GameItem* pickedItem = itemComponent.GetPickedItem(); pickedItem)
+            {
+                if (itemComponent.HasVendorSaleItem(page))
+                {
+                    [[maybe_unused]]
+                    const bool swapped = itemComponent.SwapPickedItemToVendor(page);
+                    assert(swapped);
+
+                    const GameItem* liftedItem = itemComponent.GetPickedItem();
+                    assert(liftedItem);
+
+                    player.Send(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *liftedItem));
+                }
+                else
+                {
+                    [[maybe_unused]]
+                    const bool lowered = itemComponent.LowerPickedItemToVendor(page);
+                    assert(lowered);
+
+                    player.Send(ItemArchiveMessageCreator::CreateItemRemove(player, pickedItem->GetId(), pickedItem->GetType()));
+                }
+            }
+            else
+            {
+                if (!itemComponent.GetVendorSaleItem(page))
+                {
+                    return false;
+                }
+
+                [[maybe_unused]]
+                const bool lifted = itemComponent.LiftVendorItem(page);
+                assert(lifted);
+
+                player.Send(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *itemComponent.GetPickedItem()));
+            }
+
+            result = true;
+            
+        } while (false);
+
+        if (result)
+        {
+            SaveChanges(player);
+        }
+
+        return result;
+    }
+
     bool ItemArchiveSystem::IsValid(EquipmentPosition position, sox::EquipmentType soxType)
     {
         switch (position)
@@ -1385,7 +1455,6 @@ namespace sunlight
         switch (groupComponent.GetGroupType())
         {
         case GameGroupType::Trade:
-        case GameGroupType::StreetVendor:
             return true;
         }
 

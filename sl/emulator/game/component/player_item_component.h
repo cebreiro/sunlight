@@ -37,9 +37,13 @@ namespace sunlight
         void FlushItemLogTo(std::vector<db::ItemLog>& dest);
 
     public:
+        bool IsValidVendorPage(int8_t page) const;
+
         bool IsEmpty(int8_t page, const ItemSlotRange& range) const;
         bool IsEquipped(EquipmentPosition position) const;
+
         bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
+        bool HasVendorSaleItem(int8_t page) const;
 
     public:
         void AddOrSubGold(int32_t value);
@@ -67,6 +71,10 @@ namespace sunlight
 
         bool LowerPickedItemToQuickSlot(int8_t page, int8_t x, int8_t y);
         bool SwapPickedItemToQuickSlot(int8_t page, int8_t x, int8_t y);
+
+        bool LiftVendorItem(int8_t page);
+        bool LowerPickedItemToVendor(int8_t page);
+        bool SwapPickedItemToVendor(int8_t page);
 
         bool SwapWeaponItem();
 
@@ -98,6 +106,7 @@ namespace sunlight
         auto GetInventoryPage() const -> int32_t;
         auto GetPickedItem() const -> const GameItem*;
         auto GetEquipmentItem(EquipmentPosition position) const -> const GameItem*;
+        auto GetVendorSaleItem(int32_t page) const -> const GameItem*;
 
         inline auto GetItemRange() const;
         inline auto GetEquipItems() const;
@@ -134,6 +143,8 @@ namespace sunlight
         std::array<GameItem*, static_cast<int32_t>(EquipmentPosition::Count)> _equipments = {};
 
         std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_QUICK_SLOT_PAGE_SIZE> _quickSlotStorages;
+
+        std::array<GameItem*, GameConstant::MAX_STREET_VENDOR_PAGE_SIZE> _vendorSaleItems = {};
 
         GameItem* _pickItem = nullptr;
 

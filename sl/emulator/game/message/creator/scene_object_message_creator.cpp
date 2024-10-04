@@ -10,6 +10,7 @@
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/entity/game_stored_item.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -112,6 +113,19 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto SceneObjectPacketCreator::CreateInformation(const GameStoredItem& item) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_USERINFO); // handled on client 4E6A40
+        writer.Write<int32_t>(item.GetComponent<SceneObjectComponent>().GetId());
+        writer.Write(static_cast<int32_t>(item.GetType()));
+        writer.Write(static_cast<int32_t>(item.GetId().Unwrap()));
+        writer.Write(item.GetData().GetModelId());
+        writer.Write(item.GetGroupId());
+
+        return writer.Flush();
+    }
+
     auto SceneObjectPacketCreator::CreateItemDisplay(const GameItem& item, int64_t characterId) -> Buffer
     {
         const ItemOwnershipComponent* ownershipComponent = item.FindComponent<ItemOwnershipComponent>();
@@ -197,6 +211,54 @@ namespace sunlight
         writer.Write<int16_t>(static_cast<int16_t>(sceneObjectComponent.GetYaw()));
 
         writer.Write<int32_t>(remainOwnershipDuration);
+
+        {
+            boost::container::static_vector<char, 23> buffer;
+            StreamWriter objectWriter(buffer);
+
+            // client 0x459BE0
+            objectWriter.Write<int16_t>(-1);
+            objectWriter.Write<int16_t>(-1);
+            objectWriter.Write<int16_t>(-1);
+            objectWriter.Write<int16_t>(-1);
+            objectWriter.Write<int16_t>(static_cast<uint16_t>(item.GetQuantity()));
+            objectWriter.Write<int32_t>(item.GetData().GetId()); // 65
+            objectWriter.Write<int8_t>(0);
+            objectWriter.Write<int32_t>(item.GetId().Unwrap());
+            objectWriter.Write<int32_t>(static_cast<uint32_t>(item.GetType()));
+
+            writer.Write<int32_t>(static_cast<int32_t>(std::ssize(buffer)));
+            writer.WriteObject(buffer);
+        }
+
+        return writer.Flush();
+    }
+
+    auto SceneObjectPacketCreator::CreateItemDisplay(const GameStoredItem& item) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(item).ToBuffer());
+        writer.Write(ZoneMessageType::CREATEITEM);
+        writer.Write<int32_t>(0); // -2 unk
+        writer.Write<int32_t>(0); // -3 unk
+        writer.Write<int32_t>(0); // -4 unk
+        writer.Write<int32_t>(item.GetPrice());
+
+        const SceneObjectComponent& sceneObjectComponent = item.GetComponent<SceneObjectComponent>();
+        const auto& pos = sceneObjectComponent.GetPosition();
+        const float yaw = sceneObjectComponent.GetYaw();
+        const float radian = static_cast<float>(yaw * std::numbers::pi / 180.0);
+
+        Eigen::Vector2f direction(std::cos(radian), std::sin(radian));
+        direction.normalize();
+        
+        writer.Write<float>(pos.y());
+        writer.Write<float>(pos.x());
+        writer.Write<float>(direction.y());
+        writer.Write<float>(direction.x());
 
         {
             boost::container::static_vector<char, 23> buffer;

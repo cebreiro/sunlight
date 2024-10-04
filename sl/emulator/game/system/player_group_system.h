@@ -6,6 +6,7 @@ namespace sunlight
     struct ZoneMessage;
     struct ZoneCommunityMessage;
 
+    class SlPacketReader;
     class GameGroup;
     class GamePlayer;
 }
@@ -35,7 +36,13 @@ namespace sunlight
         void OnHostExit(GameGroup& group, GamePlayer& host);
         void OnGuestExit(GameGroup& group, GamePlayer& guest);
 
+        bool HandleTradeMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader);
         void ProcessTradeFail(GameGroup& group, GamePlayer& player);
+
+        bool HandleStreetVendorMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader);
+
+    private:
+        static auto CalculateStoredItemPosition(Eigen::Vector2f ownerPos, float ownerYaw, int64_t slot) -> std::pair<Eigen::Vector2f, float>;
 
     private:
         const ServiceLocator& _serviceLocator;
