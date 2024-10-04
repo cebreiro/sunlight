@@ -1,5 +1,6 @@
 #pragma once
-#include "sl/emulator/game/game_constant.h"
+#include <boost/container/flat_map.hpp>
+
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/game_component.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
@@ -11,17 +12,16 @@ namespace sunlight
     public:
         bool IsOpen() const;
         bool IsValid(int32_t page) const;
+        bool IsDisplayedItemPage(int32_t page) const;
 
         bool IsEmpty() const;
         bool IsItemPriceConfiguredAll() const;
 
-        auto GetEmptyStoredItemSlot() const -> std::optional<int32_t>;
-
-        void AddStoredItem(int64_t slot, game_entity_id_type id);
-        void RemoveStoredItem(const game_entity_id_type id);
+        void AddStoredItem(int32_t page, game_entity_id_type id);
+        void RemoveStoredItem(int32_t page);
 
         auto GetItemPrice(int32_t page) const -> int32_t;
-        auto GetStoredItem(int64_t slot) const -> std::optional<game_entity_id_type>;
+        auto GetStoredItem(int32_t page) const -> std::optional<game_entity_id_type>;
 
         void SetOpen(bool value);
         void SetItem(int32_t page);
@@ -32,6 +32,6 @@ namespace sunlight
 
         std::array<std::optional<int32_t>, GameConstant::MAX_STREET_VENDOR_PAGE_SIZE> _prices = {};
 
-        std::array<std::optional<game_entity_id_type>, GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE> _storedItems;
+        boost::container::small_flat_map<int32_t, game_entity_id_type, GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE> _storedItems;
     };
 }

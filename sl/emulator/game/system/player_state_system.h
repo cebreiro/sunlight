@@ -42,6 +42,8 @@ namespace sunlight
 
         void HandlePickGroundItem(GamePlayer& player, game_entity_id_type itemId);
 
+        void OpenStreetVendor(GamePlayer& player, GamePlayer& host);
+
     private:
         const ServiceLocator& _serviceLocator;
     };

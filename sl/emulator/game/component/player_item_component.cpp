@@ -201,6 +201,11 @@ namespace sunlight
         _itemLogs.clear();
     }
 
+    void PlayerItemComponent::ClearItemLog()
+    {
+        _itemLogs.clear();
+    }
+
     bool PlayerItemComponent::IsValidVendorPage(int8_t page) const
     {
         return page >= 0 && page < std::ssize(_vendorSaleItems);
@@ -378,6 +383,38 @@ namespace sunlight
         [[maybe_unused]]
         const bool inserted = _items.try_emplace(id, std::move(item)).second;
         assert(inserted);
+
+        return true;
+    }
+
+    bool PlayerItemComponent::AddVendorItem(SharedPtrNotNull<GameItem> item, int32_t slot)
+    {
+        assert(item->HasComponent<ItemPositionComponent>());
+
+        if (slot < 0 || slot >= std::ssize(_vendorSaleItems))
+        {
+            return false;
+        }
+
+        if (_vendorSaleItems[slot])
+        {
+            return false;
+        }
+
+        if (_items.contains(item->GetId()))
+        {
+            return false;
+        }
+
+        ItemPositionComponent& positionComponent = item->GetComponent<ItemPositionComponent>();
+        positionComponent.SetPositionType(ItemPositionType::Vendor);
+        positionComponent.SetPage(static_cast<int8_t>(slot));
+
+        AddItemAddLog(*item);
+
+        _itemsUIdIndex[item->GetUId().value()] = item.get();
+        _vendorSaleItems[slot] = item.get();
+        _items[item->GetId()] = std::move(item);
 
         return true;
     }
@@ -1215,6 +1252,13 @@ namespace sunlight
             SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
         }
         break;
+        case ItemPositionType::Vendor:
+        {
+            assert(_vendorSaleItems[positionComponent.GetPage()] == iter->second.get());
+
+            _vendorSaleItems[positionComponent.GetPage()] = nullptr;
+        }
+        break;
         case ItemPositionType::Count:
         default:
             assert(false);
@@ -1276,6 +1320,13 @@ namespace sunlight
                 .ySize = 1,
                 });
             SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
+        }
+        break;
+        case ItemPositionType::Vendor:
+        {
+            assert(_vendorSaleItems[positionComponent.GetPage()] == iter->second.get());
+
+            _vendorSaleItems[positionComponent.GetPage()] = nullptr;
         }
         break;
         case ItemPositionType::Count:

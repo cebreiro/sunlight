@@ -35,6 +35,7 @@ namespace sunlight
         bool HasItemLog() const;
 
         void FlushItemLogTo(std::vector<db::ItemLog>& dest);
+        void ClearItemLog();
 
     public:
         bool IsValidVendorPage(int8_t page) const;
@@ -52,6 +53,8 @@ namespace sunlight
     public:
         bool AddInventoryItem(SharedPtrNotNull<GameItem> item, const InventoryPosition* hint = nullptr);
         bool AddQuickSlotItem(SharedPtrNotNull<GameItem> item, const QuickSlotPosition* hint = nullptr);
+
+        bool AddVendorItem(SharedPtrNotNull<GameItem> item, int32_t slot);
 
         bool TryRemoveInventoryItem(int32_t itemId, int32_t quantity, std::vector<item_remove_result_type>* result);
 
@@ -110,6 +113,7 @@ namespace sunlight
 
         inline auto GetItemRange() const;
         inline auto GetEquipItems() const;
+        inline auto GetVendorSaleItems() const;
 
     private:
         auto Mutable(EquipmentPosition position) -> GameItem*&;
@@ -159,5 +163,19 @@ namespace sunlight
     inline auto PlayerItemComponent::GetEquipItems() const
     {
         return _equipments;
+    }
+
+    inline auto PlayerItemComponent::GetVendorSaleItems() const
+    {
+        const auto filter = [](const auto& tuple) -> bool
+            {
+                return std::get<1>(tuple) != nullptr;
+            };
+        const auto transform = [](const auto& tuple) -> std::pair<int32_t, const GameItem&>
+            {
+                return std::pair<int32_t, const GameItem&>{ static_cast<int32_t>(std::get<0>(tuple)), *std::get<1>(tuple) };
+            };
+
+        return _vendorSaleItems | std::views::enumerate | std::views::filter(filter) | std::views::transform(transform);
     }
 }

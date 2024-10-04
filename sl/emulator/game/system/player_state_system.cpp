@@ -5,6 +5,7 @@
 #include "sl/emulator/game/entity/game_npc.h"
 
 #include "sl/emulator/game/component/entity_state_component.h"
+#include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/event_script/event_script.h"
@@ -12,6 +13,7 @@
 #include "sl/emulator/game/contants/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/entity/game_stored_item.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
@@ -21,6 +23,7 @@
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
+#include "sl/emulator/game/system/player_group_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -39,6 +42,7 @@ namespace sunlight
         Add(stage.Get<ItemArchiveSystem>());
         Add(stage.Get<PlayerQuestSystem>());
         Add(stage.Get<NPCShopSystem>());
+        Add(stage.Get<PlayerGroupSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)
@@ -293,6 +297,30 @@ namespace sunlight
             StartNPCScript(player, state.targetId);
         }
         break;
+        case GameEntityStateType::InteractWithPlayer:
+        {
+            do
+            {
+                const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::Player, state.targetId);
+                if (!entity)
+                {
+                    break;
+                }
+
+                GamePlayer* targetPlayer = entity->Cast<GamePlayer>();
+                assert(targetPlayer);
+
+                const PlayerGroupComponent& groupComponent = targetPlayer->GetGroupComponent();
+                if (!groupComponent.HasGroup() || groupComponent.GetGroupType() != GameGroupType::StreetVendor)
+                {
+                    break;
+                }
+
+                Get<PlayerGroupSystem>().AddStreetVendorGuest(groupComponent.GetGroupId(), player);
+
+            } while (false);
+        }
+        break;
         case GameEntityStateType::None:
         case GameEntityStateType::NormalAttack:
         case GameEntityStateType::PlaySkill:
@@ -303,9 +331,9 @@ namespace sunlight
         case GameEntityStateType::Leaving:
         case GameEntityStateType::DamageCancel:
         case GameEntityStateType::Greet:
-        case GameEntityStateType::InteractWithPlayer:
         case GameEntityStateType::Resurrection:
         case GameEntityStateType::ChangingZone:
+        case GameEntityStateType::PickStreetVendorItem:
         case GameEntityStateType::Hang:
         case GameEntityStateType::ChangingRoom:
         case GameEntityStateType::Sitting:

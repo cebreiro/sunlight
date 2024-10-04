@@ -17,6 +17,11 @@ namespace sunlight
         return true;
     }
 
+    bool StreetVendorHostComponent::IsDisplayedItemPage(int32_t page) const
+    {
+        return _storedItems.contains(page);
+    }
+
     bool StreetVendorHostComponent::IsEmpty() const
     {
         return std::ranges::all_of(_prices, [](std::optional<int32_t> value)
@@ -62,11 +67,11 @@ namespace sunlight
         return _prices[page].value_or(0);
     }
 
-    auto StreetVendorHostComponent::GetStoredItem(int64_t slot) const -> std::optional<game_entity_id_type>
+    auto StreetVendorHostComponent::GetStoredItem(int32_t page) const -> std::optional<game_entity_id_type>
     {
-        assert(slot >= 0 && slot < std::ssize(_storedItems));
+        const auto iter = _storedItems.find(page);
 
-        return _storedItems[slot];
+        return iter != _storedItems.end() ? iter->second : std::optional<game_entity_id_type>();
     }
 
     void StreetVendorHostComponent::SetItem(int32_t page)
@@ -83,41 +88,18 @@ namespace sunlight
         _prices[page] = price;
     }
 
-    auto StreetVendorHostComponent::GetEmptyStoredItemSlot() const -> std::optional<int32_t>
+    void StreetVendorHostComponent::AddStoredItem(int32_t page, game_entity_id_type id)
     {
-        for (int32_t i = 0; i < std::ssize(_storedItems); ++i)
-        {
-            if (!_storedItems[i].has_value())
-            {
-                return i;
-            }
-        }
+        assert(!_storedItems.contains(page));
 
-        return std::nullopt;
+        _storedItems.emplace(page, id);
     }
 
-    void StreetVendorHostComponent::AddStoredItem(int64_t slot, game_entity_id_type id)
+    void StreetVendorHostComponent::RemoveStoredItem(int32_t page)
     {
-        assert(slot >= 0 && slot < std::ssize(_storedItems));
-        assert(!_storedItems[slot].has_value());
-
-        _storedItems[slot] = id;
-    }
-
-    void StreetVendorHostComponent::RemoveStoredItem(const game_entity_id_type id)
-    {
-        for (int32_t i = 0; i < std::ssize(_storedItems); ++i)
-        {
-            std::optional<game_entity_id_type>& element = _storedItems[i];
-            if (element && *element == id)
-            {
-                element.reset();
-
-                return;
-            }
-        }
-
-        assert(false);
+        [[maybe_unused]]
+        const bool removed = _storedItems.erase(page);
+        assert(removed);
     }
 
     void StreetVendorHostComponent::SetOpen(bool value)

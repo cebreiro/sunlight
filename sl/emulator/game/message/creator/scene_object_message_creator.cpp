@@ -242,9 +242,9 @@ namespace sunlight
         writer.Write<int32_t>(0);
         writer.WriteObject(GameEntityNetworkId(item).ToBuffer());
         writer.Write(ZoneMessageType::CREATEITEM);
-        writer.Write<int32_t>(0); // -2 unk
-        writer.Write<int32_t>(0); // -3 unk
-        writer.Write<int32_t>(0); // -4 unk
+        writer.Write<int32_t>(static_cast<int32_t>(item.GetOwnerType()));
+        writer.Write<int32_t>(static_cast<int32_t>(item.GetOwnerId().Unwrap()));
+        writer.Write<int32_t>(item.GetPage());
         writer.Write<int32_t>(item.GetPrice());
 
         const SceneObjectComponent& sceneObjectComponent = item.GetComponent<SceneObjectComponent>();

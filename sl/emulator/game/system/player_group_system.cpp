@@ -94,6 +94,28 @@ namespace sunlight
         }
     }
 
+    void PlayerGroupSystem::AddStreetVendorGuest(int32_t groupId, GamePlayer& player)
+    {
+        PlayerGroupComponent& playerGroupComponent = player.GetGroupComponent();
+        if (playerGroupComponent.HasGroup())
+        {
+            return;
+        }
+
+        GameGroup* group = FindGroup(groupId);
+        if (!group || group->GetType() != GameGroupType::StreetVendor)
+        {
+            return;
+        }
+
+        if (group->IsHost(player) || group->IsGuest(player))
+        {
+            return;
+        }
+
+        return;
+    }
+
     void PlayerGroupSystem::HandleStateProposition(const ZoneMessage& message)
     {
         // client's group state broadcast request
@@ -241,11 +263,43 @@ namespace sunlight
                 handled = true;
             }
             break;
+            case GameGroupType::StreetVendor:
+            {
+                if (group.IsHost(player))
+                {
+                    assert(false);
+
+                    handled = true;
+                    break;
+                }
+
+                if (group.IsGuest(player))
+                {
+                    handled = true;
+                    break;
+                }
+
+                PlayerGroupComponent& playerGroupComponent = player.GetGroupComponent();
+                if (playerGroupComponent.HasGroup())
+                {
+                    handled = true;
+                    break;
+                }
+
+                group.AddGuest(player);
+
+                playerGroupComponent.SetGroupId(group.GetId());
+                playerGroupComponent.SetGroupType(group.GetType());
+
+                player.Send(ItemTradeMessageCreator::CreateGroupHostData(group.GetId(), group.GetHost()));
+
+                handled = true;
+            }
+            break;
             case GameGroupType::Null:
             case GameGroupType::Unk04:
             case GameGroupType::Unk05:
             case GameGroupType::ItemMix:
-            case GameGroupType::StreetVendor:
             case GameGroupType::Interior:
             default:;
             }
@@ -304,7 +358,7 @@ namespace sunlight
 
             StreetVendorHostComponent& streetVendorHostComponent = host.GetComponent<StreetVendorHostComponent>();
 
-            for (int64_t i = 0; i < GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE; ++i)
+            for (int32_t i = 0; i < GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE; ++i)
             {
                 if (const std::optional<game_entity_id_type> id = streetVendorHostComponent.GetStoredItem(i); id.has_value())
                 {
@@ -340,7 +394,8 @@ namespace sunlight
         }
         else if (group.GetType() == GameGroupType::StreetVendor)
         {
-            assert(false);
+            guest.GetGroupComponent().Clear();
+            group.RemoveGuest(guest);
         }
         else
         {
@@ -494,7 +549,14 @@ namespace sunlight
         {
             const int32_t page = reader.Read<int32_t>();
 
-            player.Send(StreetVendorMessageCreator::CreatePageItemDisplay(group.GetId(), (page / 2) * 2, player));
+            if (group.IsHost(player))
+            {
+                player.Send(StreetVendorMessageCreator::CreatePageItemDisplay(group.GetId(), (page / 2) * 2, player));
+            }
+            else
+            {
+                player.Send(StreetVendorMessageCreator::CreatePageItemDisplay(group.GetId(), (page / 2) * 2, group.GetHost()));
+            }
 
             return true;
         }
@@ -532,7 +594,7 @@ namespace sunlight
             const PlayerItemComponent& itemComponent = player.GetItemComponent();
             StreetVendorHostComponent& hostComponent = player.GetComponent<StreetVendorHostComponent>();
 
-            std::array<std::pair<const GameItem*, int32_t>, GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE> storedItemData = {};
+            std::array<std::tuple<const GameItem*, int32_t, int32_t>, GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE> storedItemData = {};
             int32_t k = 0;
 
             int32_t nullItemCount = 0;
@@ -551,7 +613,7 @@ namespace sunlight
 
                     if (k < std::ssize(storedItemData))
                     {
-                        storedItemData[k++] = std::pair{ saleItem, price };
+                        storedItemData[k++] = std::tuple{ saleItem, i, price };
                     }
                 }
                 else
@@ -567,29 +629,12 @@ namespace sunlight
                 return true;
             }
 
-            const SceneObjectComponent& playerSceneObjectComponent = player.GetSceneObjectComponent();
-            const Eigen::Vector2f& playerPosition = playerSceneObjectComponent.GetPosition();
-            const float playerYaw = playerSceneObjectComponent.GetYaw();
-
-            for (int64_t i = 0; i < std::ssize(storedItemData); ++i)
+            for (int32_t i = 0; i < GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE; ++i)
             {
-                const auto [saleItem, price] = storedItemData[i];
+                const auto [saleItem, page, price] = storedItemData[i];
                 if (saleItem)
                 {
-                    auto storedItem = std::make_shared<GameStoredItem>(_serviceLocator.Get<GameEntityIdPublisher>(),
-                        saleItem->GetData(), saleItem->GetQuantity(), group.GetId(), price);
-
-                    const auto [pos, yaw] = CalculateStoredItemPosition(playerPosition, playerYaw, i);
-
-                    auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
-                    sceneObjectComponent->SetPosition(pos);
-                    sceneObjectComponent->SetDestPosition(pos);
-                    sceneObjectComponent->SetYaw(yaw);
-
-                    storedItem->AddComponent(std::move(sceneObjectComponent));
-
-                    hostComponent.AddStoredItem(i, storedItem->GetId());
-                    Get<SceneObjectSystem>().SpawnItem(std::move(storedItem));
+                    SpawnStoredItem(group, player, *saleItem, page, price, i);
                 }
                 else
                 {
@@ -603,9 +648,156 @@ namespace sunlight
 
             return true;
         }
+        case 1308: // purchase
+        {
+            const int32_t page = reader.Read<int32_t>();
+
+            StreetVendorPurchaseResult result = StreetVendorPurchaseResult::AlreadySold;
+
+            do
+            {
+                if (group.IsHost(player))
+                {
+                    break;
+                }
+
+                GamePlayer& host = group.GetHost();
+                StreetVendorHostComponent& hostComponent = host.GetComponent<StreetVendorHostComponent>();
+
+                if (!hostComponent.IsValid(page))
+                {
+                    break;
+                }
+
+                const std::optional<game_entity_id_type> itemId = hostComponent.GetStoredItem(page);
+                if (!itemId.has_value())
+                {
+                    break;
+                }
+
+                const auto& storedItem = Get<SceneObjectSystem>().FindEntity(GameStoredItem::TYPE, *itemId);
+                if (!storedItem)
+                {
+                    assert(false);
+
+                    break;
+                }
+
+                const int32_t price = hostComponent.GetItemPrice(page);
+
+                PlayerItemComponent& playerItemComponent = player.GetItemComponent();
+                if (playerItemComponent.GetGold() < price)
+                {
+                    result = StreetVendorPurchaseResult::LockOfMoney;
+
+                    break;
+                }
+
+                PlayerItemComponent& hostItemComponent = host.GetItemComponent();
+                const GameItem* targetItem = hostItemComponent.GetVendorSaleItem(page);
+                if (!targetItem)
+                {
+                    assert(false);
+
+                    break;
+                }
+
+                std::shared_ptr<GameItem> instance = hostItemComponent.ReleaseItem(targetItem->GetId());
+
+                ItemArchiveSystem& itemArchiveSystem = Get<ItemArchiveSystem>();
+
+                if (!itemArchiveSystem.AddItem(player, instance))
+                {
+                    // rollback
+
+                    [[maybe_unused]]
+                    const bool added = hostItemComponent.AddVendorItem(instance, page);
+                    assert(added);
+
+                    hostItemComponent.ClearItemLog();
+
+                    result = StreetVendorPurchaseResult::LockOfSpace;
+
+                    break;
+                }
+
+                [[maybe_unused]]
+                const bool charged = itemArchiveSystem.Charge(player, price);
+                assert(charged);
+
+                result = StreetVendorPurchaseResult::Success;
+
+                const int32_t offset = storedItem->Cast<GameStoredItem>()->GetFieldOffset();
+
+                hostComponent.RemoveStoredItem(page);
+                Get<SceneObjectSystem>().RemoveStoredItem(*itemId);
+
+                bool empty = true;
+
+                for (const auto& [saleItemPage, saleItem] : hostItemComponent.GetVendorSaleItems())
+                {
+                    empty = false;
+
+                    if (hostComponent.IsDisplayedItemPage(saleItemPage))
+                    {
+                        continue;
+                    }
+
+                    SpawnStoredItem(group, host, saleItem, saleItemPage, hostComponent.GetItemPrice(saleItemPage), offset);
+
+                    break;
+                }
+
+                if (empty)
+                {
+                    // TODO: destroy street vendor
+                }
+
+            } while (false);
+
+            player.Send(StreetVendorMessageCreator::CreateItemPurchaseResult(group.GetId(), result));
+
+            return true;
+        }
         }
 
         return false;
+    }
+
+    void PlayerGroupSystem::SpawnStoredItem(const GameGroup& group, GamePlayer& player, const GameItem& item, int32_t page, int32_t price, int32_t offset)
+    {
+        const SceneObjectComponent& playerSceneObjectComponent = player.GetSceneObjectComponent();
+        const Eigen::Vector2f& playerPosition = playerSceneObjectComponent.GetPosition();
+        const float playerYaw = playerSceneObjectComponent.GetYaw();
+
+        const auto [pos, yaw] = CalculateStoredItemPosition(playerPosition, playerYaw, offset);
+
+        auto storedItem = std::make_shared<GameStoredItem>(_serviceLocator.Get<GameEntityIdPublisher>(),
+            player.GetId(), player.GetType(), item.GetData(), item.GetQuantity(), group.GetId(), page, price, offset);
+
+        auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
+        sceneObjectComponent->SetPosition(pos);
+        sceneObjectComponent->SetDestPosition(pos);
+        sceneObjectComponent->SetYaw(yaw);
+
+        storedItem->AddComponent(std::move(sceneObjectComponent));
+
+        player.GetComponent<StreetVendorHostComponent>().AddStoredItem(page, storedItem->GetId());
+        Get<SceneObjectSystem>().SpawnItem(std::move(storedItem));
+    }
+
+    auto PlayerGroupSystem::FindGroup(int32_t groupId) -> GameGroup*
+    {
+        const auto iter = _gameGroups.find(groupId);
+
+        return iter != _gameGroups.end() ? iter->second.get() : nullptr;
+    }
+
+    auto PlayerGroupSystem::FindGroup(int32_t groupId) const -> const GameGroup*
+    {
+        const auto iter = _gameGroups.find(groupId);
+
+        return iter != _gameGroups.end() ? iter->second.get() : nullptr;
     }
 
     auto PlayerGroupSystem::CalculateStoredItemPosition(Eigen::Vector2f ownerPos, float ownerYaw, int64_t slot) -> std::pair<Eigen::Vector2f, float>
