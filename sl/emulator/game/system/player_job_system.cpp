@@ -67,9 +67,8 @@ namespace sunlight
         }
 
         const GameDataProvideService& gameDataProvider = _serviceLocator.Get<GameDataProvideService>();
-        const SkillDataProvider& skillDataProvider = gameDataProvider.GetSkillDataProvider();
-
         const sox::JobReference* newJobData = gameDataProvider.Get<sox::JobReferenceTable>().Find(static_cast<int32_t>(advanced));
+
         if (!newJobData)
         {
             return false;
@@ -78,38 +77,46 @@ namespace sunlight
         const Job newJob(*newJobData, advanced, 1, 0, 0);
         (void)jobComponent.AddJob(JobType::Advanced, newJob);
 
-        const std::vector<int32_t>& skills = GetJobGainSkills(newJob.GetId(), newJob.GetLevel());
+        std::vector<int32_t> skills = GetJobGainSkills(newJob.GetId(), newJob.GetLevel());
 
         PlayerSkillComponent& skillComponent = player.GetSkillComponent();
 
-        for (int32_t skillId : skills)
+        if (!skills.empty())
         {
-            const PlayerSkillData* skillData = skillDataProvider.FindPlayerSkill(skillId);
-            if (!skillData)
-            {
-                assert(false);
+            const SkillDataProvider& skillDataProvider = gameDataProvider.GetSkillDataProvider();
 
-                continue;
+            for (auto iter = skills.begin(); iter != skills.end(); )
+            {
+                const int32_t skillId = *iter;
+
+                if (const PlayerSkillData* skillData = skillDataProvider.FindPlayerSkill(skillId);
+                    skillData)
+                {
+                    if (skillComponent.AddSkill(PlayerSkill(advanced, skillData)))
+                    {
+                        player.Defer(GamePlayerMessageCreator::CreateJobSkillAdd(player, newJob.GetId(), skillId, 0));
+
+                        ++iter;
+
+                        continue;
+                    }
+                }
+
+                iter = skills.erase(iter);
             }
-
-            (void)skillComponent.AddSkill(PlayerSkill(advanced, skillData));
-
-            player.Defer(GamePlayerMessageCreator::CreateJobSkillAdd(player, newJob.GetId(), skillId, 0));
         }
-
-        const auto transform = [cid = player.GetCId(), &newJob](int32_t skillId) -> req::SkillCreate
-            {
-                return req::SkillCreate{
-                    .cid = cid,
-                    .id = skillId,
-                    .job = static_cast<int32_t>(newJob.GetId()),
-                    .level = 1,
-                };
-            };
 
         Get<GameRepositorySystem>().SaveNewJob(player, static_cast<int32_t>(newJob.GetId()),
             static_cast<int32_t>(JobType::Advanced), newJob.GetLevel(), newJob.GetSkillPoint(),
-            std::ranges::to<std::vector>(skills | std::views::transform(transform)));
+            std::ranges::to<std::vector>(skills | std::views::transform([cid = player.GetCId(), &newJob](int32_t skillId) -> req::SkillCreate
+                {
+                    return req::SkillCreate{
+                        .cid = cid,
+                        .id = skillId,
+                        .job = static_cast<int32_t>(newJob.GetId()),
+                        .level = 1,
+                    };
+                })));
 
         player.Defer(GamePlayerMessageCreator::CreateJobPromotion(player, advanced));
         player.FlushDeferred();
@@ -147,26 +154,47 @@ namespace sunlight
             job.SetLevel(job.GetLevel() + 1);
             job.SetSkillPoint(job.GetSkillPoint() + 1);
 
-            const std::vector<int32_t>& skills = GetJobGainSkills(job.GetId(), job.GetLevel());
-            const auto transform = [cid = player.GetCId(), &job](int32_t skillId) -> req::SkillCreate
+            std::vector<int32_t> skills = GetJobGainSkills(job.GetId(), job.GetLevel());
+
+            if (!skills.empty())
+            {
+                const GameDataProvideService& gameDataProvider = _serviceLocator.Get<GameDataProvideService>();
+                const SkillDataProvider& skillDataProvider = gameDataProvider.GetSkillDataProvider();
+                PlayerSkillComponent& skillComponent = player.GetSkillComponent();
+
+                for (auto iter = skills.begin(); iter != skills.end(); )
                 {
-                    return req::SkillCreate{
-                        .cid = cid,
-                        .id = skillId,
-                        .job = static_cast<int32_t>(job.GetId()),
-                        .level = 1,
-                    };
-                };
+                    const int32_t skillId = *iter;
+
+                    if (const PlayerSkillData* skillData = skillDataProvider.FindPlayerSkill(skillId);
+                        skillData)
+                    {
+                        if (skillComponent.AddSkill(PlayerSkill(job.GetId(), skillData)))
+                        {
+                            player.Defer(GamePlayerMessageCreator::CreateJobSkillAdd(player, job.GetId(), skillId, 0));
+
+                            ++iter;
+
+                            continue;
+                        }
+                    }
+
+                    iter = skills.erase(iter);
+                }
+            }
 
             Get<GameRepositorySystem>().SaveJobLevel(player, static_cast<int32_t>(job.GetId()), job.GetLevel(), job.GetSkillPoint(),
-                std::ranges::to<std::vector>(skills | std::views::transform(transform)));
+                std::ranges::to<std::vector>(skills | std::views::transform([cid = player.GetCId(), &job](int32_t skillId) -> req::SkillCreate
+                    {
+                        return req::SkillCreate{
+                            .cid = cid,
+                            .id = skillId,
+                            .job = static_cast<int32_t>(job.GetId()),
+                            .level = 1,
+                        };
+                    })));
 
             player.Defer(GamePlayerMessageCreator::CreateJobExpLevelUp(player));
-
-            for (int32_t skillId : skills)
-            {
-                player.Defer(GamePlayerMessageCreator::CreateJobSkillAdd(player, job.GetId(), skillId, 5));
-            }
         }
         else
         {
