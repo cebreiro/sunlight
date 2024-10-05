@@ -87,6 +87,16 @@ namespace sunlight
         return _player.GetQuestComponent().FindQuest(quest);
     }
 
+    void LuaPlayer::ChangeStage(int32_t stageId, int32_t destX, int32_t destY)
+    {
+        _system.ChangeStage(_player, stageId, destX, destY);
+    }
+
+    void LuaPlayer::ChangeZone(int32_t zoneId, int32_t destX, int32_t destY)
+    {
+        _system.ChangeZone(_player, zoneId, destX, destY);
+    }
+
     void LuaPlayer::Send(SlPacketWriter& writer)
     {
         _player.Send(writer.Flush());
@@ -119,6 +129,16 @@ namespace sunlight
         return _player.GetNPCScriptComponent().GetSelection();
     }
 
+    auto LuaPlayer::GetState() const -> int32_t
+    {
+        return _player.GetNPCScriptComponent().GetState();
+    }
+
+    void LuaPlayer::SetState(int32_t state)
+    {
+        _player.GetNPCScriptComponent().SetState(state);
+    }
+
     void LuaPlayer::Bind(sol::state& luaState)
     {
         luaState.new_usertype<LuaPlayer>("Player",
@@ -135,12 +155,16 @@ namespace sunlight
             "startQuest", &LuaPlayer::StartQuest,
             "changeQuest", &LuaPlayer::ChangeQuest,
             "findQuest", &LuaPlayer::FindQuest,
+            "changeStage", &LuaPlayer::ChangeStage,
+            "changeZone", &LuaPlayer::ChangeZone,
             "send", &LuaPlayer::Send,
             "broadcast", &LuaPlayer::Broadcast,
             "getId", &LuaPlayer::GetId,
             "getTypeValue", &LuaPlayer::GetTypeValue,
             "getNoviceJobLevel", &LuaPlayer::GetNoviceJobLevel,
-            "getSelection", &LuaPlayer::GetSelection
+            "getSelection", &LuaPlayer::GetSelection,
+            "getState", &LuaPlayer::GetState,
+            "setState", &LuaPlayer::SetState
         );
     }
 

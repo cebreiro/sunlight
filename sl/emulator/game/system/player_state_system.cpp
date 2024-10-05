@@ -27,6 +27,7 @@
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/zone_change_service.h"
 
 namespace sunlight
 {
@@ -158,6 +159,16 @@ namespace sunlight
         player.Send(NPCMessageCreator::CreateTalkBoxClose(targetId));
 
         scriptComponent.Clear();
+    }
+
+    void PlayerStateSystem::ChangeStage(GamePlayer& player, int32_t stageId, int32_t destX, int32_t destY)
+    {
+        _serviceLocator.Get<ZoneChangeService>().StartStageChange(player, stageId, destX, destY);
+    }
+
+    void PlayerStateSystem::ChangeZone(GamePlayer& player, int32_t zoneId, int32_t destX, int32_t destY)
+    {
+        _serviceLocator.Get<ZoneChangeService>().StartZoneChange(player.GetClientId(), zoneId, destX, destY);
     }
 
     void PlayerStateSystem::StartNPCScript(GamePlayer& player, game_entity_id_type target)

@@ -33,6 +33,9 @@ namespace sunlight
         void CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox);
         void DisposeNPCTalk(GamePlayer& player);
 
+        void ChangeStage(GamePlayer& player, int32_t stageId, int32_t destX, int32_t destY);
+        void ChangeZone(GamePlayer& player, int32_t zoneId, int32_t destX, int32_t destY);
+
     private:
         void StartNPCScript(GamePlayer& player, game_entity_id_type target);
         void HandleScriptState(const ZoneMessage& message);
@@ -41,8 +44,6 @@ namespace sunlight
         bool HandleCharacterState(const ZoneMessage& message);
 
         void HandlePickGroundItem(GamePlayer& player, game_entity_id_type itemId);
-
-        void OpenStreetVendor(GamePlayer& player, GamePlayer& host);
 
     private:
         const ServiceLocator& _serviceLocator;

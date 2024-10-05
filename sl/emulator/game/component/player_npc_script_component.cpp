@@ -12,6 +12,7 @@ namespace sunlight
         _targetNPCId.reset();
         _sequence = 0;
         _selection = 0;
+        _state = 0;
     }
 
     auto PlayerNPCScriptComponent::GetTargetNPCId() const -> game_entity_id_type
@@ -31,6 +32,11 @@ namespace sunlight
         return _selection;
     }
 
+    auto PlayerNPCScriptComponent::GetState() const -> int32_t
+    {
+        return _state;
+    }
+
     void PlayerNPCScriptComponent::SetTargetNPCId(game_entity_id_type id)
     {
         _targetNPCId = id;
@@ -44,5 +50,10 @@ namespace sunlight
     void PlayerNPCScriptComponent::SetSelection(int32_t selection)
     {
         _selection = selection;
+    }
+
+    void PlayerNPCScriptComponent::SetState(int32_t state)
+    {
+        _state = state;
     }
 }

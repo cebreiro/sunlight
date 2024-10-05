@@ -43,6 +43,9 @@ namespace sunlight
 
         auto FindQuest(int32_t quest) const -> const Quest*;
 
+        void ChangeStage(int32_t stageId, int32_t destX, int32_t destY);
+        void ChangeZone(int32_t zoneId, int32_t destX, int32_t destY);
+
         void Send(SlPacketWriter& writer);
         void Broadcast(SlPacketWriter& writer, bool includeSelf);
 
@@ -50,6 +53,9 @@ namespace sunlight
         auto GetTypeValue() const -> int32_t;
         auto GetNoviceJobLevel() const -> int32_t;
         auto GetSelection() const -> int32_t;
+        auto GetState() const -> int32_t;
+
+        void SetState(int32_t state);
 
     public:
         static void Bind(sol::state& luaState);
