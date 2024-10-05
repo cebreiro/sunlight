@@ -29,6 +29,9 @@ namespace sunlight
         bool IsMale() const;
         bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
 
+        void RecoverHP();
+        void RecoverSP();
+
         bool AddItem(int32_t itemId, int32_t quantity);
         bool RemoveInventoryItem(int32_t itemId, int32_t quantity);
 

@@ -25,6 +25,7 @@
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_group_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
+#include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
@@ -44,6 +45,7 @@ namespace sunlight
         Add(stage.Get<PlayerQuestSystem>());
         Add(stage.Get<NPCShopSystem>());
         Add(stage.Get<PlayerGroupSystem>());
+        Add(stage.Get<PlayerStatSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)

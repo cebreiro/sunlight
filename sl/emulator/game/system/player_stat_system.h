@@ -1,4 +1,6 @@
 #pragma once
+#include "sl/emulator/game/contants/stat/hp_change_floater_type.h"
+#include "sl/emulator/game/contants/stat/sp_change_floater_type.h"
 #include "sl/emulator/game/contants/stat/stat_value.h"
 #include "sl/emulator/game/system/game_system.h"
 
@@ -34,6 +36,9 @@ namespace sunlight
     public:
         void AddItemStat(GamePlayer& player, const GameItem& item);
         void RemoveItemStat(GamePlayer& player, const GameItem& item);
+
+        void RecoverHP(GamePlayer& player, HPChangeFloaterType floater);
+        void RecoverSP(GamePlayer& player, SPChangeFloaterType floater);
 
     public:
         void OnInitialize(GamePlayer& player);

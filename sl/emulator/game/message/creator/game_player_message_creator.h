@@ -2,6 +2,8 @@
 #include "sl/emulator/game/contants/group/game_group_type.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/job/job_id.h"
+#include "sl/emulator/game/contants/stat/hp_change_floater_type.h"
+#include "sl/emulator/game/contants/stat/sp_change_floater_type.h"
 
 namespace sunlight
 {
@@ -59,5 +61,8 @@ namespace sunlight
 
         static auto CreatePlayerStateProposition(const GamePlayer& player, const std::string& title, int32_t groupId, GameGroupType groupType, int32_t unk2) -> Buffer;
         static auto CreatePlayerStateProposition(const GamePlayer& player, const GameGroupState& groupState) -> Buffer;
+
+        static auto CreateHPChange(const GamePlayer& player, int32_t maxHP, int32_t hp, HPChangeFloaterType floater) -> Buffer;
+        static auto CreateSPChange(const GamePlayer& player, int32_t maxSP, int32_t sp, SPChangeFloaterType floater) -> Buffer;
     };
 }

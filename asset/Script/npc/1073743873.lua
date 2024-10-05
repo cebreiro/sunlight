@@ -75,7 +75,8 @@ return function (system, npc, player, sequence)
             
             if selection == 1 then
 
-                -- todo: impl heal
+                player:recoverHP()
+                player:recoverSP()
 
                 if quest ~= nil and quest:getState() == 1 then
 

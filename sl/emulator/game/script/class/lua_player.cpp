@@ -17,6 +17,7 @@
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
+#include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/server/packet/io/sl_packet_writer.h"
 
 namespace sunlight
@@ -35,6 +36,16 @@ namespace sunlight
     bool LuaPlayer::HasInventoryItem(int32_t itemId, int32_t quantity) const
     {
         return _player.GetItemComponent().HasInventoryItem(itemId, quantity);
+    }
+
+    void LuaPlayer::RecoverHP()
+    {
+        _system.Get<PlayerStatSystem>().RecoverHP(_player, HPChangeFloaterType::None);
+    }
+
+    void LuaPlayer::RecoverSP()
+    {
+        _system.Get<PlayerStatSystem>().RecoverSP(_player, SPChangeFloaterType::None);
     }
 
     bool LuaPlayer::AddItem(int32_t itemId, int32_t quantity)
@@ -145,6 +156,8 @@ namespace sunlight
             sol::no_constructor,
             "isMale", &LuaPlayer::IsMale,
             "hasInventoryItem", &LuaPlayer::HasInventoryItem,
+            "recoverHP", &LuaPlayer::RecoverHP,
+            "recoverSP", &LuaPlayer::RecoverSP,
             "addItem", &LuaPlayer::AddItem,
             "removeInventoryItem", &LuaPlayer::RemoveInventoryItem,
             "show", &LuaPlayer::Show,

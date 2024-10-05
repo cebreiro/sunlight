@@ -96,6 +96,35 @@ namespace sunlight
         (void)item;
     }
 
+    void PlayerStatSystem::RecoverHP(GamePlayer& player, HPChangeFloaterType floater)
+    {
+        PlayerStatComponent& statComponent = player.GetStatComponent();
+
+        const int32_t maxHP = statComponent.GetFinalStat(PlayerStatType::MaxHP).As<int32_t>();
+        statComponent.SetRecoveryStat(RecoveryStatType::HP, maxHP);
+
+        Get<EntityViewRangeSystem>().Broadcast(player,
+            GamePlayerMessageCreator::CreateHPChange(player, maxHP, maxHP, floater), true);
+    }
+
+    void PlayerStatSystem::RecoverSP(GamePlayer& player, SPChangeFloaterType floater)
+    {
+        PlayerStatComponent& statComponent = player.GetStatComponent();
+
+        const int32_t maxHP = statComponent.GetFinalStat(PlayerStatType::MaxSP).As<int32_t>();
+        statComponent.SetRecoveryStat(RecoveryStatType::SP, maxHP);
+
+        if (floater == SPChangeFloaterType::None)
+        {
+            player.Send(GamePlayerMessageCreator::CreateSPChange(player, maxHP, maxHP, floater));
+        }
+        else
+        {
+            Get<EntityViewRangeSystem>().Broadcast(player,
+                GamePlayerMessageCreator::CreateSPChange(player, maxHP, maxHP, floater), true);
+        }
+    }
+
     void PlayerStatSystem::OnInitialize(GamePlayer& player)
     {
         PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
