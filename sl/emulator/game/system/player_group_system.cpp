@@ -269,7 +269,9 @@ namespace sunlight
                     GamePlayer& host = group.GetHost();
                     host.Send(ItemTradeMessageCreator::CreateGroupGuestData(group.GetId(), player));
 
-                    player.Send(ItemTradeMessageCreator::CreateGroupHostData(group.GetId(), host));
+                    player.Defer(ItemTradeMessageCreator::CreateGroupHostData(group.GetId(), host));
+                    player.Defer(ItemTradeMessageCreator::CreateGroupHostItemData(group.GetId(), host));
+                    player.FlushDeferred();
 
                     Get<ItemTradeSystem>().Start(player);
                 }
@@ -402,13 +404,9 @@ namespace sunlight
 
         if (group.GetType() == GameGroupType::Trade)
         {
-            ProcessTradeFail(group, guest);
+            OnHostExit(group, group.GetHost());
 
-            group.RemoveGuest(guest);
-
-            GamePlayer& host = group.GetHost();
-
-            host.Send(ItemTradeMessageCreator::CreateGroupGuestExit(group.GetId(), host));
+            return;
         }
         else if (group.GetType() == GameGroupType::StreetVendor)
         {
@@ -486,9 +484,7 @@ namespace sunlight
                 GamePlayer& host = group.GetHost();
                 GamePlayer& guest = *group.GetGuests()[0];
 
-                ItemTradeSystem& itemTradeSystem = Get<ItemTradeSystem>();
-
-                if (itemTradeSystem.Commit(host, guest))
+                if (Get<ItemTradeSystem>().Commit(host, guest))
                 {
                     group.Broadcast(ItemTradeMessageCreator::CreateTradeSuccess(group.GetId()), std::nullopt);
                 }

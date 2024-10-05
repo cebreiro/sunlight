@@ -19,11 +19,13 @@ namespace sunlight
 
         static auto CreateGroupGuestData(int32_t groupId, const GamePlayer& guest) -> Buffer;
         static auto CreateGroupHostData(int32_t groupId, const GamePlayer& host) -> Buffer;
+        static auto CreateGroupHostItemData(int32_t groupId, const GamePlayer& host) -> Buffer;
 
         static auto CreateGroupJoinFail(int32_t groupId) -> Buffer;
         static auto CreateGroupGuestExit(int32_t groupId, const GamePlayer& host) -> Buffer;
 
         static auto CreateGoldChange(int32_t groupId, int32_t gold) -> Buffer;
+        static auto CreateGoldChangeResult(int32_t groupId) -> Buffer;
 
         static auto CreateLiftItem(int32_t groupId, game_entity_id_type itemId, GameEntityType itemType) -> Buffer;
         static auto CreateLowerItem(int32_t groupId, int32_t x, int32_t y, const GameItem& item) -> Buffer;

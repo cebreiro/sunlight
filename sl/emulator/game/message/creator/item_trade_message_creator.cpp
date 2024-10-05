@@ -1,5 +1,6 @@
 #include "item_trade_message_creator.h"
 
+#include "sl/emulator/game/component/player_item_trade_component.h"
 #include "sl/emulator/game/contants/group/game_group_type.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
@@ -41,6 +42,38 @@ namespace sunlight
         writer.Write<int32_t>(1); // guest count
         writer.Write<int32_t>(static_cast<int32_t>(host.GetType()));
         writer.Write<int32_t>(static_cast<int32_t>(host.GetId().Unwrap()));
+
+        return writer.Flush();
+    }
+
+    auto ItemTradeMessageCreator::CreateGroupHostItemData(int32_t groupId, const GamePlayer& host) -> Buffer
+    {
+        assert(host.HasComponent<PlayerItemTradeComponent>());
+
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_NORMAL_MESSAGE);
+        writer.Write(ZoneMessageType::GROUP_MSG);
+        writer.Write<int32_t>(groupId);
+        writer.Write<int32_t>(900);
+        writer.Write<int32_t>(1008);
+
+        const PlayerItemTradeComponent& itemTradeComponent = host.GetComponent<PlayerItemTradeComponent>();
+
+        writer.Write<int32_t>(itemTradeComponent.GetGold());
+        writer.Write<int32_t>(static_cast<int32_t>(std::ssize(itemTradeComponent.GetItems())));
+
+        for (const auto& pair : itemTradeComponent.GetItems() | std::views::values)
+        {
+            {
+                const boost::container::static_vector<char, 23> buffer = ItemArchiveMessageCreator::CreateItemObject(*pair.first);
+
+                writer.Write<int32_t>(static_cast<int32_t>(std::ssize(buffer)));
+                writer.WriteObject(buffer);
+                writer.Write<int32_t>(pair.second.x);
+                writer.Write<int32_t>(pair.second.y);
+            }
+        }
 
         return writer.Flush();
     }
@@ -95,6 +128,19 @@ namespace sunlight
         writer.Write<int32_t>(900);
         writer.Write<int32_t>(1003);
         writer.Write<int32_t>(gold);
+
+        return writer.Flush();
+    }
+
+    auto ItemTradeMessageCreator::CreateGoldChangeResult(int32_t groupId) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_NORMAL_MESSAGE);
+        writer.Write(ZoneMessageType::GROUP_MSG);
+        writer.Write<int32_t>(groupId);
+        writer.Write<int32_t>(900);
+        writer.Write<int32_t>(1155);
 
         return writer.Flush();
     }

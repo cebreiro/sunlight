@@ -497,6 +497,8 @@ namespace sunlight
 
         itemTradeComponent.SetGold(gold);
 
+        player.Send(ItemTradeMessageCreator::CreateGoldChangeResult(group.GetId()));
+
         if (group.GetMemberCount() > 1)
         {
             group.Broadcast(ItemTradeMessageCreator::CreateGoldChange(group.GetId(), gold), player.GetId());
