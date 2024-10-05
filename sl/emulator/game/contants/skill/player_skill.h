@@ -23,6 +23,7 @@ namespace sunlight
         auto GetPage() const -> int8_t;
         auto GetX() const -> int8_t;
         auto GetY() const -> int8_t;
+        auto GetEXP() const -> int32_t;
         auto GetData() const -> const PlayerSkillData&;
 
         void SetBaseLevel(int32_t value);
@@ -31,6 +32,7 @@ namespace sunlight
         void SetPage(int8_t value);
         void SetX(int8_t value);
         void SetY(int8_t value);
+        void SetEXP(int32_t value);
 
     private:
         JobId _jobId = JobId::None;
@@ -40,6 +42,7 @@ namespace sunlight
         int8_t _page = -1;
         int8_t _x = -1;
         int8_t _y = -1;
+        int32_t _exp = 0;
 
         PtrNotNull<const PlayerSkillData> _data = nullptr;
     };

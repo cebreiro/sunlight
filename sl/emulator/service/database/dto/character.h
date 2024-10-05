@@ -58,6 +58,7 @@ namespace sunlight::db::dto
             int8_t page = 0;
             int8_t x = 0;
             int8_t y = 0;
+            int32_t exp = 0;
         };
         std::vector<Skill> skills;
 

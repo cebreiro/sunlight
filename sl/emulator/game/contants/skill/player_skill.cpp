@@ -56,6 +56,11 @@ namespace sunlight
         return _y;
     }
 
+    auto PlayerSkill::GetEXP() const -> int32_t
+    {
+        return _exp;
+    }
+
     auto PlayerSkill::GetData() const -> const PlayerSkillData&
     {
         assert(_data);
@@ -91,5 +96,10 @@ namespace sunlight
     void PlayerSkill::SetY(int8_t value)
     {
         _y = value;
+    }
+
+    void PlayerSkill::SetEXP(int32_t value)
+    {
+        _exp = value;
     }
 }

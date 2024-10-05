@@ -35,5 +35,13 @@ namespace sunlight
         static constexpr int32_t QUICK_SLOT_WIDTH = 4;
         static constexpr int32_t QUICK_SLOT_HEIGHT = 2;
         static constexpr int32_t MAX_QUICK_SLOT_PAGE_SIZE = 10;
+
+        static constexpr int32_t MAX_MIX_SKILL_DEGREE = 3;
+        static constexpr int32_t MAX_MIX_SKILL_LEVEL = 30;
+
+        // client 0x460C50
+        static const std::array<int32_t, MAX_MIX_SKILL_LEVEL> MIX_SKILL_LEVEL_UP_REQUIRED_EXP_D1;
+        static const std::array<int32_t, MAX_MIX_SKILL_LEVEL> MIX_SKILL_LEVEL_UP_REQUIRED_EXP_D2;
+        static const std::array<int32_t, MAX_MIX_SKILL_LEVEL> MIX_SKILL_LEVEL_UP_REQUIRED_EXP_D3;
     };
 }

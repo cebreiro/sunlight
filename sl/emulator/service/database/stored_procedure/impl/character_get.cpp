@@ -134,6 +134,7 @@ namespace sunlight::db::sp
             skill.page = static_cast<int8_t>(row.at(index++).as_int64());
             skill.x = static_cast<int8_t>(row.at(index++).as_int64());
             skill.y = static_cast<int8_t>(row.at(index++).as_int64());
+            skill.exp = static_cast<int32_t>(row.at(index++).as_int64());
         }
 
         character.items.reserve(characterItemSet.rows().size());

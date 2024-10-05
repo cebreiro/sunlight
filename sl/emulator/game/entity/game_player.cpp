@@ -119,6 +119,7 @@ namespace sunlight
                 playerSkill.SetPage(dtoSkill.page);
                 playerSkill.SetX(dtoSkill.x);
                 playerSkill.SetY(dtoSkill.y);
+                playerSkill.SetEXP(dtoSkill.exp);
 
                 if (!result->AddSkill(playerSkill))
                 {

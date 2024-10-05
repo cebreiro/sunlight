@@ -172,8 +172,70 @@ return function (player)
 
     end
 
+    function sendTest3 (player)
+
+        local writer = SlPacketWriter:new()
+
+        writeGlobalMessageHead(writer, player)
+
+        writer:writeInt32(5000)
+        writer:writeInt32(142) 
+        writer:writeInt32(1301) 
+        writer:writeInt32(900) 
+        writer:writeInt32(50) 
+
+        player:send(writer)
+    end
+
+    function sendTest4 (player)
+
+        local writer = SlPacketWriter:new()
+
+        writeGlobalMessageHead(writer, player)
+
+        writer:writeInt32(5000)
+        writer:writeInt32(5031) -- change skill mix exp
+        writer:writeInt32(1301) 
+        writer:writeInt32(166852)
+
+        player:send(writer)
+    end
+
+    function sendTest5 (player)
+
+        local writer = SlPacketWriter:new()
+
+        writeGlobalMessageHead(writer, player)
+
+        writer:writeInt32(5000)
+        writer:writeInt32(5007) 
+        writer:writeInt32(1) 
+        writer:writeInt32(2)
+        writer:writeInt32(0)
+
+        player:send(writer)
+    end
+
+    function sendTest6 (player)
+
+        local writer = SlPacketWriter:new()
+
+        writeGlobalMessageHead(writer, player)
+
+        writer:writeInt32(5000)
+        writer:writeInt32(5020)  -- SLV2_SKILL_LEVEL_CHANGE
+        writer:writeInt32(1301) 
+        writer:writeInt32(29)
+        writer:writeInt32(0)
+
+        player:send(writer)
+    end
+
     --createOpenStreetVenderGroup(player)
-    sendTest2(player)
+    --sendTest2(player)
     --send1705(player)
+
+    sendTest4(player)
+    --sendTest4(player)
     
 end
