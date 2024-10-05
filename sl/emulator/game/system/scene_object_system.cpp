@@ -1,5 +1,6 @@
 #include "scene_object_system.h"
 
+#include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
@@ -118,6 +119,17 @@ namespace sunlight
                     player->Defer(ZonePacketS2CCreator::CreateObjectMove(other));
                     player->Defer(SceneObjectPacketCreator::CreateInformation(other, false));
                     player->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(other));
+
+                    if (const PlayerGroupComponent& otherGroupComponent = other.GetGroupComponent();
+                        otherGroupComponent.HasGroup())
+                    {
+                        player->Defer(GamePlayerMessageCreator::CreatePlayerStateProposition(other, otherGroupComponent.GetGroupState()));
+
+                        if (otherGroupComponent.GetGroupType() == GameGroupType::StreetVendor)
+                        {
+                            player->Defer(SceneObjectPacketCreator::CreateState(other, GameEntityState{ .type = GameEntityStateType::StreetVendor }));
+                        }
+                    }
                 }
                 break;
                 case GameEntityType::NPC:

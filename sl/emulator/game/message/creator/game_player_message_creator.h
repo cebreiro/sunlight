@@ -7,6 +7,7 @@ namespace sunlight
 {
     class Quest;
     struct PlayerProfileIntroduction;
+    struct GameGroupState;
 
     class GamePlayer;
     class GameItem;
@@ -57,5 +58,6 @@ namespace sunlight
         static auto CreateProfileIntroductionSaveResult(const GamePlayer& player) -> Buffer;
 
         static auto CreatePlayerStateProposition(const GamePlayer& player, const std::string& title, int32_t groupId, GameGroupType groupType, int32_t unk2) -> Buffer;
+        static auto CreatePlayerStateProposition(const GamePlayer& player, const GameGroupState& groupState) -> Buffer;
     };
 }

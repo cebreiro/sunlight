@@ -3,6 +3,7 @@
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_profile_component.h"
 #include "sl/emulator/game/component/player_quest_component.h"
+#include "sl/emulator/game/contants/group/game_group_state.h"
 #include "sl/emulator/game/contants/quest/quest.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_item.h"
@@ -596,6 +597,22 @@ namespace sunlight
         writer.Write<int32_t>(groupId);
         writer.Write(groupType);
         writer.Write<int32_t>(unk2);
+
+        return writer.Flush();
+    }
+
+    auto GamePlayerMessageCreator::CreatePlayerStateProposition(const GamePlayer& player, const GameGroupState& groupState) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::STATE_PROPOSITION);
+        writer.WriteString(groupState.title);
+        writer.Write<int32_t>(groupState.groupId);
+        writer.Write(groupState.groupType);
+        writer.Write<int32_t>(groupState.type);
 
         return writer.Flush();
     }

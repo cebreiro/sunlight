@@ -6,10 +6,12 @@
 #include "sl/data/map/map_stage_room.h"
 #include "sl/data/map/map_stage_terrain.h"
 #include "sl/emulator/game/game_constant.h"
+#include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/sector/game_spatial_id.h"
 #include "sl/emulator/game/contants/sector/game_spatial_mbr.h"
 #include "sl/emulator/game/contants/sector/game_spatial_sector.h"
+#include "sl/emulator/game/contants/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -247,6 +249,17 @@ namespace sunlight
 
                                 player->Defer(SceneObjectPacketCreator::CreateInformation(targetPlayer, false));
                                 player->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(targetPlayer));
+
+                                if (PlayerGroupComponent& otherGroupComponent = targetPlayer.GetGroupComponent();
+                                    otherGroupComponent.HasGroup())
+                                {
+                                    player->Defer(GamePlayerMessageCreator::CreatePlayerStateProposition(targetPlayer, otherGroupComponent.GetGroupState()));
+
+                                    if (otherGroupComponent.GetGroupType() == GameGroupType::StreetVendor)
+                                    {
+                                        player->Defer(SceneObjectPacketCreator::CreateState(targetPlayer, GameEntityState{ .type = GameEntityStateType::StreetVendor }));
+                                    }
+                                }
                             }
                             break;
                             case GameEntityType::NPC:

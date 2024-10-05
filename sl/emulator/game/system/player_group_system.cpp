@@ -137,16 +137,18 @@ namespace sunlight
         GamePlayer& player = message.player;
         SlPacketReader& reader = message.reader;
 
-        const std::string& title = reader.ReadString();
-        const int32_t groupId = reader.Read<int32_t>();
-        const GameGroupType groupType = static_cast<GameGroupType>(reader.Read<int32_t>());
-        const int32_t unk2 = reader.Read<int32_t>(); // maybe on/off
+        GameGroupState newState;
+        newState.title = reader.ReadString();
+        newState.groupId = reader.Read<int32_t>();
+        newState.groupType = static_cast<GameGroupType>(reader.Read<int32_t>());
+        newState.type = reader.Read<int32_t>();
+
+        player.GetGroupComponent().SetGroupState(newState);
 
         constexpr bool includeSelf = true;
 
         Get<EntityViewRangeSystem>().Broadcast(player,
-            GamePlayerMessageCreator::CreatePlayerStateProposition(player, title, groupId, groupType, unk2),
-            includeSelf);
+            GamePlayerMessageCreator::CreatePlayerStateProposition(player, newState), includeSelf);
     }
 
     void PlayerGroupSystem::HandleCreateGroup(const ZoneCommunityMessage& message)
