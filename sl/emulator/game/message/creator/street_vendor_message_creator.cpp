@@ -38,6 +38,19 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto StreetVendorMessageCreator::CreateGroupShutdown(int32_t groupId) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_NORMAL_MESSAGE);
+        writer.Write(ZoneMessageType::GROUP_MSG);
+        writer.Write<int32_t>(groupId);
+        writer.Write<int32_t>(900);
+        writer.Write<int32_t>(1307);
+
+        return writer.Flush();
+    }
+
     auto StreetVendorMessageCreator::CreatePageItemDisplay(int32_t groupId, int32_t page, const GamePlayer& player) -> Buffer
     {
         assert(player.HasComponent<StreetVendorHostComponent>());
@@ -131,6 +144,19 @@ namespace sunlight
         writer.Write<int32_t>(900);
         writer.Write<int32_t>(1308);
         writer.Write(result);
+
+        return writer.Flush();
+    }
+
+    auto StreetVendorMessageCreator::CreateVendorItemSoldOut(int32_t groupId) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_NORMAL_MESSAGE);
+        writer.Write(ZoneMessageType::GROUP_MSG);
+        writer.Write<int32_t>(groupId);
+        writer.Write<int32_t>(900);
+        writer.Write<int32_t>(1309);
 
         return writer.Flush();
     }

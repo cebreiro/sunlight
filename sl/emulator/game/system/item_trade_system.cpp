@@ -373,7 +373,7 @@ namespace sunlight
         hostItemComponent.FlushItemLogTo(transaction.logs);
         guestItemComponent.FlushItemLogTo(transaction.logs);
 
-        Get<GameRepositorySystem>().SaveTrade(host, guest, std::move(transaction));
+        Get<GameRepositorySystem>().Save(host, guest, std::move(transaction));
 
         for (Buffer& buffer : hostSyncPackets)
         {

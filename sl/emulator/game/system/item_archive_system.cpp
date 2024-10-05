@@ -75,6 +75,63 @@ namespace sunlight
         return GameSystem::GetClassId<ItemArchiveSystem>();
     }
 
+    bool ItemArchiveSystem::PurchaseStreetVendorItem(GamePlayer& host, GamePlayer& guest, game_entity_id_type itemId, int32_t price)
+    {
+        bool success = false;
+        db::ItemTransaction transaction;
+
+        PlayerItemComponent& hostItemComponent = host.GetItemComponent();
+        PlayerItemComponent& guestItemComponent = guest.GetItemComponent();
+
+        do
+        {
+            if (guestItemComponent.GetGold() < price)
+            {
+                break;
+            }
+
+            const GameItem* targetItem = hostItemComponent.FindItem(itemId);
+            if (!targetItem || targetItem->GetComponent<ItemPositionComponent>().GetPositionType() != ItemPositionType::Vendor)
+            {
+                break;
+            }
+
+            const ItemData& itemData = targetItem->GetData();
+            const std::optional<InventoryPosition> position = guestItemComponent.FindEmptyInventoryPosition(itemData.GetWidth(), itemData.GetHeight());
+
+            if (!position.has_value())
+            {
+                break;
+            }
+
+            std::shared_ptr<GameItem> instance = hostItemComponent.ReleaseItem(itemId);
+
+            [[maybe_unused]]
+            const bool added = guestItemComponent.AddInventoryItem(std::move(instance), &position.value());
+            assert(added);
+
+            guestItemComponent.AddOrSubGold(-price);
+
+            hostItemComponent.FlushItemLogTo(transaction.logs);
+            guestItemComponent.FlushItemLogTo(transaction.logs);
+
+            guest.Defer(ItemArchiveMessageCreator::CreateInventoryItemAdd(guest, *targetItem));
+            guest.Defer(ItemArchiveMessageCreator::CreateGoldAddOrSub(guest, -price));
+
+            success = true;
+            
+        } while (false);
+
+        if (success)
+        {
+            Get<GameRepositorySystem>().Save(host, guest, std::move(transaction));
+
+            guest.FlushDeferred();
+        }
+
+        return success;
+    }
+
     void ItemArchiveSystem::Purchase(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId, int32_t itemId, int32_t page, int32_t x, int32_t y, int32_t quantity)
     {
         PlayerItemComponent& playerItemComponent = player.GetItemComponent();

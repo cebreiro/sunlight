@@ -46,6 +46,8 @@ namespace sunlight
         bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
         bool HasVendorSaleItem(int8_t page) const;
 
+        auto GetVendorSaleItemSize() const -> int64_t;
+
     public:
         void AddOrSubGold(int32_t value);
         void SetGold(int32_t value);
@@ -149,7 +151,7 @@ namespace sunlight
         std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_QUICK_SLOT_PAGE_SIZE> _quickSlotStorages;
 
         std::array<GameItem*, GameConstant::MAX_STREET_VENDOR_PAGE_SIZE> _vendorSaleItems = {};
-
+        
         GameItem* _pickItem = nullptr;
 
         static constexpr GameDebugType debug_type = GameDebugType::PlayerItemSlot;

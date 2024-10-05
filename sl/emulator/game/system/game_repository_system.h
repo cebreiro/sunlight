@@ -41,7 +41,7 @@ namespace sunlight
         void LoadProfileIntroduction(const GamePlayer& player, const std::function<void(PlayerProfileIntroduction&)>& callback);
 
         void Save(const GamePlayer& player, db::ItemTransaction transaction);
-        void SaveTrade(const GamePlayer& host, const GamePlayer& guest, db::ItemTransaction transaction);
+        void Save(const GamePlayer& host, const GamePlayer& guest, db::ItemTransaction transaction);
 
         void SaveCharacterExp(const GamePlayer& player, int32_t exp);
         void SaveCharacterLevel(const GamePlayer& player, int32_t level, int32_t statPoint);

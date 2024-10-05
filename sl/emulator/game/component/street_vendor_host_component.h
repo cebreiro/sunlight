@@ -27,6 +27,8 @@ namespace sunlight
         void SetItem(int32_t page);
         void SetItemPrice(int32_t page, int32_t price);
 
+        inline auto GetStoredItems() const;
+
     private:
         bool _open = false;
 
@@ -34,4 +36,9 @@ namespace sunlight
 
         boost::container::small_flat_map<int32_t, game_entity_id_type, GameConstant::MAX_STREET_VENDOR_STORED_ITEM_SIZE> _storedItems;
     };
+
+    inline auto StreetVendorHostComponent::GetStoredItems() const
+    {
+        return _storedItems | std::views::values;
+    }
 }

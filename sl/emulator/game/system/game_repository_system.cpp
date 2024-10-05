@@ -144,7 +144,7 @@ namespace sunlight
                 });
     }
 
-    void GameRepositorySystem::SaveTrade(const GamePlayer& host, const GamePlayer& guest, db::ItemTransaction transaction)
+    void GameRepositorySystem::Save(const GamePlayer& host, const GamePlayer& guest, db::ItemTransaction transaction)
     {
         ++_pending[host.GetCId()].first;
         ++_pending[guest.GetCId()].first;

@@ -261,6 +261,14 @@ namespace sunlight
         return _vendorSaleItems[page] != nullptr;
     }
 
+    auto PlayerItemComponent::GetVendorSaleItemSize() const -> int64_t
+    {
+        return std::ranges::count_if(_vendorSaleItems, [](const GameItem* item) -> bool
+            {
+                return item != nullptr;
+            });
+    }
+
     void PlayerItemComponent::AddOrSubGold(int32_t value)
     {
         _gold += value;
