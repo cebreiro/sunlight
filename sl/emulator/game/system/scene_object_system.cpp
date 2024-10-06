@@ -11,6 +11,7 @@
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
@@ -35,6 +36,7 @@ namespace sunlight
     void SceneObjectSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<EntityViewRangeSystem>());
+        Add(stage.Get<EntityMovementSystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerAppearanceSystem>());
         Add(stage.Get<PlayerQuestSystem>());
@@ -293,6 +295,7 @@ namespace sunlight
         }
 
         Get<EntityViewRangeSystem>().Remove(player);
+        Get<EntityMovementSystem>().Remove(player.GetId());
 
         [[maybe_unused]]
         const size_t erased = _players.erase(player.GetCId());
