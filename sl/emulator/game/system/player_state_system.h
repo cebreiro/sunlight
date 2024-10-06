@@ -5,6 +5,7 @@
 
 namespace sunlight
 {
+    struct MapStage;
     struct ZoneMessage;
 
     class NPCTalkBox;
@@ -19,7 +20,7 @@ namespace sunlight
     class PlayerStateSystem final : public GameSystem
     {
     public:
-        explicit PlayerStateSystem(const ServiceLocator& serviceLocator);
+        PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData);
 
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
@@ -36,8 +37,11 @@ namespace sunlight
         void ChangeStage(GamePlayer& player, int32_t stageId, int32_t destX, int32_t destY);
         void ChangeZone(GamePlayer& player, int32_t zoneId, int32_t destX, int32_t destY);
 
+    public:
+        void OnUseItem(const ZoneMessage& message);
+
     private:
-        void StartNPCScript(GamePlayer& player, game_entity_id_type target);
+        void HandleNPCConversation(GamePlayer& player, game_entity_id_type target);
         void HandleScriptState(const ZoneMessage& message);
 
     private:
@@ -47,5 +51,6 @@ namespace sunlight
 
     private:
         const ServiceLocator& _serviceLocator;
+        const MapStage& _stageData;
     };
 }

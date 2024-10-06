@@ -126,6 +126,45 @@ namespace sunlight
         return true;
     }
 
+    bool PlayerJobSystem::AddSkill(GamePlayer& player, JobId jobId, int32_t skillId)
+    {
+        const GameDataProvideService& gameDataProvider = _serviceLocator.Get<GameDataProvideService>();
+
+        if (jobId != JobId::Any)
+        {
+            if (const sox::JobReference* jobData = gameDataProvider.Get<sox::JobReferenceTable>().Find(static_cast<int32_t>(jobId));
+                !jobData)
+            {
+                return false;
+            }
+        }
+
+        const PlayerSkillData* skillData = gameDataProvider.GetSkillDataProvider().FindPlayerSkill(skillId);
+        if (!skillData)
+        {
+            return false;
+        }
+
+        if (std::ranges::all_of(skillData->jobs, [requested = static_cast<int32_t>(jobId)](int32_t skillJob) -> bool
+            {
+                return skillJob != requested;
+            }))
+        {
+            return false;
+        }
+
+        if (!player.GetSkillComponent().AddSkill(PlayerSkill(jobId, skillData)))
+        {
+            return false;
+        }
+
+        Get<GameRepositorySystem>().SaveNewSkill(player, static_cast<int32_t>(jobId), skillData->index, 1);
+
+        player.Send(GamePlayerMessageCreator::CreateJobSkillAdd(player, jobId, skillId, 0));
+
+        return true;
+    }
+
     void PlayerJobSystem::GainJobExp(GamePlayer& player, int32_t exp)
     {
         PlayerJobComponent& jobComponent = player.GetJobComponent();

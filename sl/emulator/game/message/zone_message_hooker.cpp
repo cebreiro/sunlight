@@ -6,6 +6,7 @@
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_profile_system.h"
+#include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/zone/stage.h"
 
@@ -72,6 +73,15 @@ namespace sunlight
 
                 return true;
             }
+            case ZoneMessageType::ITEMARCHIVE_USEITEM:
+            {
+                reader.Skip();
+
+                _stage.Get<PlayerStateSystem>().OnUseItem(message);
+
+                return true;
+            }
+            break;
             default:;
             }
 

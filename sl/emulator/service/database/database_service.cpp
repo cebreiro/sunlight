@@ -268,6 +268,27 @@ namespace sunlight
         co_return true;
     }
 
+    auto DatabaseService::AddSkill(int64_t cid, int32_t job, int32_t skillId, int32_t skillLevel) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::CharacterSkillAdd procedure(conn, cid,job, skillId, skillLevel);
+
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
     auto DatabaseService::SetCharacterExp(int64_t cid, int32_t exp) -> Future<bool>
     {
         [[maybe_unused]]

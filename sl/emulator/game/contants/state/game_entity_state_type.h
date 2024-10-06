@@ -27,6 +27,7 @@ namespace sunlight
         (PickStreetVendorItem, 27)
         (Hang, 28)
         (ChangingRoom, 29)
+        (ItemMix, 30)
         (Sitting, 31)
         (StandingUp, 32)
         (UseItem, 33)

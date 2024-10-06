@@ -11,6 +11,7 @@
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/message/creator/item_mix_message_creator.h"
 #include "sl/emulator/game/message/creator/item_trade_message_creator.h"
 #include "sl/emulator/game/message/creator/street_vendor_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
@@ -211,9 +212,20 @@ namespace sunlight
             player.FlushDeferred();
         }
         break;
+        case GameGroupType::ItemMix:
+        {
+            const int32_t groupId = ++_nextGroupId;
+            _gameGroups[groupId] = std::make_unique<GameGroup>(groupId, groupType, player);
+
+            groupComponent.SetGroupId(groupId);
+            groupComponent.SetGroupType(groupType);
+
+            player.Defer(ItemMixMessageCreator::CreateGroupCreate(groupId));
+            player.FlushDeferred();
+        }
+        break;
         case GameGroupType::Unk04:
         case GameGroupType::Unk05:
-        case GameGroupType::ItemMix:
         case GameGroupType::Interior:
         default:
             SUNLIGHT_LOG_WARN(_serviceLocator,
@@ -337,10 +349,14 @@ namespace sunlight
                 handled = HandleStreetVendorMessage(group, player, reader);
             }
             break;
+            case GameGroupType::ItemMix:
+            {
+                handled = HandleItemMixMessage(group, player, reader);
+            }
+            break;
             case GameGroupType::Null:
             case GameGroupType::Unk04:
             case GameGroupType::Unk05:
-            case GameGroupType::ItemMix:
             case GameGroupType::Interior:
             default:;
             }
@@ -391,6 +407,10 @@ namespace sunlight
             }
 
             host.RemoveComponent<StreetVendorHostComponent>();
+        }
+        else if (group.GetType() == GameGroupType::ItemMix)
+        {
+            host.GetGroupComponent().Clear();
         }
         else
         {
@@ -525,8 +545,8 @@ namespace sunlight
 
     bool PlayerGroupSystem::HandleStreetVendorMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader)
     {
-        const int32_t tradeMessage = reader.Read<int32_t>();
-        switch (tradeMessage)
+        const int32_t message = reader.Read<int32_t>();
+        switch (message)
         {
         case 1601:
         {
@@ -761,6 +781,22 @@ namespace sunlight
 
                 OnHostExit(group, group.GetHost());
             }
+
+            return true;
+        }
+        }
+
+        return false;
+    }
+
+    bool PlayerGroupSystem::HandleItemMixMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader)
+    {
+        const int32_t message = reader.Read<int32_t>();
+        switch (message)
+        {
+        case 1106:
+        {
+            OnHostExit(group, player);
 
             return true;
         }

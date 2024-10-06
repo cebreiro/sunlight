@@ -6,6 +6,7 @@
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/service/gamedata/skill/player_skill_data.h"
 
 namespace sunlight
 {
@@ -261,6 +262,8 @@ namespace sunlight
 
         for (const PlayerSkill& skill : skillComponent.GetSkills())
         {
+            const bool isMixSkill = skill.GetData().abilityType == 5;
+
             writer.Write<int32_t>(static_cast<int32_t>(skill.GetJobId()));
             writer.Write<int32_t>(skill.GetId());
             writer.Write<int32_t>(skill.GetBaseLevel());
@@ -268,7 +271,7 @@ namespace sunlight
             writer.Write<int32_t>(skill.GetEXP());
             writer.Write<int32_t>(skill.GetCooldown()); // client 0x4B1F70
             writer.Write<int32_t>(0); // delay? -> client set on 0x0047D0CF
-            writer.Write<int32_t>(0); // hidden? -> client cmp 1 on 00422E76
+            writer.Write<int32_t>(isMixSkill ? 1 : 0); // choose whether displayed on skill window or mix skill window
             writer.Write<int32_t>(0); // can use skill? -> client 0x48D200
             writer.Write<int32_t>(skill.GetPage());
             writer.Write<int32_t>(skill.GetX());

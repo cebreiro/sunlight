@@ -43,6 +43,7 @@ namespace sunlight
         void ProcessTradeFail(GameGroup& group, GamePlayer& player);
 
         bool HandleStreetVendorMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader);
+        bool HandleItemMixMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader);
 
     private:
         void SpawnStoredItem(const GameGroup& group, GamePlayer& player, const GameItem& item, int32_t page, int32_t price, int32_t offset);

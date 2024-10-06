@@ -1,21 +1,26 @@
 #include "player_state_system.h"
 
+#include "sl/data/map/map_stage.h"
+#include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/script/class/lua_npc.h"
 #include "sl/emulator/game/script/class/lua_player.h"
-#include "sl/emulator/game/entity/game_npc.h"
 
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/player_group_component.h"
+#include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
+#include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contants/event_script/event_script.h"
+#include "sl/emulator/game/contants/group/item_mix_prop_item_mapping.h"
 #include "sl/emulator/game/contants/npc/npc_talk_box.h"
 #include "sl/emulator/game/contants/state/game_entity_state.h"
+#include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
-#include "sl/emulator/game/entity/game_stored_item.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/message/creator/item_mix_message_creator.h"
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/script/lua_script_engine.h"
@@ -29,11 +34,15 @@
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
+#include "sl/emulator/service/gamedata/item/item_data.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
 namespace sunlight
 {
-    PlayerStateSystem::PlayerStateSystem(const ServiceLocator& serviceLocator)
+    PlayerStateSystem::PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData)
         : _serviceLocator(serviceLocator)
+        , _stageData(stageData)
     {
     }
 
@@ -173,20 +182,81 @@ namespace sunlight
         _serviceLocator.Get<ZoneChangeService>().StartZoneChange(player.GetClientId(), zoneId, destX, destY);
     }
 
-    void PlayerStateSystem::StartNPCScript(GamePlayer& player, game_entity_id_type target)
+    void PlayerStateSystem::OnUseItem(const ZoneMessage& message)
     {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const auto [targetItemId, targetItemType] = reader.ReadInt64();
+
+        bool handled = false;
+
         do
         {
-            PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
-            if (scriptComponent.HasTargetNPC())
+            const GameItem* targetItem = player.GetItemComponent().FindItem(game_entity_id_type(targetItemId));
+            if (!targetItem || targetItem->GetType() != static_cast<GameEntityType>(targetItemType))
             {
-                SUNLIGHT_LOG_WARN(_serviceLocator,
-                    fmt::format("[{}] player has already talk npc. player: {}, prev_npc: {}, new_npc: {}",
-                        GetName(), player.GetCId(), scriptComponent.GetTargetNPCId(), target));
-
                 break;
             }
 
+            const sox::ItemEtc* etcData = targetItem->GetData().GetEtcData();
+            if (etcData&& etcData->isTool)
+            {
+                if (player.GetGroupComponent().HasGroup())
+                {
+                    break;
+                }
+
+                const auto failReason = [&]() -> std::optional<ItemMixOpenByItemFailReason>
+                    {
+                        if (!player.GetSkillComponent().FindSkill(etcData->skillID))
+                        {
+                            return ItemMixOpenByItemFailReason::NoItemMixSkill;
+                        }
+
+                        if (player.GetStateComponent().GetState().type == GameEntityStateType::Sitting)
+                        {
+                            return ItemMixOpenByItemFailReason::InvalidState;
+                        }
+
+                        if (!_stageData.terrain)
+                        {
+                            return ItemMixOpenByItemFailReason::NotTerrain;
+                        }
+
+                        return std::nullopt;
+                    }();
+
+                if (failReason.has_value())
+                {
+                    player.Send(ItemMixMessageCreator::CreateItemMixWindowByItemFail(player, *failReason));
+                }
+                else
+                {
+                    player.Send(ItemMixMessageCreator::CreateItemMixWindowByItemSuccess(player, *targetItem));
+                }
+            }
+            else
+            {
+                break;
+            }
+
+            handled = true;
+            
+        } while (false);
+
+        if (!handled)
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] unhandled item use. player: {}, target_item_id: {}",
+                    GetName(), player.GetCId(), targetItemId));
+        }
+    }
+
+    void PlayerStateSystem::HandleNPCConversation(GamePlayer& player, game_entity_id_type target)
+    {
+        do
+        {
             const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, target);
             if (!entity)
             {
@@ -201,20 +271,57 @@ namespace sunlight
                 break;
             }
 
-            scriptComponent.SetTargetNPCId(target);
-
-            LuaSystem luaSystem(*this);
-            LuaNPC luaNPC(*npc);
-            LuaPlayer luaPlayer(*this, player);
-
-            if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaSystem, luaNPC, luaPlayer, 0))
+            if (const int32_t itemId = ItemMixPropItemMapping::FindItemId(npc->GetUnk1(), npc->GetUnk2());
+                itemId != 0)
             {
-                scriptComponent.Clear();
+                const ItemData* itemData = _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider().Find(itemId);
+                if (!itemData)
+                {
+                    break;
+                }
 
-                break;
+                const sox::ItemEtc* etcData = itemData->GetEtcData();
+                if (!etcData)
+                {
+                    break;
+                }
+
+                if (!player.GetSkillComponent().FindSkill(etcData->skillID))
+                {
+                    player.Send(ItemMixMessageCreator::CreateItemMixWindowByPropFail(player));
+                }
+                else
+                {
+                    player.Send(ItemMixMessageCreator::CreateItemMixWindowByPropSuccess(player, itemId));
+                }
             }
+            else
+            {
+                PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
+                if (scriptComponent.HasTargetNPC())
+                {
+                    SUNLIGHT_LOG_WARN(_serviceLocator,
+                        fmt::format("[{}] player has already talk npc. player: {}, prev_npc: {}, new_npc: {}",
+                            GetName(), player.GetCId(), scriptComponent.GetTargetNPCId(), target));
 
-            return;
+                    break;
+                }
+
+                scriptComponent.SetTargetNPCId(target);
+
+                LuaSystem luaSystem(*this);
+                LuaNPC luaNPC(*npc);
+                LuaPlayer luaPlayer(*this, player);
+
+                if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaSystem, luaNPC, luaPlayer, 0))
+                {
+                    scriptComponent.Clear();
+
+                    break;
+                }
+
+                return;
+            }
         }
         while (false);
 
@@ -307,7 +414,7 @@ namespace sunlight
         break;
         case GameEntityStateType::Conversation:
         {
-            StartNPCScript(player, state.targetId);
+            HandleNPCConversation(player, state.targetId);
         }
         break;
         case GameEntityStateType::InteractWithPlayer:

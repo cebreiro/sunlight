@@ -23,6 +23,7 @@ namespace sunlight
 
     public:
         bool Promote(GamePlayer& player, JobId advanced);
+        bool AddSkill(GamePlayer& player, JobId jobId, int32_t skillId);
 
         void GainJobExp(GamePlayer& player, int32_t exp);
 

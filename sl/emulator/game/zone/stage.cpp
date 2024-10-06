@@ -341,7 +341,7 @@ namespace sunlight
         Add(std::make_shared<ItemArchiveSystem>(_serviceLocator));
         Add(std::make_shared<PlayerStatSystem>(_serviceLocator));
         Add(std::make_shared<PlayerJobSystem>(_serviceLocator));
-        Add(std::make_shared<PlayerStateSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerStateSystem>(_serviceLocator, _stageData));
         Add(std::make_shared<PlayerAppearanceSystem>(_serviceLocator));
         Add(std::make_shared<GameRepositorySystem>(_serviceLocator));
         Add(std::make_shared<PlayerQuestSystem>());
@@ -432,6 +432,8 @@ namespace sunlight
 
                 auto npc = std::make_shared<GameNPC>(game_entity_id_type(prop.id), prop.pnx);
                 npc->AddComponent(std::move(sceneObjectComponent));
+                npc->SetUnk1(prop.unk1);
+                npc->SetUnk2(prop.unk2);
 
                 if (prop.unk6)
                 {
