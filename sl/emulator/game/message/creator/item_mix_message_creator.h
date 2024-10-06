@@ -20,5 +20,9 @@ namespace sunlight
         static auto CreateItemMixWindowByItemFail(const GamePlayer& player, ItemMixOpenByItemFailReason result) -> Buffer;
 
         static auto CreateGroupCreate(int32_t groupId) -> Buffer;
+
+        static auto CreateItemLowerResult(int32_t groupId) -> Buffer;
+        static auto CreateItemMixSuccess(int32_t groupId, int32_t itemId, int32_t mixSkillLevel, int32_t mixSkillExp) -> Buffer;
+        static auto CreateItemMixFailure(int32_t groupId, int32_t mixSkillLevel, int32_t mixSkillExp) -> Buffer;
     };
 }

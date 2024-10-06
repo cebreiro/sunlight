@@ -11,6 +11,7 @@
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/message/creator/item_mix_message_creator.h"
 #include "sl/emulator/game/message/creator/item_trade_message_creator.h"
 #include "sl/emulator/game/message/creator/street_vendor_message_creator.h"
@@ -214,7 +215,7 @@ namespace sunlight
         break;
         case GameGroupType::ItemMix:
         {
-            const int32_t groupId = ++_nextGroupId;
+            const int32_t groupId = 12011;
             _gameGroups[groupId] = std::make_unique<GameGroup>(groupId, groupType, player);
 
             groupComponent.SetGroupId(groupId);
@@ -794,12 +795,57 @@ namespace sunlight
         const int32_t message = reader.Read<int32_t>();
         switch (message)
         {
-        case 1106:
+        case 1601: // suspend ?
+        case 1106: // exit ?
         {
             OnHostExit(group, player);
 
             return true;
         }
+        case 1108: // click target item to rollback
+        {
+            player.Send(ItemTradeMessageCreator::CreateGoldChangeResult(group.GetId()));
+        }
+        break;
+        case 1151: // lower item to item mix window
+        {
+            const int32_t unk1 = reader.Read<int32_t>();
+            if (unk1 == 0)
+            {
+                const auto [itemId, itemType] = reader.ReadInt64();
+
+                if (game_entity_id_type(itemId) == player.GetItemComponent().GetPickedItem()->GetId())
+                {
+                    player.GetItemComponent().RemovePickedItem();
+
+                    player.Send(ItemArchiveMessageCreator::CreateItemRemove(player, game_entity_id_type(itemId), static_cast<GameEntityType>(itemType)));
+                    player.Send(ItemMixMessageCreator::CreateItemLowerResult(group.GetId()));
+                }
+                else
+                {
+                    assert(false);
+                }
+            }
+            else
+            {
+                assert(false);
+            }
+        }
+        break;
+        case 1105: // request mix
+        {
+            [[maybe_unused]]
+            const int32_t unk1 = reader.Read<int32_t>(); // itemId
+
+            [[maybe_unused]]
+            const int32_t unk2 = reader.Read<int32_t>(); // required mix Skill
+
+            [[maybe_unused]]
+            const auto [mixToolItemId, unkType] = reader.ReadInt64();
+
+            player.Send(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), unk1, 1, 0));
+        }
+        break;
         }
 
         return false;
