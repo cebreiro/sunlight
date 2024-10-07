@@ -227,7 +227,6 @@ namespace sunlight
 
         Get<SceneObjectSystem>().SpawnPlayer(player, enterType);
         Get<PlayerProfileSystem>().OnStageEnter(*player);
-        Get<ItemArchiveSystem>().OnStageEnter(*player);
 
         GameDebugger::SetInstance(nullptr);
     }

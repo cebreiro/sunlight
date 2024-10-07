@@ -76,11 +76,6 @@ namespace sunlight
         return GameSystem::GetClassId<ItemArchiveSystem>();
     }
 
-    void ItemArchiveSystem::OnStageEnter(GamePlayer& player)
-    {
-        TryRollbackMixItem(player);
-    }
-
     bool ItemArchiveSystem::PurchaseStreetVendorItem(GamePlayer& host, GamePlayer& guest, game_entity_id_type itemId, int32_t price)
     {
         bool success = false;
