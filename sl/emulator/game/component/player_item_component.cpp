@@ -82,6 +82,7 @@ namespace sunlight
                 }
 
                 storage.Set(itemEntity.get(), range);
+                _inventoryItemIdIndex.emplace(dtoItem.dataId, itemEntity.get());
             }
             break;
             case db::ItemPosType::Equipment:
@@ -177,6 +178,13 @@ namespace sunlight
                 vendorSaleItem = itemEntity.get();
             }
             break;
+            case db::ItemPosType::Mix:
+            {
+                positionComponent->SetPositionType(ItemPositionType::Mix);
+
+                _mixItems[itemEntity->GetId()] = itemEntity.get();
+            }
+            break;
             }
         }
     }
@@ -269,6 +277,11 @@ namespace sunlight
             });
     }
 
+    auto PlayerItemComponent::GetMixItemSize() const -> int64_t
+    {
+        return std::ssize(_mixItems);
+    }
+
     void PlayerItemComponent::AddOrSubGold(int32_t value)
     {
         _gold += value;
@@ -313,30 +326,7 @@ namespace sunlight
         positionComponent.SetX(position->x);
         positionComponent.SetY(position->y);
 
-        ItemSlotStorage* slotStorage = GetInventorySlotStorage(position->page);
-        assert(slotStorage);
-
-        const ItemSlotRange range{
-            .x = position->x,
-            .y = position->y,
-            .xSize = width,
-            .ySize = height
-        };
-
-        assert(slotStorage->HasEmptySlot(range));
-
-        slotStorage->Set(item.get(), range);
-        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, slotStorage->GetDebugString());
-
-        AddItemAddLog(*item);
-
-        _itemsUIdIndex.try_emplace(item->GetUId().value(), item.get());
-
-        const game_entity_id_type id = item->GetId();
-
-        [[maybe_unused]]
-        const bool inserted = _items.try_emplace(id, std::move(item)).second;
-        assert(inserted);
+        Insert(std::move(item));
 
         return true;
     }
@@ -367,30 +357,7 @@ namespace sunlight
         positionComponent.SetX(position->x);
         positionComponent.SetY(position->y);
 
-        ItemSlotStorage* slotStorage = GetQuickSlotStorage(position->page);
-        assert(slotStorage);
-
-        const ItemSlotRange range{
-            .x = position->x,
-            .y = position->y,
-            .xSize = 1,
-            .ySize = 1
-        };
-
-        assert(slotStorage->HasEmptySlot(range));
-
-        slotStorage->Set(item.get(), range);
-        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, slotStorage->GetDebugString());
-
-        AddItemAddLog(*item);
-
-        _itemsUIdIndex.try_emplace(item->GetUId().value(), item.get());
-
-        const game_entity_id_type id = item->GetId();
-
-        [[maybe_unused]]
-        const bool inserted = _items.try_emplace(id, std::move(item)).second;
-        assert(inserted);
+        Insert(std::move(item));
 
         return true;
     }
@@ -418,11 +385,7 @@ namespace sunlight
         positionComponent.SetPositionType(ItemPositionType::Vendor);
         positionComponent.SetPage(static_cast<int8_t>(slot));
 
-        AddItemAddLog(*item);
-
-        _itemsUIdIndex[item->GetUId().value()] = item.get();
-        _vendorSaleItems[slot] = item.get();
-        _items[item->GetId()] = std::move(item);
+        Insert(std::move(item));
 
         return true;
     }
@@ -486,23 +449,7 @@ namespace sunlight
                         });
                 }
 
-                AddItemRemoveLog(targetItem);
-
-                const ItemPositionComponent& positionComponent = targetItem.GetComponent<ItemPositionComponent>();
-                assert(positionComponent.GetPositionType() == ItemPositionType::Inventory);
-
-                const ItemSlotRange slotRange{
-                    .x = positionComponent.GetX(),
-                    .y = positionComponent.GetY(),
-                    .xSize = targetItem.GetData().GetWidth(),
-                    .ySize = targetItem.GetData().GetHeight(),
-                };
-
-                GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr, slotRange);
-                SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
-
-                _itemsUIdIndex.erase(iter->second->GetUId().value());
-                _items.erase(iter);
+                Erase(removeItemId);
             }
             else if (sum < targetItemQuantity)
             {
@@ -647,19 +594,13 @@ namespace sunlight
             return false;
         }
 
-        GameItem*& equipItem = Mutable(position);
+        GameItem* equipItem = Mutable(position);
         if (!equipItem)
         {
             return false;
         }
 
-        ItemPositionComponent& itemPositionComponent = equipItem->GetComponent<ItemPositionComponent>();
-        itemPositionComponent.SetPositionType(ItemPositionType::Pick);
-        itemPositionComponent.ResetPosition();
-
-        std::swap(_pickItem, equipItem);
-
-        AddItemUpdatePositionLog(*_pickItem);
+        UpdateItemPosition(*equipItem, ItemPositionUpdatePicked{});
 
         return true;
     }
@@ -676,13 +617,9 @@ namespace sunlight
             return false;
         }
 
-        ItemPositionComponent& itemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
-        itemPositionComponent.SetPositionType(ItemPositionType::Equipment);
-        itemPositionComponent.SetPage(static_cast<int8_t>(position));
+        GameItem* pickItem = _pickItem;
 
-        AddItemUpdatePositionLog(*_pickItem);
-
-        std::swap(_pickItem, Mutable(position));
+        UpdateItemPosition(*pickItem, ItemPositionUpdateEquipment{ .position = position });
 
         return true;
     }
@@ -694,19 +631,15 @@ namespace sunlight
             return false;
         }
 
-        GameItem*& equipItem = Mutable(position);
+        GameItem* equipItem = Mutable(position);
         if (!equipItem)
         {
             return false;
         }
 
-        _pickItem->GetComponent<ItemPositionComponent>().SwapPosition(
-            equipItem->GetComponent<ItemPositionComponent>());
+        GameItem* pickItem = _pickItem;
 
-        std::swap(_pickItem, equipItem);
-
-        AddItemUpdatePositionLog(*_pickItem);
-        AddItemUpdatePositionLog(*equipItem);
+        SwapItemPosition(*pickItem, *equipItem);
 
         return true;
     }
@@ -727,56 +660,7 @@ namespace sunlight
         GameItem* item = iter->second.get();
         assert(item);
 
-        ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
-        switch (positionComponent.GetPositionType())
-        {
-        case ItemPositionType::Inventory:
-        {
-            GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr,
-                ItemSlotRange{
-                .x = positionComponent.GetX(),
-                .y = positionComponent.GetY(),
-                .xSize = iter->second->GetData().GetWidth(),
-                .ySize = iter->second->GetData().GetHeight(),
-                });
-            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
-        }
-        break;
-        case ItemPositionType::Equipment:
-        {
-            GameItem*& equipItem = Mutable(static_cast<EquipmentPosition>(positionComponent.GetPage()));
-            assert(equipItem && equipItem == iter->second.get());
-
-            equipItem = nullptr;
-        }
-        break;
-        case ItemPositionType::Pick:
-        {
-            return false;
-        }
-        case ItemPositionType::QuickSlot:
-        {
-            GetQuickSlotStorage(positionComponent.GetPage())->Set(nullptr,
-                ItemSlotRange{
-                .x = positionComponent.GetX(),
-                .y = positionComponent.GetY(),
-                .xSize = 1,
-                .ySize = 1,
-                });
-            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
-        }
-        break;
-        case ItemPositionType::Count:
-        default:
-            assert(false);
-        }
-
-        positionComponent.SetPositionType(ItemPositionType::Pick);
-        positionComponent.ResetPosition();
-
-        _pickItem = item;
-
-        AddItemUpdatePositionLog(*_pickItem);
+        UpdateItemPosition(*item, ItemPositionUpdatePicked{});
 
         return true;
     }
@@ -814,16 +698,11 @@ namespace sunlight
             return false;
         }
 
-        ItemPositionComponent& itemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
-        itemPositionComponent.SetPositionType(ItemPositionType::Inventory);
-        itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
-
-        storage->Set(_pickItem, slotRange);
-        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
-
-        AddItemUpdatePositionLog(*_pickItem);
-
-        _pickItem = nullptr;
+        UpdateItemPosition(*_pickItem, ItemPositionUpdateInventory{
+            .page = page,
+            .x = x,
+            .y = y,
+            });
 
         return true;
     }
@@ -861,29 +740,26 @@ namespace sunlight
             return false;
         }
 
+        // because of target item position and inventory item's left-top can be difference, it can't be swapped
+        GameItem* pickItem = _pickItem;
         GameItem* inventoryItem = *_itemStorageQueryResult.begin();
-        ItemPositionComponent& positionComponent = inventoryItem->GetComponent<ItemPositionComponent>();
 
-        storage->Set(nullptr, ItemSlotRange{
-            .x = positionComponent.GetX(),
-            .y = positionComponent.GetY(),
-            .xSize = inventoryItem->GetData().GetWidth(),
-            .ySize = inventoryItem->GetData().GetHeight(),
-            });
-        storage->Set(_pickItem, slotRange);
-        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
+        RemovePosition(*pickItem);
+        RemovePosition(*inventoryItem);
 
-        positionComponent.SetPositionType(ItemPositionType::Pick);
-        positionComponent.ResetPosition();
+        ItemPositionComponent& inventoryItemPositionComponent = inventoryItem->GetComponent<ItemPositionComponent>();
+        inventoryItemPositionComponent.SetPositionType(ItemPositionType::Pick);
+        inventoryItemPositionComponent.ResetPosition();
 
-        ItemPositionComponent& pickItemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        ItemPositionComponent& pickItemPositionComponent = pickItem->GetComponent<ItemPositionComponent>();
         pickItemPositionComponent.SetPositionType(ItemPositionType::Inventory);
         pickItemPositionComponent.SetPosition(page, x, y);
 
-        AddItemUpdatePositionLog(*_pickItem);
-        AddItemUpdatePositionLog(*inventoryItem);
+        AddPosition(*inventoryItem);
+        AddPosition(*pickItem);
 
-        _pickItem = inventoryItem;
+        AddItemUpdatePositionLog(*pickItem);
+        AddItemUpdatePositionLog(*inventoryItem);
 
         return true;
     }
@@ -921,16 +797,11 @@ namespace sunlight
             return false;
         }
 
-        ItemPositionComponent& itemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
-        itemPositionComponent.SetPositionType(ItemPositionType::QuickSlot);
-        itemPositionComponent.SetPosition(page, static_cast<int8_t>(slotRange.x), static_cast<int8_t>(slotRange.y));
-
-        storage->Set(_pickItem, slotRange);
-        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
-
-        AddItemUpdatePositionLog(*_pickItem);
-
-        _pickItem = nullptr;
+        UpdateItemPosition(*_pickItem, ItemPositionUpdateQuickSlot{
+            .page = page,
+            .x = static_cast<int8_t>(slotRange.x),
+            .y = static_cast<int8_t>(slotRange.y),
+            });
 
         return true;
     }
@@ -968,29 +839,10 @@ namespace sunlight
             return false;
         }
 
-        GameItem* inventoryItem = *_itemStorageQueryResult.begin();
-        ItemPositionComponent& positionComponent = inventoryItem->GetComponent<ItemPositionComponent>();
+        GameItem* pickItem = _pickItem;
+        GameItem* quickSlotItem = *_itemStorageQueryResult.begin();
 
-        storage->Set(nullptr, ItemSlotRange{
-            .x = positionComponent.GetX(),
-            .y = positionComponent.GetY(),
-            .xSize = 1,
-            .ySize = 1,
-            });
-        storage->Set(_pickItem, slotRange);
-        SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
-
-        positionComponent.SetPositionType(ItemPositionType::Pick);
-        positionComponent.ResetPosition();
-
-        ItemPositionComponent& pickItemPositionComponent = _pickItem->GetComponent<ItemPositionComponent>();
-        pickItemPositionComponent.SetPositionType(ItemPositionType::QuickSlot);
-        pickItemPositionComponent.SetPosition(page, x, y);
-
-        AddItemUpdatePositionLog(*_pickItem);
-        AddItemUpdatePositionLog(*inventoryItem);
-
-        _pickItem = inventoryItem;
+        SwapItemPosition(*pickItem, *quickSlotItem);
 
         return true;
     }
@@ -1007,19 +859,8 @@ namespace sunlight
             return false;
         }
 
-        GameItem*& vendorSaleItem = _vendorSaleItems[page];
-        if (!vendorSaleItem)
-        {
-            return false;
-        }
-
-        ItemPositionComponent& itemPositionComponent = vendorSaleItem->GetComponent<ItemPositionComponent>();
-        itemPositionComponent.SetPositionType(ItemPositionType::Pick);
-        itemPositionComponent.ResetPosition();
-
-        std::swap(_pickItem, vendorSaleItem);
-
-        AddItemUpdatePositionLog(*_pickItem);
+        GameItem* targetItem = _vendorSaleItems[page];
+        UpdateItemPosition(*targetItem, ItemPositionUpdatePicked{});
 
         return true;
     }
@@ -1031,25 +872,13 @@ namespace sunlight
             return false;
         }
 
-        if (page < 0 || page >= std::ssize(_vendorSaleItems))
+        if (page < 0 || page >= std::ssize(_vendorSaleItems) || _vendorSaleItems[page])
         {
             return false;
         }
 
-        GameItem*& vendorSaleItem = _vendorSaleItems[page];
-        if (vendorSaleItem)
-        {
-            return false;
-        }
-
-        ItemPositionComponent& positionComponent = _pickItem->GetComponent<ItemPositionComponent>();
-        positionComponent.SetPositionType(ItemPositionType::Vendor);
-        positionComponent.SetPage(page);
-
-        vendorSaleItem = _pickItem;
-        _pickItem = nullptr;
-
-        AddItemUpdatePositionLog(*vendorSaleItem);
+        GameItem* targetItem = _pickItem;
+        UpdateItemPosition(*targetItem, ItemPositionUpdateVendor{ .page = page });
 
         return true;
     }
@@ -1061,25 +890,70 @@ namespace sunlight
             return false;
         }
 
-        if (page < 0 || page >= std::ssize(_vendorSaleItems))
+        if (page < 0 || page >= std::ssize(_vendorSaleItems) || !_vendorSaleItems[page])
         {
             return false;
         }
 
-        GameItem*& vendorSaleItem = _vendorSaleItems[page];
-        if (!vendorSaleItem)
-        {
-            return false;
-        }
+        GameItem* pickItem = _pickItem;
+        GameItem* vendorSaleItem = _vendorSaleItems[page];
 
-        _pickItem->GetComponent<ItemPositionComponent>().SwapPosition(
-            vendorSaleItem->GetComponent<ItemPositionComponent>());
-        std::swap(_pickItem, vendorSaleItem);
-
-        AddItemUpdatePositionLog(*_pickItem);
-        AddItemUpdatePositionLog(*vendorSaleItem);
+        SwapItemPosition(*pickItem, *vendorSaleItem);
 
         return true;
+    }
+
+    bool PlayerItemComponent::LowerPickedItemToMix()
+    {
+        if (!_pickItem)
+        {
+            return false;
+        }
+
+        UpdateItemPosition(*_pickItem, ItemPositionUpdateMix{});
+
+        return true;
+    }
+
+    void PlayerItemComponent::MoveMixItemToInventory(std::vector<PtrNotNull<const GameItem>>& result)
+    {
+        for (auto iter = _mixItems.begin(); iter != _mixItems.end(); )
+        {
+            GameItem* item = iter->second;
+            const ItemData& itemData = item->GetData();
+
+            const auto pos = FindEmptyInventoryPosition(itemData.GetWidth(), itemData.GetHeight());
+            if (pos.has_value())
+            {
+                ItemSlotStorage* storage = GetInventorySlotStorage(pos->page);
+                assert(storage);
+
+                const ItemSlotRange range{
+                    .x = pos->x,
+                    .y = pos->y,
+                    .xSize = itemData.GetWidth(),
+                    .ySize = itemData.GetHeight(),
+                };
+                assert(storage->HasEmptySlot(range));
+
+                ItemPositionComponent& positionComponent = item->GetComponent<ItemPositionComponent>();
+                positionComponent.SetPositionType(ItemPositionType::Inventory);
+                positionComponent.SetPosition(pos->page, pos->x, pos->y);
+
+                storage->Set(item, range);
+                SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
+
+                AddItemUpdatePositionLog(*item);
+
+                result.push_back(item);
+
+                iter = _mixItems.erase(iter);
+            }
+            else
+            {
+                ++iter;
+            }
+        }
     }
 
     bool PlayerItemComponent::SwapWeaponItem()
@@ -1175,16 +1049,11 @@ namespace sunlight
             return false;
         }
 
-        _pickItem = item.get();
-
-        _itemsUIdIndex.try_emplace(_pickItem->GetUId().value(), _pickItem);
-        _items[_pickItem->GetId()] = std::move(item);
-
-        ItemPositionComponent& positionComponent = _pickItem->GetComponent<ItemPositionComponent>();
+        ItemPositionComponent& positionComponent = item->GetComponent<ItemPositionComponent>();
         positionComponent.SetPositionType(ItemPositionType::Pick);
         positionComponent.ResetPosition();
 
-        AddItemAddLog(*_pickItem);
+        Insert(std::move(item));
 
         return true;
     }
@@ -1196,15 +1065,7 @@ namespace sunlight
             return false;
         }
 
-        AddItemRemoveLog(*_pickItem);
-
-        const auto iter = _items.find(_pickItem->GetId());
-        assert(iter != _items.end());
-
-        _pickItem = nullptr;
-
-        _itemsUIdIndex.erase(iter->second->GetUId().value());
-        _items.erase(iter);
+        RemoveItem(_pickItem->GetId());
 
         return true;
     }
@@ -1217,65 +1078,7 @@ namespace sunlight
             return false;
         }
 
-        ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
-        switch (positionComponent.GetPositionType())
-        {
-        case ItemPositionType::Inventory:
-        {
-            GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr,
-                ItemSlotRange{
-                .x = positionComponent.GetX(),
-                .y = positionComponent.GetY(),
-                .xSize = iter->second->GetData().GetWidth(),
-                .ySize = iter->second->GetData().GetHeight(),
-            });
-
-            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
-        }
-        break;
-        case ItemPositionType::Equipment:
-        {
-            GameItem*& equipItem = Mutable(static_cast<EquipmentPosition>(positionComponent.GetPage()));
-            assert(equipItem && equipItem == iter->second.get());
-
-            equipItem = nullptr;
-        }
-        break;
-        case ItemPositionType::Pick:
-        {
-            assert(_pickItem == iter->second.get());
-
-            _pickItem = nullptr;
-        }
-        break;
-        case ItemPositionType::QuickSlot:
-        {
-            GetQuickSlotStorage(positionComponent.GetPage())->Set(nullptr,
-                ItemSlotRange{
-                .x = positionComponent.GetX(),
-                .y = positionComponent.GetY(),
-                .xSize = 1,
-                .ySize = 1,
-                });
-            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
-        }
-        break;
-        case ItemPositionType::Vendor:
-        {
-            assert(_vendorSaleItems[positionComponent.GetPage()] == iter->second.get());
-
-            _vendorSaleItems[positionComponent.GetPage()] = nullptr;
-        }
-        break;
-        case ItemPositionType::Count:
-        default:
-            assert(false);
-        }
-
-        AddItemRemoveLog(*iter->second);
-
-        _itemsUIdIndex.erase(iter->second->GetUId().value());
-        _items.erase(iter);
+        Erase(id);
 
         return true;
     }
@@ -1288,66 +1091,9 @@ namespace sunlight
             return {};
         }
 
-        ItemPositionComponent& positionComponent = iter->second->GetComponent<ItemPositionComponent>();
-        switch (positionComponent.GetPositionType())
-        {
-        case ItemPositionType::Inventory:
-        {
-            GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr,
-                ItemSlotRange{
-                .x = positionComponent.GetX(),
-                .y = positionComponent.GetY(),
-                .xSize = iter->second->GetData().GetWidth(),
-                .ySize = iter->second->GetData().GetHeight(),
-                });
-            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
-        }
-        break;
-        case ItemPositionType::Equipment:
-        {
-            GameItem*& equipItem = Mutable(static_cast<EquipmentPosition>(positionComponent.GetPage()));
-            assert(equipItem && equipItem == iter->second.get());
-
-            equipItem = nullptr;
-        }
-        break;
-        case ItemPositionType::Pick:
-        {
-            assert(_pickItem == iter->second.get());
-
-            _pickItem = nullptr;
-        }
-        break;
-        case ItemPositionType::QuickSlot:
-        {
-            GetQuickSlotStorage(positionComponent.GetPage())->Set(nullptr,
-                ItemSlotRange{
-                .x = positionComponent.GetX(),
-                .y = positionComponent.GetY(),
-                .xSize = 1,
-                .ySize = 1,
-                });
-            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
-        }
-        break;
-        case ItemPositionType::Vendor:
-        {
-            assert(_vendorSaleItems[positionComponent.GetPage()] == iter->second.get());
-
-            _vendorSaleItems[positionComponent.GetPage()] = nullptr;
-        }
-        break;
-        case ItemPositionType::Count:
-        default:
-            assert(false);
-        }
-
-        AddItemRemoveLog(*iter->second);
-
         SharedPtrNotNull<GameItem> result = std::move(iter->second);
 
-        _itemsUIdIndex.erase(result->GetUId().value());
-        _items.erase(iter);
+        Erase(result->GetId());
 
         return result;
     }
@@ -1438,6 +1184,19 @@ namespace sunlight
         }
 
         return iter->second.get();
+    }
+
+    auto PlayerItemComponent::FindMixItemByItemId(int32_t itemId) const -> const GameItem*
+    {
+        for (const GameItem* mixItem : _mixItems | std::views::values)
+        {
+            if (mixItem->GetData().GetId() == itemId)
+            {
+                return mixItem;
+            }
+        }
+
+        return nullptr;
     }
 
     auto PlayerItemComponent::FindEmptyInventoryPosition(int32_t width, int32_t height) const -> std::optional<InventoryPosition>
@@ -1565,6 +1324,8 @@ namespace sunlight
             return db::ItemPosType::Pick;
         case ItemPositionType::Vendor:
             return db::ItemPosType::Vendor;
+        case ItemPositionType::Mix:
+            return db::ItemPosType::Mix;
         default:;
         }
 
@@ -1625,5 +1386,281 @@ namespace sunlight
             .cid = _cid,
             .gold = newGold,
             });
+    }
+
+    void PlayerItemComponent::AddPosition(GameItem& item)
+    {
+        ItemPositionComponent& positionComponent = item.GetComponent<ItemPositionComponent>();
+
+        const ItemData& data = item.GetData();
+        const int8_t page = positionComponent.GetPage();
+        const int8_t x = positionComponent.GetX();
+        const int8_t y = positionComponent.GetY();
+
+        switch (positionComponent.GetPositionType())
+        {
+        case ItemPositionType::Inventory:
+        {
+            ItemSlotStorage* slotStorage = GetInventorySlotStorage(page);
+            assert(slotStorage);
+
+            const ItemSlotRange range{
+                .x = x,
+                .y = y,
+                .xSize = data.GetWidth(),
+                .ySize = data.GetHeight()
+            };
+
+            assert(slotStorage->HasEmptySlot(range));
+
+            slotStorage->Set(&item, range);
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, slotStorage->GetDebugString());
+
+            _inventoryItemIdIndex.emplace(item.GetData().GetId(), &item);
+        }
+        break;
+        case ItemPositionType::Equipment:
+        {
+            assert(page > static_cast<int8_t>(EquipmentPosition::None) && page < static_cast<int8_t>(EquipmentPosition::Count));
+
+            GameItem*& equipItem = Mutable(static_cast<EquipmentPosition>(page));
+            assert(!equipItem);
+
+            equipItem = &item;
+        }
+        break;
+        case ItemPositionType::Pick:
+        {
+            assert(!_pickItem);
+
+            _pickItem = &item;
+        }
+        break;
+        case ItemPositionType::QuickSlot:
+        {
+            ItemSlotStorage* slotStorage = GetQuickSlotStorage(page);
+            assert(slotStorage);
+
+            const ItemSlotRange range{
+                .x = x,
+                .y = y,
+                .xSize = 1,
+                .ySize = 1
+            };
+
+            assert(slotStorage->HasEmptySlot(range));
+
+            slotStorage->Set(&item, range);
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, slotStorage->GetDebugString());
+        }
+        break;
+        case ItemPositionType::Vendor:
+        {
+            assert(page >= 0 && page < std::ssize(_vendorSaleItems));
+            assert(!_vendorSaleItems[page]);
+
+            _vendorSaleItems[page] = &item;
+        }
+        break;
+        case ItemPositionType::Mix:
+        {
+            [[maybe_unused]]
+            const bool inserted = _mixItems.try_emplace(item.GetId(), &item).second;
+            assert(inserted);
+        }
+        break;
+        case ItemPositionType::Count:
+        default:
+            assert(false);
+        }
+    }
+
+    void PlayerItemComponent::RemovePosition(GameItem& item)
+    {
+        ItemPositionComponent& positionComponent = item.GetComponent<ItemPositionComponent>();
+
+        switch (positionComponent.GetPositionType())
+        {
+        case ItemPositionType::Inventory:
+        {
+            GetInventorySlotStorage(positionComponent.GetPage())->Set(nullptr,
+                ItemSlotRange{
+                .x = positionComponent.GetX(),
+                .y = positionComponent.GetY(),
+                .xSize = item.GetData().GetWidth(),
+                .ySize = item.GetData().GetHeight(),
+                });
+
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetInventorySlotStorage(positionComponent.GetPage())->GetDebugString());
+
+            const auto [begin, end] = _inventoryItemIdIndex.equal_range(item.GetData().GetId());
+            assert(begin != end);
+
+            [[maybe_unused]]
+            bool erased = false;
+
+            for (auto iter2 = begin; iter2 != end; ++iter2)
+            {
+                if (PtrNotNull<GameEntity> inventoryItem = iter2->second;
+                    inventoryItem == &item)
+                {
+                    erased = true;
+
+                    _inventoryItemIdIndex.erase(iter2);
+
+                    break;
+                }
+            }
+
+            assert(erased);
+        }
+        break;
+        case ItemPositionType::Equipment:
+        {
+            GameItem*& equipItem = Mutable(static_cast<EquipmentPosition>(positionComponent.GetPage()));
+            assert(equipItem && equipItem == &item);
+
+            equipItem = nullptr;
+        }
+        break;
+        case ItemPositionType::Pick:
+        {
+            assert(_pickItem == &item);
+
+            _pickItem = nullptr;
+        }
+        break;
+        case ItemPositionType::QuickSlot:
+        {
+            GetQuickSlotStorage(positionComponent.GetPage())->Set(nullptr,
+                ItemSlotRange{
+                .x = positionComponent.GetX(),
+                .y = positionComponent.GetY(),
+                .xSize = 1,
+                .ySize = 1,
+                });
+            SUNLIGHT_GAME_DEBUG_REPORT(debug_type, GetQuickSlotStorage(positionComponent.GetPage())->GetDebugString());
+        }
+        break;
+        case ItemPositionType::Vendor:
+        {
+            assert(_vendorSaleItems[positionComponent.GetPage()] == &item);
+
+            _vendorSaleItems[positionComponent.GetPage()] = nullptr;
+        }
+        break;
+        case ItemPositionType::Mix:
+        {
+            [[maybe_unused]]
+            const bool erased = _mixItems.erase(item.GetId());
+            assert(erased);
+        }
+        break;
+        case ItemPositionType::Count:
+        default:
+            assert(false);
+        }
+    }
+
+    void PlayerItemComponent::SwapItemPosition(GameItem& first, GameItem& second)
+    {
+        RemovePosition(first);
+        RemovePosition(second);
+
+        first.GetComponent<ItemPositionComponent>().SwapPosition(second.GetComponent<ItemPositionComponent>());
+
+        AddPosition(first);
+        AddPosition(second);
+
+        AddItemUpdatePositionLog(first);
+        AddItemUpdatePositionLog(second);
+    }
+
+    void PlayerItemComponent::UpdateItemPosition(GameItem& item, item_position_update_type updateType)
+    {
+        std::visit([this, &item]<typename T>(const T& update)
+            {
+                RemovePosition(item);
+
+                ItemPositionComponent& positionComponent = item.GetComponent<ItemPositionComponent>();
+
+                if constexpr (std::is_same_v<T, ItemPositionUpdatePicked>)
+                {
+                    positionComponent.SetPositionType(ItemPositionType::Pick);
+                    positionComponent.ResetPosition();
+                }
+                else if constexpr (std::is_same_v<T, ItemPositionUpdateInventory>)
+                {
+                    positionComponent.SetPositionType(ItemPositionType::Inventory);
+                    positionComponent.SetPosition(update.page, update.x, update.y);
+                }
+                else if constexpr (std::is_same_v<T, ItemPositionUpdateQuickSlot>)
+                {
+                    positionComponent.SetPositionType(ItemPositionType::QuickSlot);
+                    positionComponent.SetPosition(update.page, update.x, update.y);
+                }
+                else if constexpr (std::is_same_v<T, ItemPositionUpdateEquipment>)
+                {
+                    positionComponent.SetPositionType(ItemPositionType::Equipment);
+                    positionComponent.ResetPosition();
+                    positionComponent.SetPage(static_cast<int8_t>(update.position));
+                }
+                else if constexpr (std::is_same_v<T, ItemPositionUpdateVendor>)
+                {
+                    positionComponent.SetPositionType(ItemPositionType::Vendor);
+                    positionComponent.ResetPosition();
+                    positionComponent.SetPage(update.page);
+                }
+                else if constexpr (std::is_same_v<T, ItemPositionUpdateMix>)
+                {
+                    positionComponent.SetPositionType(ItemPositionType::Mix);
+                    positionComponent.ResetPosition();
+                }
+                else
+                {
+                    static_assert(!sizeof(T), "not implemented");
+                }
+
+                AddPosition(item);
+
+            }, updateType);
+
+        AddItemUpdatePositionLog(item);
+    }
+
+    void PlayerItemComponent::Insert(SharedPtrNotNull<GameItem> item)
+    {
+        AddPosition(*item);
+
+        AddItemAddLog(*item);
+
+        const game_entity_id_type id = item->GetId();
+
+        [[maybe_unused]]
+        bool inserted = false;
+
+        inserted = _itemsUIdIndex.try_emplace(item->GetUId().value(), item.get()).second;
+        assert(inserted);
+
+        inserted = _items.try_emplace(id, std::move(item)).second;
+        assert(inserted);
+    }
+
+    void PlayerItemComponent::Erase(game_entity_id_type id)
+    {
+        const auto iter = _items.find(id);
+        if (iter == _items.end())
+        {
+            assert(false);
+
+            return;
+        }
+
+        RemovePosition(*iter->second);
+
+        AddItemRemoveLog(*iter->second);
+
+        _itemsUIdIndex.erase(iter->second->GetUId().value());
+        _items.erase(iter);
     }
 }

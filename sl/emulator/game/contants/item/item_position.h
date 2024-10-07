@@ -8,6 +8,7 @@ namespace sunlight
         (QuickSlot)
         (Pick)
         (Vendor)
+        (Mix)
 
         (Count)
     )

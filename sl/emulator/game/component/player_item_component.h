@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/unordered/unordered_flat_set.hpp>
+#include <boost/container/flat_map.hpp>
 #include "sl/emulator/game/debug/game_debug_type.h"
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/game_component.h"
@@ -7,6 +8,7 @@
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/item/inventory_position.h"
 #include "sl/emulator/game/contants/item/item_position.h"
+#include "sl/emulator/game/contants/item/item_position_update.h"
 #include "sl/emulator/game/contants/item/item_slot_storage_base.h"
 #include "sl/emulator/game/contants/quick_slot/quick_slot_position.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
@@ -47,6 +49,7 @@ namespace sunlight
         bool HasVendorSaleItem(int8_t page) const;
 
         auto GetVendorSaleItemSize() const -> int64_t;
+        auto GetMixItemSize() const -> int64_t;
 
     public:
         void AddOrSubGold(int32_t value);
@@ -81,6 +84,9 @@ namespace sunlight
         bool LowerPickedItemToVendor(int8_t page);
         bool SwapPickedItemToVendor(int8_t page);
 
+        bool LowerPickedItemToMix();
+        void MoveMixItemToInventory(std::vector<PtrNotNull<const GameItem>>& result);
+
         bool SwapWeaponItem();
 
     public:
@@ -103,6 +109,7 @@ namespace sunlight
         auto FindEquipmentItem(EquipmentPosition position) const -> const GameItem*;
         auto FindInventoryItem(game_entity_id_type id) const -> const GameItem*;
         auto FindQuickSlotItem(game_entity_id_type id) const -> const GameItem*;
+        auto FindMixItemByItemId(int32_t itemId) const -> const GameItem*;
         auto FindEmptyInventoryPosition(int32_t width, int32_t height) const -> std::optional<InventoryPosition>;
         auto FindEmptyQuickSlotPosition() const -> std::optional<QuickSlotPosition>;
 
@@ -116,6 +123,7 @@ namespace sunlight
         inline auto GetItemRange() const;
         inline auto GetEquipItems() const;
         inline auto GetVendorSaleItems() const;
+        inline auto GetMixItems() const;
 
     private:
         auto Mutable(EquipmentPosition position) -> GameItem*&;
@@ -134,6 +142,16 @@ namespace sunlight
         void AddGoldChangeLog(int32_t newGold);
 
     private:
+        void AddPosition(GameItem& item);
+        void RemovePosition(GameItem& item);
+
+        void SwapItemPosition(GameItem& first, GameItem& second);
+        void UpdateItemPosition(GameItem& item, item_position_update_type updateType);
+
+        void Insert(SharedPtrNotNull<GameItem> item);
+        void Erase(game_entity_id_type id);
+
+    private:
         int64_t _cid = 0;
         std::vector<db::ItemLog> _itemLogs;
 
@@ -145,12 +163,15 @@ namespace sunlight
         int32_t _inventoryPage = 0;
         std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_INVENTORY_PAGE_SIZE> _inventorySlot;
         boost::unordered::unordered_flat_set<PtrNotNull<GameItem>> _itemStorageQueryResult;
+        boost::container::flat_multimap<int32_t, PtrNotNull<GameItem>> _inventoryItemIdIndex;
 
         std::array<GameItem*, static_cast<int32_t>(EquipmentPosition::Count)> _equipments = {};
 
         std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_QUICK_SLOT_PAGE_SIZE> _quickSlotStorages;
 
         std::array<GameItem*, GameConstant::MAX_STREET_VENDOR_PAGE_SIZE> _vendorSaleItems = {};
+
+        std::unordered_map<game_entity_id_type, PtrNotNull<GameItem>> _mixItems;
         
         GameItem* _pickItem = nullptr;
 
@@ -179,5 +200,10 @@ namespace sunlight
             };
 
         return _vendorSaleItems | std::views::enumerate | std::views::filter(filter) | std::views::transform(transform);
+    }
+
+    inline auto PlayerItemComponent::GetMixItems() const
+    {
+        return _mixItems | std::views::values | notnull::reference;
     }
 }
