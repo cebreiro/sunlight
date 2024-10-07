@@ -10,6 +10,8 @@ namespace sunlight
     class GameGroup;
     class GamePlayer;
     class GameItem;
+
+    class IGroupMessageHandler;
 }
 
 namespace sunlight
@@ -25,28 +27,26 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 
+        auto GetServiceLocator() const -> const ServiceLocator&;
+        auto GetRandomEngine() -> std::mt19937&;
+
     public:
         void OnStageExit(GamePlayer& player);
 
         void AddStreetVendorGuest(int32_t groupId, GamePlayer& player);
 
+        void ProcessHostExit(GameGroup& group, GamePlayer& host);
+        void ProcessGuestExit(GameGroup& group, GamePlayer& guest);
+
+        void ProcessTradeComplete(GameGroup& group, GamePlayer& host, GamePlayer& guest);
+        void ProcessTradeFail(GameGroup& group, GamePlayer& player);
+
+        void SpawnStoredItem(const GameGroup& group, GamePlayer& player, const GameItem& item, int32_t page, int32_t price, int32_t offset);
+
     private:
         void HandleStateProposition(const ZoneMessage& message);
         void HandleCreateGroup(const ZoneCommunityMessage& message);
         void HandleGroupMessage(const ZoneCommunityMessage& message);
-
-    private:
-        void OnHostExit(GameGroup& group, GamePlayer& host);
-        void OnGuestExit(GameGroup& group, GamePlayer& guest);
-
-        bool HandleTradeMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader);
-        void ProcessTradeFail(GameGroup& group, GamePlayer& player);
-
-        bool HandleStreetVendorMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader);
-        bool HandleItemMixMessage(GameGroup& group, GamePlayer& player, SlPacketReader& reader);
-
-    private:
-        void SpawnStoredItem(const GameGroup& group, GamePlayer& player, const GameItem& item, int32_t page, int32_t price, int32_t offset);
 
     private:
         auto FindGroup(int32_t groupId) -> GameGroup*;
@@ -59,6 +59,10 @@ namespace sunlight
 
         int32_t _nextGroupId = 0;
         std::unordered_map<int32_t, UniquePtrNotNull<GameGroup>> _gameGroups;
+
+        std::unordered_map<int32_t, UniquePtrNotNull<IGroupMessageHandler>> _itemMixMessageHandlers;
+        std::unordered_map<int32_t, UniquePtrNotNull<IGroupMessageHandler>> _itemTradeMessageHandlers;
+        std::unordered_map<int32_t, UniquePtrNotNull<IGroupMessageHandler>> _streetVendorMessageHandlers;
 
         std::mt19937 _mt;
     };

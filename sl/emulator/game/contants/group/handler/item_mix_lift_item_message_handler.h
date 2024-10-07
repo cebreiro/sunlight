@@ -1,0 +1,11 @@
+#pragma once
+#include "sl/emulator/game/contants/group/group_message_handler_interface.h"
+
+namespace sunlight
+{
+    class ItemMixLiftItemMessageHandler final : public IGroupMessageHandler
+    {
+    public:
+        void Handle(PlayerGroupSystem& system, GameGroup& group, GamePlayer& player, SlPacketReader& reader) const override;
+    };
+}
