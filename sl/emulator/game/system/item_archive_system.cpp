@@ -1,6 +1,7 @@
 #include "item_archive_system.h"
 
 #include <boost/scope/scope_exit.hpp>
+#include <boost/container/small_vector.hpp>
 
 #include "sl/emulator/game/component/item_ownership_component.h"
 #include "sl/emulator/game/component/item_position_component.h"
@@ -73,6 +74,11 @@ namespace sunlight
     auto ItemArchiveSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<ItemArchiveSystem>();
+    }
+
+    void ItemArchiveSystem::OnStageEnter(GamePlayer& player)
+    {
+        TryRollbackMixItem(player);
     }
 
     bool ItemArchiveSystem::PurchaseStreetVendorItem(GamePlayer& host, GamePlayer& guest, game_entity_id_type itemId, int32_t price)
@@ -831,6 +837,137 @@ namespace sunlight
 
         player.Send(GamePlayerMessageCreator::CreatePlayerWeaponSwap(player, itemComponent.FindEquipmentItem(EquipmentPosition::Weapon1)));
         Get<EntityViewRangeSystem>().Broadcast(player, GamePlayerMessageCreator::CreateRemovePlayerWeaponChange(player), true);
+    }
+
+    void ItemArchiveSystem::TryRollbackMixItem(GamePlayer& player)
+    {
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+        if (itemComponent.GetMixItemSize() <= 0)
+        {
+            return;
+        }
+
+        std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>> stackResult;
+        boost::container::small_vector<game_entity_id_type, 4> removeItems;
+
+        for (GameItem& mixItem : itemComponent.GetMixItems())
+        {
+            const ItemData& itemData = mixItem.GetData();
+            const int32_t quantity = mixItem.GetQuantity();
+
+            if (itemData.GetMaxOverlapCount() > 1)
+            {
+                stackResult.clear();
+                int32_t usedQuantity = 0;
+
+                if (itemComponent.TryStackItem(itemData.GetId(), quantity, usedQuantity, &stackResult))
+                {
+                    assert(usedQuantity > 0 && usedQuantity <= quantity);
+
+                    if (usedQuantity >= quantity)
+                    {
+                        removeItems.push_back(mixItem.GetId());
+                    }
+                    else
+                    {
+                        itemComponent.SetItemQuantity(mixItem.GetId(), quantity - usedQuantity);
+                    }
+
+                    for (const auto& [overlappedItem, overlappedQuantity] : stackResult)
+                    {
+                        player.Defer(ItemArchiveMessageCreator::CreateItemAdd(player, *overlappedItem, overlappedQuantity));
+                    }
+                }
+            }
+        }
+
+        for (const game_entity_id_type id : removeItems)
+        {
+            itemComponent.RemoveItem(id);
+        }
+
+        std::vector<PtrNotNull<const GameItem>> moveItems;
+        itemComponent.MoveMixItemToInventory(moveItems);
+
+        for (const GameItem& item : moveItems | notnull::reference)
+        {
+            player.Defer(ItemArchiveMessageCreator::CreateItemAdd(player, item, item.GetQuantity()));
+        }
+
+        if (player.HasDeferred())
+        {
+            player.FlushDeferred();
+        }
+
+        SaveChanges(player);
+    }
+
+    bool ItemArchiveSystem::OnMixItemLower(GamePlayer& player, game_entity_id_type itemId)
+    {
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+
+        const GameItem* pickedItem = itemComponent.GetPickedItem();
+        if (pickedItem->GetId() != itemId)
+        {
+            return false;
+        }
+
+        boost::scope::scope_exit exit([this, &player]()
+            {
+                SaveChanges(player);
+            });
+
+        const ItemData& itemData = pickedItem->GetData();
+
+        if (const auto* etcData = itemData.GetEtcData();
+            etcData && etcData->maxOverlapCount > 1)
+        {
+            if (const GameItem* mixItem = itemComponent.FindMixItemByItemId(itemData.GetId());
+                mixItem)
+            {
+                const int32_t mixItemQuantity = mixItem->GetQuantity();
+                const int32_t addQuantity = std::min(itemData.GetMaxOverlapCount() - mixItemQuantity, pickedItem->GetQuantity());
+
+                [[maybe_unused]]
+                const bool stacked = itemComponent.IncreaseItemQuantity(mixItem->GetId(), addQuantity);
+                assert(stacked);
+
+                if (addQuantity >= pickedItem->GetQuantity())
+                {
+                    player.Send(ItemArchiveMessageCreator::CreateItemRemove(player, pickedItem->GetId(), pickedItem->GetType()));
+
+                    itemComponent.RemovePickedItem();
+                }
+                else
+                {
+                    itemComponent.DecreaseItemQuantity(pickedItem->GetId(), addQuantity);
+                }
+
+                return true;
+            }
+        }
+
+        player.Send(ItemArchiveMessageCreator::CreateItemRemove(player, pickedItem->GetId(), pickedItem->GetType()));
+        itemComponent.LowerPickedItemToMix();
+
+        return true;
+    }
+
+    bool ItemArchiveSystem::OnMixItemLift(GamePlayer& player, game_entity_id_type itemId)
+    {
+        PlayerItemComponent& itemComponent = player.GetItemComponent();
+
+        if (!itemComponent.LiftItem(itemId))
+        {
+            return false;
+        }
+
+        const GameItem* pickedItem = itemComponent.GetPickedItem();
+        assert(pickedItem);
+
+        player.Send(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *pickedItem));
+
+        return true;
     }
 
     void ItemArchiveSystem::OnCompleteLoadAccountStorage(int64_t cid, const db::dto::AccountStorage& dto)

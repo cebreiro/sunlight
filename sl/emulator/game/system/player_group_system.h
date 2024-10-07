@@ -59,5 +59,7 @@ namespace sunlight
 
         int32_t _nextGroupId = 0;
         std::unordered_map<int32_t, UniquePtrNotNull<GameGroup>> _gameGroups;
+
+        std::mt19937 _mt;
     };
 }

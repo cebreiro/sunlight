@@ -1,7 +1,10 @@
 #include "player_group_system.h"
 
+#include <boost/container/small_vector.hpp>
+
 #include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
+#include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/component/street_vendor_host_component.h"
 #include "sl/emulator/game/contants/group/game_group.h"
@@ -22,11 +25,15 @@
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/server/client/game_client.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/item/item_data.h"
+#include "sl/emulator/service/gamedata/item_mix/item_mix_data_provider.h"
 
 namespace sunlight
 {
     PlayerGroupSystem::PlayerGroupSystem(const ServiceLocator& serviceLocator)
         : _serviceLocator(serviceLocator)
+        , _mt(std::random_device{}())
     {
     }
 
@@ -215,7 +222,7 @@ namespace sunlight
         break;
         case GameGroupType::ItemMix:
         {
-            const int32_t groupId = 12011;
+            const int32_t groupId = ++_nextGroupId;
             _gameGroups[groupId] = std::make_unique<GameGroup>(groupId, groupType, player);
 
             groupComponent.SetGroupId(groupId);
@@ -804,46 +811,204 @@ namespace sunlight
         }
         case 1108: // click target item to rollback
         {
+            Get<ItemArchiveSystem>().TryRollbackMixItem(player);
+
             player.Send(ItemTradeMessageCreator::CreateGoldChangeResult(group.GetId()));
+        }
+        break;
+        case 1150: // lift item
+        {
+            [[maybe_unused]]
+            const int32_t unk1 = reader.Read<int32_t>();
+            const auto [itemId, itemType] = reader.ReadInt64();
+
+            if (!Get<ItemArchiveSystem>().OnMixItemLift(player, game_entity_id_type(itemId)))
+            {
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] fail to lift mix item. player: {}, item_id: {}",
+                        GetName(), player.GetCId(), itemId));
+            }
         }
         break;
         case 1151: // lower item to item mix window
         {
+            [[maybe_unused]]
             const int32_t unk1 = reader.Read<int32_t>();
-            if (unk1 == 0)
+            const auto [itemId, itemType] = reader.ReadInt64();
+
+            if (Get<ItemArchiveSystem>().OnMixItemLower(player, game_entity_id_type(itemId)))
             {
-                const auto [itemId, itemType] = reader.ReadInt64();
-
-                if (game_entity_id_type(itemId) == player.GetItemComponent().GetPickedItem()->GetId())
-                {
-                    player.GetItemComponent().RemovePickedItem();
-
-                    player.Send(ItemArchiveMessageCreator::CreateItemRemove(player, game_entity_id_type(itemId), static_cast<GameEntityType>(itemType)));
-                    player.Send(ItemMixMessageCreator::CreateItemLowerResult(group.GetId()));
-                }
-                else
-                {
-                    assert(false);
-                }
+                player.Send(ItemMixMessageCreator::CreateItemLowerResult(group.GetId()));
             }
             else
             {
-                assert(false);
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] fail to lower mix item. player: {}, item_id: {}",
+                        GetName(), player.GetCId(), itemId));
             }
         }
         break;
         case 1105: // request mix
         {
-            [[maybe_unused]]
-            const int32_t unk1 = reader.Read<int32_t>(); // itemId
+            const int32_t itemId = reader.Read<int32_t>();
+            const int32_t skillId = reader.Read<int32_t>();
 
             [[maybe_unused]]
-            const int32_t unk2 = reader.Read<int32_t>(); // required mix Skill
+            const auto [mixToolItemId, unused] = reader.ReadInt64();
 
-            [[maybe_unused]]
-            const auto [mixToolItemId, unkType] = reader.ReadInt64();
+            bool result = false;
+            std::string log;
 
-            player.Send(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), unk1, 1, 0));
+            do
+            {
+                PlayerSkillComponent& skillComponent = player.GetSkillComponent();
+                const PlayerSkill* skill = skillComponent.FindSkill(skillId);
+
+                if (!skill)
+                {
+                    log = fmt::format("fail to find ski. player: {}, skill: {}", player.GetCId(), skillId);
+
+                    break;
+                }
+
+                const ItemMixDataProvider& itemMixDataProvider = _serviceLocator.Get<GameDataProvideService>().GetItemMixDataProvider();
+                const ItemMixGroupMemberData* itemMixData = itemMixDataProvider.Find(skillId)->Find(skill->GetLevel(), itemId);
+
+                if (!itemMixData)
+                {
+                    log = fmt::format("fail to find item mix data. player: {}, skill {}, skill_level: {}, item_id: {}",
+                        player.GetCId(), skillId, skill->GetLevel(), itemId);
+
+                    break;
+                }
+
+                int32_t materialLevel = 0;
+
+                const std::vector<ItemMixMaterial>& dataMaterials = itemMixData->GetMaterials();
+                boost::container::small_vector<ItemMixMaterial, 4> materials(dataMaterials.begin(), dataMaterials.end());
+
+                constexpr int32_t itemIdGradeRuleConstant = 10000000;
+
+                for (const GameItem& mixItem : player.GetItemComponent().GetMixItems())
+                {
+                    const int32_t mixItemId = mixItem.GetData().GetId();
+                    const auto iter = std::ranges::find_if(materials, [mixItemId](const ItemMixMaterial& material) -> bool
+                        {
+                            if (material.quantity <= 0)
+                            {
+                                return false;
+                            }
+
+                            return (mixItemId % itemIdGradeRuleConstant) == (material.itemId % itemIdGradeRuleConstant);
+                        });
+                    if (iter != materials.end())
+                    {
+                        iter->quantity -= mixItem.GetQuantity();
+
+                        materialLevel += std::max(0, (mixItemId / itemIdGradeRuleConstant) - 1);
+                    }
+                }
+
+                if (std::ranges::any_of(materials, [](const ItemMixMaterial& material) -> bool
+                    {
+                        return material.quantity > 0;
+                    }))
+                {
+                    log = fmt::format("lack of mix item material. player: {}, skill {}, skill_level: {}, item_id: {}",
+                        player.GetCId(), skillId, skill->GetLevel(), itemId);
+
+                    break;
+                }
+
+                const int32_t gradeLevel = skill->GetLevel() + materialLevel;
+                const std::array<int32_t, item_mix_grade_weight_size>* weightData = itemMixDataProvider.FindWeight(itemMixData->GetGradeType(), gradeLevel);
+
+                if (!weightData)
+                {
+                    log = fmt::format("fail to find weight data. player: {}, skill {}, skill_level: {}, item_id: {}, grade_type: {}grade_level: {}",
+                        player.GetCId(), skillId, skill->GetLevel(), itemId, itemMixData->GetGradeType(), gradeLevel);
+
+                    break;
+                }
+
+                int32_t prev = 0;
+                boost::container::small_vector<std::pair<ItemMixGradeWeightType, int32_t>, item_mix_grade_weight_size> weights;
+
+                for (int32_t i = 0; i < item_mix_grade_weight_size; ++i)
+                {
+                    const int32_t value = (*weightData)[i];
+                    if (value != 0)
+                    {
+                        const int32_t weight = prev + value;
+                        weights.emplace_back(static_cast<ItemMixGradeWeightType>(i), weight);
+
+                        prev = weight;
+                    }
+                }
+
+                assert(!weights.empty());
+
+                const ItemMixGradeWeightType grade = [&]() -> ItemMixGradeWeightType
+                    {
+                        std::uniform_int_distribution dist(0, weights.back().second);
+
+                        const int32_t rand = dist(_mt);
+
+                        for (const auto& [type, value] : weights)
+                        {
+                            if (rand <= value)
+                            {
+                                return type;
+                            }
+                        }
+
+                        assert(false);
+
+                        return weights.begin()->first;
+                    }();
+
+                const ItemData* itemData = [&]() -> const ItemData*
+                    {
+                        const std::array<const ItemData*, item_mix_grade_count>& dataList = itemMixData->GetResultItemDataList();
+
+                        switch (grade)
+                        {
+                        case ItemMixGradeWeightType::Low:
+                            return dataList[static_cast<int32_t>(ItemMixGradeType::Low)];
+                        case ItemMixGradeWeightType::Middle:
+                            return dataList[static_cast<int32_t>(ItemMixGradeType::Middle)];
+                        case ItemMixGradeWeightType::High:
+                            return dataList[static_cast<int32_t>(ItemMixGradeType::High)];
+                        case ItemMixGradeWeightType::Super:
+                            return dataList[static_cast<int32_t>(ItemMixGradeType::Super)];
+                        case ItemMixGradeWeightType::Fail:
+                        case ItemMixGradeWeightType::Count:
+                        default:;
+                        }
+
+                        return nullptr;
+                    }();
+
+                if (itemData)
+                {
+                    player.Send(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), itemData->GetId(), 1, 0));
+                }
+                else
+                {
+                    player.Send(ItemMixMessageCreator::CreateItemMixFailure(group.GetId(), 1, 0));
+                }
+
+                result = true;
+
+
+            } while (false);
+
+            if (!result)
+            {
+                SUNLIGHT_LOG_ERROR(_serviceLocator, log);
+
+                player.Send(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), itemId, 1, 0));
+            }
         }
         break;
         }

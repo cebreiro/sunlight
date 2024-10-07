@@ -4,6 +4,7 @@
 #include "sl/emulator/game/data/sox_table_set.h"
 #include "sl/emulator/service/gamedata/exp/exp_data_provider.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
+#include "sl/emulator/service/gamedata/item_mix/item_mix_data_provider.h"
 #include "sl/emulator/service/gamedata/map/map_data_provider.h"
 #include "sl/emulator/service/gamedata/shop/npc_shop_data_provider.h"
 #include "sl/emulator/service/gamedata/skill/skill_data_provider.h"
@@ -34,6 +35,7 @@ namespace sunlight
         _soxTableSet = std::make_shared<SoxTableSet>(assetPath / "Misc");
 
         _itemDataProvider = std::make_shared<ItemDataProvider>(_serviceLocator, *_soxTableSet);
+        _itemMixDataProvider = std::make_shared<ItemMixDataProvider>(_serviceLocator, *_soxTableSet, *_itemDataProvider);
         _skillDataProvider = std::make_shared<SkillDataProvider>(_serviceLocator, *_soxTableSet);
         _expDataProvider = std::make_shared<ExpDataProvider>(*_soxTableSet);
         _npcShopDataProvider = std::make_shared<NPCShopDataProvider>(*_soxTableSet);
@@ -68,6 +70,13 @@ namespace sunlight
         assert(_itemDataProvider);
 
         return *_itemDataProvider;
+    }
+
+    auto GameDataProvideService::GetItemMixDataProvider() const -> const ItemMixDataProvider&
+    {
+        assert(_itemMixDataProvider);
+
+        return *_itemMixDataProvider;
     }
 
     auto GameDataProvideService::GetSkillDataProvider() const -> const SkillDataProvider&

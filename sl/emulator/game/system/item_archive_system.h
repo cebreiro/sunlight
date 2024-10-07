@@ -39,6 +39,9 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
+        void OnStageEnter(GamePlayer& player);
+
+    public:
         bool PurchaseStreetVendorItem(GamePlayer& host, GamePlayer& guest, game_entity_id_type itemId, int32_t payment);
         void Purchase(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId, int32_t itemId, int32_t page, int32_t x, int32_t y, int32_t quantity);
         void SellOwnItem(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId);
@@ -63,6 +66,9 @@ namespace sunlight
 
     public:
         void OnWeaponSwap(const ZoneMessage& message);
+        void TryRollbackMixItem(GamePlayer& player);
+        bool OnMixItemLower(GamePlayer& player, game_entity_id_type itemId);
+        bool OnMixItemLift(GamePlayer& player, game_entity_id_type itemId);
 
     private:
         void OnCompleteLoadAccountStorage(int64_t cid, const db::dto::AccountStorage& dto);

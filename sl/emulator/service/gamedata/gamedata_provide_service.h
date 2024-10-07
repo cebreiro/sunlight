@@ -7,6 +7,7 @@ namespace sunlight
     class AssetDataProvider;
     class MapDataProvider;
     class ItemDataProvider;
+    class ItemMixDataProvider;
     class SkillDataProvider;
     class ExpDataProvider;
     class NPCShopDataProvider;
@@ -36,6 +37,7 @@ namespace sunlight
         auto GetAssetDataProvider() const -> const AssetDataProvider&;
         auto GetMapDataProvider() const -> const MapDataProvider&;
         auto GetItemDataProvider() const -> const ItemDataProvider&;
+        auto GetItemMixDataProvider() const -> const ItemMixDataProvider&;
         auto GetSkillDataProvider() const -> const SkillDataProvider&;
         auto GetExpDataProvider() const -> const ExpDataProvider&;
         auto GetNPCShopDataProvider() const -> const NPCShopDataProvider&;
@@ -49,6 +51,7 @@ namespace sunlight
         SharedPtrNotNull<MapDataProvider> _mapDataProvider;
         SharedPtrNotNull<SoxTableSet> _soxTableSet;
         SharedPtrNotNull<ItemDataProvider> _itemDataProvider;
+        SharedPtrNotNull<ItemMixDataProvider> _itemMixDataProvider;
         SharedPtrNotNull<SkillDataProvider> _skillDataProvider;
         SharedPtrNotNull<ExpDataProvider> _expDataProvider;
         SharedPtrNotNull<NPCShopDataProvider> _npcShopDataProvider;

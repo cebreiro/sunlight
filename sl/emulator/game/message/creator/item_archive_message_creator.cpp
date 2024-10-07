@@ -385,7 +385,7 @@ namespace sunlight
         writer.Write<int16_t>(positionComponent.GetY());
         writer.Write<int16_t>(static_cast<uint16_t>(item.GetQuantity())); // 63
         writer.Write<int32_t>(item.GetData().GetId()); // 65
-        writer.Write<int8_t>(0); // 69
+        writer.Write<int8_t>(2); // 69
         writer.Write<int32_t>(item.GetId().Unwrap()); // 70
         writer.Write<int32_t>(static_cast<uint32_t>(item.GetType())); // 74
 

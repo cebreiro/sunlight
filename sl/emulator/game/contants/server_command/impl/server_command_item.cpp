@@ -1,8 +1,10 @@
 #include "server_command_item.h"
 
+#include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_stored_item.h"
+#include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
@@ -29,7 +31,19 @@ namespace sunlight
 
     bool ServerCommandItemAdd::Execute(GamePlayer& player, int32_t itemId, int32_t quantity) const
     {
-        return _system.Get<ItemArchiveSystem>().AddItem(player, itemId, quantity);
+        const bool added = _system.Get<ItemArchiveSystem>().AddItem(player, itemId, quantity);
+        const ItemDataProvider& itemDataProvider = _system.GetServiceLocator().Get<GameDataProvideService>().GetItemDataProvider();
+        const ItemData* itemData = itemDataProvider.Find(12500060);
+
+        auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData, 1);
+        item->AddComponent(std::make_unique<ItemPositionComponent>());
+        item->GetComponent<ItemPositionComponent>().SetPositionType(ItemPositionType::Inventory);
+        item->GetComponent<ItemPositionComponent>().SetPosition(0, -1, -1);
+
+        player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *item, 1));
+        player.Send(ItemArchiveMessageCreator::CreateItemRemove(player, item->GetId(), item->GetType()));
+
+        return added;
     }
 
     ServerCommandItemGain::ServerCommandItemGain(ServerCommandSystem& system)
