@@ -76,6 +76,76 @@ namespace sunlight
         return GameSystem::GetClassId<ItemArchiveSystem>();
     }
 
+    bool ItemArchiveSystem::MixItems(GamePlayer& player, const ItemData& resultItemData, int32_t resultItemCount, std::span<const ItemMixMaterial> materials)
+    {
+        bool success = false;
+        db::ItemTransaction transaction;
+
+        do
+        {
+            PlayerItemComponent& itemComponent = player.GetItemComponent();
+
+            const std::optional<InventoryPosition> pos = itemComponent.FindEmptyInventoryPosition(resultItemData.GetWidth(), resultItemData.GetHeight());
+            if (!pos.has_value() && itemComponent.GetPickedItem())
+            {
+                break;
+            }
+
+            for (const ItemMixMaterial& material : materials)
+            {
+                const GameItem* item = itemComponent.FindItem(material.itemId);
+                if (!item)
+                {
+                    assert(false);
+
+                    continue;
+                }
+
+                if (item->GetQuantity() > material.quantity)
+                {
+                    itemComponent.DecreaseItemQuantity(material.itemId, material.quantity);
+                }
+                else
+                {
+                    itemComponent.RemoveItem(material.itemId);
+                }
+            }
+
+            success = true;
+
+            auto resultItem = CreateNewGameItem(resultItemData, resultItemCount);
+            resultItem->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
+
+            GameItem* resultItemPtr = resultItem.get();
+
+            [[maybe_unused]]
+            bool added = false;
+
+            if (pos.has_value())
+            {
+                added = itemComponent.AddInventoryItem(std::move(resultItem), &pos.value());
+
+                player.Send(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *resultItemPtr));
+            }
+            else
+            {
+                added = itemComponent.AddNewPickedItem(std::move(resultItem));
+
+                player.Send(ItemArchiveMessageCreator::CreateNewPickedItemAdd(player, *resultItemPtr));
+            }
+
+            assert(added);
+            
+        } while (false);
+
+        if (success)
+        {
+            SaveChanges(player);
+        }
+
+        return success;
+    }
+
     bool ItemArchiveSystem::PurchaseStreetVendorItem(GamePlayer& host, GamePlayer& guest, game_entity_id_type itemId, int32_t price)
     {
         bool success = false;

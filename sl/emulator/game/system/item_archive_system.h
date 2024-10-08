@@ -1,5 +1,6 @@
 #pragma once
 #include "sl/data/sox/item/equipment_type.h"
+#include "sl/emulator/game/contants/group/item_mix_material.h"
 #include "sl/emulator/game/contants/item/equipment_position.h"
 #include "sl/emulator/game/contants/item/item_remove_result.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
@@ -14,6 +15,7 @@ namespace sunlight
 {
     enum class ZoneMessageType : int32_t;
 
+    struct ItemMixMaterial;
     struct ZoneMessage;
 
     class ItemData;
@@ -39,7 +41,9 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        bool PurchaseStreetVendorItem(GamePlayer& host, GamePlayer& guest, game_entity_id_type itemId, int32_t payment);
+        bool MixItems(GamePlayer& player, const ItemData& resultItemData, int32_t resultItemCount, std::span<const ItemMixMaterial> materials);
+        bool PurchaseStreetVendorItem(GamePlayer& host, GamePlayer& guest, game_entity_id_type itemId, int32_t price);
+
         void Purchase(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId, int32_t itemId, int32_t page, int32_t x, int32_t y, int32_t quantity);
         void SellOwnItem(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId);
 

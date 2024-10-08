@@ -13,7 +13,7 @@ namespace sunlight
 
 namespace sunlight
 {
-    struct ItemMixMaterial
+    struct ItemMixMaterialData
     {
         int32_t itemId = 0;
         int32_t quantity = 0;
@@ -32,7 +32,7 @@ namespace sunlight
 
         auto GetResultItemId() const -> int32_t;
         auto GetResultItemCount() const -> int32_t;
-        auto GetMaterials() const -> const std::vector<ItemMixMaterial>&;
+        auto GetMaterials() const -> const std::vector<ItemMixMaterialData>&;
         auto GetResultItemDataList() const -> const std::array<const ItemData*, item_mix_grade_count>&;
 
         void SetResultItemData(const std::array<const ItemData*, item_mix_grade_count>& data);
@@ -47,7 +47,7 @@ namespace sunlight
         int32_t _resultItemId = 0;
         int32_t _resultItemCount = 0;
 
-        std::vector<ItemMixMaterial> _materials;
+        std::vector<ItemMixMaterialData> _materials;
         std::array<const ItemData*, item_mix_grade_count> _resultItemDataList = {};
     };
 }

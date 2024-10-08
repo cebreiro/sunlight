@@ -12,7 +12,7 @@ namespace sunlight
         , _difficulty(data.difficulty)
         , _resultItemId(data.resultID)
         , _resultItemCount(data.count)
-        , _materials([&data]() -> std::vector<ItemMixMaterial>
+        , _materials([&data]() -> std::vector<ItemMixMaterialData>
             {
                 std::initializer_list<std::pair<int32_t, int32_t>> list{
                     std::pair(data.material1ID, data.material1NU),
@@ -25,9 +25,9 @@ namespace sunlight
                     {
                         return pair.first != 0 && pair.second > 0;
                     };
-                constexpr auto transform = [](const auto& pair) -> ItemMixMaterial
+                constexpr auto transform = [](const auto& pair) -> ItemMixMaterialData
                     {
-                        return ItemMixMaterial{
+                        return ItemMixMaterialData{
                             .itemId = pair.first,
                             .quantity = pair.second,
                         };
@@ -73,7 +73,7 @@ namespace sunlight
         return _resultItemCount;
     }
 
-    auto ItemMixGroupMemberData::GetMaterials() const -> const std::vector<ItemMixMaterial>&
+    auto ItemMixGroupMemberData::GetMaterials() const -> const std::vector<ItemMixMaterialData>&
     {
         return _materials;
     }

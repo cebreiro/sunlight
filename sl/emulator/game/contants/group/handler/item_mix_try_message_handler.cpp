@@ -8,6 +8,7 @@
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/item_mix_message_creator.h"
+#include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/player_group_system.h"
 #include "sl/emulator/server/packet/io/sl_packet_reader.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -52,116 +53,24 @@ namespace sunlight
                 break;
             }
 
+            boost::container::small_vector<ItemMixMaterial, 4> mixItems;
             int32_t materialLevel = 0;
 
-            const std::vector<ItemMixMaterial>& dataMaterials = itemMixData->GetMaterials();
-            boost::container::small_vector<ItemMixMaterial, 4> materials(dataMaterials.begin(), dataMaterials.end());
-
-            constexpr int32_t itemIdGradeRuleConstant = 10000000;
-
-            for (const GameItem& mixItem : player.GetItemComponent().GetMixItems())
+            if (!GetMaterial(mixItems, materialLevel, player, *itemMixData))
             {
-                const int32_t mixItemId = mixItem.GetData().GetId();
-                const auto iter = std::ranges::find_if(materials, [mixItemId](const ItemMixMaterial& material) -> bool
-                    {
-                        if (material.quantity <= 0)
-                        {
-                            return false;
-                        }
-
-                        return (mixItemId % itemIdGradeRuleConstant) == (material.itemId % itemIdGradeRuleConstant);
-                    });
-                if (iter != materials.end())
-                {
-                    iter->quantity -= mixItem.GetQuantity();
-
-                    materialLevel += std::max(0, (mixItemId / itemIdGradeRuleConstant) - 1);
-                }
-            }
-
-            if (std::ranges::any_of(materials, [](const ItemMixMaterial& material) -> bool
-                {
-                    return material.quantity > 0;
-                }))
-            {
-                log = fmt::format("lack of mix item material. player: {}, skill {}, skill_level: {}, item_id: {}",
-                    player.GetCId(), skillId, skill->GetLevel(), itemId);
-
-                break;
+                log = fmt::format("fail to gather player mix items. player: {}, skill {}, skill_level: {}, item_id: {}, grade_type: {}",
+                    player.GetCId(), skillId, skill->GetLevel(), itemId, itemMixData->GetGradeType());
             }
 
             const int32_t gradeLevel = skill->GetLevel() + materialLevel;
-            const std::array<int32_t, item_mix_grade_weight_size>* weightData = itemMixDataProvider.FindWeight(itemMixData->GetGradeType(), gradeLevel);
-
-            if (!weightData)
-            {
-                log = fmt::format("fail to find weight data. player: {}, skill {}, skill_level: {}, item_id: {}, grade_type: {}grade_level: {}",
-                    player.GetCId(), skillId, skill->GetLevel(), itemId, itemMixData->GetGradeType(), gradeLevel);
-
-                break;
-            }
-
-            int32_t prev = 0;
-            boost::container::small_vector<std::pair<ItemMixGradeWeightType, int32_t>, item_mix_grade_weight_size> weights;
-
-            for (int32_t i = 0; i < item_mix_grade_weight_size; ++i)
-            {
-                const int32_t value = (*weightData)[i];
-                if (value != 0)
-                {
-                    const int32_t weight = prev + value;
-                    weights.emplace_back(static_cast<ItemMixGradeWeightType>(i), weight);
-
-                    prev = weight;
-                }
-            }
-
-            assert(!weights.empty());
-
-            const ItemMixGradeWeightType grade = [&]() -> ItemMixGradeWeightType
-                {
-                    std::uniform_int_distribution dist(0, weights.back().second);
-
-                    const int32_t rand = dist(system.GetRandomEngine());
-
-                    for (const auto& [type, value] : weights)
-                    {
-                        if (rand <= value)
-                        {
-                            return type;
-                        }
-                    }
-
-                    assert(false);
-
-                    return weights.begin()->first;
-                }();
-
-            const ItemData* itemData = [&]() -> const ItemData*
-                {
-                    const std::array<const ItemData*, item_mix_grade_count>& dataList = itemMixData->GetResultItemDataList();
-
-                    switch (grade)
-                    {
-                    case ItemMixGradeWeightType::Low:
-                        return dataList[static_cast<int32_t>(ItemMixGradeType::Low)];
-                    case ItemMixGradeWeightType::Middle:
-                        return dataList[static_cast<int32_t>(ItemMixGradeType::Middle)];
-                    case ItemMixGradeWeightType::High:
-                        return dataList[static_cast<int32_t>(ItemMixGradeType::High)];
-                    case ItemMixGradeWeightType::Super:
-                        return dataList[static_cast<int32_t>(ItemMixGradeType::Super)];
-                    case ItemMixGradeWeightType::Fail:
-                    case ItemMixGradeWeightType::Count:
-                    default:;
-                    }
-
-                    return nullptr;
-                }();
+            const ItemData* itemData = GetResultItem(system, itemMixDataProvider, *itemMixData, gradeLevel);
 
             if (itemData)
             {
-                player.Send(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), itemData->GetId(), 1, 0));
+                if (system.Get<ItemArchiveSystem>().MixItems(player, *itemData, itemMixData->GetResultItemCount(), mixItems))
+                {
+                    player.Send(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), itemData->GetId(), 1, 0));
+                }
             }
             else
             {
@@ -178,5 +87,121 @@ namespace sunlight
 
             player.Send(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), itemId, 1, 0));
         }
+    }
+
+    bool ItemMixTryMessageHandler::GetMaterial(boost::container::small_vector<ItemMixMaterial, 4>& materials,
+        int32_t& materialLevel, const GamePlayer& player, const ItemMixGroupMemberData& data) const
+    {
+        const std::vector<ItemMixMaterialData>& dataMaterials = data.GetMaterials();
+        auto mixItems = player.GetItemComponent().GetMixItems();
+
+        constexpr int32_t itemIdGradeRuleConstant = 10000000;
+
+        for (const ItemMixMaterialData& material : dataMaterials)
+        {
+            const int32_t id = material.itemId % itemIdGradeRuleConstant;
+
+            const auto iter = std::ranges::find_if(mixItems, [id](const GameItem& mixItem) -> bool
+                {
+                    return id == (mixItem.GetData().GetId() % itemIdGradeRuleConstant);
+                });
+
+            if (iter == mixItems.end())
+            {
+                return false;
+            }
+
+            const GameItem& mixItem = *iter;
+
+            if (mixItem.GetQuantity() < material.quantity)
+            {
+                return false;
+            }
+
+            materials.push_back(ItemMixMaterial{
+                .itemId = mixItem.GetId(),
+                .quantity = material.quantity,
+                });
+
+            materialLevel += std::max(0, (mixItem.GetData().GetId() / itemIdGradeRuleConstant) - 1);
+        }
+
+        return true;
+    }
+
+    auto ItemMixTryMessageHandler::GetResultItem(PlayerGroupSystem& system, const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& data, int32_t gradeLevel) const -> const ItemData*
+    {
+        const std::array<int32_t, item_mix_grade_weight_size>* weightDataPtr = dataProvider.FindWeight(data.GetGradeType(), gradeLevel);
+        if (!weightDataPtr)
+        {
+            assert(false);
+
+            return nullptr;
+        }
+
+        std::array<int32_t, item_mix_grade_weight_size> weightData = *weightDataPtr;
+
+        if (const std::optional<int32_t> difficulty = dataProvider.GetDifficulty(data.GetDifficulty(), gradeLevel);
+            difficulty.has_value())
+        {
+            int32_t& failWeight = weightData[static_cast<int32_t>(ItemMixGradeWeightType::Fail)];
+
+            failWeight = static_cast<int32_t>(std::round((static_cast<double>(failWeight) * static_cast<double>(*difficulty) / 100.0)));
+        }
+
+        int32_t prev = 0;
+        boost::container::small_vector<std::pair<ItemMixGradeWeightType, int32_t>, item_mix_grade_weight_size> weights;
+
+        for (int32_t i = 0; i < item_mix_grade_weight_size; ++i)
+        {
+            const int32_t value = weightData[i];
+            if (value != 0)
+            {
+                const int32_t weight = prev + value;
+                weights.emplace_back(static_cast<ItemMixGradeWeightType>(i), weight);
+
+                prev = weight;
+            }
+        }
+
+        assert(!weights.empty());
+
+        const ItemMixGradeWeightType grade = [&]() -> ItemMixGradeWeightType
+            {
+                std::uniform_int_distribution dist(0, weights.back().second);
+
+                const int32_t rand = dist(system.GetRandomEngine());
+
+                for (const auto& [type, value] : weights)
+                {
+                    if (rand <= value)
+                    {
+                        return type;
+                    }
+                }
+
+                assert(false);
+
+                return weights.begin()->first;
+            }();
+
+        const std::array<const ItemData*, item_mix_grade_count>& dataList = data.GetResultItemDataList();
+
+        switch (grade)
+        {
+        case ItemMixGradeWeightType::Low:
+            return dataList[static_cast<int32_t>(ItemMixGradeType::Low)];
+        case ItemMixGradeWeightType::Middle:
+            return dataList[static_cast<int32_t>(ItemMixGradeType::Middle)];
+        case ItemMixGradeWeightType::High:
+            return dataList[static_cast<int32_t>(ItemMixGradeType::High)];
+        case ItemMixGradeWeightType::Super:
+            return dataList[static_cast<int32_t>(ItemMixGradeType::Super)];
+        case ItemMixGradeWeightType::Fail:
+        case ItemMixGradeWeightType::Count:
+        default:;
+        }
+
+        return nullptr;
     }
 }

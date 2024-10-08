@@ -149,7 +149,7 @@ namespace sunlight
         void UpdateItemPosition(GameItem& item, item_position_update_type updateType);
 
         void Insert(SharedPtrNotNull<GameItem> item);
-        void Erase(game_entity_id_type id);
+        auto Erase(game_entity_id_type id) -> std::shared_ptr<GameItem>;
 
     private:
         int64_t _cid = 0;

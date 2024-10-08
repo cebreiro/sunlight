@@ -1085,17 +1085,12 @@ namespace sunlight
 
     auto PlayerItemComponent::ReleaseItem(game_entity_id_type id) -> std::shared_ptr<GameItem>
     {
-        const auto iter = _items.find(id);
-        if (iter == _items.end())
+        if (!_items.contains(id))
         {
             return {};
         }
 
-        SharedPtrNotNull<GameItem> result = std::move(iter->second);
-
-        Erase(result->GetId());
-
-        return result;
+        return Erase(id);
     }
 
     auto PlayerItemComponent::ReleaseItemByUId(int64_t id) -> std::shared_ptr<GameItem>
@@ -1646,14 +1641,14 @@ namespace sunlight
         assert(inserted);
     }
 
-    void PlayerItemComponent::Erase(game_entity_id_type id)
+    auto PlayerItemComponent::Erase(game_entity_id_type id) -> std::shared_ptr<GameItem>
     {
         const auto iter = _items.find(id);
         if (iter == _items.end())
         {
             assert(false);
 
-            return;
+            return {};
         }
 
         RemovePosition(*iter->second);
@@ -1661,6 +1656,11 @@ namespace sunlight
         AddItemRemoveLog(*iter->second);
 
         _itemsUIdIndex.erase(iter->second->GetUId().value());
+
+        std::shared_ptr<GameItem> result = std::move(iter->second);
+
         _items.erase(iter);
+
+        return result;
     }
 }
