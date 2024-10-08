@@ -1,4 +1,5 @@
 #include "item_mix_data_provider.h"
+#include "sl/emulator/service/gamedata/item_mix/item_mix_data_provider.h"
 
 #include "sl/emulator/game/data/sox_table_set.h"
 #include "sl/emulator/game/data/sox/itemmix_correcttable.h"
@@ -8,6 +9,8 @@
 #include "sl/emulator/game/data/sox/itemmix_skillexp_table.h"
 #include "sl/emulator/game/data/sox/itemmix_table.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
+#include "sl/emulator/service/gamedata/item_mix/item_mix_difficulty_data.h"
+#include "sl/emulator/service/gamedata/item_mix/item_mix_skill_exp_data.h"
 
 namespace sunlight
 {
@@ -107,6 +110,43 @@ namespace sunlight
                 }
             }
         }
+
+        const sox::ItemmixCorrecttableTable& difficultyData = tableSet.Get<sox::ItemmixCorrecttableTable>();
+        const std::vector<sox::ItemmixCorrecttable>& soxDifficultyList = difficultyData.Get();
+
+        for (int64_t i = 0; i < difficulty_count; ++i)
+        {
+            _difficultyData[i] = std::make_unique<ItemMixDifficultyData>(soxDifficultyList.back().index);
+        }
+
+        for (const sox::ItemmixCorrecttable& soxDifficulty : soxDifficultyList)
+        {
+            _difficultyData[0]->SetDifficulty(soxDifficulty.index, soxDifficulty.difficultyA);
+            _difficultyData[1]->SetDifficulty(soxDifficulty.index, soxDifficulty.difficultyB);
+            _difficultyData[2]->SetDifficulty(soxDifficulty.index, soxDifficulty.difficultyC);
+            _difficultyData[3]->SetDifficulty(soxDifficulty.index, soxDifficulty.difficultyD);
+            _difficultyData[4]->SetDifficulty(soxDifficulty.index, soxDifficulty.difficultyE);
+            _difficultyData[5]->SetDifficulty(soxDifficulty.index, soxDifficulty.difficultyF);
+        }
+
+        const sox::ItemmixSkillexpTableTable& skillExpData = tableSet.Get<sox::ItemmixSkillexpTableTable>();
+        const std::vector<sox::ItemmixSkillexpTable>& soxSkillExpList = skillExpData.Get();
+
+        for (int64_t i = 0; i < skill_exp_count; ++i)
+        {
+            _skillExpData[i] = std::make_unique<ItemMixSkillExpData>(soxSkillExpList.back().index);
+        }
+
+        for (const sox::ItemmixSkillexpTable& soxSkillExp : soxSkillExpList)
+        {
+            _skillExpData[0]->SetExp(soxSkillExp.index, soxSkillExp.difficultyA);
+            _skillExpData[1]->SetExp(soxSkillExp.index, soxSkillExp.difficultyB);
+            _skillExpData[2]->SetExp(soxSkillExp.index, soxSkillExp.difficultyC);
+        }
+    }
+
+    ItemMixDataProvider::~ItemMixDataProvider()
+    {
     }
 
     auto ItemMixDataProvider::GetName() const -> std::string_view
@@ -124,5 +164,27 @@ namespace sunlight
     auto ItemMixDataProvider::FindWeight(int32_t gradeType, int32_t level) const -> const std::array<int32_t, item_mix_grade_weight_size>*
     {
         return _weightData.Find(gradeType, level);
+    }
+
+    auto ItemMixDataProvider::GetDifficulty(int32_t difficultyLevel, int32_t level) const -> std::optional<int32_t>
+    {
+        const int32_t index = difficultyLevel - 1;
+        if (index < 0 || index >= std::ssize(_difficultyData))
+        {
+            return std::nullopt;
+        }
+
+        return _difficultyData[index]->GetDifficulty(level);
+    }
+
+    auto ItemMixDataProvider::GetLevelUpExp(int32_t expType, int32_t currentLevel) const -> std::optional<int32_t>
+    {
+        const int32_t index = expType - 1;
+        if (index < 0 || index >= std::ssize(_skillExpData))
+        {
+            return std::nullopt;
+        }
+
+        return _skillExpData[index]->GetExp(currentLevel);
     }
 }
