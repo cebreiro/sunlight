@@ -22,9 +22,10 @@ namespace sunlight
     class ItemMixGroupMemberData
     {
     public:
-        explicit ItemMixGroupMemberData(const sox::ItemmixTable& data);
+        ItemMixGroupMemberData(const sox::ItemmixTable& data, int32_t groupLevel);
 
         auto GetGroupId() const -> int32_t;
+        auto GetGroupLevel() const -> int32_t;
         auto GetName() const -> std::string_view;
         auto GetGradeType() const -> int32_t;
         auto GetMixTimeMilli() const -> int32_t;
@@ -39,6 +40,7 @@ namespace sunlight
 
     private:
         int32_t _groupId = 0;
+        int32_t _groupLevel = 0;
         std::string _name;
 
         int32_t _gradeType = 0;

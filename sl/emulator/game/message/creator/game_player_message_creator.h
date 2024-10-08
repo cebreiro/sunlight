@@ -33,6 +33,7 @@ namespace sunlight
         static auto CreateJobSkillLevelChange(const GamePlayer& player, int32_t skillId, int32_t skillLevel) -> Buffer;
         static auto CreateJobSkillPointChange(const GamePlayer& player, JobId jobId, int32_t newSkillPoint, bool unk) -> Buffer;
         static auto CreateJobPromotion(const GamePlayer& player, JobId jobId) -> Buffer;
+        static auto CreateMixSkillExpChange(const GamePlayer& player, int32_t skillId, int32_t exp) -> Buffer;
 
         static auto CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer;
 

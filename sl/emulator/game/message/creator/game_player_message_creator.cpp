@@ -227,6 +227,21 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto GamePlayerMessageCreator::CreateMixSkillExpChange(const GamePlayer& player, int32_t skillId, int32_t exp) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::SLV2_MSG);
+        writer.Write(ZoneMessageType::SLV2_SET_MIX_SKILL_EXP);
+        writer.Write<int32_t>(skillId);
+        writer.Write<int32_t>(exp);
+
+        return writer.Flush();
+    }
+
     auto GamePlayerMessageCreator::CreatePlayerGainGroupItem(const GamePlayer& player, int32_t x, int32_t y) -> Buffer
     {
         SlPacketWriter writer;

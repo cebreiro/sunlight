@@ -492,6 +492,19 @@ namespace sunlight
                 continue;
             }
 
+            switch (item.GetComponent<ItemPositionComponent>().GetPositionType())
+            {
+            case ItemPositionType::Inventory:
+            case ItemPositionType::Equipment:
+            case ItemPositionType::QuickSlot:
+                break;
+            case ItemPositionType::Pick:
+            case ItemPositionType::Vendor:
+            case ItemPositionType::Mix:
+            case ItemPositionType::Count:
+                continue;
+            }
+
             const int32_t maxOverlapCount = item.GetData().GetMaxOverlapCount();
             if (maxOverlapCount <= 1 || item.GetQuantity() >= maxOverlapCount)
             {
@@ -943,6 +956,8 @@ namespace sunlight
                 storage->Set(item, range);
                 SUNLIGHT_GAME_DEBUG_REPORT(debug_type, storage->GetDebugString());
 
+                _inventoryItemIdIndex.emplace(item->GetData().GetId(), item);
+
                 AddItemUpdatePositionLog(*item);
 
                 result.push_back(item);
@@ -958,27 +973,15 @@ namespace sunlight
 
     bool PlayerItemComponent::SwapWeaponItem()
     {
-        GameItem*& mainWeapon = Mutable(EquipmentPosition::Weapon1);
-        GameItem*& subWeapon = Mutable(EquipmentPosition::Weapon2);
+        GameItem* mainWeapon = Mutable(EquipmentPosition::Weapon1);
+        GameItem* subWeapon = Mutable(EquipmentPosition::Weapon2);
 
         if (!mainWeapon && !subWeapon)
         {
             return false;
         }
 
-        if (mainWeapon)
-        {
-            mainWeapon->GetComponent<ItemPositionComponent>().SetPage(static_cast<int8_t>(EquipmentPosition::Weapon2));
-            AddItemUpdatePositionLog(*mainWeapon);
-        }
-
-        if (subWeapon)
-        {
-            subWeapon->GetComponent<ItemPositionComponent>().SetPage(static_cast<int8_t>(EquipmentPosition::Weapon1));
-            AddItemUpdatePositionLog(*subWeapon);
-        }
-
-        std::swap(mainWeapon, subWeapon);
+        SwapItemPosition(*mainWeapon, *subWeapon);
 
         return true;
     }

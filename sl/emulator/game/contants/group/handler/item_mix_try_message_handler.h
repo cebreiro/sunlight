@@ -6,6 +6,7 @@
 namespace sunlight
 {
     class ItemData;
+    class ItemMixData;
     class ItemMixDataProvider;
     class ItemMixGroupMemberData;
 
@@ -23,7 +24,9 @@ namespace sunlight
         bool GetMaterial(boost::container::small_vector<ItemMixMaterial, 4>& materials, int32_t& materialLevel,
             const GamePlayer& player, const ItemMixGroupMemberData& data) const;
 
-        auto GetResultItem(PlayerGroupSystem& system, const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& data, int32_t gradeLevel) const
+        auto RollDiceAndGetResult(PlayerGroupSystem& system, const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& data, int32_t gradeLevel) const
             -> const ItemData*;
+
+        auto CalculateItemMixExp(const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& memberData, int32_t skillLevel, int32_t materialLevel) const -> int32_t;
     };
 }

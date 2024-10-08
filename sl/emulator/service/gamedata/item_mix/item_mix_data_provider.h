@@ -8,6 +8,7 @@ namespace sunlight
     class ItemMixData;
     class ItemMixDifficultyData;
     class ItemMixSkillExpData;
+    class ItemMixSkillExpModifyData;
 
     class ItemDataProvider;
 }
@@ -27,6 +28,7 @@ namespace sunlight
 
         auto GetDifficulty(int32_t difficultyLevel, int32_t level) const -> std::optional<int32_t>;
         auto GetLevelUpExp(int32_t expType, int32_t currentLevel) const -> std::optional<int32_t>;
+        auto GetExpModifier(int32_t difficultyLevel, int32_t skillLevel)const -> std::optional<int32_t>;
 
     private:
         std::unordered_map<int32_t, ItemMixData> _mixData;
@@ -37,5 +39,7 @@ namespace sunlight
 
         static constexpr int32_t skill_exp_count = 3;
         std::array<UniquePtrNotNull<ItemMixSkillExpData>, skill_exp_count> _skillExpData;
+
+        std::array<UniquePtrNotNull<ItemMixSkillExpModifyData>, difficulty_count> _skillExpModifiers;
     };
 }

@@ -4,8 +4,9 @@
 
 namespace sunlight
 {
-    ItemMixGroupMemberData::ItemMixGroupMemberData(const sox::ItemmixTable& data)
+    ItemMixGroupMemberData::ItemMixGroupMemberData(const sox::ItemmixTable& data, int32_t groupLevel)
         : _groupId(data.groupID)
+        , _groupLevel(groupLevel)
         , _name(data.name)
         , _gradeType(data.gradeTableType)
         , _mixTimeMilli(data.mixTime)
@@ -41,6 +42,11 @@ namespace sunlight
     auto ItemMixGroupMemberData::GetGroupId() const -> int32_t
     {
         return _groupId;
+    }
+
+    auto ItemMixGroupMemberData::GetGroupLevel() const -> int32_t
+    {
+        return _groupLevel;
     }
 
     auto ItemMixGroupMemberData::GetName() const -> std::string_view

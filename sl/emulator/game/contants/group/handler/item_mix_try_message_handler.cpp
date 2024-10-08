@@ -7,7 +7,9 @@
 #include "sl/emulator/game/contants/group/game_group.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/item_mix_message_creator.h"
+#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/player_group_system.h"
 #include "sl/emulator/server/packet/io/sl_packet_reader.h"
@@ -33,7 +35,7 @@ namespace sunlight
         do
         {
             PlayerSkillComponent& skillComponent = player.GetSkillComponent();
-            const PlayerSkill* skill = skillComponent.FindSkill(skillId);
+            PlayerSkill* skill = skillComponent.FindSkill(skillId);
 
             if (!skill)
             {
@@ -43,9 +45,10 @@ namespace sunlight
             }
 
             const ItemMixDataProvider& itemMixDataProvider = serviceLocator.Get<GameDataProvideService>().GetItemMixDataProvider();
-            const ItemMixGroupMemberData* itemMixData = itemMixDataProvider.Find(skillId)->Find(skill->GetLevel(), itemId);
+            const ItemMixData* mixData = itemMixDataProvider.Find(skillId);
+            const ItemMixGroupMemberData* mixMemberData = mixData ? mixData->Find(skill->GetLevel(), itemId) : nullptr;
 
-            if (!itemMixData)
+            if (!mixMemberData)
             {
                 log = fmt::format("fail to find item mix data. player: {}, skill {}, skill_level: {}, item_id: {}",
                     player.GetCId(), skillId, skill->GetLevel(), itemId);
@@ -53,29 +56,59 @@ namespace sunlight
                 break;
             }
 
-            boost::container::small_vector<ItemMixMaterial, 4> mixItems;
+            boost::container::small_vector<ItemMixMaterial, 4> mixMaterials;
             int32_t materialLevel = 0;
 
-            if (!GetMaterial(mixItems, materialLevel, player, *itemMixData))
+            if (!GetMaterial(mixMaterials, materialLevel, player, *mixMemberData))
             {
                 log = fmt::format("fail to gather player mix items. player: {}, skill {}, skill_level: {}, item_id: {}, grade_type: {}",
-                    player.GetCId(), skillId, skill->GetLevel(), itemId, itemMixData->GetGradeType());
+                    player.GetCId(), skillId, skill->GetLevel(), itemId, mixMemberData->GetGradeType());
             }
 
             const int32_t gradeLevel = skill->GetLevel() + materialLevel;
-            const ItemData* itemData = GetResultItem(system, itemMixDataProvider, *itemMixData, gradeLevel);
+            const ItemData* itemData = RollDiceAndGetResult(system, itemMixDataProvider, *mixMemberData, gradeLevel);
 
             if (itemData)
             {
-                if (system.Get<ItemArchiveSystem>().MixItems(player, *itemData, itemMixData->GetResultItemCount(), mixItems))
+                system.Get<ItemArchiveSystem>().OnItemMixSuccess(player, *itemData, mixMemberData->GetResultItemCount(), mixMaterials);
+
+                int32_t level = skill->GetLevel();
+                int32_t exp = skill->GetEXP();
+
+                if (skill->GetLevel() < 30)
                 {
-                    player.Send(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), itemData->GetId(), 1, 0));
+                    if (const std::optional<int32_t> requiredExp = itemMixDataProvider.GetLevelUpExp(mixData->GetDifficultyType(), level);
+                        requiredExp.has_value())
+                    {
+                        const int32_t addExp = CalculateItemMixExp(itemMixDataProvider, *mixMemberData, level, materialLevel);
+
+                        exp += addExp;
+                        if (exp >= *requiredExp)
+                        {
+                            ++level;
+
+                            player.Defer(GamePlayerMessageCreator::CreateJobSkillLevelChange(player, skill->GetId(), level));
+                        }
+                    }
+
+                    skill->SetBaseLevel(level);
+                    skill->SetEXP(exp);
+
+                    player.Defer(GamePlayerMessageCreator::CreateMixSkillExpChange(player, skillId, exp));
                 }
+
+                system.Get<GameRepositorySystem>().SaveMixSkillExp(player, skillId, level, exp);
+
+                player.Defer(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), itemData->GetId(), level, exp));
             }
             else
             {
-                player.Send(ItemMixMessageCreator::CreateItemMixFailure(group.GetId(), 1, 0));
+                system.Get<ItemArchiveSystem>().OnItemMixFail(player, mixMaterials);
+                
+                player.Defer(ItemMixMessageCreator::CreateItemMixFailure(group.GetId(), skill->GetLevel(), skill->GetEXP()));
             }
+
+            player.FlushDeferred();
 
             result = true;
 
@@ -129,12 +162,14 @@ namespace sunlight
         return true;
     }
 
-    auto ItemMixTryMessageHandler::GetResultItem(PlayerGroupSystem& system, const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& data, int32_t gradeLevel) const -> const ItemData*
+    auto ItemMixTryMessageHandler::RollDiceAndGetResult(PlayerGroupSystem& system, const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& data, int32_t gradeLevel) const -> const ItemData*
     {
         const std::array<int32_t, item_mix_grade_weight_size>* weightDataPtr = dataProvider.FindWeight(data.GetGradeType(), gradeLevel);
         if (!weightDataPtr)
         {
-            assert(false);
+            SUNLIGHT_LOG_ERROR(system.GetServiceLocator(),
+                fmt::format("fail to find item mix weight data. grade_type: {}, grade_level: {}",
+                    data.GetGradeType(), gradeLevel));
 
             return nullptr;
         }
@@ -203,5 +238,18 @@ namespace sunlight
         }
 
         return nullptr;
+    }
+
+    auto ItemMixTryMessageHandler::CalculateItemMixExp(const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& memberData, int32_t skillLevel, int32_t materialLevel) const -> int32_t
+    {
+        const int32_t levelModifer = std::max(1, memberData.GetGroupLevel() * 2 / 3);
+        const int32_t materialExp = materialLevel * 50;
+
+        const int32_t baseExp = (400 + materialExp) * levelModifer;
+        const int32_t modifier = dataProvider.GetExpModifier(memberData.GetDifficulty(), skillLevel).value_or(100);
+
+        const int32_t result = static_cast<int32_t>(std::round(static_cast<double>(baseExp) * static_cast<double>(modifier) / 100.0));
+
+        return result;
     }
 }

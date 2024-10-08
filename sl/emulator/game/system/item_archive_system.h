@@ -41,7 +41,6 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        bool MixItems(GamePlayer& player, const ItemData& resultItemData, int32_t resultItemCount, std::span<const ItemMixMaterial> materials);
         bool PurchaseStreetVendorItem(GamePlayer& host, GamePlayer& guest, game_entity_id_type itemId, int32_t price);
 
         void Purchase(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId, int32_t itemId, int32_t page, int32_t x, int32_t y, int32_t quantity);
@@ -60,6 +59,8 @@ namespace sunlight
         void OpenAccountStorage(GamePlayer& player);
 
     public:
+        void OnItemMixSuccess(GamePlayer& player, const ItemData& resultItemData, int32_t resultItemCount, std::span<const ItemMixMaterial> materials);
+        void OnItemMixFail(GamePlayer& player, std::span<const ItemMixMaterial> materials);
         bool OnVendorSaleStorageClick(GamePlayer& player, int32_t index);
 
     public:
