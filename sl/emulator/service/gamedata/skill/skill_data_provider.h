@@ -1,5 +1,5 @@
 #pragma once
-#include "sl/emulator/game/contants/job/job_id.h"
+#include "sl/emulator/game/contents/job/job_id.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_data.h"
 
 namespace sunlight

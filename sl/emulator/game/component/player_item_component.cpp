@@ -1,7 +1,7 @@
 #include "player_item_component.h"
 
 #include "sl/emulator/game/component/item_position_component.h"
-#include "sl/emulator/game/contants/item/item_slot_stroage.h"
+#include "sl/emulator/game/contents/item/item_slot_stroage.h"
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"

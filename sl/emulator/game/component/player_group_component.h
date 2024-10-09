@@ -1,5 +1,5 @@
 #pragma once
-#include "sl/emulator/game/contants/group/game_group_state.h"
+#include "sl/emulator/game/contents/group/game_group_state.h"
 #include "sl/emulator/game/component/game_component.h"
 
 namespace sunlight

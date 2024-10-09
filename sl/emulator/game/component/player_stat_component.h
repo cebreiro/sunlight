@@ -1,8 +1,8 @@
 #pragma once
 #include "sl/emulator/game/component/game_component.h"
-#include "sl/emulator/game/contants/stat/player_stat_type.h"
-#include "sl/emulator/game/contants/stat/stat.h"
-#include "sl/emulator/game/contants/stat/recovery_stat.h"
+#include "sl/emulator/game/contents/stat/player_stat_type.h"
+#include "sl/emulator/game/contents/stat/stat.h"
+#include "sl/emulator/game/contents/stat/recovery_stat.h"
 #include "sl/emulator/game/time/game_time_service.h"
 
 namespace sunlight::db::dto

@@ -1,7 +1,7 @@
 #pragma once
-#include "sl/emulator/game/contants/stat/hp_change_floater_type.h"
-#include "sl/emulator/game/contants/stat/sp_change_floater_type.h"
-#include "sl/emulator/game/contants/stat/stat_value.h"
+#include "sl/emulator/game/contents/stat/hp_change_floater_type.h"
+#include "sl/emulator/game/contents/stat/sp_change_floater_type.h"
+#include "sl/emulator/game/contents/stat/stat_value.h"
 #include "sl/emulator/game/system/game_system.h"
 
 namespace sunlight::sox

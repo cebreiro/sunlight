@@ -1,8 +1,8 @@
 #pragma once
 #include "sl/data/sox/item/equipment_type.h"
-#include "sl/emulator/game/contants/group/item_mix_material.h"
-#include "sl/emulator/game/contants/item/equipment_position.h"
-#include "sl/emulator/game/contants/item/item_remove_result.h"
+#include "sl/emulator/game/contents/group/item_mix_material.h"
+#include "sl/emulator/game/contents/item/equipment_position.h"
+#include "sl/emulator/game/contents/item/item_remove_result.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/system/game_system.h"
 

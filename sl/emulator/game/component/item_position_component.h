@@ -1,6 +1,6 @@
 #pragma once
 #include "sl/emulator/game/component/game_component.h"
-#include "sl/emulator/game/contants/item/item_position.h"
+#include "sl/emulator/game/contents/item/item_position.h"
 
 namespace sunlight
 {

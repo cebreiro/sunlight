@@ -3,7 +3,7 @@
 #include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_item_trade_component.h"
-#include "sl/emulator/game/contants/group/game_group.h"
+#include "sl/emulator/game/contents/group/game_group.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"

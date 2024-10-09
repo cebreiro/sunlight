@@ -2,7 +2,7 @@
 
 #include "sl/emulator/game/component/player_profile_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
-#include "sl/emulator/game/contants/quest/quest.h"
+#include "sl/emulator/game/contents/quest/quest.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/database/database_service.h"

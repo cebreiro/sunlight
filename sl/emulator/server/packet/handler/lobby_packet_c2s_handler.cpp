@@ -6,7 +6,7 @@
 
 #include "shared/network/session/session.h"
 #include "sl/emulator/game/game_constant.h"
-#include "sl/emulator/game/contants/item/equipment_position.h"
+#include "sl/emulator/game/contents/item/equipment_position.h"
 #include "sl/emulator/server/lobby_server.h"
 #include "sl/emulator/server/server_connection.h"
 #include "sl/emulator/server/server_constant.h"

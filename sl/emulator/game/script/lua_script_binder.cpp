@@ -2,10 +2,10 @@
 
 #include <sol/sol.hpp>
 
-#include "sl/emulator/game/contants/event_script/event_script.h"
-#include "sl/emulator/game/contants/npc/npc_talk_box.h"
-#include "sl/emulator/game/contants/quest/quest.h"
-#include "sl/emulator/game/contants/quest/quest_change.h"
+#include "sl/emulator/game/contents/event_script/event_script.h"
+#include "sl/emulator/game/contents/npc/npc_talk_box.h"
+#include "sl/emulator/game/contents/quest/quest.h"
+#include "sl/emulator/game/contents/quest/quest_change.h"
 #include "sl/emulator/game/script/class/lua_npc.h"
 #include "sl/emulator/game/script/class/lua_player.h"
 #include "sl/emulator/game/script/class/lua_system.h"

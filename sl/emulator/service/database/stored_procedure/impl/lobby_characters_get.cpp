@@ -2,7 +2,7 @@
 
 #include <boost/locale.hpp>
 
-#include "sl/emulator/game/contants/item/equipment_position.h"
+#include "sl/emulator/game/contents/item/equipment_position.h"
 #include "sl/emulator/server/server_constant.h"
 
 namespace sunlight::db::sp

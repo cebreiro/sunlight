@@ -1,6 +1,6 @@
 #pragma once
-#include "sl/emulator/game/contants/group/street_vendor_start_result.h"
-#include "sl/emulator/game/contants/group/street_vendor_purchase_result.h"
+#include "sl/emulator/game/contents/group/street_vendor_start_result.h"
+#include "sl/emulator/game/contents/group/street_vendor_purchase_result.h"
 
 namespace sunlight
 {

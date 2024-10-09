@@ -2,9 +2,9 @@
 
 #include <sol/state.hpp>
 
-#include "sl/emulator/game/contants/event_script/event_script.h"
-#include "sl/emulator/game/contants/npc/npc_talk_box.h"
-#include "sl/emulator/game/contants/quest/quest_change.h"
+#include "sl/emulator/game/contents/event_script/event_script.h"
+#include "sl/emulator/game/contents/npc/npc_talk_box.h"
+#include "sl/emulator/game/contents/quest/quest_change.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"

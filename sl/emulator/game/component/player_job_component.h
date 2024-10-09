@@ -1,8 +1,8 @@
 #pragma once
 #include "sl/emulator/service/database/dto/character.h"
 #include "sl/emulator/game/component/game_component.h"
-#include "sl/emulator/game/contants/job/job_type.h"
-#include "sl/emulator/game/contants/job/job.h"
+#include "sl/emulator/game/contents/job/job_type.h"
+#include "sl/emulator/game/contents/job/job.h"
 
 namespace sunlight
 {

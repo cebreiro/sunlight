@@ -1,6 +1,6 @@
 #pragma once
 #include "sl/emulator/game/component/game_component.h"
-#include "sl/emulator/game/contants/quest/quest.h"
+#include "sl/emulator/game/contents/quest/quest.h"
 
 namespace sunlight
 {

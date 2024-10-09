@@ -1,5 +1,5 @@
 #pragma once
-#include "sl/emulator/game/contants/npc/npc_item_shop_result.h"
+#include "sl/emulator/game/contents/npc/npc_item_shop_result.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/entity/game_entity_type.h"
 

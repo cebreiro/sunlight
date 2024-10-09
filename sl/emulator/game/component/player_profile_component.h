@@ -1,6 +1,6 @@
 #pragma once
-#include "sl/emulator/game/contants/profile/player_profile_setting.h"
-#include "sl/emulator/game/contants/profile/player_profile_introduction.h"
+#include "sl/emulator/game/contents/profile/player_profile_setting.h"
+#include "sl/emulator/game/contents/profile/player_profile_introduction.h"
 #include "sl/emulator/game/component/game_component.h"
 
 namespace sunlight

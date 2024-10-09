@@ -1,5 +1,5 @@
 #pragma once
-#include "sl/emulator/game/contants/group/item_mix_window_open_result.h"
+#include "sl/emulator/game/contents/group/item_mix_window_open_result.h"
 
 namespace sunlight
 {

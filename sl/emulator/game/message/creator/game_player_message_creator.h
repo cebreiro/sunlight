@@ -1,9 +1,9 @@
 #pragma once
-#include "sl/emulator/game/contants/group/game_group_type.h"
-#include "sl/emulator/game/contants/item/equipment_position.h"
-#include "sl/emulator/game/contants/job/job_id.h"
-#include "sl/emulator/game/contants/stat/hp_change_floater_type.h"
-#include "sl/emulator/game/contants/stat/sp_change_floater_type.h"
+#include "sl/emulator/game/contents/group/game_group_type.h"
+#include "sl/emulator/game/contents/item/equipment_position.h"
+#include "sl/emulator/game/contents/job/job_id.h"
+#include "sl/emulator/game/contents/stat/hp_change_floater_type.h"
+#include "sl/emulator/game/contents/stat/sp_change_floater_type.h"
 
 namespace sunlight
 {

@@ -1,6 +1,6 @@
 #include "normal_message_creator.h"
 
-#include "sl/emulator/game/contants/group/game_group_type.h"
+#include "sl/emulator/game/contents/group/game_group_type.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"

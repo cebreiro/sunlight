@@ -1,6 +1,6 @@
 #include "item_mix_message_creator.h"
 
-#include "sl/emulator/game/contants/group/game_group_type.h"
+#include "sl/emulator/game/contents/group/game_group_type.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/entity/game_item.h"

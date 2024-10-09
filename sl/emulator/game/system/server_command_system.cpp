@@ -2,8 +2,8 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "sl/emulator/game/contants/server_command/server_command_interface.h"
-#include "sl/emulator/game/contants/server_command/server_command_register.h"
+#include "sl/emulator/game/contents/server_command/server_command_interface.h"
+#include "sl/emulator/game/contents/server_command/server_command_register.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/system/entity_movement_system.h"

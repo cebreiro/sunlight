@@ -1,7 +1,7 @@
 #include "player_quest_system.h"
 
 #include "sl/emulator/game/component/player_quest_component.h"
-#include "sl/emulator/game/contants/quest/quest_change.h"
+#include "sl/emulator/game/contents/quest/quest_change.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/system/game_repository_system.h"

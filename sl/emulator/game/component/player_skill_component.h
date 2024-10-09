@@ -1,6 +1,6 @@
 #pragma once
 #include "sl/emulator/game/component/game_component.h"
-#include "sl/emulator/game/contants/skill/player_skill.h"
+#include "sl/emulator/game/contents/skill/player_skill.h"
 
 namespace sunlight
 {

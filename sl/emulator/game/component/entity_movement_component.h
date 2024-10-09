@@ -1,6 +1,6 @@
 #pragma once
 #include "sl/emulator/game/component/game_component.h"
-#include "sl/emulator/game/contants/movement/forward_movement.h"
+#include "sl/emulator/game/contents/movement/forward_movement.h"
 #include "sl/emulator/game/time/game_time.h"
 
 namespace sunlight

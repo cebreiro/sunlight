@@ -1,9 +1,9 @@
 #pragma once
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/game_component.h"
-#include "sl/emulator/game/contants/npc/npc_shop_item_bucket.h"
-#include "sl/emulator/game/contants/item/inventory_position.h"
-#include "sl/emulator/game/contants/item/item_slot_stroage.h"
+#include "sl/emulator/game/contents/npc/npc_shop_item_bucket.h"
+#include "sl/emulator/game/contents/item/inventory_position.h"
+#include "sl/emulator/game/contents/item/item_slot_stroage.h"
 #include "sl/emulator/game/debug/game_debug_type.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/time/game_time.h"

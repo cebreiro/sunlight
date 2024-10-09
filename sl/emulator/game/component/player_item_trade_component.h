@@ -1,7 +1,7 @@
 #pragma once
 #include "sl/emulator/game/component/game_component.h"
-#include "sl/emulator/game/contants/item/item_slot_stroage.h"
-#include "sl/emulator/game/contants/item/item_trade_origin_state.h"
+#include "sl/emulator/game/contents/item/item_slot_stroage.h"
+#include "sl/emulator/game/contents/item/item_trade_origin_state.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 
 namespace sunlight

@@ -2,7 +2,7 @@
 
 #include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
-#include "sl/emulator/game/contants/state/game_entity_state.h"
+#include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"

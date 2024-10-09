@@ -1,5 +1,5 @@
 #pragma once
-#include "sl/emulator/game/contants/quest/quest.h"
+#include "sl/emulator/game/contents/quest/quest.h"
 
 namespace sol
 {
