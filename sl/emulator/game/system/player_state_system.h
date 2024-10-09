@@ -42,6 +42,7 @@ namespace sunlight
 
     private:
         void HandleNPCConversation(GamePlayer& player, game_entity_id_type target);
+        void HandlePlayerInteraction(GamePlayer& player, game_entity_id_type target);
         void HandleScriptState(const ZoneMessage& message);
 
     private:

@@ -328,6 +328,26 @@ namespace sunlight
         player.Send(NPCMessageCreator::CreateTalkBoxClose(target));
     }
 
+    void PlayerStateSystem::HandlePlayerInteraction(GamePlayer& player, game_entity_id_type target)
+    {
+        const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::Player, target);
+        if (!entity)
+        {
+            return;
+        }
+
+        GamePlayer* targetPlayer = entity->Cast<GamePlayer>();
+        assert(targetPlayer);
+
+        const PlayerGroupComponent& groupComponent = targetPlayer->GetGroupComponent();
+        if (!groupComponent.HasGroup() || groupComponent.GetGroupType() != GameGroupType::StreetVendor)
+        {
+            return;
+        }
+
+        Get<PlayerGroupSystem>().AddStreetVendorGuest(groupComponent.GetGroupId(), player);
+    }
+
     void PlayerStateSystem::HandleScriptState(const ZoneMessage& message)
     {
         // selection == 0 -> exit state
@@ -419,26 +439,7 @@ namespace sunlight
         break;
         case GameEntityStateType::InteractWithPlayer:
         {
-            do
-            {
-                const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::Player, state.targetId);
-                if (!entity)
-                {
-                    break;
-                }
-
-                GamePlayer* targetPlayer = entity->Cast<GamePlayer>();
-                assert(targetPlayer);
-
-                const PlayerGroupComponent& groupComponent = targetPlayer->GetGroupComponent();
-                if (!groupComponent.HasGroup() || groupComponent.GetGroupType() != GameGroupType::StreetVendor)
-                {
-                    break;
-                }
-
-                Get<PlayerGroupSystem>().AddStreetVendorGuest(groupComponent.GetGroupId(), player);
-
-            } while (false);
+            HandlePlayerInteraction(player, state.targetId);
         }
         break;
         case GameEntityStateType::None:
