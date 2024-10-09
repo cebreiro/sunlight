@@ -32,40 +32,8 @@ namespace sunlight
     bool ServerCommandItemAdd::Execute(GamePlayer& player, int32_t itemId, int32_t quantity) const
     {
         const bool added = _system.Get<ItemArchiveSystem>().AddItem(player, itemId, quantity);
-        const ItemDataProvider& itemDataProvider = _system.GetServiceLocator().Get<GameDataProvideService>().GetItemDataProvider();
-        const ItemData* itemData = itemDataProvider.Find(12500060);
-
-        auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData, 1);
-        item->AddComponent(std::make_unique<ItemPositionComponent>());
-        item->GetComponent<ItemPositionComponent>().SetPositionType(ItemPositionType::Inventory);
-        item->GetComponent<ItemPositionComponent>().SetPosition(0, -1, -1);
-
-        player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *item, 1));
-        player.Send(ItemArchiveMessageCreator::CreateItemRemove(player, item->GetId(), item->GetType()));
 
         return added;
-    }
-
-    ServerCommandItemGain::ServerCommandItemGain(ServerCommandSystem& system)
-        : _system(system)
-    {
-    }
-
-    auto ServerCommandItemGain::GetName() const -> std::string_view
-    {
-        return "item_gain";
-    }
-
-    auto ServerCommandItemGain::GetRequiredGmLevel() const -> int8_t
-    {
-        return 0;
-    }
-
-    bool ServerCommandItemGain::Execute(GamePlayer& player, int32_t itemId, int32_t quantity) const
-    {
-        int32_t addQuantity = 0;
-
-        return _system.Get<ItemArchiveSystem>().GainItem(player, itemId, quantity, addQuantity);
     }
 
     ServerCommandItemSpawn::ServerCommandItemSpawn(ServerCommandSystem& system)

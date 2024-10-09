@@ -63,9 +63,7 @@ namespace sunlight
 
         bool TryRemoveInventoryItem(int32_t itemId, int32_t quantity, std::vector<item_remove_result_type>* result);
 
-        bool TryStackItem(int32_t itemId, int32_t quantity,
-            int32_t& usedQuantity, std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result = nullptr);
-        bool TryStackQuickSlotItem(const ItemData& itemData, int32_t quantity,
+        bool TryStackInventoryItem(int32_t itemId, int32_t quantity,
             int32_t& usedQuantity, std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result = nullptr);
 
     public:
@@ -163,7 +161,9 @@ namespace sunlight
         int32_t _inventoryPage = 0;
         std::array<UniquePtrNotNull<ItemSlotStorage>, GameConstant::MAX_INVENTORY_PAGE_SIZE> _inventorySlot;
         boost::unordered::unordered_flat_set<PtrNotNull<GameItem>> _itemStorageQueryResult;
+
         boost::container::flat_multimap<int32_t, PtrNotNull<GameItem>> _inventoryItemIdIndex;
+        std::vector<PtrNotNull<GameItem>> _sortedStackableItemCache;
 
         std::array<GameItem*, static_cast<int32_t>(EquipmentPosition::Count)> _equipments = {};
 

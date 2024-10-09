@@ -127,6 +127,7 @@ namespace sunlight
         {
             Get<GameRepositorySystem>().Save(host, guest, std::move(transaction));
 
+            AddDummyPacketForInventoryRefresh(guest);
             guest.FlushDeferred();
         }
 
@@ -449,6 +450,13 @@ namespace sunlight
             {
                 addedQuantity = resultAddedCount;
 
+                if (player.HasDeferred())
+                {
+                    AddDummyPacketForInventoryRefresh(player);
+
+                    player.FlushDeferred();
+                }
+
                 SaveChanges(player);
             });
 
@@ -456,93 +464,28 @@ namespace sunlight
 
         if (itemData.GetMaxOverlapCount() > 1)
         {
-            bool fillItemQuantity = true;
-
-            // exceptional case, client rules
-            // if rules are not followed, client rejects to add overlap item quantity
-            // so server-client item quantity synchronization is break
-            // exceptional case 1
-            if (itemData.IsAbleToUseQuickSlot())
+            while (item->GetQuantity() > 0)
             {
-                while (item->GetQuantity() > 0)
+                int32_t usedCount = 0;
+                std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>> result;
+
+                if (itemComponent.TryStackInventoryItem(itemData.GetId(), item->GetQuantity(), usedCount, &result))
                 {
-                    int32_t usedCount = 0;
-                    std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>> result;
+                    assert(usedCount > 0 && usedCount <= item->GetQuantity());
 
-                    if (itemComponent.TryStackQuickSlotItem(itemData, item->GetQuantity(), usedCount, &result))
+                    item->SetQuantity(item->GetQuantity() - usedCount);
+
+                    resultAddedCount += usedCount;
+
+                    for (const auto& overlappedItem : result | std::views::keys)
                     {
-                        assert(usedCount > 0 && usedCount <= item->GetQuantity());
-
-                        fillItemQuantity = false;
-
-                        item->SetQuantity(item->GetQuantity() - usedCount);
-
-                        resultAddedCount += usedCount;
-
-                        for (const auto& [overlappedItem, overlappedQuantity] : result)
-                        {
-                            player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *overlappedItem, overlappedQuantity));
-                        }
-                    }
-                    else
-                    {
-                        break;
+                        player.Defer(ItemArchiveMessageCreator::CreateItemRemove(player, overlappedItem->GetId(), overlappedItem->GetType()));
+                        player.Defer(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *overlappedItem));
                     }
                 }
-            }
-
-            // exceptional case 2
-            if (itemData.GetEtcData() && itemData.GetEtcData()->bulletType)
-            {
-                const GameItem* bulletItem = itemComponent.GetEquipmentItem(EquipmentPosition::Bullet);
-                if (bulletItem)
+                else
                 {
-                    if (bulletItem->GetData().GetId() == itemData.GetId() &&
-                        bulletItem->GetQuantity() < itemData.GetMaxOverlapCount())
-                    {
-                        fillItemQuantity = false;
-
-                        const int32_t newQuantity = std::min(itemData.GetMaxOverlapCount(), bulletItem->GetQuantity() + item->GetQuantity());
-                        const int32_t added = newQuantity - bulletItem->GetQuantity();
-
-                        resultAddedCount += added;
-
-                        item->SetQuantity(item->GetQuantity() - added);
-                        assert(item->GetQuantity() >= 0);
-
-                        [[maybe_unused]]
-                        const bool success = itemComponent.SetItemQuantity(bulletItem->GetId(), newQuantity);
-                        assert(success);
-
-                        player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *bulletItem, added));
-                    }
-                }
-            }
-
-            if (fillItemQuantity)
-            {
-                while (item->GetQuantity() > 0)
-                {
-                    int32_t usedCount = 0;
-                    std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>> result;
-
-                    if (itemComponent.TryStackItem(itemData.GetId(), item->GetQuantity(), usedCount, &result))
-                    {
-                        assert(usedCount > 0 && usedCount <= item->GetQuantity());
-
-                        item->SetQuantity(item->GetQuantity() - usedCount);
-
-                        resultAddedCount += usedCount;
-
-                        for (const auto& [overlappedItem, overlappedQuantity] : result)
-                        {
-                            player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *overlappedItem, overlappedQuantity));
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
         }
@@ -559,22 +502,6 @@ namespace sunlight
             item->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
         }
 
-        if (itemData.IsAbleToUseQuickSlot())
-        {
-            const std::optional<QuickSlotPosition>& pos = itemComponent.FindEmptyQuickSlotPosition();
-            if (pos.has_value())
-            {
-                if (itemComponent.AddQuickSlotItem(item, &pos.value()))
-                {
-                    player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *item, item->GetQuantity()));
-
-                    resultAddedCount += item->GetQuantity();
-
-                    return true;
-                }
-            }
-        }
-
         const std::optional<InventoryPosition>& pos = itemComponent.FindEmptyInventoryPosition(itemData.GetWidth(), itemData.GetHeight());
         if (!pos.has_value())
         {
@@ -586,7 +513,7 @@ namespace sunlight
             return false;
         }
 
-        player.Send(ItemArchiveMessageCreator::CreateItemAdd(player, *item, item->GetQuantity()));
+        player.Defer(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *item));
 
         resultAddedCount += item->GetQuantity();
 
@@ -755,7 +682,11 @@ namespace sunlight
             {
                 added = itemComponent.AddInventoryItem(std::move(resultItem), &pos.value());
 
-                player.Send(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *resultItemPtr));
+                player.Defer(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *resultItemPtr));
+
+                AddDummyPacketForInventoryRefresh(player);
+
+                player.FlushDeferred();
             }
             else if (itemComponent.GetPickedItem() == nullptr)
             {
@@ -948,7 +879,7 @@ namespace sunlight
                 stackResult.clear();
                 int32_t usedQuantity = 0;
 
-                if (itemComponent.TryStackItem(itemData.GetId(), quantity, usedQuantity, &stackResult))
+                if (itemComponent.TryStackInventoryItem(itemData.GetId(), quantity, usedQuantity, &stackResult))
                 {
                     assert(usedQuantity > 0 && usedQuantity <= quantity);
 
@@ -961,9 +892,10 @@ namespace sunlight
                         itemComponent.SetItemQuantity(mixItem.GetId(), quantity - usedQuantity);
                     }
 
-                    for (const auto& [overlappedItem, overlappedQuantity] : stackResult)
+                    for (const auto& overlappedItem : stackResult | std::views::keys)
                     {
-                        player.Defer(ItemArchiveMessageCreator::CreateItemAdd(player, *overlappedItem, overlappedQuantity));
+                        player.Defer(ItemArchiveMessageCreator::CreateItemRemove(player, overlappedItem->GetId(), overlappedItem->GetType()));
+                        player.Defer(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *overlappedItem));
                     }
                 }
             }
@@ -979,11 +911,13 @@ namespace sunlight
 
         for (const GameItem& item : moveItems | notnull::reference)
         {
-            player.Defer(ItemArchiveMessageCreator::CreateItemAdd(player, item, item.GetQuantity()));
+            player.Defer(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, item));
         }
 
         if (player.HasDeferred())
         {
+            AddDummyPacketForInventoryRefresh(player);
+
             player.FlushDeferred();
         }
 
@@ -1692,6 +1626,12 @@ namespace sunlight
         item->AddComponent(std::make_unique<ItemPositionComponent>());
 
         return item;
+    }
+
+    void ItemArchiveSystem::AddDummyPacketForInventoryRefresh(GamePlayer& player)
+    {
+        player.Defer(ItemArchiveMessageCreator::CreateItemAddForRefresh(player));
+        player.Defer(ItemArchiveMessageCreator::CreateItemRemoveForRefresh(player));
     }
 
     void ItemArchiveSystem::SaveChanges(GamePlayer& player)

@@ -473,7 +473,7 @@ namespace sunlight
         return true;
     }
 
-    bool PlayerItemComponent::TryStackItem(int32_t itemId, int32_t quantity, int32_t& usedQuantity,
+    bool PlayerItemComponent::TryStackInventoryItem(int32_t itemId, int32_t quantity, int32_t& usedQuantity,
         std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result)
     {
         if (quantity <= 0)
@@ -483,92 +483,58 @@ namespace sunlight
             return false;
         }
 
-        int32_t remainQuantity = quantity;
-
-        for (GameItem& item : _items | std::views::values | notnull::reference)
-        {
-            if (item.GetData().GetId() != itemId)
-            {
-                continue;
-            }
-
-            switch (item.GetComponent<ItemPositionComponent>().GetPositionType())
-            {
-            case ItemPositionType::Inventory:
-            case ItemPositionType::Equipment:
-            case ItemPositionType::QuickSlot:
-                break;
-            case ItemPositionType::Pick:
-            case ItemPositionType::Vendor:
-            case ItemPositionType::Mix:
-            case ItemPositionType::Count:
-                continue;
-            }
-
-            const int32_t maxOverlapCount = item.GetData().GetMaxOverlapCount();
-            if (maxOverlapCount <= 1 || item.GetQuantity() >= maxOverlapCount)
-            {
-                continue;
-            }
-
-            const int32_t possibleCount = maxOverlapCount - item.GetQuantity();
-            const int32_t addQuantity = possibleCount > remainQuantity ? remainQuantity : possibleCount;
-
-            remainQuantity -= addQuantity;
-            assert(remainQuantity >= 0);
-
-            item.SetQuantity(item.GetQuantity() + addQuantity);
-            assert(item.GetQuantity() <= maxOverlapCount);
-
-            AddItemUpdateQuantityLog(item);
-
-            if (result)
-            {
-                result->emplace_back(&item, addQuantity);
-            }
-
-            if (remainQuantity <= 0)
-            {
-                break;
-            }
-        }
-
-        usedQuantity = (quantity - remainQuantity);
-
-        return remainQuantity != quantity;
-    }
-
-    bool PlayerItemComponent::TryStackQuickSlotItem(const ItemData& itemData, int32_t quantity, int32_t& usedQuantity,
-        std::vector<std::pair<PtrNotNull<const GameItem>, int32_t>>* result)
-    {
-        if (quantity <= 0)
-        {
-            assert(false);
-
-            return false;
-        }
-
-        if (!itemData.IsAbleToUseQuickSlot())
+        const auto [begin, end] = _inventoryItemIdIndex.equal_range(itemId);
+        if (begin == end)
         {
             return false;
         }
 
+        _sortedStackableItemCache.clear();
+        _sortedStackableItemCache.insert_range(_sortedStackableItemCache.end(), std::ranges::subrange(begin, end) | std::views::values);
+        std::ranges::sort(_sortedStackableItemCache, [](PtrNotNull<const GameItem> lhs, PtrNotNull<const GameItem> rhs) -> bool
+            {
+                const int32_t lQuantity = lhs->GetQuantity();
+                const int32_t rQuantity = rhs->GetQuantity();
+
+                if (lQuantity == rQuantity)
+                {
+                    const ItemPositionComponent& lPositionComponent = lhs->GetComponent<ItemPositionComponent>();
+                    const ItemPositionComponent& rPositionComponent = rhs->GetComponent<ItemPositionComponent>();
+
+                    const int8_t lPage = lPositionComponent.GetPage();
+                    const int8_t rPage = rPositionComponent.GetPage();
+
+                    if (lPage == rPage)
+                    {
+                        const int8_t lY = lPositionComponent.GetY();
+                        const int8_t rY = rPositionComponent.GetY();
+
+                        if (lY == rY)
+                        {
+                            assert(lPositionComponent.GetX() != rPositionComponent.GetX());
+
+                            return lPositionComponent.GetX() < rPositionComponent.GetX();
+                        }
+
+                        return lY < rY;
+                    }
+
+                    return lPage < rPage;
+                }
+
+                return lQuantity < rQuantity;
+            });
+
         int32_t remainQuantity = quantity;
 
-        for (GameItem& item : _items | std::views::values | notnull::reference)
+        for (GameItem& item : _sortedStackableItemCache | notnull::reference)
         {
-            if (item.GetData().GetId() != itemData.GetId())
-            {
-                continue;
-            }
-
-            if (!item.GetComponent<ItemPositionComponent>().IsInQuickSlot())
-            {
-                continue;
-            }
+            assert(item.GetData().GetId() == itemId);
+            assert(item.GetData().GetMaxOverlapCount() > 1);
+            assert(item.GetComponent<ItemPositionComponent>().GetPositionType() == ItemPositionType::Inventory);
 
             const int32_t maxOverlapCount = item.GetData().GetMaxOverlapCount();
-            if (maxOverlapCount <= 1 || item.GetQuantity() >= maxOverlapCount)
+            if (item.GetQuantity() >= maxOverlapCount)
             {
                 continue;
             }

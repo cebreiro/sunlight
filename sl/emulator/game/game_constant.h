@@ -39,6 +39,13 @@ namespace sunlight
         static constexpr int32_t MAX_MIX_SKILL_DEGREE = 3;
         static constexpr int32_t MAX_MIX_SKILL_LEVEL = 30;
 
+        // when client receive 'item add' packet, ignores server's item position
+        // the client's item add/stack priority is totally chaos to me
+        // so use 'inventory add item' packet that client respects server item position
+        // even though client doesn't refresh UI when receives 'inventory add item'
+        // sending dummy 'item add' and 'item remove' is required to refresh UI
+        static constexpr int32_t ITEM_ENTITY_ID_FOR_INVENTORY_REFRESH = 0x2F2F2F2F; // magic number. no intention
+
         // client 0x460C50
         static const std::array<int32_t, MAX_MIX_SKILL_LEVEL> MIX_SKILL_LEVEL_UP_REQUIRED_EXP_D1;
         static const std::array<int32_t, MAX_MIX_SKILL_LEVEL> MIX_SKILL_LEVEL_UP_REQUIRED_EXP_D2;

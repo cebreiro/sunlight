@@ -13,6 +13,8 @@
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/service/database/transaction/item/item_transaction.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
 namespace sunlight
 {
@@ -231,6 +233,10 @@ namespace sunlight
             {
                 player.Defer(std::move(buffer));
             }
+
+            // to refresh client inventory UI
+            player.Defer(ItemArchiveMessageCreator::CreateItemAddForRefresh(player));
+            player.Defer(ItemArchiveMessageCreator::CreateItemRemoveForRefresh(player));
 
             player.FlushDeferred();
         }

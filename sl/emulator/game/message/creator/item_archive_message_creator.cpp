@@ -167,7 +167,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto ItemArchiveMessageCreator::CreateItemAdd(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer
+    auto ItemArchiveMessageCreator::CreateItemAddForRefresh(const GamePlayer& player) -> Buffer
     {
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
@@ -178,33 +178,30 @@ namespace sunlight
         writer.Write(ZoneMessageType::ITEMARCHIVE_ADDITEM);
 
         {
-            const ItemPositionComponent& positionComponent = item.GetComponent<ItemPositionComponent>();
-
             PacketWriter objectWriter;
 
-            // client 0x459BE0
-            objectWriter.Write<int16_t>(positionComponent.IsInQuickSlot());
-            objectWriter.Write<int16_t>(positionComponent.GetPage());
-            objectWriter.Write<int16_t>(positionComponent.GetX());
-            objectWriter.Write<int16_t>(positionComponent.GetY());
-            objectWriter.Write<int16_t>(static_cast<int16_t>(quantity));
-            objectWriter.Write<int32_t>(item.GetData().GetId());
+            objectWriter.Write<int16_t>(0);
+            objectWriter.Write<int16_t>(-1);
+            objectWriter.Write<int16_t>(-1);
+            objectWriter.Write<int16_t>(-1);
+            objectWriter.Write<int16_t>(1);
+            objectWriter.Write<int32_t>(12500060);
             objectWriter.Write<int8_t>(0); // unk
-            objectWriter.Write<int32_t>(item.GetId().Unwrap());
-            objectWriter.Write<int32_t>(static_cast<uint32_t>(item.GetType()));
+            objectWriter.Write<int32_t>(GameConstant::ITEM_ENTITY_ID_FOR_INVENTORY_REFRESH);
+            objectWriter.Write<int32_t>(static_cast<uint32_t>(GameEntityType::Item));
 
             writer.Write<int32_t>(static_cast<int32_t>(objectWriter.GetWriteSize()));
             writer.WriteObject(objectWriter);
         }
 
-        // client 45560B
-        // 0: inventory/quick_slot item quantity, 1: create new pick item
-        // client 450CEF
-        // if itemEdibleData.bUseQuickSlot is true, client priorly treats page, x, y as quick_slot position(if not empty)
-        // so, before create bUseQuickSlot item on inventory, must priorly fill all quick slots.
         writer.Write<int32_t>(0);
 
         return writer.Flush();
+    }
+
+    auto ItemArchiveMessageCreator::CreateItemRemoveForRefresh(const GamePlayer& player) -> Buffer
+    {
+        return CreateItemRemove(player, game_entity_id_type(GameConstant::ITEM_ENTITY_ID_FOR_INVENTORY_REFRESH), GameEntityType::Item);
     }
 
     auto ItemArchiveMessageCreator::CreateItemDecrease(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer

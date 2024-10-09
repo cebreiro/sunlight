@@ -96,6 +96,7 @@ namespace sunlight
         auto CreateNewGameItem(const ItemData& itemData, int32_t quantity) -> SharedPtrNotNull<GameItem>;
 
     private:
+        void AddDummyPacketForInventoryRefresh(GamePlayer& player);
         void SaveChanges(GamePlayer& player);
 
     private:
