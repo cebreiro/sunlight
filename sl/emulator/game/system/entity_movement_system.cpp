@@ -2,7 +2,7 @@
 
 #include "sl/emulator/game/component/entity_movement_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
-#include "sl/emulator/game/contents/movement/forward_movement.h"
+#include "sl/emulator/game/contents/movement/client_movement.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_request.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
