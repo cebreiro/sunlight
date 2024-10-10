@@ -47,7 +47,7 @@ namespace sunlight
         return _forwardMovement.unk3;
     }
 
-    auto SceneObjectComponent::GetMovement() const -> const ForwardMovement&
+    auto SceneObjectComponent::GetMovement() const -> const ClientMovement&
     {
         return _forwardMovement;
     }
@@ -92,7 +92,7 @@ namespace sunlight
         _forwardMovement.unk3 = value;
     }
 
-    void SceneObjectComponent::Set(const ForwardMovement& movement)
+    void SceneObjectComponent::Set(const ClientMovement& movement)
     {
         _forwardMovement = movement;
     }

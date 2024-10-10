@@ -11,15 +11,15 @@ namespace sunlight
         bool IsMoving() const;
 
         auto GetStartTimePoint() const -> game_time_point_type;
-        auto GetForwardMovement() -> ForwardMovement*;
-        auto GetForwardMovement() const -> const ForwardMovement*;
+        auto GetForwardMovement() -> ClientMovement*;
+        auto GetForwardMovement() const -> const ClientMovement*;
 
         void SetIsMoving(bool value);
         void SetStartTimePoint(game_time_point_type startTimePoint);
-        void SetForwardMovement(const ForwardMovement& movement);
+        void SetForwardMovement(const ClientMovement& movement);
 
     private:
         game_time_point_type _startTimePoint;
-        std::variant<ForwardMovement> _movement;
+        std::variant<ClientMovement> _movement;
     };
 }

@@ -507,7 +507,7 @@ namespace sunlight
 
         scriptComponent.SetNPCYaw(newYaw);
 
-        ForwardMovement movement = npc->GetComponent<SceneObjectComponent>().GetMovement();
+        ClientMovement movement = npc->GetComponent<SceneObjectComponent>().GetMovement();
         movement.yaw = newYaw;
 
         Get<EntityViewRangeSystem>().Broadcast(*npc, ZonePacketS2CCreator::CreateObjectMove(*npc, movement), false);

@@ -6,7 +6,7 @@ namespace sunlight
     {
         return std::visit([]<typename T>(const T & item) -> bool
         {
-            if constexpr (std::is_same_v<T, ForwardMovement>)
+            if constexpr (std::is_same_v<T, ClientMovement>)
             {
                 return item.unk3 == 0x10;
             }
@@ -23,21 +23,21 @@ namespace sunlight
         return _startTimePoint;
     }
 
-    auto EntityMovementComponent::GetForwardMovement() -> ForwardMovement*
+    auto EntityMovementComponent::GetForwardMovement() -> ClientMovement*
     {
-        return std::get_if<ForwardMovement>(&_movement);
+        return std::get_if<ClientMovement>(&_movement);
     }
 
-    auto EntityMovementComponent::GetForwardMovement() const -> const ForwardMovement*
+    auto EntityMovementComponent::GetForwardMovement() const -> const ClientMovement*
     {
-        return std::get_if<ForwardMovement>(&_movement);
+        return std::get_if<ClientMovement>(&_movement);
     }
 
     void EntityMovementComponent::SetIsMoving(bool value)
     {
         std::visit([value]<typename T>(T& item)
         {
-            if constexpr (std::is_same_v<T, ForwardMovement>)
+            if constexpr (std::is_same_v<T, ClientMovement>)
             {
                 item.unk3 = value ? 0x10 : 0;
             }
@@ -54,7 +54,7 @@ namespace sunlight
         _startTimePoint = startTimePoint;
     }
 
-    void EntityMovementComponent::SetForwardMovement(const ForwardMovement& movement)
+    void EntityMovementComponent::SetForwardMovement(const ClientMovement& movement)
     {
         _movement = movement;
     }

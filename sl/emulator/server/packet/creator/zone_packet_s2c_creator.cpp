@@ -105,7 +105,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto ZonePacketS2CCreator::CreateObjectMove(const GameEntity& entity, const ForwardMovement& movement) -> Buffer
+    auto ZonePacketS2CCreator::CreateObjectMove(const GameEntity& entity, const ClientMovement& movement) -> Buffer
     {
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_OBJECT_MOVE);

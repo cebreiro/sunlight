@@ -50,7 +50,7 @@ namespace sunlight
             EntityMovementComponent& movementComponent = entity.GetComponent<EntityMovementComponent>();
             if (movementComponent.IsMoving())
             {
-                if (ForwardMovement* forwardMovement = movementComponent.GetForwardMovement(); forwardMovement)
+                if (ClientMovement* forwardMovement = movementComponent.GetForwardMovement(); forwardMovement)
                 {
                     std::chrono::duration<float> duration = (now - movementComponent.GetStartTimePoint());
                     const float totalDistance = (forwardMovement->destPosition - forwardMovement->position).norm();
@@ -125,11 +125,11 @@ namespace sunlight
         GamePlayer& player = request.player;
 
         BufferReader reader1 = request.reader.ReadObject();
-        ForwardMovement movement1 = ForwardMovement::CreateFrom(reader1);
+        ClientMovement movement1 = ClientMovement::CreateFrom(reader1);
         (void)movement1;
 
         BufferReader reader2 = request.reader.ReadObject();
-        ForwardMovement movement2 = ForwardMovement::CreateFrom(reader2);
+        ClientMovement movement2 = ClientMovement::CreateFrom(reader2);
 
         EntityMovementComponent& movementComponent = player.GetMovementComponent();
         movementComponent.SetStartTimePoint(GameTimeService::Now());

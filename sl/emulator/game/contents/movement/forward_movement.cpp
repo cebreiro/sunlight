@@ -2,9 +2,9 @@
 
 namespace sunlight
 {
-    auto ForwardMovement::CreateFrom(BufferReader& reader) -> ForwardMovement
+    auto ClientMovement::CreateFrom(BufferReader& reader) -> ClientMovement
     {
-        ForwardMovement result;
+        ClientMovement result;
         result.position.x() = reader.Read<float>();
         result.position.y() = reader.Read<float>();
         result.yaw = reader.Read<float>();
