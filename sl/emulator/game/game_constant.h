@@ -45,10 +45,5 @@ namespace sunlight
         // even though client doesn't refresh UI when receives 'inventory add item'
         // sending dummy 'item add' and 'item remove' is required to refresh UI
         static constexpr int32_t ITEM_ENTITY_ID_FOR_INVENTORY_REFRESH = 0x2F2F2F2F; // magic number. no intention
-
-        // client 0x460C50
-        static const std::array<int32_t, MAX_MIX_SKILL_LEVEL> MIX_SKILL_LEVEL_UP_REQUIRED_EXP_D1;
-        static const std::array<int32_t, MAX_MIX_SKILL_LEVEL> MIX_SKILL_LEVEL_UP_REQUIRED_EXP_D2;
-        static const std::array<int32_t, MAX_MIX_SKILL_LEVEL> MIX_SKILL_LEVEL_UP_REQUIRED_EXP_D3;
     };
 }
