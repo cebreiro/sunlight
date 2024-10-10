@@ -59,6 +59,7 @@ namespace sunlight
         void HandlePlayerActivate(const ZoneMessage& message);
 
         void HandleRequestItemStructure(const ZoneMessage& message);
+        void HandleNPCDirectionSet(const ZoneMessage& message);
 
     private:
         const ServiceLocator& _serviceLocator;

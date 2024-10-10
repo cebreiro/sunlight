@@ -17,6 +17,7 @@ namespace sunlight
         auto GetUnk1() const -> float;
         auto GetUnk2() const -> uint16_t;
         auto GetUnk3() const -> uint16_t;
+        auto GetMovement() const -> const ForwardMovement&;
 
         void SetId(int32_t id);
         void SetPosition(const Eigen::Vector2f& pos);

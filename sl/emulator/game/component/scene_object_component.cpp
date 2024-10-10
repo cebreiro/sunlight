@@ -47,6 +47,11 @@ namespace sunlight
         return _forwardMovement.unk3;
     }
 
+    auto SceneObjectComponent::GetMovement() const -> const ForwardMovement&
+    {
+        return _forwardMovement;
+    }
+
     void SceneObjectComponent::SetId(int32_t id)
     {
         _id = id;

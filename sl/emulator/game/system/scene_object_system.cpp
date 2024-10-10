@@ -1,7 +1,9 @@
 #include "scene_object_system.h"
 
 #include "sl/emulator/game/component/player_group_component.h"
+#include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/contents/group/item_mix_prop_item_mapping.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_npc.h"
@@ -58,6 +60,12 @@ namespace sunlight
 
         if (!stage.AddSubscriber(ZoneMessageType::REQUESTITEMSTRUCT,
             std::bind_front(&SceneObjectSystem::HandleRequestItemStructure, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::NPC_SETDIRECTION,
+            std::bind_front(&SceneObjectSystem::HandleNPCDirectionSet, this)))
         {
             return false;
         }
@@ -458,5 +466,50 @@ namespace sunlight
         
         // but, this emulator does not respect origin protocol
         // create_item is sent at process (1)
+    }
+
+    void SceneObjectSystem::HandleNPCDirectionSet(const ZoneMessage& message)
+    {
+        SlPacketReader& reader = message.reader;
+        GamePlayer& player = message.player;
+
+        PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
+        if (!scriptComponent.HasTargetNPC())
+        {
+            return;
+        }
+
+        const auto& target = FindEntity(GameEntityType::NPC, message.targetId);
+        if (!target)
+        {
+            return;
+        }
+
+        const GameNPC* npc = target->Cast<GameNPC>();
+        assert(npc);
+
+        if (const int32_t itemId = ItemMixPropItemMapping::FindItemId(npc->GetUnk1(), npc->GetUnk2());
+            itemId != 0)
+        {
+            return;
+        }
+
+        const float x = reader.Read<float>();
+        const float y = reader.Read<float>();
+
+        const float newYaw = std::atan2f(y, x) * (180.f / static_cast<float>(std::numbers::pi));
+        const float prevYaw = scriptComponent.GetNPCYaw();
+
+        if (std::abs(newYaw - prevYaw) < 1.f)
+        {
+            return;
+        }
+
+        scriptComponent.SetNPCYaw(newYaw);
+
+        ForwardMovement movement = npc->GetComponent<SceneObjectComponent>().GetMovement();
+        movement.yaw = newYaw;
+
+        Get<EntityViewRangeSystem>().Broadcast(*npc, ZonePacketS2CCreator::CreateObjectMove(*npc, movement), false);
     }
 }
