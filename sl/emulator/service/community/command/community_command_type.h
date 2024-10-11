@@ -7,15 +7,22 @@ namespace sunlight
         (PlayerRegister)
         (PlayerDeregister)
         (PlayerDeregisterTimer)
+        (PlayerUpdateInformation)
         (PartyCreate)
         (PartyInviteResult)
+        (PartyPlayerStateRequest)
+        (PartyPlayerStateResponse)
     )
 
     BOOST_DESCRIBE_ENUM(CommunityCommandType,
         PlayerRegister,
         PlayerDeregister,
+        PlayerDeregisterTimer,
+        PlayerUpdateInformation,
         PartyCreate,
-        PartyInviteResult
+        PartyInviteResult,
+        PartyPlayerStateRequest,
+        PartyPlayerStateResponse
     )
 
     template <CommunityCommandType E>

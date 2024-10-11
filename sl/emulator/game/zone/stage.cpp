@@ -24,6 +24,7 @@
 #include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_channel_system.h"
 #include "sl/emulator/game/system/player_group_system.h"
+#include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_profile_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
@@ -226,8 +227,8 @@ namespace sunlight
 
         GameTimeService::SetNow(game_clock_type::now());
 
+        Get<PlayerIndexSystem>().OnStageEnter(*player);
         Get<SceneObjectSystem>().SpawnPlayer(player, enterType);
-        Get<PlayerProfileSystem>().OnStageEnter(*player);
         Get<PlayerChannelSystem>().OnStageEnter(*player, enterType);
 
         GameDebugger::SetInstance(nullptr);
@@ -255,7 +256,6 @@ namespace sunlight
 
         Get<SceneObjectSystem>().DespawnPlayer(player->GetId(), exitType);
         Get<NPCShopSystem>().OnStageExit(*player);
-        Get<PlayerProfileSystem>().OnStageExit(*player);
         Get<PlayerGroupSystem>().OnStageExit(*player);
         Get<PlayerChannelSystem>().OnStageExit(*player, exitType);
 
@@ -270,6 +270,8 @@ namespace sunlight
         case StageExitType::StageChange:
             break;
         }
+
+        Get<PlayerIndexSystem>().OnStageExit(*player);
 
         GameDebugger::SetInstance(nullptr);
 
@@ -353,6 +355,7 @@ namespace sunlight
         Add(std::make_shared<PlayerGroupSystem>(_serviceLocator));
         Add(std::make_shared<ItemTradeSystem>(_serviceLocator));
         Add(std::make_shared<PlayerChannelSystem>(_serviceLocator, _zoneId));
+        Add(std::make_shared<PlayerIndexSystem>());
 
         const auto range = _systems | std::views::values;
 

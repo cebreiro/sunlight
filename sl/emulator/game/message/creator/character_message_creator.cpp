@@ -109,6 +109,25 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto CharacterMessageCreator::CreateIamHere(int8_t type, const GamePlayer& player) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(player.GetName());
+        writer.Write(CharacterMessageType::IamHere);
+        writer.Write<int8_t>(type);
+        writer.WriteString(""); // unk
+
+        const auto& position = player.GetSceneObjectComponent().GetPosition();
+        writer.Write<float>(position.x());
+        writer.Write<float>(position.y());
+        writer.Write<int32_t>(0);
+        writer.Write<float>(player.GetStatComponent().GetFinalStat(RecoveryStatType::HP).As<float>());
+
+        return writer.Flush();
+    }
+
     auto CharacterMessageCreator::CreateMessageResult(const std::string& targetPlayerName, CharacterMessageType type, bool success) -> Buffer
     {
         // client 0x4C74E0

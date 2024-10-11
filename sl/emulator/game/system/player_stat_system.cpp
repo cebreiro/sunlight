@@ -111,18 +111,39 @@ namespace sunlight
     {
         PlayerStatComponent& statComponent = player.GetStatComponent();
 
-        const int32_t maxHP = statComponent.GetFinalStat(PlayerStatType::MaxSP).As<int32_t>();
-        statComponent.SetRecoveryStat(RecoveryStatType::SP, maxHP);
+        const int32_t maxSP = statComponent.GetFinalStat(PlayerStatType::MaxSP).As<int32_t>();
+        statComponent.SetRecoveryStat(RecoveryStatType::SP, maxSP);
 
-        if (floater == SPChangeFloaterType::None)
-        {
-            player.Send(GamePlayerMessageCreator::CreateSPChange(player, maxHP, maxHP, floater));
-        }
-        else
-        {
-            Get<EntityViewRangeSystem>().Broadcast(player,
-                GamePlayerMessageCreator::CreateSPChange(player, maxHP, maxHP, floater), true);
-        }
+        Get<EntityViewRangeSystem>().Broadcast(player,
+            GamePlayerMessageCreator::CreateSPChange(player, maxSP, maxSP, floater), true);
+    }
+
+    void PlayerStatSystem::SetHP(GamePlayer& player, int32_t value, HPChangeFloaterType floater)
+    {
+        PlayerStatComponent& statComponent = player.GetStatComponent();
+
+        const int32_t maxHP = statComponent.GetFinalStat(PlayerStatType::MaxSP).As<int32_t>();
+        const int32_t hp = std::clamp(value, 0, maxHP);
+
+        statComponent.SetRecoveryStat(RecoveryStatType::HP, StatValue(hp));
+        statComponent.SetRecoveryTimePoint(RecoveryStatType::HP, GameTimeService::Now());
+
+        Get<EntityViewRangeSystem>().Broadcast(player,
+            GamePlayerMessageCreator::CreateHPChange(player, maxHP, hp, floater), true);
+    }
+
+    void PlayerStatSystem::SetSP(GamePlayer& player, int32_t value, SPChangeFloaterType floater)
+    {
+        PlayerStatComponent& statComponent = player.GetStatComponent();
+
+        const int32_t maxSP = statComponent.GetFinalStat(PlayerStatType::MaxSP).As<int32_t>();
+        const int32_t sp = std::clamp(value, 0, maxSP);
+
+        statComponent.SetRecoveryStat(RecoveryStatType::SP, StatValue(sp));
+        statComponent.SetRecoveryTimePoint(RecoveryStatType::SP, GameTimeService::Now());
+
+        Get<EntityViewRangeSystem>().Broadcast(player,
+            GamePlayerMessageCreator::CreateSPChange(player, maxSP, sp, floater), true);
     }
 
     void PlayerStatSystem::OnInitialize(GamePlayer& player)

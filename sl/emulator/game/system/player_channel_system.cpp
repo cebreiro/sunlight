@@ -2,10 +2,12 @@
 
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
+#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/channel/game_channel_type.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/character_message.h"
 #include "sl/emulator/game/message/creator/character_message_creator.h"
+#include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_community_service.h"
@@ -23,7 +25,7 @@ namespace sunlight
 
     void PlayerChannelSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<PlayerIndexSystem>());
     }
 
     bool PlayerChannelSystem::Subscribe(Stage& stage)
@@ -36,6 +38,12 @@ namespace sunlight
 
         if (!stage.AddSubscriber(CharacterMessageType::ChannelInviteResult,
             std::bind_front(&PlayerChannelSystem::HandleChannelInviteResult, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(CharacterMessageType::WhereAreYou,
+            std::bind_front(&PlayerChannelSystem::HandleWhereAreYou, this)))
         {
             return false;
         }
@@ -63,10 +71,12 @@ namespace sunlight
             command->name = player.GetName();
 
             const Job& mainJob = player.GetJobComponent().GetMainJob();
+            const PlayerStatComponent& statComponent = player.GetStatComponent();
             
             command->jobId = static_cast<int32_t>(mainJob.GetId());
             command->jobLevel = static_cast<int8_t>(mainJob.GetLevel());
-            command->characterLevel = static_cast<int8_t>(player.GetStatComponent().GetLevel());
+            command->characterLevel = static_cast<int8_t>(statComponent.GetLevel());
+            command->maxHP = statComponent.GetFinalStat(PlayerStatType::MaxHP).As<int32_t>();
 
             _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
         }
@@ -100,9 +110,25 @@ namespace sunlight
         }
     }
 
+    void PlayerChannelSystem::UpdateCommunityPlayerStat(const GamePlayer& player)
+    {
+        const Job& mainJob = player.GetJobComponent().GetMainJob();
+        const PlayerStatComponent& statComponent = player.GetStatComponent();
+
+        auto command = std::make_shared<CommunityCommandPlayerUpdateInformation>();
+        command->zoneId = _zoneId;
+        command->playerId = player.GetCId();
+        command->jobId = static_cast<int32_t>(mainJob.GetId());
+        command->jobLevel = static_cast<int8_t>(mainJob.GetLevel());
+        command->characterLevel = static_cast<int8_t>(statComponent.GetLevel());
+        command->maxHP = statComponent.GetFinalStat(PlayerStatType::MaxHP).As<int32_t>();
+
+        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+    }
+
     void PlayerChannelSystem::HandleNotification(const PartyNotificationCreateResult& notification)
     {
-        GamePlayer* player = Get<SceneObjectSystem>().FindPlayerByCid(notification.playerId);
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
         if (!player)
         {
             return;
@@ -114,7 +140,7 @@ namespace sunlight
 
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyInvite& notification)
     {
-        GamePlayer* player = Get<SceneObjectSystem>().FindPlayerByCid(notification.playerId);
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
         if (!player)
         {
             return;
@@ -126,13 +152,38 @@ namespace sunlight
 
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyInviteRefused& notification)
     {
-        GamePlayer* player = Get<SceneObjectSystem>().FindPlayerByCid(notification.playerId);
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
         if (!player)
         {
             return;
         }
 
         player->Send(CharacterMessageCreator::CreatePartyInviteResult(notification.refuserName, notification.result));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification)
+    {
+        const GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        auto command = std::make_shared<PartyCommandPartyPlayerStateResponse>();
+        command->playerId = player->GetCId();
+        command->requestId = notification.requesterId;
+
+        const Eigen::Vector2f position = player->GetSceneObjectComponent().GetPosition();
+        command->x = position.x();
+        command->y = position.y();
+        command->hp = player->GetStatComponent().GetFinalStat(RecoveryStatType::HP).As<float>();
+
+        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyPlayerState& notification)
+    {
+        (void)notification;
     }
 
     void PlayerChannelSystem::HandleChannelInvite(const CharacterMessage& message)
@@ -183,6 +234,27 @@ namespace sunlight
         command->playerId = message.player.GetCId();
         command->inviterName = message.targetName;
         command->result = static_cast<ChannelInviteResult>(message.reader.Read<int8_t>());
+
+        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+    }
+
+    void PlayerChannelSystem::HandleWhereAreYou(const CharacterMessage& message)
+    {
+        SlPacketReader& reader = message.reader;
+
+        const int8_t type = reader.Read<int8_t>();
+        if (type == 1)
+        {
+            // user command using chatting
+            // I think that it has no reason to allow
+            return;
+        }
+
+        // when client is in party play, constantly request to show party member's hp
+
+        auto command = std::make_shared<PartyCommandPartyPlayerStateRequest>();
+        command->playerId = message.player.GetCId();
+        command->targetName = message.targetName;
 
         _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
     }

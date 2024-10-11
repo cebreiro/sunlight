@@ -39,5 +39,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandZoneChange>(system));
 
         system.AddCommand(std::make_shared<ServerCommandSkillAdd>(system));
+
+        system.AddCommand(std::make_shared<ServerCommandStatHPSet>(system));
     }
 }

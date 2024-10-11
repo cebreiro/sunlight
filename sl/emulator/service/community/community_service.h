@@ -8,6 +8,7 @@ namespace sunlight
     struct CommunityCommandPlayerRegister;
     struct CommunityCommandPlayerDeregister;
     struct CommunityCommandPlayerDeregisterTimer;
+    struct CommunityCommandPlayerUpdateInformation;
 
     class CommunityPlayerStorage;
     class CommunityPartyService;
@@ -46,6 +47,7 @@ namespace sunlight
         void HandleCommand(const CommunityCommandPlayerRegister& command);
         void HandleCommand(const CommunityCommandPlayerDeregister& command);
         void HandleCommand(const CommunityCommandPlayerDeregisterTimer& command);
+        void HandleCommand(const CommunityCommandPlayerUpdateInformation& command);
 
         auto FindNotificationChannel(int32_t zoneId) -> Channel<SharedPtrNotNull<ICommunityNotification>>*;
 

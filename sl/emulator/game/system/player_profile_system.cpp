@@ -8,6 +8,7 @@
 #include "sl/emulator/game/message/creator/character_message_creator.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/service/database/dto/profile_introduction.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -36,6 +37,7 @@ namespace sunlight
     void PlayerProfileSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<GameRepositorySystem>());
+        Add(stage.Get<PlayerIndexSystem>());
     }
 
     bool PlayerProfileSystem::Subscribe(Stage& stage)
@@ -65,23 +67,6 @@ namespace sunlight
         return GameSystem::GetClassId<PlayerProfileSystem>();
     }
 
-    void PlayerProfileSystem::OnStageEnter(GamePlayer& player)
-    {
-        if (!_playerNameIndex.try_emplace(player.GetName(), &player).second)
-        {
-            SUNLIGHT_LOG_CRITICAL(_serviceLocator,
-                fmt::format("[{}] fail to insert player name. player: {}, name: {}",
-                    GetName(), player.GetCId(), player.GetName()));
-        }
-    }
-
-    void PlayerProfileSystem::OnStageExit(const GamePlayer& player)
-    {
-        [[maybe_unused]]
-        const size_t erased = _playerNameIndex.erase(player.GetName());
-        assert(erased > 0);
-    }
-
     void PlayerProfileSystem::OnZoneExit(const GamePlayer& player)
     {
         Get<GameRepositorySystem>().SaveProfile(player);
@@ -104,14 +89,14 @@ namespace sunlight
     {
         GamePlayer& player = message.player;
 
-        const auto iter = _playerNameIndex.find(message.targetName);
-        if (iter == _playerNameIndex.end())
+        if (const GamePlayer* target = Get<PlayerIndexSystem>().FindByName(message.targetName);
+            target)
         {
-            player.Send(CharacterMessageCreator::CreateProfileFail(message.targetName));
+            player.Send(CharacterMessageCreator::CreateProfile(*target, _zoneData));
         }
         else
         {
-            player.Send(CharacterMessageCreator::CreateProfile(*iter->second, _zoneData));
+            player.Send(CharacterMessageCreator::CreateProfileFail(message.targetName));
         }
     }
 
@@ -141,16 +126,15 @@ namespace sunlight
 
     void PlayerProfileSystem::HandleProfileIntroductionRequest(GamePlayer& player, const std::string& targetName)
     {
-        const auto iter = _playerNameIndex.find(targetName);
-        if (iter == _playerNameIndex.end())
+        GamePlayer* targetPlayer = Get<PlayerIndexSystem>().FindByName(targetName);
+        if (!targetPlayer)
         {
             player.Send(GamePlayerMessageCreator::CreateProfileIntroductionFail(player));
 
             return;
         }
 
-        GamePlayer& targetPlayer = *iter->second;
-        PlayerProfileComponent& targetProfileComponent = targetPlayer.GetProfileComponent();
+        PlayerProfileComponent& targetProfileComponent = targetPlayer->GetProfileComponent();
 
         if (const std::optional<PlayerProfileIntroduction>& introduction = targetProfileComponent.GetIntroduction();
             introduction.has_value())
@@ -169,8 +153,8 @@ namespace sunlight
 
         targetProfileComponent.SetLoadPendingIntroduction(true);
 
-        Get<GameRepositorySystem>().LoadProfileIntroduction(targetPlayer,
-            [this, playerName = player.GetName(), targetName = targetPlayer.GetName()](PlayerProfileIntroduction introduction)
+        Get<GameRepositorySystem>().LoadProfileIntroduction(*targetPlayer,
+            [this, playerName = player.GetName(), targetName = targetPlayer->GetName()](PlayerProfileIntroduction introduction)
             {
                 OnProfileIntroductionLoadComplete(playerName, targetName, introduction);
             });
@@ -179,19 +163,21 @@ namespace sunlight
     void PlayerProfileSystem::OnProfileIntroductionLoadComplete(
         const std::string& playerName, const std::string& targetName, PlayerProfileIntroduction& introduction)
     {
-        if (GamePlayer* player = FindPlayer(playerName); player)
+        PlayerIndexSystem& playerIndexSystem = Get<PlayerIndexSystem>();
+
+        if (GamePlayer* player = playerIndexSystem.FindByName(playerName); player)
         {
             player->Send(GamePlayerMessageCreator::CreateProfileIntroduction(*player, introduction));
         }
 
-        if (GamePlayer* targetPlayer = FindPlayer(targetName); targetPlayer)
+        if (GamePlayer* targetPlayer = playerIndexSystem.FindByName(targetName); targetPlayer)
         {
             PlayerProfileComponent& targetProfileComponent = targetPlayer->GetProfileComponent();
             assert(targetProfileComponent.IsLoadPendingIntroduction());
 
             for (const std::string& waiterName : targetProfileComponent.GetIntroductionLoadingWaiters())
             {
-                if (GamePlayer* waiter = FindPlayer(waiterName); waiter)
+                if (GamePlayer* waiter = playerIndexSystem.FindByName(waiterName); waiter)
                 {
                     if (waiter->GetName() == playerName)
                     {
@@ -227,19 +213,5 @@ namespace sunlight
         player.GetProfileComponent().SetIntroduction(std::move(profileIntroduction));
 
         player.Send(GamePlayerMessageCreator::CreateProfileIntroductionSaveResult(player));
-    }
-
-    auto PlayerProfileSystem::FindPlayer(const std::string& name) -> GamePlayer*
-    {
-        const auto iter = _playerNameIndex.find(name);
-
-        return iter != _playerNameIndex.end() ? iter->second : nullptr;
-    }
-
-    auto PlayerProfileSystem::FindPlayer(const std::string& name) const -> const GamePlayer*
-    {
-        const auto iter = _playerNameIndex.find(name);
-
-        return iter != _playerNameIndex.end() ? iter->second : nullptr;
     }
 }

@@ -21,6 +21,7 @@
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -47,6 +48,7 @@ namespace sunlight
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<PlayerStatSystem>());
+        Add(stage.Get<PlayerIndexSystem>());
     }
 
     bool ItemArchiveSystem::Subscribe(Stage& stage)
@@ -994,7 +996,7 @@ namespace sunlight
 
     void ItemArchiveSystem::OnCompleteLoadAccountStorage(int64_t cid, const db::dto::AccountStorage& dto)
     {
-        GamePlayer* player = Get<SceneObjectSystem>().FindPlayerByCid(cid);
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(cid);
         if (!player)
         {
             return;

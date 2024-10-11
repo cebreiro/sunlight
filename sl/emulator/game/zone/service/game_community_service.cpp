@@ -1,7 +1,7 @@
 #include "game_community_service.h"
 
 #include "sl/emulator/game/system/player_channel_system.h"
-#include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/zone.h"
 #include "sl/emulator/service/community/notification/community_notification.h"
@@ -78,7 +78,7 @@ namespace sunlight
                                 return;
                             }
 
-                            const GamePlayer* player = stage->Get<SceneObjectSystem>().FindPlayerByCid(notification.playerId);
+                            const GamePlayer* player = stage->Get<PlayerIndexSystem>().FindByCId(notification.playerId);
                             if (!player)
                             {
                                 assert(false);

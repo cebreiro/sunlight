@@ -11,6 +11,8 @@ namespace sunlight
     struct PartyNotificationCreateResult;
     struct PartyNotificationPartyInvite;
     struct PartyNotificationPartyInviteRefused;
+    struct PartyNotificationPartyPlayerStateRequested;
+    struct PartyNotificationPartyPlayerState;
 }
 
 namespace sunlight
@@ -30,15 +32,20 @@ namespace sunlight
     public:
         PlayerChannelSystem(const ServiceLocator& serviceLocator, int32_t zoneId);
 
+        void UpdateCommunityPlayerStat(const GamePlayer& player);
+
     public:
         void HandleNotification(const PartyNotificationCreateResult& notification);
         void HandleNotification(const PartyNotificationPartyInvite& notification);
         void HandleNotification(const PartyNotificationPartyInviteRefused& notification);
+        void HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification);
+        void HandleNotification(const PartyNotificationPartyPlayerState& notification);
 
 
     private:
         void HandleChannelInvite(const CharacterMessage& message);
         void HandleChannelInviteResult(const CharacterMessage& message);
+        void HandleWhereAreYou(const CharacterMessage& message);
 
     private:
         const ServiceLocator& _serviceLocator;

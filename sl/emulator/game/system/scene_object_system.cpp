@@ -180,11 +180,6 @@ namespace sunlight
         {
             player->FlushDeferred();
         }
-
-        const int64_t cid = player->GetCId();
-        assert(!_players.contains(cid));
-
-        _players[cid] = std::move(player);
     }
 
     bool SceneObjectSystem::SpawnNPC(SharedPtrNotNull<GameNPC> npc)
@@ -305,10 +300,6 @@ namespace sunlight
         Get<EntityViewRangeSystem>().Remove(player);
         Get<EntityMovementSystem>().Remove(player.GetId());
 
-        [[maybe_unused]]
-        const size_t erased = _players.erase(player.GetCId());
-        assert(erased > 0);
-
         iter1->second.erase(iter2);
 
         return true;
@@ -366,13 +357,6 @@ namespace sunlight
         return true;
     }
 
-    auto SceneObjectSystem::FindPlayerByCid(int64_t cid) -> GamePlayer*
-    {
-        const auto iter = _players.find(cid);
-
-        return iter != _players.end() ? iter->second.get() : nullptr;
-    }
-
     auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&
     {
         const auto iter1 = _entities.find(type);
@@ -413,7 +397,6 @@ namespace sunlight
 
         oss << fmt::format("-------------------------------------\n");
         oss << fmt::format("stage: {}\n", _stageId);
-        oss << fmt::format("players_size: {}\n", std::ssize(_players));
         oss << fmt::format("entities: {}\n", [this]() -> std::string
             {
                 std::ostringstream oss2;

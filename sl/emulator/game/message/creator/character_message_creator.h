@@ -25,6 +25,7 @@ namespace sunlight
         static auto CreateProfile(const GamePlayer& targetPlayer, const sox::Zone& zone) -> Buffer;
         static auto CreateProfileFail(const std::string& targetPlayerName) -> Buffer;
 
+        static auto CreateIamHere(int8_t type, const GamePlayer& player) -> Buffer;
         static auto CreateMessageResult(const std::string& targetPlayerName, CharacterMessageType type, bool success) -> Buffer;
 
         static auto CreatePartyInvite(const std::string& inviter, const std::string& partyName, const std::string& unk1, int8_t creation) -> Buffer;

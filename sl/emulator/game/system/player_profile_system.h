@@ -28,8 +28,6 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        void OnStageEnter(GamePlayer& player);
-        void OnStageExit(const GamePlayer& player);
         void OnZoneExit(const GamePlayer& player);
 
     public:
@@ -45,13 +43,7 @@ namespace sunlight
         void HandleProfileIntroductionSave(const ZoneMessage& message);
 
     private:
-        auto FindPlayer(const std::string& name) -> GamePlayer*;
-        auto FindPlayer(const std::string& name) const -> const GamePlayer*;
-
-    private:
         const ServiceLocator& _serviceLocator;
         const sox::Zone& _zoneData;
-
-        std::unordered_map<std::string, GamePlayer*> _playerNameIndex;
     };
 }

@@ -40,6 +40,9 @@ namespace sunlight
         void RecoverHP(GamePlayer& player, HPChangeFloaterType floater);
         void RecoverSP(GamePlayer& player, SPChangeFloaterType floater);
 
+        void SetHP(GamePlayer& player, int32_t value, HPChangeFloaterType floater);
+        void SetSP(GamePlayer& player, int32_t value, SPChangeFloaterType floater);
+
     public:
         void OnInitialize(GamePlayer& player);
         void OnLocalActivate(GamePlayer& player);

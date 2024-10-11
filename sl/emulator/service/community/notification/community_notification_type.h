@@ -8,13 +8,17 @@ namespace sunlight
         (PartyCreateResult)
         (PartyInvite)
         (PartyInviteRefused)
+        (PartyPlayerStateRequested)
+        (PartyPlayerState)
     )
 
     BOOST_DESCRIBE_ENUM(CommunityNotificationType,
         PlayerKick,
         PartyCreateResult,
         PartyInvite,
-        PartyInviteRefused
+        PartyInviteRefused,
+        PartyPlayerStateRequested,
+        PartyPlayerState
     )
 
     template <CommunityNotificationType E>

@@ -47,8 +47,6 @@ namespace sunlight
         bool RemoveStoredItem(game_entity_id_type id);
 
     public:
-        auto FindPlayerByCid(int64_t cid) -> GamePlayer*;
-
         auto FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&;
         auto FindEntity(GameEntityType type, game_entity_id_type id) const -> const std::shared_ptr<GameEntity>&;
 
@@ -65,7 +63,6 @@ namespace sunlight
         const ServiceLocator& _serviceLocator;
         int32_t _stageId;
 
-        std::unordered_map<int64_t, SharedPtrNotNull<GamePlayer>> _players;
         std::unordered_map<GameEntityType,
             boost::unordered::unordered_flat_map<game_entity_id_type, SharedPtrNotNull<GameEntity>>> _entities;
 

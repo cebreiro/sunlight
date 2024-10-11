@@ -188,6 +188,7 @@ namespace sunlight
         newPlayer->SetJobId(command.jobId);
         newPlayer->SetJobLevel(command.jobLevel);
         newPlayer->SetCharacterLevel(command.characterLevel);
+        newPlayer->SetMaxHP(command.maxHP);
 
         // TODO: remove timer
     }
@@ -212,6 +213,11 @@ namespace sunlight
         (void)command;
 
         // TODO: impl
+    }
+
+    void CommunityService::HandleCommand(const CommunityCommandPlayerUpdateInformation& command)
+    {
+        (void)command;
     }
 
     auto CommunityService::FindNotificationChannel(int32_t zoneId) -> Channel<SharedPtrNotNull<ICommunityNotification>>*
