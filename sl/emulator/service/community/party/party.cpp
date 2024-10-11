@@ -30,6 +30,17 @@ namespace sunlight
         _members.push_back(playerId);
     }
 
+    void Party::Remove(int64_t playerId)
+    {
+        assert(Contains(playerId));
+
+        if (const auto iter = std::ranges::find(_members, playerId);
+            iter != _members.end())
+        {
+            _members.erase(iter);
+        }
+    }
+
     bool Party::IsPublic() const
     {
         return _isPublic;

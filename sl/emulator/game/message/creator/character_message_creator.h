@@ -35,6 +35,10 @@ namespace sunlight
         static auto CreatePartyCreate(const PartyInformation& party, const PartyPlayerInformation& leader, const PartyPlayerInformation& member) -> Buffer;
         static auto CreatePartyQueryResult(const std::string& partyName, std::span<const PartyPlayerInformation> members) -> Buffer;
 
+        static auto CreatePartyLeave() -> Buffer;
+        static auto CreatePartyMemberLeave(const std::string& partyName, const std::string& memberName) -> Buffer;
+        static auto CreatePartyDisband(const std::string& partyName, bool autoDisband) -> Buffer;
+
     private:
         static auto WritePartyInformation(const PartyPlayerInformation& player) -> Buffer;
         static auto WriteParty(const PartyInformation& party) -> Buffer;

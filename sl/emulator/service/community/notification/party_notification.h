@@ -57,6 +57,18 @@ namespace sunlight
     };
     SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyJoinResult);
 
+    struct PartyNotificationPartyLeave : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyLeave;
+
+        int64_t playerId = 0;
+        std::string partyName;
+        std::string leaverName;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyLeave);
+
     struct PartyNotificationPartyMemberAdd : ICommunityNotification
     {
         static constexpr auto TYPE = CommunityNotificationType::PartyMemberAdd;
@@ -68,6 +80,18 @@ namespace sunlight
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };
     SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyMemberAdd);
+
+    struct PartyNotificationPartyDisband : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyDisband;
+
+        int64_t playerId = 0;
+        std::string partyName;
+        bool autoDisband = false;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyDisband);
 
     struct PartyNotificationPartyPlayerStateRequested : ICommunityNotification
     {

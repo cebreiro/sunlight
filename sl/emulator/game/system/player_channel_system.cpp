@@ -6,6 +6,7 @@
 #include "sl/emulator/game/contents/channel/game_channel_type.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/character_message.h"
+#include "sl/emulator/game/message/zone_community_message.h"
 #include "sl/emulator/game/message/creator/character_message_creator.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -38,6 +39,12 @@ namespace sunlight
 
         if (!stage.AddSubscriber(CharacterMessageType::ChannelInviteResult,
             std::bind_front(&PlayerChannelSystem::HandleChannelInviteResult, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::CHANNEL_LEAVE,
+            std::bind_front(&PlayerChannelSystem::HandleChannelLeave, this)))
         {
             return false;
         }
@@ -187,6 +194,32 @@ namespace sunlight
         player->Send(CharacterMessageCreator::CreatePartyQueryResult(notification.partyName, notification.members));
     }
 
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyLeave& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        // TODO: remove party member
+
+        player->Send(CharacterMessageCreator::CreatePartyMemberLeave(notification.partyName, notification.leaverName));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyDisband& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        // TODO: remove party data all
+
+        player->Send(CharacterMessageCreator::CreatePartyDisband(notification.partyName, notification.autoDisband));
+    }
+
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification)
     {
         const GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
@@ -272,6 +305,33 @@ namespace sunlight
         command->result = static_cast<ChannelInviteResult>(message.reader.Read<int8_t>());
 
         _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+    }
+
+    void PlayerChannelSystem::HandleChannelLeave(const ZoneCommunityMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const std::string channelName = reader.ReadString();
+        const GameChannelType channelType = static_cast<GameChannelType>(reader.Read<int8_t>());
+
+        switch (channelType)
+        {
+        case GameChannelType::Party:
+        {
+            auto command = std::make_shared<PartyCommandPartyLeave>();
+            command->playerId = player.GetCId();
+
+            _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+
+            player.Send(CharacterMessageCreator::CreatePartyLeave());
+        }
+        break;
+        case GameChannelType::Channel:
+        case GameChannelType::Guild:
+        default:
+            assert(false);
+        }
     }
 
     void PlayerChannelSystem::HandleWhereAreYou(const CharacterMessage& message)

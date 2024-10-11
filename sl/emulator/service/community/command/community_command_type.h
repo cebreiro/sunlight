@@ -11,6 +11,7 @@ namespace sunlight
         (PartyCreate)
         (PartyInvite)
         (PartyInviteResult)
+        (PartyLeave)
         (PartyPlayerStateRequest)
         (PartyPlayerStateResponse)
     )
@@ -23,6 +24,7 @@ namespace sunlight
         PartyCreate,
         PartyInvite,
         PartyInviteResult,
+        PartyLeave,
         PartyPlayerStateRequest,
         PartyPlayerStateResponse
     )

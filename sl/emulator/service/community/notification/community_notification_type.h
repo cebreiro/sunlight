@@ -9,7 +9,9 @@ namespace sunlight
         (PartyInvite)
         (PartyInviteRefused)
         (PartyJoinResult)
+        (PartyLeave)
         (PartyMemberAdd)
+        (PartyDisband)
         (PartyPlayerStateRequested)
         (PartyPlayerState)
     )
@@ -20,7 +22,9 @@ namespace sunlight
         PartyInvite,
         PartyInviteRefused,
         PartyJoinResult,
+        PartyLeave,
         PartyMemberAdd,
+        PartyDisband,
         PartyPlayerStateRequested,
         PartyPlayerState
     )

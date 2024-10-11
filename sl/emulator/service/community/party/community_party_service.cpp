@@ -261,6 +261,7 @@ namespace sunlight
                 }
 
                 party->Add(invited->GetId());
+                invited->SetPartyId(party->GetId());
 
                 std::vector<PartyPlayerInformation> informationList = CreatePartyPlayerInformationList(*party);
 
@@ -282,8 +283,6 @@ namespace sunlight
                     _communityService.Notify(partyPlayer->GetZoneId(), std::move(notification));
                 }
 
-                // TODO: notify
-
             } while (false);
 
             auto joinResultNotification = std::make_shared<PartyNotificationPartyJoinResult>();
@@ -295,6 +294,93 @@ namespace sunlight
 
             return;
         }
+        }
+    }
+
+    void CommunityPartyService::HandleCommand(const PartyCommandPartyLeave& command)
+    {
+        CommunityPlayerStorage& playerStorage = _communityService.GetPlayerStorage();
+        const int64_t playerId = command.playerId;
+
+        CommunityPlayer* player = playerStorage.Find(playerId);
+        if (!player || !player->HasParty())
+        {
+            return;
+        }
+
+        Party* party = FindParty(player->GetPartyId());
+        if (!party)
+        {
+            assert(false);
+
+            return;
+        }
+
+        if (!party->Contains(playerId))
+        {
+            return;
+        }
+
+        bool shouldDisband = false;
+        bool autoDisband = false;
+
+        if (party->GetLeaderId() == playerId)
+        {
+            shouldDisband = true;
+        }
+        else
+        {
+            party->Remove(playerId);
+            player->SetPartyId(std::nullopt);
+
+            for (int64_t memberId : party->GetMembers())
+            {
+                const CommunityPlayer* member = playerStorage.Find(memberId);
+                if (!member)
+                {
+                    assert(false);
+
+                    continue;
+                }
+
+                auto notification = std::make_shared<PartyNotificationPartyLeave>();
+                notification->playerId = memberId;
+                notification->partyName = party->GetName();
+                notification->leaverName = player->GetName();
+
+                _communityService.Notify(member->GetZoneId(), std::move(notification));
+            }
+
+            if (std::ssize(party->GetMembers()) == 1)
+            {
+                shouldDisband = true;
+                autoDisband = true;
+            }
+        }
+
+        if (shouldDisband)
+        {
+            for (int64_t memberId : party->GetMembers())
+            {
+                CommunityPlayer* member = playerStorage.Find(memberId);
+                if (!member)
+                {
+                    assert(false);
+
+                    continue;
+                }
+
+                member->SetPartyId(std::nullopt);
+
+                auto notification = std::make_shared<PartyNotificationPartyDisband>();
+                notification->playerId = memberId;
+                notification->partyName = party->GetName();
+                notification->autoDisband = autoDisband;
+
+                _communityService.Notify(member->GetZoneId(), std::move(notification));
+            }
+
+            _parties.erase(party->GetId());
         }
     }
 
@@ -314,7 +400,7 @@ namespace sunlight
         notification->playerId = target->GetId();
         notification->requesterId = command.playerId;
 
-        _communityService.Notify(player->GetZoneId(), std::move(notification));
+        _communityService.Notify(target->GetZoneId(), std::move(notification));
     }
 
     void CommunityPartyService::HandleCommand(const PartyCommandPartyPlayerStateResponse& command)

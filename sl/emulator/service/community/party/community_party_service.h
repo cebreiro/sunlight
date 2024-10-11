@@ -27,6 +27,7 @@ namespace sunlight
         void HandleCommand(const PartyCommandCreate& command);
         void HandleCommand(const PartyCommandInvite& command);
         void HandleCommand(const PartyCommandInviteResult& command);
+        void HandleCommand(const PartyCommandPartyLeave& command);
         void HandleCommand(const PartyCommandPartyPlayerStateRequest& command);
         void HandleCommand(const PartyCommandPartyPlayerStateResponse& command);
 

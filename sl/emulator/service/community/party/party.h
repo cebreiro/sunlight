@@ -12,6 +12,7 @@ namespace sunlight
         bool Contains(int64_t playerId);
 
         void Add(int64_t playerId);
+        void Remove(int64_t playerId);
 
         bool IsPublic() const;
         bool IsSetGoldDistribution() const;

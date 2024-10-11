@@ -7,12 +7,15 @@
 namespace sunlight
 {
     struct CharacterMessage;
+    struct ZoneCommunityMessage;
 
     struct PartyNotificationCreateResult;
     struct PartyNotificationPartyInvite;
     struct PartyNotificationPartyInviteRefused;
     struct PartyNotificationPartyJoinResult;
     struct PartyNotificationPartyMemberAdd;
+    struct PartyNotificationPartyLeave;
+    struct PartyNotificationPartyDisband;
     struct PartyNotificationPartyPlayerStateRequested;
     struct PartyNotificationPartyPlayerState;
 }
@@ -42,6 +45,8 @@ namespace sunlight
         void HandleNotification(const PartyNotificationPartyInviteRefused& notification);
         void HandleNotification(const PartyNotificationPartyJoinResult& notification);
         void HandleNotification(const PartyNotificationPartyMemberAdd& notification);
+        void HandleNotification(const PartyNotificationPartyLeave& notification);
+        void HandleNotification(const PartyNotificationPartyDisband& notification);
         void HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification);
         void HandleNotification(const PartyNotificationPartyPlayerState& notification);
 
@@ -49,6 +54,7 @@ namespace sunlight
     private:
         void HandleChannelInvite(const CharacterMessage& message);
         void HandleChannelInviteResult(const CharacterMessage& message);
+        void HandleChannelLeave(const ZoneCommunityMessage& message);
         void HandleWhereAreYou(const CharacterMessage& message);
 
     private:

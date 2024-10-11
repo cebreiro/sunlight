@@ -5,6 +5,7 @@
 #include "sl/emulator/game/component/player_profile_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/contents/channel/channel_notify_type.h"
 #include "sl/emulator/game/contents/channel/game_channel_type.h"
 #include "sl/emulator/game/data/sox/zone.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -173,6 +174,18 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto CharacterMessageCreator::CreatePartyInviteResult(const std::string& inviter, ChannelInviteResult result) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(inviter);
+        writer.Write(CharacterMessageType::ChannelInviteResult);
+        writer.Write(result);
+
+        return writer.Flush();
+    }
+
     auto CharacterMessageCreator::CreatePartyCreate(const PartyInformation& party, const PartyPlayerInformation& leader, const PartyPlayerInformation& member) -> Buffer
     {
         SlPacketWriter writer;
@@ -209,14 +222,42 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto CharacterMessageCreator::CreatePartyInviteResult(const std::string& inviter, ChannelInviteResult result) -> Buffer
+    auto CharacterMessageCreator::CreatePartyLeave() -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_NORMAL_MESSAGE);
+        writer.Write(ZoneMessageType::CHANNEL_LEAVE_RESULT);
+        writer.Write<int32_t>(0); // client 0x4C7D5F
+        writer.Write(GameChannelType::Party);
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyMemberLeave(const std::string& partyName, const std::string& memberName) -> Buffer
     {
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
         writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
-        writer.WriteString(inviter);
-        writer.Write(CharacterMessageType::ChannelInviteResult);
-        writer.Write(result);
+        writer.WriteString(partyName);
+        writer.Write(CharacterMessageType::ChannelNotifyMsg);
+        writer.Write(ChannelNotifyType::Leave);
+        writer.Write(GameChannelType::Party);
+        writer.WriteString(partyName);
+        writer.WriteString(memberName);
+        writer.WriteString("");
+
+        return writer.Flush();
+    }
+    auto CharacterMessageCreator::CreatePartyDisband(const std::string& partyName, bool autoDisband) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(partyName);
+        writer.Write(CharacterMessageType::ChannelNotifyMsg);
+        writer.Write(autoDisband ? ChannelNotifyType::PartyAutoDisband : ChannelNotifyType::PartyDisband);
+        writer.Write(GameChannelType::Party);
 
         return writer.Flush();
     }
