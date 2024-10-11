@@ -11,6 +11,8 @@ namespace sunlight
     struct PartyNotificationCreateResult;
     struct PartyNotificationPartyInvite;
     struct PartyNotificationPartyInviteRefused;
+    struct PartyNotificationPartyJoinResult;
+    struct PartyNotificationPartyMemberAdd;
     struct PartyNotificationPartyPlayerStateRequested;
     struct PartyNotificationPartyPlayerState;
 }
@@ -38,6 +40,8 @@ namespace sunlight
         void HandleNotification(const PartyNotificationCreateResult& notification);
         void HandleNotification(const PartyNotificationPartyInvite& notification);
         void HandleNotification(const PartyNotificationPartyInviteRefused& notification);
+        void HandleNotification(const PartyNotificationPartyJoinResult& notification);
+        void HandleNotification(const PartyNotificationPartyMemberAdd& notification);
         void HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification);
         void HandleNotification(const PartyNotificationPartyPlayerState& notification);
 

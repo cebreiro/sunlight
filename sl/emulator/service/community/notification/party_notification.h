@@ -45,6 +45,30 @@ namespace sunlight
     };
     SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyInviteRefused);
 
+    struct PartyNotificationPartyJoinResult : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyJoinResult;
+
+        int64_t playerId = 0;
+        std::string partyName;
+        ChannelJoinResult result = {};
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyJoinResult);
+
+    struct PartyNotificationPartyMemberAdd : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyMemberAdd;
+
+        int64_t playerId = 0;
+        std::string partyName;
+        std::vector<PartyPlayerInformation> members;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyMemberAdd);
+
     struct PartyNotificationPartyPlayerStateRequested : ICommunityNotification
     {
         static constexpr auto TYPE = CommunityNotificationType::PartyPlayerStateRequested;

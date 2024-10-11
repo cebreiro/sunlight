@@ -25,13 +25,19 @@ namespace sunlight
 
     public:
         void HandleCommand(const PartyCommandCreate& command);
+        void HandleCommand(const PartyCommandInvite& command);
         void HandleCommand(const PartyCommandInviteResult& command);
         void HandleCommand(const PartyCommandPartyPlayerStateRequest& command);
         void HandleCommand(const PartyCommandPartyPlayerStateResponse& command);
 
     private:
+        auto FindParty(int64_t partyId) -> Party*;
+        auto FindParty(int64_t partyId) const -> const Party*;
+
+    private:
         auto CreatePartyInformation(const Party& party) const -> PartyInformation;
         auto CreatePartyPlayerInformation(const CommunityPlayer& player) const -> PartyPlayerInformation;
+        auto CreatePartyPlayerInformationList(const Party& party) const -> std::vector<PartyPlayerInformation>;
 
     private:
         CommunityService& _communityService;

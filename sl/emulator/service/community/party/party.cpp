@@ -13,6 +13,23 @@ namespace sunlight
         _members.push_back(memberId);
     }
 
+    bool Party::IsFull() const
+    {
+        return std::ssize(_members) >= 8;
+    }
+
+    bool Party::Contains(int64_t playerId)
+    {
+        return std::ranges::contains(_members, playerId);
+    }
+
+    void Party::Add(int64_t playerId)
+    {
+        assert(!Contains(playerId));
+
+        _members.push_back(playerId);
+    }
+
     bool Party::IsPublic() const
     {
         return _isPublic;

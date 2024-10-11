@@ -8,6 +8,11 @@ namespace sunlight
         Party() = default;
         Party(int64_t partyId, std::string partyName, int64_t leaderId, int64_t memberId);
 
+        bool IsFull() const;
+        bool Contains(int64_t playerId);
+
+        void Add(int64_t playerId);
+
         bool IsPublic() const;
         bool IsSetGoldDistribution() const;
         bool IsSetItemDistribution() const;

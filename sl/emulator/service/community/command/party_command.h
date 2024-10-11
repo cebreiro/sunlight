@@ -16,6 +16,17 @@ namespace sunlight
     };
     SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandCreate);
 
+    struct PartyCommandInvite : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::PartyInvite;
+
+        int64_t playerId = 0;
+        std::string targetName;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandInvite);
+
     struct PartyCommandInviteResult : ICommunityCommand
     {
         static constexpr auto TYPE = CommunityCommandType::PartyInviteResult;

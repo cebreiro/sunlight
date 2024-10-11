@@ -134,6 +134,8 @@ namespace sunlight
             return;
         }
 
+        // TODO: Set Party information
+
         player->Send(CharacterMessageCreator::CreatePartyCreate(notification.information,
             notification.leader, notification.member));
     }
@@ -161,6 +163,30 @@ namespace sunlight
         player->Send(CharacterMessageCreator::CreatePartyInviteResult(notification.refuserName, notification.result));
     }
 
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyJoinResult& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        player->Send(CharacterMessageCreator::CreateJoinResult(notification.partyName, notification.result));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyMemberAdd& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        // TODO: update party information
+
+        player->Send(CharacterMessageCreator::CreatePartyQueryResult(notification.partyName, notification.members));
+    }
+
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification)
     {
         const GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
@@ -183,7 +209,13 @@ namespace sunlight
 
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyPlayerState& notification)
     {
-        (void)notification;
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        player->Send(CharacterMessageCreator::CreateIamHere(notification.targetName, 0, notification.x, notification.y, notification.hp));
     }
 
     void PlayerChannelSystem::HandleChannelInvite(const CharacterMessage& message)
@@ -214,7 +246,11 @@ namespace sunlight
             }
             else
             {
-                
+                auto command = std::make_shared<PartyCommandInvite>();
+                command->playerId = player.GetCId();
+                command->targetName = message.targetName;
+
+                _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
             }
         }
         break;

@@ -34,70 +34,105 @@ namespace sunlight
 
         _pendingParties.erase(player->GetName());
 
-        ChannelInviteResult result = ChannelInviteResult::RefuseParty;
-
-        do
+        if (player->HasParty())
         {
-            if (player->HasParty())
-            {
-                result = ChannelInviteResult::AlreadyHasParty;
+            auto notification = std::make_shared<PartyNotificationPartyInviteRefused>();
 
-                break;
-            }
+            notification->result = ChannelInviteResult::AlreadyHasParty;
+            notification->playerId = command.playerId;
+            notification->refuserName = command.targetName;
 
-            CommunityPlayer* target = playerStorage.FindByName(command.targetName);
-            if (!target)
-            {
-                result = ChannelInviteResult::RefuseParty;
+            _communityService.Notify(player->GetZoneId(), std::move(notification));
+            
+            return;
+        }
 
-                break;
-            }
+        CommunityPlayer* target = playerStorage.FindByName(command.targetName);
+        if (!target)
+        {
+            return;
+        }
 
-            auto inviteNotification = std::make_shared<PartyNotificationPartyInvite>();
-            inviteNotification->creation = true;
-            inviteNotification->partyName = command.partyName;
-            inviteNotification->inviterName = player->GetName();
-            inviteNotification->playerId = target->GetId();
+        auto notification = std::make_shared<PartyNotificationPartyInvite>();
+        notification->creation = true;
+        notification->partyName = command.partyName;
+        notification->inviterName = player->GetName();
+        notification->playerId = target->GetId();
 
-            _communityService.Notify(target->GetZoneId(), std::move(inviteNotification));
+        _communityService.Notify(target->GetZoneId(), std::move(notification));
 
-            const int64_t partyId = _nextPartyId++;
+        const int64_t partyId = _nextPartyId++;
 
-            _pendingParties.try_emplace(player->GetName(), PendingParty{
-                .id = partyId,
-                .leaderId = player->GetId(),
-                .partyName = command.partyName,
-                .invited = target->GetName(),
+        _pendingParties.try_emplace(player->GetName(), PendingParty{
+            .id = partyId,
+            .leaderId = player->GetId(),
+            .partyName = command.partyName,
+            .invited = target->GetName(),
+            });
+
+        Delay(max_party_pending_duration).Then(_communityService.GetStrand(),
+            [weak = _communityService.weak_from_this(), this, partyId, playerName = player->GetName()]()
+                {
+                    if (const auto instance = weak.lock(); !instance)
+                    {
+                        return;
+                    }
+
+                    const auto iter = _pendingParties.find(playerName);
+                    if (iter == _pendingParties.end() || iter->second.id != partyId)
+                    {
+                        return;
+                    }
+
+                    _pendingParties.erase(iter);
                 });
 
-            Delay(max_party_pending_duration).Then(_communityService.GetStrand(),
-                [weak = _communityService.weak_from_this(), this, partyId, playerName = player->GetName()]()
-                    {
-                        if (const auto instance = weak.lock(); !instance)
-                        {
-                            return;
-                        }
+        return;
+    }
 
-                        const auto iter = _pendingParties.find(playerName);
-                        if (iter == _pendingParties.end() || iter->second.id != partyId)
-                        {
-                            return;
-                        }
+    void CommunityPartyService::HandleCommand(const PartyCommandInvite& command)
+    {
+        CommunityPlayerStorage& playerStorage = _communityService.GetPlayerStorage();
 
-                        _pendingParties.erase(iter);
-                    });
+        CommunityPlayer* player = playerStorage.Find(command.playerId);
+        CommunityPlayer* target = playerStorage.FindByName(command.targetName);
+
+        if (!player || !target)
+        {
+            return;
+        }
+
+        if (!player->HasParty())
+        {
+            return;
+        }
+
+        const Party* party = FindParty(player->GetPartyId());
+        if (!party)
+        {
+            return;
+        }
+
+        if (target->HasParty())
+        {
+            auto notification = std::make_shared<PartyNotificationPartyInviteRefused>();
+
+            notification->result = ChannelInviteResult::AlreadyHasParty;
+            notification->playerId = command.playerId;
+            notification->refuserName = command.targetName;
+
+            _communityService.Notify(player->GetZoneId(), std::move(notification));
 
             return;
-            
-        } while (false);
+        }
 
-        auto refuseNotification = std::make_shared<PartyNotificationPartyInviteRefused>();
+        auto notification = std::make_shared<PartyNotificationPartyInvite>();
+        notification->creation = false;
+        notification->partyName = party->GetName();
+        notification->inviterName = player->GetName();
+        notification->playerId = target->GetId();
 
-        refuseNotification->result = result;
-        refuseNotification->playerId = command.playerId;
-        refuseNotification->refuserName = command.targetName;
-
-        _communityService.Notify(player->GetZoneId(), std::move(refuseNotification));
+        _communityService.Notify(target->GetZoneId(), std::move(notification));
     }
 
     void CommunityPartyService::HandleCommand(const PartyCommandInviteResult& command)
@@ -189,6 +224,74 @@ namespace sunlight
         }
         case ChannelInviteResult::AcceptPartyJoin:
         {
+            ChannelJoinResult result = {};
+            std::string partyName;
+
+            do
+            {
+                if (!inviter->HasParty())
+                {
+                    result = ChannelJoinResult::NotExist;
+
+                    break;
+                }
+
+                Party* party = FindParty(inviter->GetPartyId());
+                if (!party)
+                {
+                    result = ChannelJoinResult::NotExist;
+
+                    break;
+                }
+
+                partyName = party->GetName();
+
+                if (party->Contains(invited->GetId()))
+                {
+                    result = ChannelJoinResult::Fail;
+
+                    break;
+                }
+
+                if (party->IsFull())
+                {
+                    result = ChannelJoinResult::Fail_IsFull;
+
+                    break;
+                }
+
+                party->Add(invited->GetId());
+
+                std::vector<PartyPlayerInformation> informationList = CreatePartyPlayerInformationList(*party);
+
+                for (const int64_t partyPlayerId : party->GetMembers())
+                {
+                    const CommunityPlayer* partyPlayer = playerStorage.Find(partyPlayerId);
+                    if (!partyPlayerId)
+                    {
+                        assert(false);
+
+                        continue;
+                    }
+
+                    auto notification = std::make_shared<PartyNotificationPartyMemberAdd>();
+                    notification->playerId = partyPlayerId;
+                    notification->partyName = party->GetName();
+                    notification->members = informationList;
+
+                    _communityService.Notify(partyPlayer->GetZoneId(), std::move(notification));
+                }
+
+                // TODO: notify
+
+            } while (false);
+
+            auto joinResultNotification = std::make_shared<PartyNotificationPartyJoinResult>();
+            joinResultNotification->playerId = invited->GetId();
+            joinResultNotification->partyName = std::move(partyName);
+            joinResultNotification->result = result;
+
+            _communityService.Notify(invited->GetZoneId(), std::move(joinResultNotification));
 
             return;
         }
@@ -236,6 +339,20 @@ namespace sunlight
         _communityService.Notify(requester->GetZoneId(), std::move(notification));
     }
 
+    auto CommunityPartyService::FindParty(int64_t partyId) -> Party*
+    {
+        const auto iter = _parties.find(partyId);
+
+        return iter != _parties.end() ? &iter->second : nullptr;
+    }
+
+    auto CommunityPartyService::FindParty(int64_t partyId) const -> const Party*
+    {
+        const auto iter = _parties.find(partyId);
+
+        return iter != _parties.end() ? &iter->second : nullptr;
+    }
+
     auto CommunityPartyService::CreatePartyInformation(const Party& party) const -> PartyInformation
     {
         const CommunityPlayerStorage& playerStorage = _communityService.GetPlayerStorage();
@@ -265,5 +382,29 @@ namespace sunlight
             .hp = player.GetHP(),
             .maxHP = player.GetMaxHP(),
         };
+    }
+
+    auto CommunityPartyService::CreatePartyPlayerInformationList(const Party& party) const -> std::vector<PartyPlayerInformation>
+    {
+        const CommunityPlayerStorage& playerStorage = _communityService.GetPlayerStorage();
+        const std::vector<int64_t>& members = party.GetMembers();
+
+        std::vector<PartyPlayerInformation> result;
+        result.reserve(members.size());
+
+        for (int64_t partyPlayerId : members)
+        {
+            const CommunityPlayer* partyPlayer = playerStorage.Find(partyPlayerId);
+            if (!partyPlayerId)
+            {
+                assert(false);
+
+                continue;
+            }
+
+            result.emplace_back(CreatePartyPlayerInformation(*partyPlayer));
+        }
+
+        return result;
     }
 }

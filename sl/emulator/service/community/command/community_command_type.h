@@ -9,6 +9,7 @@ namespace sunlight
         (PlayerDeregisterTimer)
         (PlayerUpdateInformation)
         (PartyCreate)
+        (PartyInvite)
         (PartyInviteResult)
         (PartyPlayerStateRequest)
         (PartyPlayerStateResponse)
@@ -20,6 +21,7 @@ namespace sunlight
         PlayerDeregisterTimer,
         PlayerUpdateInformation,
         PartyCreate,
+        PartyInvite,
         PartyInviteResult,
         PartyPlayerStateRequest,
         PartyPlayerStateResponse
