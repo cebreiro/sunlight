@@ -11,7 +11,14 @@ namespace sunlight
         (PartyCreate)
         (PartyInvite)
         (PartyInviteResult)
+        (PartyList)
         (PartyLeave)
+        (PartyForceExit)
+        (PartyLeaderChange)
+        (PartyOptionChange)
+        (PartyJoin)
+        (PartyJoinAck)
+        (PartyJoinReject)
         (PartyPlayerStateRequest)
         (PartyPlayerStateResponse)
     )
@@ -24,7 +31,14 @@ namespace sunlight
         PartyCreate,
         PartyInvite,
         PartyInviteResult,
+        PartyList,
         PartyLeave,
+        PartyForceExit,
+        PartyLeaderChange,
+        PartyOptionChange,
+        PartyJoin,
+        PartyJoinAck,
+        PartyJoinReject,
         PartyPlayerStateRequest,
         PartyPlayerStateResponse
     )

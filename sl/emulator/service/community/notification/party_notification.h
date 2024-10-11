@@ -14,11 +14,23 @@ namespace sunlight
 
         PartyPlayerInformation leader;
         PartyPlayerInformation member;
-        PartyInformation information;
+        PartyInformation party;
 
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };
     SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationCreateResult);
+
+    struct PartyNotificationPartyList : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyList;
+
+        int64_t playerId = 0;
+
+        std::vector<PartyInformation> parties;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyList);
 
     struct PartyNotificationPartyInvite : ICommunityNotification
     {
@@ -53,6 +65,8 @@ namespace sunlight
         std::string partyName;
         ChannelJoinResult result = {};
 
+        std::vector<PartyPlayerInformation> players;
+
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };
     SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyJoinResult);
@@ -75,7 +89,7 @@ namespace sunlight
 
         int64_t playerId = 0;
         std::string partyName;
-        std::vector<PartyPlayerInformation> members;
+        PartyPlayerInformation member;
 
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };
@@ -92,6 +106,64 @@ namespace sunlight
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };
     SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyDisband);
+
+    struct PartyNotificationPartyForceExit : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyForceExit;
+
+        int64_t playerId = 0;
+        std::string partyName;
+        std::string targetName;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyForceExit);
+
+    struct PartyNotificationPartyLeaderChange : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyLeaderChange;
+
+        int64_t playerId = 0;
+        std::string partyName;
+        std::string newLeaderName;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyLeaderChange);
+
+    struct PartyNotificationPartyOptionChange : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyOptionChange;
+
+        int64_t playerId = 0;
+
+        PartyInformation party;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyOptionChange);
+
+    struct PartyNotificationPartyJoinRequest : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyJoinRequest;
+
+        int64_t playerId = 0;
+        std::string requesterName;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyJoinRequest);
+
+    struct PartyNotificationPartyJoinRejected : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyJoinRejected;
+
+        int64_t playerId = 0;
+        std::string partyLeaderName;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyJoinRejected);
 
     struct PartyNotificationPartyPlayerStateRequested : ICommunityNotification
     {

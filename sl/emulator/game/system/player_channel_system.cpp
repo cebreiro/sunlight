@@ -49,6 +49,48 @@ namespace sunlight
             return false;
         }
 
+        if (!stage.AddSubscriber(ZoneMessageType::FORCEEXIT,
+            std::bind_front(&PlayerChannelSystem::HandleChannelForceExit, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::PARTY_CHANGE_LEADER,
+            std::bind_front(&PlayerChannelSystem::HandlePartyLeaderChange, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::PARTY_CHANGE_OPTION,
+            std::bind_front(&PlayerChannelSystem::HandlePartyOptionChange, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::CHANNEL_ENUM_USER,
+            std::bind_front(&PlayerChannelSystem::HandleChannelUserList, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(CharacterMessageType::JoinReq,
+            std::bind_front(&PlayerChannelSystem::HandlePartyJoinRequest, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(CharacterMessageType::JoinAck,
+            std::bind_front(&PlayerChannelSystem::HandlePartyJoinAck, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(CharacterMessageType::JoinReje,
+            std::bind_front(&PlayerChannelSystem::HandlePartyJoinReject, this)))
+        {
+            return false;
+        }
+
         if (!stage.AddSubscriber(CharacterMessageType::WhereAreYou,
             std::bind_front(&PlayerChannelSystem::HandleWhereAreYou, this)))
         {
@@ -143,8 +185,20 @@ namespace sunlight
 
         // TODO: Set Party information
 
-        player->Send(CharacterMessageCreator::CreatePartyCreate(notification.information,
+        player->Send(CharacterMessageCreator::CreatePartyCreate(notification.party,
             notification.leader, notification.member));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyList& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        player->Defer(CharacterMessageCreator::CreatePartyList(notification.parties));
+        player->FlushDeferred();
     }
 
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyInvite& notification)
@@ -178,6 +232,11 @@ namespace sunlight
             return;
         }
 
+        if (notification.result == ChannelJoinResult::Success)
+        {
+            player->Send(CharacterMessageCreator::CreatePartyQueryResult(notification.partyName, notification.players));
+        }
+
         player->Send(CharacterMessageCreator::CreateJoinResult(notification.partyName, notification.result));
     }
 
@@ -191,7 +250,9 @@ namespace sunlight
 
         // TODO: update party information
 
-        player->Send(CharacterMessageCreator::CreatePartyQueryResult(notification.partyName, notification.members));
+        player->Defer(CharacterMessageCreator::CreatePartyMemberAdd(notification.partyName, notification.member));
+        player->Defer(CharacterMessageCreator::CreatePartyMemberEnterNotify(notification.partyName, notification.member.name));
+        player->FlushDeferred();
     }
 
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyLeave& notification)
@@ -218,6 +279,63 @@ namespace sunlight
         // TODO: remove party data all
 
         player->Send(CharacterMessageCreator::CreatePartyDisband(notification.partyName, notification.autoDisband));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyForceExit& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        // TODO: remove party member data
+
+        player->Send(CharacterMessageCreator::CreatePartyForceExit(notification.partyName, notification.targetName));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyLeaderChange& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        player->Send(CharacterMessageCreator::CreatePartyLeaderChange(notification.partyName, notification.newLeaderName));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyOptionChange& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        player->Send(CharacterMessageCreator::CreatePartyOptionChange(notification.party));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyJoinRequest& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        player->Send(CharacterMessageCreator::CreatePartyJoinRequest(notification.requesterName));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyJoinRejected& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        player->Send(CharacterMessageCreator::CreatePartyJoinRejected(notification.partyLeaderName));
     }
 
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification)
@@ -332,6 +450,145 @@ namespace sunlight
         default:
             assert(false);
         }
+    }
+
+    void PlayerChannelSystem::HandleChannelForceExit(const ZoneCommunityMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const std::string channelName = reader.ReadString();
+        std::string targetName = reader.ReadString();
+        const GameChannelType channelType = static_cast<GameChannelType>(reader.Read<int8_t>());
+
+        switch (channelType)
+        {
+        case GameChannelType::Party:
+        {
+            auto command = std::make_shared<PartyCommandPartyForceExit>();
+            command->playerId = player.GetCId();
+            command->targetName = std::move(targetName);
+
+            _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+        }
+        break;
+        case GameChannelType::Channel:
+        case GameChannelType::Guild:
+        default:
+            assert(false);
+        }
+    }
+
+    void PlayerChannelSystem::HandlePartyLeaderChange(const ZoneCommunityMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const std::string partyName = reader.ReadString();
+        std::string newLeaderName = reader.ReadString();
+
+        auto command = std::make_shared<PartyCommandPartyLeaderChange>();
+        command->playerId = player.GetCId();
+        command->newLeaderName = std::move(newLeaderName);
+
+        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+    }
+
+    void PlayerChannelSystem::HandlePartyOptionChange(const ZoneCommunityMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const std::string partyName = reader.ReadString();
+
+        BufferReader partyObjectReader = reader.ReadObject();
+
+        constexpr int64_t party_object_size = 332;
+        if (!partyObjectReader.CanRead(party_object_size))
+        {
+            return;
+        }
+
+        partyObjectReader.Skip(324);
+
+        const bool isPublic = static_cast<bool>(partyObjectReader.Read<int8_t>());
+        const bool setGoldDistribution = static_cast<bool>(partyObjectReader.Read<int8_t>());
+        const bool setItemDistribution = static_cast<bool>(partyObjectReader.Read<int8_t>());
+
+        auto command = std::make_shared<PartyCommandPartyOptionChange>();
+        command->playerId = player.GetCId();
+        command->isPublic = isPublic;
+        command->setGoldDistribution = setGoldDistribution;
+        command->setItemDistribution = setItemDistribution;
+
+        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+    }
+
+    void PlayerChannelSystem::HandleChannelUserList(const ZoneCommunityMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const GameChannelType channelType = static_cast<GameChannelType>(reader.Read<int8_t>());
+
+        switch (channelType)
+        {
+        case GameChannelType::Party:
+        {
+            auto command = std::make_shared<PartyCommandPartyList>();
+            command->playerId = player.GetCId();
+
+            _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+        }
+        break;
+        case GameChannelType::Channel:
+        case GameChannelType::Guild:
+        default:
+            assert(false);
+        }
+    }
+
+    void PlayerChannelSystem::HandlePartyJoinRequest(const CharacterMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const GameChannelType channelType = static_cast<GameChannelType>(reader.Read<int8_t>());
+
+        switch (channelType)
+        {
+        case GameChannelType::Party:
+        {
+            auto command = std::make_shared<PartyCommandPartyJoin>();
+            command->playerId = player.GetCId();
+            command->targetName = message.targetName;
+
+            _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+        }
+        break;
+        case GameChannelType::Channel:
+        case GameChannelType::Guild:
+        default:
+            assert(false);
+        }
+    }
+
+    void PlayerChannelSystem::HandlePartyJoinAck(const CharacterMessage& message)
+    {
+        auto command = std::make_shared<PartyCommandPartyJoinAck>();
+        command->playerId = message.player.GetCId();
+        command->targetName = message.targetName;
+
+        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+    }
+
+    void PlayerChannelSystem::HandlePartyJoinReject(const CharacterMessage& message)
+    {
+        auto command = std::make_shared<PartyCommandPartyJoinReject>();
+        command->playerId = message.player.GetCId();
+        command->targetName = message.targetName;
+
+        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
     }
 
     void PlayerChannelSystem::HandleWhereAreYou(const CharacterMessage& message)

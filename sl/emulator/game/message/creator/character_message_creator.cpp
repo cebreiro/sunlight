@@ -197,9 +197,27 @@ namespace sunlight
         writer.WriteString(party.partyName);
         writer.Write<int8_t>(0);
         writer.Write<int8_t>(0);
-        writer.WriteObject(WritePartyInformation(leader));
-        writer.WriteObject(WritePartyInformation(member));
+        writer.WriteObject(WritePartyPlayer(leader));
+        writer.WriteObject(WritePartyPlayer(member));
         writer.WriteObject(WriteParty(party));
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyList(std::span<const PartyInformation> parties) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_NORMAL_MESSAGE);
+        writer.Write(ZoneMessageType::CHANNEL_ENUM_USER_RESULT);
+        writer.Write<int32_t>(0); // success. 0x10000 -> fail to get channel list. client 0x4C88E3
+        writer.Write<int8_t>(1); // client 0x4C8913
+        writer.Write<int32_t>(static_cast<int32_t>(std::ssize(parties))); // count
+
+        for (const PartyInformation& party : parties)
+        {
+            writer.WriteObject(WriteParty(party));
+        }
 
         return writer.Flush();
     }
@@ -216,8 +234,39 @@ namespace sunlight
 
         for (const PartyPlayerInformation& member : members)
         {
-            writer.WriteObject(WritePartyInformation(member));
+            writer.WriteObject(WritePartyPlayer(member));
         }
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyMemberAdd(const std::string& partyName, const PartyPlayerInformation& member) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(partyName);
+        writer.Write(CharacterMessageType::ChannelNotifyMsg);
+        writer.Write(ChannelNotifyType::PartyPlayerUpdate);
+        writer.Write(GameChannelType::Party);
+        writer.WriteString(partyName);
+        writer.WriteString(member.name);
+        writer.WriteObject(WritePartyPlayer(member));
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyMemberEnterNotify(const std::string& partyName, const std::string& target) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(partyName);
+        writer.Write(CharacterMessageType::ChannelNotifyMsg);
+        writer.Write(ChannelNotifyType::Enter);
+        writer.Write(GameChannelType::Party);
+        writer.WriteString(partyName);
+        writer.WriteString(target);
 
         return writer.Flush();
     }
@@ -249,6 +298,23 @@ namespace sunlight
 
         return writer.Flush();
     }
+
+    auto CharacterMessageCreator::CreatePartyForceExit(const std::string& partyName, const std::string& targetName) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(partyName);
+        writer.Write(CharacterMessageType::ChannelNotifyMsg);
+        writer.Write(ChannelNotifyType::ForceLeave);
+        writer.Write(GameChannelType::Party);
+        writer.WriteString(partyName);
+        writer.WriteString(targetName);
+        writer.WriteString("");
+
+        return writer.Flush();
+    }
+
     auto CharacterMessageCreator::CreatePartyDisband(const std::string& partyName, bool autoDisband) -> Buffer
     {
         SlPacketWriter writer;
@@ -262,7 +328,61 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto CharacterMessageCreator::WritePartyInformation(const PartyPlayerInformation& player) -> Buffer
+    auto CharacterMessageCreator::CreatePartyLeaderChange(const std::string& partyName, const std::string& newLeaderName) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(partyName);
+        writer.Write(CharacterMessageType::ChannelNotifyMsg);
+        writer.Write(ChannelNotifyType::PartyLeaderChange);
+        writer.Write(GameChannelType::Party);
+        writer.WriteString("");
+        writer.WriteString("");
+        writer.WriteString(newLeaderName);
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyOptionChange(const PartyInformation& party) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(party.partyName);
+        writer.Write(CharacterMessageType::ChannelNotifyMsg);
+        writer.Write(ChannelNotifyType::PartyOptionChange);
+        writer.Write(GameChannelType::Party);
+        writer.WriteString("");
+        writer.WriteString("");
+        writer.WriteObject(WriteParty(party));
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyJoinRequest(const std::string& requesterName) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(requesterName);
+        writer.Write(CharacterMessageType::JoinReq);
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyJoinRejected(const std::string& partyLeaderName) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(partyLeaderName);
+        writer.Write(CharacterMessageType::JoinReje);
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::WritePartyPlayer(const PartyPlayerInformation& player) -> Buffer
     {
         PacketWriter writer;
         writer.WriteFixeSizeString(player.name, 32);

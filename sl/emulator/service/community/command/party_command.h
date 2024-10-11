@@ -39,6 +39,16 @@ namespace sunlight
     };
     SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandInviteResult);
 
+    struct PartyCommandPartyList : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::PartyList;
+
+        int64_t playerId = 0;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandPartyList);
+
     struct PartyCommandPartyLeave : ICommunityCommand
     {
         static constexpr auto TYPE = CommunityCommandType::PartyLeave;
@@ -48,6 +58,75 @@ namespace sunlight
         auto GetType() const -> CommunityCommandType override { return TYPE; }
     };
     SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandPartyLeave);
+
+    struct PartyCommandPartyForceExit : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::PartyForceExit;
+
+        int64_t playerId = 0;
+        std::string targetName;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandPartyForceExit);
+
+    struct PartyCommandPartyLeaderChange : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::PartyLeaderChange;
+
+        int64_t playerId = 0;
+        std::string newLeaderName;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandPartyLeaderChange);
+
+    struct PartyCommandPartyOptionChange : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::PartyOptionChange;
+
+        int64_t playerId = 0;
+
+        bool isPublic = false;
+        bool setGoldDistribution = false;
+        bool setItemDistribution = false;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandPartyOptionChange);
+
+    struct PartyCommandPartyJoin : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::PartyJoin;
+
+        int64_t playerId = 0;
+        std::string targetName;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandPartyJoin);
+
+    struct PartyCommandPartyJoinAck : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::PartyJoinAck;
+
+        int64_t playerId = 0;
+        std::string targetName;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandPartyJoinAck);
+
+    struct PartyCommandPartyJoinReject : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::PartyJoinReject;
+
+        int64_t playerId = 0;
+        std::string targetName;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(PartyCommandPartyJoinReject);
 
     struct PartyCommandPartyPlayerStateRequest : ICommunityCommand
     {

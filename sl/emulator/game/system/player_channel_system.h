@@ -10,12 +10,18 @@ namespace sunlight
     struct ZoneCommunityMessage;
 
     struct PartyNotificationCreateResult;
+    struct PartyNotificationPartyList;
     struct PartyNotificationPartyInvite;
     struct PartyNotificationPartyInviteRefused;
     struct PartyNotificationPartyJoinResult;
     struct PartyNotificationPartyMemberAdd;
     struct PartyNotificationPartyLeave;
     struct PartyNotificationPartyDisband;
+    struct PartyNotificationPartyForceExit;
+    struct PartyNotificationPartyLeaderChange;
+    struct PartyNotificationPartyOptionChange;
+    struct PartyNotificationPartyJoinRequest;
+    struct PartyNotificationPartyJoinRejected;
     struct PartyNotificationPartyPlayerStateRequested;
     struct PartyNotificationPartyPlayerState;
 }
@@ -41,20 +47,32 @@ namespace sunlight
 
     public:
         void HandleNotification(const PartyNotificationCreateResult& notification);
+        void HandleNotification(const PartyNotificationPartyList& notification);
         void HandleNotification(const PartyNotificationPartyInvite& notification);
         void HandleNotification(const PartyNotificationPartyInviteRefused& notification);
         void HandleNotification(const PartyNotificationPartyJoinResult& notification);
         void HandleNotification(const PartyNotificationPartyMemberAdd& notification);
         void HandleNotification(const PartyNotificationPartyLeave& notification);
         void HandleNotification(const PartyNotificationPartyDisband& notification);
+        void HandleNotification(const PartyNotificationPartyForceExit& notification);
+        void HandleNotification(const PartyNotificationPartyLeaderChange& notification);
+        void HandleNotification(const PartyNotificationPartyOptionChange& notification);
+        void HandleNotification(const PartyNotificationPartyJoinRequest& notification);
+        void HandleNotification(const PartyNotificationPartyJoinRejected& notification);
         void HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification);
         void HandleNotification(const PartyNotificationPartyPlayerState& notification);
-
 
     private:
         void HandleChannelInvite(const CharacterMessage& message);
         void HandleChannelInviteResult(const CharacterMessage& message);
         void HandleChannelLeave(const ZoneCommunityMessage& message);
+        void HandleChannelForceExit(const ZoneCommunityMessage& message);
+        void HandlePartyLeaderChange(const ZoneCommunityMessage& message);
+        void HandlePartyOptionChange(const ZoneCommunityMessage& message);
+        void HandleChannelUserList(const ZoneCommunityMessage& message);
+        void HandlePartyJoinRequest(const CharacterMessage& message);
+        void HandlePartyJoinAck(const CharacterMessage& message);
+        void HandlePartyJoinReject(const CharacterMessage& message);
         void HandleWhereAreYou(const CharacterMessage& message);
 
     private:

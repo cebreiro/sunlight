@@ -6,12 +6,18 @@ namespace sunlight
     ENUM_CLASS(CommunityNotificationType, int32_t,
         (PlayerKick)
         (PartyCreateResult)
+        (PartyList)
         (PartyInvite)
         (PartyInviteRefused)
         (PartyJoinResult)
         (PartyLeave)
         (PartyMemberAdd)
         (PartyDisband)
+        (PartyForceExit)
+        (PartyLeaderChange)
+        (PartyOptionChange)
+        (PartyJoinRequest)
+        (PartyJoinRejected)
         (PartyPlayerStateRequested)
         (PartyPlayerState)
     )
@@ -19,12 +25,18 @@ namespace sunlight
     BOOST_DESCRIBE_ENUM(CommunityNotificationType,
         PlayerKick,
         PartyCreateResult,
+        PartyList,
         PartyInvite,
         PartyInviteRefused,
         PartyJoinResult,
         PartyLeave,
         PartyMemberAdd,
         PartyDisband,
+        PartyForceExit,
+        PartyLeaderChange,
+        PartyOptionChange,
+        PartyJoinRequest,
+        PartyJoinRejected,
         PartyPlayerStateRequested,
         PartyPlayerState
     )

@@ -75,4 +75,39 @@ namespace sunlight
     {
         return _members;
     }
+
+    void Party::SetLeaderId(int64_t newLeaderId)
+    {
+        if (_leaderId == newLeaderId)
+        {
+            return;
+        }
+
+        const auto iter = std::ranges::find(_members, newLeaderId);
+        if (iter == _members.end())
+        {
+            assert(false);
+
+            return;
+        }
+
+        std::iter_swap(_members.begin(), iter);
+
+        _leaderId = newLeaderId;
+    }
+
+    void Party::SetPublic(bool value)
+    {
+        _isPublic = value;
+    }
+
+    void Party::SetGoldDistribution(bool value)
+    {
+        _goldDistribution = value;
+    }
+
+    void Party::SetItemDistribution(bool value)
+    {
+        _itemDistribution = value;
+    }
 }

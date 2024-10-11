@@ -23,6 +23,11 @@ namespace sunlight
         auto GetLeaderId() const -> int64_t;
         auto GetMembers() const -> const std::vector<int64_t>&;
 
+        void SetLeaderId(int64_t newLeaderId);
+        void SetPublic(bool value);
+        void SetGoldDistribution(bool value);
+        void SetItemDistribution(bool value);
+
     private:
         int64_t _id = 0;
         std::string _name;

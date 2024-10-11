@@ -33,14 +33,22 @@ namespace sunlight
         static auto CreatePartyInviteResult(const std::string& inviter, ChannelInviteResult result) -> Buffer;
 
         static auto CreatePartyCreate(const PartyInformation& party, const PartyPlayerInformation& leader, const PartyPlayerInformation& member) -> Buffer;
+        static auto CreatePartyList(std::span<const PartyInformation> parties) -> Buffer;
         static auto CreatePartyQueryResult(const std::string& partyName, std::span<const PartyPlayerInformation> members) -> Buffer;
 
+        static auto CreatePartyMemberAdd(const std::string& partyName, const PartyPlayerInformation& member) -> Buffer;
+        static auto CreatePartyMemberEnterNotify(const std::string& partyName, const std::string& target) -> Buffer;
         static auto CreatePartyLeave() -> Buffer;
         static auto CreatePartyMemberLeave(const std::string& partyName, const std::string& memberName) -> Buffer;
+        static auto CreatePartyForceExit(const std::string& partyName, const std::string& targetName) -> Buffer;
         static auto CreatePartyDisband(const std::string& partyName, bool autoDisband) -> Buffer;
+        static auto CreatePartyLeaderChange(const std::string& partyName, const std::string& newLeaderName) -> Buffer;
+        static auto CreatePartyOptionChange(const PartyInformation& party) -> Buffer;
+        static auto CreatePartyJoinRequest(const std::string& requesterName) -> Buffer;
+        static auto CreatePartyJoinRejected(const std::string& partyLeaderName) -> Buffer;
 
     private:
-        static auto WritePartyInformation(const PartyPlayerInformation& player) -> Buffer;
+        static auto WritePartyPlayer(const PartyPlayerInformation& player) -> Buffer;
         static auto WriteParty(const PartyInformation& party) -> Buffer;
     };
 }
