@@ -8,11 +8,14 @@
 #include "sl/emulator/game/message/creator/normal_message_creator.h"
 #include "sl/emulator/game/script/lua_script_engine.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_community_service.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
+#include "sl/emulator/service/community/community_service.h"
+#include "sl/emulator/service/community/command/community_command.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/map/map_data_provider.h"
 #include "sl/emulator/service/snowflake/snowflake_service.h"
@@ -37,6 +40,15 @@ namespace sunlight
         _serviceLocator.Add<GameItemUniqueIdPublisher>(std::make_shared<GameItemUniqueIdPublisher>(_id, *snowflakeValue));
         _serviceLocator.Add<GameEntityIdPublisher>(std::make_shared<GameEntityIdPublisher>(_id));
         _serviceLocator.Add<ZoneChangeService>(std::make_shared<ZoneChangeService>(*this));
+
+        auto communityCommandChannel = std::make_shared<Channel<SharedPtrNotNull<ICommunityCommand>>>();
+        auto communityNotificationChannel = _serviceLocator.Get<CommunityService>()
+            .StartStreaming(_id, AsyncEnumerable<SharedPtrNotNull<ICommunityCommand>>(communityCommandChannel));
+
+        _gameCommunityService = std::make_shared<GameCommunityService>(*this, std::move(communityCommandChannel), communityNotificationChannel.GetChannel());
+        _gameCommunityService->Start();
+
+        _serviceLocator.Add<GameCommunityService>(_gameCommunityService);
 
         const MapDataProvider& mapDataProvider = _serviceLocator.Get<GameDataProvideService>().GetMapDataProvider();
         if (_mapData = mapDataProvider.FindMap(id); !_mapData)
@@ -65,16 +77,22 @@ namespace sunlight
     void Zone::Shutdown()
     {
         _shutdown.store(true);
+
+        _gameCommunityService->Shutdown();
     }
 
-    void Zone::Join()
+    auto Zone::Join() -> Future<void>
     {
         if (_updateFuture.IsValid())
         {
-            _updateFuture.Get();
+            co_await _updateFuture;
 
             _updateFuture = Future<void>();
         }
+
+        co_await _gameCommunityService->Join();
+
+        co_return;
     }
 
     auto Zone::SpawnPlayer(SharedPtrNotNull<GameClient> client, db::dto::Character dto) -> Future<bool>
@@ -103,6 +121,7 @@ namespace sunlight
             assert(!_clients.contains(client->GetId()));
 
             _playerStages[client->GetId()] = stage;
+            _playerCIdStageIndex[dto.id] = stage;
             _clients[client->GetId()] = client;
         }
         catch (const std::exception& e)
@@ -149,9 +168,13 @@ namespace sunlight
 
         co_await repositorySystem.WaitForSaveCompletion(*player);
 
+        _playerCIdStageIndex.erase(player->GetCId());
+
         [[maybe_unused]]
         const size_t erased = _clients.erase(id);
         assert(erased > 0);
+
+        _playerStages.erase(iter);
 
         co_return true;
     }
@@ -173,7 +196,7 @@ namespace sunlight
 
         Stage& stage = *iter->second;
 
-        std::shared_ptr<GamePlayer> player = co_await stage.DespawnPlayer(id, StageExitType::ZoneChange);
+        const std::shared_ptr<GamePlayer> player = co_await stage.DespawnPlayer(id, StageExitType::ZoneChange);
         if (!player)
         {
             assert(false);
@@ -181,6 +204,7 @@ namespace sunlight
             co_return false;
         }
 
+        _playerCIdStageIndex.erase(player->GetCId());
         _playerStages.erase(iter);
 
         GameRepositorySystem& repositorySystem = stage.Get<GameRepositorySystem>();
@@ -226,6 +250,8 @@ namespace sunlight
             co_return false;
         }
 
+        const int64_t cid = player->GetCId();
+
         player->Send(NormalMessageCreator::CreateChangeRoom(destStageId, destX, destY));
 
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
@@ -233,7 +259,9 @@ namespace sunlight
         sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
 
         destStage->SpawnPlayer(std::move(player), StageEnterType::StageChange);
+
         iter->second = destStage;
+        _playerCIdStageIndex[cid] = destStage;
 
         co_return true;
     }
@@ -295,6 +323,20 @@ namespace sunlight
             });
 
         return iter != _stages.end() ? iter->get() : nullptr;
+    }
+
+    auto Zone::FindPlayerStage(int64_t cid) -> Stage*
+    {
+        const auto iter = _playerCIdStageIndex.find(cid);
+
+        return iter != _playerCIdStageIndex.end() ? iter->second : nullptr;
+    }
+
+    auto Zone::FindPlayerStage(int64_t cid) const -> const Stage*
+    {
+        const auto iter = _playerCIdStageIndex.find(cid);
+
+        return iter != _playerCIdStageIndex.end() ? iter->second : nullptr;
     }
 
     auto Zone::FindClient(game_client_id_type id) -> GameClient*

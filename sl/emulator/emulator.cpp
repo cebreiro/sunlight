@@ -10,6 +10,7 @@
 #include "sl/emulator/server/zone_server.h"
 #include "sl/emulator/server/client/game_client_storage.h"
 #include "sl/emulator/service/authentication/authentication_service.h"
+#include "sl/emulator/service/community/community_service.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gateway/gateway_service.h"
@@ -35,6 +36,7 @@ namespace sunlight
         , _authenticationService(std::make_shared<AuthenticationService>(GetServiceLocator(), *_ioExecutor))
         , _databaseService(std::make_shared<DatabaseService>(GetServiceLocator(), *_ioExecutor, _connectionPool))
         , _gatewayService(std::make_shared<GatewayService>(GetServiceLocator(), *_ioExecutor))
+        , _communityService(std::make_shared<CommunityService>(GetServiceLocator(), *_ioExecutor))
         , _loginServer(std::make_shared<LoginServer>(*_ioExecutor))
         , _lobbyServer(std::make_shared<LobbyServer>(*_ioExecutor))
     {
@@ -48,6 +50,7 @@ namespace sunlight
         RegisterService(_authenticationService);
         RegisterService(_databaseService);
         RegisterService(_gatewayService);
+        RegisterService(_communityService);
     }
 
     SlEmulator::~SlEmulator()

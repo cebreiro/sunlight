@@ -9,6 +9,8 @@ namespace sunlight
 {
     struct MapFile;
 
+    class GameCommunityService;
+
     class Stage;
     class GameClient;
     class GamePlayer;
@@ -24,7 +26,7 @@ namespace sunlight
 
         void Start();
         void Shutdown();
-        void Join();
+        auto Join() -> Future<void>;
 
         auto SpawnPlayer(SharedPtrNotNull<GameClient> client, db::dto::Character dto) -> Future<bool>;
         auto LogoutPlayer(game_client_id_type id) -> Future<bool>;
@@ -40,6 +42,8 @@ namespace sunlight
     public:
         auto FindStage(int32_t id) -> Stage*;
         auto FindStage(int32_t id) const -> const Stage*;
+        auto FindPlayerStage(int64_t cid) -> Stage*;
+        auto FindPlayerStage(int64_t cid) const -> const Stage*;
         auto FindClient(game_client_id_type id) -> GameClient*;
         auto FindClient(game_client_id_type id) const -> const GameClient*;
 
@@ -65,6 +69,9 @@ namespace sunlight
 
         std::vector<UniquePtrNotNull<Stage>> _stages;
         std::unordered_map<game_client_id_type, PtrNotNull<Stage>> _playerStages;
+        std::unordered_map<int64_t, PtrNotNull<Stage>> _playerCIdStageIndex;
         std::unordered_map<game_client_id_type, SharedPtrNotNull<GameClient>> _clients;
+
+        SharedPtrNotNull<GameCommunityService> _gameCommunityService;
     };
 }

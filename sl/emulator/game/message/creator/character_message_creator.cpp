@@ -5,12 +5,16 @@
 #include "sl/emulator/game/component/player_profile_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/contents/channel/game_channel_type.h"
 #include "sl/emulator/game/data/sox/zone.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/character_message_type.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
+#include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/server/packet/zone_packet_s2c.h"
 #include "sl/emulator/server/packet/io/sl_packet_writer.h"
+#include "sl/emulator/service/community/party/party_information.h"
+#include "sl/emulator/service/community/party/party_player_information.h"
 
 namespace sunlight
 {
@@ -101,6 +105,102 @@ namespace sunlight
         writer.WriteString(targetPlayerName);
         writer.Write(CharacterMessageType::ShowYouAck);
         writer.Write<int32_t>(0);
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreateMessageResult(const std::string& targetPlayerName, CharacterMessageType type, bool success) -> Buffer
+    {
+        // client 0x4C74E0
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE_RESULT);
+        writer.WriteString(targetPlayerName);
+        writer.Write<int8_t>(success ? 1 : 0);
+        writer.Write(type);
+
+        if (type == CharacterMessageType::WhereAreYou)
+        {
+            writer.Write<int8_t>(success ? 0 : 1);
+        }
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyInvite(const std::string& inviter, const std::string& partyName, const std::string& unk1, int8_t creation) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(inviter);
+        writer.Write(CharacterMessageType::ChannelInvite);
+        writer.WriteString(partyName);
+        writer.WriteString(unk1);
+        writer.Write(GameChannelType::Party);
+        writer.Write<int8_t>(creation);
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyCreate(const PartyInformation& party, const PartyPlayerInformation& leader, const PartyPlayerInformation& member) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_NORMAL_MESSAGE);
+        writer.Write(ZoneMessageType::CHANNEL_CREATE_RESULT);
+        writer.Write<int32_t>(0);
+        writer.Write(GameChannelType::Party);
+        writer.WriteString(party.partyName);
+        writer.Write<int8_t>(0);
+        writer.Write<int8_t>(0);
+
+        const auto writePlayer = [](const PartyPlayerInformation& player) -> Buffer
+            {
+                PacketWriter writer;
+                writer.WriteFixeSizeString(player.name, 32);
+                writer.Write<int8_t>(0);
+                writer.Write<int32_t>(player.jobId);
+                writer.Write<int8_t>(player.jobLevel);
+                writer.Write<int32_t>(player.hp);
+                writer.Write<int32_t>(player.maxHP); // 0x41E90C
+
+                return writer.Flush();
+            };
+
+        const auto writeParty = [](const PartyInformation& party) -> Buffer
+            {
+                PacketWriter writer;
+                writer.WriteFixeSizeString(party.partyName, 32);
+                writer.Write<int8_t>(0);
+                writer.WriteFixeSizeString(party.leaderName, 32);
+                writer.Write<int8_t>(0);
+                writer.WriteZeroBytes(257);
+
+                writer.Write<int8_t>(party.memberCount);
+                writer.Write<int8_t>(party.isPublic ? 1 : 0);
+                writer.Write<int8_t>(party.goldDistribution ? 1 : 0);
+                writer.Write<int8_t>(party.itemDistribution ? 1 : 0);
+                writer.Write<int8_t>(party.leaderCharacterLevel);
+                writer.Write<int32_t>(party.leaderZoneId);
+
+                return writer.Flush();
+            };
+
+        writer.WriteObject(writePlayer(leader));
+        writer.WriteObject(writePlayer(member));
+        writer.WriteObject(writeParty(party));
+
+        return writer.Flush();
+    }
+
+    auto CharacterMessageCreator::CreatePartyInviteResult(const std::string& inviter, ChannelInviteResult result) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(inviter);
+        writer.Write(CharacterMessageType::ChannelInviteResult);
+        writer.Write(result);
 
         return writer.Flush();
     }

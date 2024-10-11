@@ -24,6 +24,7 @@ namespace sunlight
     class AuthenticationService;
     class DatabaseService;
     class GatewayService;
+    class CommunityService;
 }
 
 namespace sunlight
@@ -78,6 +79,7 @@ namespace sunlight
         SharedPtrNotNull<AuthenticationService> _authenticationService;
         SharedPtrNotNull<DatabaseService> _databaseService;
         SharedPtrNotNull<GatewayService> _gatewayService;
+        SharedPtrNotNull<CommunityService> _communityService;
         std::vector<SharedPtrNotNull<IEmulationService>> _services;
 
         SharedPtrNotNull<LoginServer> _loginServer;
