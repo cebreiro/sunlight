@@ -21,6 +21,7 @@
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -49,6 +50,7 @@ namespace sunlight
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerIndexSystem>());
+        Add(stage.Get<PlayerAppearanceSystem>());
     }
 
     bool ItemArchiveSystem::Subscribe(Stage& stage)
@@ -858,13 +860,21 @@ namespace sunlight
             return;
         }
 
-        // TODO: update stat
-
         assert(itemComponent.HasItemLog());
         SaveChanges(player);
 
-        player.Send(GamePlayerMessageCreator::CreatePlayerWeaponSwap(player, itemComponent.FindEquipmentItem(EquipmentPosition::Weapon1)));
-        Get<EntityViewRangeSystem>().Broadcast(player, GamePlayerMessageCreator::CreateRemovePlayerWeaponChange(player), true);
+        // TODO: update stat
+
+        Get<PlayerAppearanceSystem>().UpdateEquipmentAppearance(player);
+
+        Get<EntityViewRangeSystem>().VisitPlayer(player,
+            [&](GamePlayer& target)
+            {
+                target.Defer(GamePlayerMessageCreator::CreatePlayerWeaponSwap(player, itemComponent.FindEquipmentItem(EquipmentPosition::Weapon1)));
+                target.Defer(GamePlayerMessageCreator::CreateRemovePlayerWeaponChange(player));
+
+                target.FlushDeferred();
+            });
     }
 
     void ItemArchiveSystem::TryRollbackMixItem(GamePlayer& player)
@@ -1403,21 +1413,35 @@ namespace sunlight
             return false;
         }
 
-
-        if (position == EquipmentPosition::Hat)
-        {
-            const PlayerAppearanceComponent& appearanceComponent = player.GetAppearanceComponent();
-
-            Get<EntityViewRangeSystem>().Broadcast(player,
-                GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position, appearanceComponent.GetHair(), appearanceComponent.GetHairColor()), false);
-        }
-        else
-        {
-            Get<EntityViewRangeSystem>().Broadcast(player,
-                GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position, 0, 0), false);
-        }
-
+        Get<PlayerAppearanceSystem>().UpdateEquipmentAppearance(player);
         Get<PlayerStatSystem>().RemoveItemStat(player, *itemComponent.GetEquipmentItem(position));
+
+        Get<EntityViewRangeSystem>().VisitPlayer(player,
+            [&](GamePlayer& other)
+            {
+                if (other.GetId() == player.GetId())
+                {
+                    return;
+                }
+
+                if (position == EquipmentPosition::Hat)
+                {
+                    const PlayerAppearanceComponent& appearanceComponent = player.GetAppearanceComponent();
+
+                    other.Defer(GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position, appearanceComponent.GetHair(), appearanceComponent.GetHairColor()));
+                }
+                else
+                {
+                    other.Defer(GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position, 0, 0));
+                }
+
+                if (position == EquipmentPosition::Weapon1)
+                {
+                    other.Defer(GamePlayerMessageCreator::CreateRemovePlayerWeaponChange(player));
+                }
+
+                other.FlushDeferred();
+            });
 
         return true;
     }
@@ -1475,12 +1499,27 @@ namespace sunlight
             Get<PlayerStatSystem>().AddItemStat(player, *itemComponent.GetEquipmentItem(position));
         }
 
+        Get<PlayerAppearanceSystem>().UpdateEquipmentAppearance(player);
+
         const GameItem* equipItem = itemComponent.GetEquipmentItem(position);
         assert(equipItem);
 
-        Get<EntityViewRangeSystem>().Broadcast(player,
-            GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position,
-                equipItem->GetData().GetModelId(), equipItem->GetData().GetModelColor()), false);
+        Get<EntityViewRangeSystem>().VisitPlayer(player,
+            [&, equipItem](GamePlayer& other)
+            {
+                if (other.GetId() == player.GetId())
+                {
+                    return;
+                }
+
+                other.Send(GamePlayerMessageCreator::CreatePlayerEquipmentChange(player, position,
+                    equipItem->GetData().GetModelId(), equipItem->GetData().GetModelColor()));
+
+                if (position == EquipmentPosition::Weapon1)
+                {
+                    other.Send(GamePlayerMessageCreator::CreateRemovePlayerWeaponChange(player));
+                }
+            });
 
         return true;
     }

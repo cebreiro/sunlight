@@ -947,7 +947,18 @@ namespace sunlight
             return false;
         }
 
-        SwapItemPosition(*mainWeapon, *subWeapon);
+        if (mainWeapon && subWeapon)
+        {
+            SwapItemPosition(*mainWeapon, *subWeapon);
+        }
+        else if (mainWeapon)
+        {
+            UpdateItemPosition(*mainWeapon, ItemPositionUpdateEquipment{ .position = EquipmentPosition::Weapon2 });
+        }
+        else if (subWeapon)
+        {
+            UpdateItemPosition(*subWeapon, ItemPositionUpdateEquipment{ .position = EquipmentPosition::Weapon1 });
+        }
 
         return true;
     }

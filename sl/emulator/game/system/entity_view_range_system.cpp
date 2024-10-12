@@ -6,6 +6,7 @@
 #include "sl/data/map/map_stage_room.h"
 #include "sl/data/map/map_stage_terrain.h"
 #include "sl/emulator/game/game_constant.h"
+#include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/sector/game_spatial_id.h"
@@ -230,6 +231,12 @@ namespace sunlight
 
                                 targetPlayer->Defer(SceneObjectPacketCreator::CreateInformation(*player, false));
                                 targetPlayer->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(*player));
+
+                                if (const PlayerAppearanceComponent& appearanceComponent = player->GetAppearanceComponent();
+                                    appearanceComponent.GetHatModelId() != 0)
+                                {
+                                    targetPlayer->Defer(GamePlayerMessageCreator::CreatePlayerHairColorChange(*player, appearanceComponent.GetHairColor()));
+                                }
                             }
                             break;
                             }
@@ -249,6 +256,12 @@ namespace sunlight
 
                                 player->Defer(SceneObjectPacketCreator::CreateInformation(targetPlayer, false));
                                 player->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(targetPlayer));
+
+                                if (const PlayerAppearanceComponent& appearanceComponent = targetPlayer.GetAppearanceComponent();
+                                    appearanceComponent.GetHatModelId() != 0)
+                                {
+                                    player->Defer(GamePlayerMessageCreator::CreatePlayerHairColorChange(targetPlayer, appearanceComponent.GetHairColor()));
+                                }
 
                                 if (PlayerGroupComponent& otherGroupComponent = targetPlayer.GetGroupComponent();
                                     otherGroupComponent.HasGroup())

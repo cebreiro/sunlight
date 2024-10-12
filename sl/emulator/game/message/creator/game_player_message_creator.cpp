@@ -68,16 +68,17 @@ namespace sunlight
         writer.Write<int8_t>(0);
 
         const PlayerAppearanceComponent& appearanceComponent = player.GetAppearanceComponent();
+        const int32_t hatModelId = appearanceComponent.GetHatModelId();
 
-        writer.Write<int32_t>(appearanceComponent.GetHair());
-        writer.Write<int32_t>(appearanceComponent.GetHairColor());
+        writer.Write<int32_t>(hatModelId != 0 ? appearanceComponent.GetHair() : 0);
+        writer.Write<int32_t>(hatModelId != 0 ? appearanceComponent.GetHatModelColor() : appearanceComponent.GetHairColor());
         writer.Write<int32_t>(appearanceComponent.GetSkinColor());
 
         // color
         {
             PacketWriter objectWriter;
-            objectWriter.Write<int32_t>(0);
-            objectWriter.Write<int32_t>(appearanceComponent.GetHatModelColor());
+            objectWriter.Write<int32_t>(appearanceComponent.GetHairColor());
+            objectWriter.Write<int32_t>(hatModelId != 0 ? appearanceComponent.GetHairColor() : appearanceComponent.GetHatModelColor());
             objectWriter.Write<int32_t>(appearanceComponent.GetJacketModelColor());
             objectWriter.Write<int32_t>(appearanceComponent.GetGlovesModelColor());
             objectWriter.Write<int32_t>(appearanceComponent.GetPantsModelColor());
@@ -91,7 +92,7 @@ namespace sunlight
         {
             PacketWriter objectWriter;
             objectWriter.Write<int32_t>(appearanceComponent.GetFace());
-            objectWriter.Write<int32_t>(appearanceComponent.GetHatModelId());
+            objectWriter.Write<int32_t>(hatModelId != 0 ? hatModelId : appearanceComponent.GetHair());
             objectWriter.Write<int32_t>(appearanceComponent.GetJacketModelId());
             objectWriter.Write<int32_t>(appearanceComponent.GetGlovesModelId());
             objectWriter.Write<int32_t>(appearanceComponent.GetPantsModelId());

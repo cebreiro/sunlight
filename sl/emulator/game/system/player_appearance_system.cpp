@@ -47,11 +47,71 @@ namespace sunlight
         return GameSystem::GetClassId<PlayerAppearanceSystem>();
     }
 
-    void PlayerAppearanceSystem::RefreshWeaponMotionCategory(GamePlayer& player)
+    void PlayerAppearanceSystem::UpdateEquipmentAppearance(GamePlayer& player)
     {
-        const int32_t weaponMotion = GetWeaponMotionCategory(player);
+        constexpr auto appearanceEquipPositions = {
+            EquipmentPosition::Hat,
+            EquipmentPosition::Jacket,
+            EquipmentPosition::Gloves,
+            EquipmentPosition::Pants,
+            EquipmentPosition::Shoes,
+            EquipmentPosition::Weapon1,
+        };
 
-        player.GetAppearanceComponent().SetWeaponMotionCategory(weaponMotion);
+        const PlayerItemComponent& itemComponent = player.GetItemComponent();
+        PlayerAppearanceComponent& appearanceComponent = player.GetAppearanceComponent();
+
+        for (const EquipmentPosition position : appearanceEquipPositions)
+        {
+            const GameItem* item = itemComponent.FindEquipmentItem(position);
+
+            const int32_t modelId = item ? item->GetData().GetModelId() : 0;
+            const int32_t modelColor = item ? item->GetData().GetModelColor() : 0;
+
+            switch (position)
+            {
+            case EquipmentPosition::Hat:
+            {
+                appearanceComponent.SetHatModelId(modelId);
+                appearanceComponent.SetHatModelColor(modelColor);
+            }
+            break;
+            case EquipmentPosition::Jacket:
+            {
+                appearanceComponent.SetJacketModelId(modelId);
+                appearanceComponent.SetJacketModelColor(modelColor);
+            }
+            break;
+            case EquipmentPosition::Gloves:
+            {
+                appearanceComponent.SetGlovesModelId(modelId);
+                appearanceComponent.SetGlovesModelColor(modelColor);
+            }
+            break;
+            case EquipmentPosition::Pants:
+            {
+                appearanceComponent.SetPantsModelId(modelId);
+                appearanceComponent.SetPantsModelColor(modelColor);
+            }
+            break;
+            case EquipmentPosition::Shoes:
+            {
+                appearanceComponent.SetShoesModelId(modelId);
+                appearanceComponent.SetShoesModelColor(modelColor);
+            }
+            break;
+            case EquipmentPosition::Weapon1:
+            {
+                appearanceComponent.SetWeaponModelId(modelId);
+                appearanceComponent.SetWeaponModelColor(modelColor);
+            }
+            break;
+            default:
+                assert(false);
+            }
+        }
+
+        appearanceComponent.SetWeaponMotionCategory(GetWeaponMotionCategory(player));
     }
 
     void PlayerAppearanceSystem::HandleMultiPlayerSyncMessage(const ZoneMessage& message)
@@ -139,12 +199,24 @@ namespace sunlight
                     std::pair(data->jobMotion3, data->motionCategory3)
                 };
 
+                std::optional<int32_t> defaultMotionType = std::nullopt;
+
                 for (const auto [job, category] : list)
                 {
+                    if (job == static_cast<int32_t>(JobId::Any))
+                    {
+                        defaultMotionType = category;
+                    }
+
                     if (job == static_cast<int32_t>(mainJob.GetId()))
                     {
                         return category;
                     }
+                }
+
+                if (defaultMotionType.has_value())
+                {
+                    return *defaultMotionType;
                 }
             }
             else

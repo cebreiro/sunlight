@@ -322,13 +322,20 @@ namespace sunlight
     auto ZoneDataTransferObjectCreator::CreatePlayerWeaponMotion(const GamePlayer& player) -> Buffer
     {
         PacketWriter writer;
-        writer.Write<int32_t>(0);
+
+        // client 0x4A9212
+        // maybe base weapon motion category (I think it is 1700(other) or 5500(novice knuckle man).)
+        // if client receives incorrect value then client can't see remote player's skill charge animation
+        // because client basically interprets asset id as party of 'novice knuckle man'
+        // e.g. magician skill charge requires COMMON_MEDICALBAG0USERMAGIC0READY04.bnx but when invalid value is given, COMMON_KNUCKLE0NOVICE0COMBO02.bnx is returned
+        writer.Write<int32_t>(player.GetJobComponent().GetMainJob().GetId() == JobId::MartialArtist ? 5500 : 1700);
+
         writer.Write<int32_t>(0);
         writer.Write<int32_t>(0);
         writer.Write<int8_t>(0);
         writer.Write<int32_t>(0);
-        writer.Write<int32_t>(0);
-        writer.Write<int32_t>(0);
+        writer.Write<int32_t>(0); // client get this at 'update character stat(0x487220)' but is immediately discarded, client 0x47D810
+        writer.Write<int32_t>(0); // client get this at 'update character stat(0x487220)' but is immediately discarded, client 0x47D820
 
         int32_t v13 = 0;
         writer.Write<int32_t>(v13);

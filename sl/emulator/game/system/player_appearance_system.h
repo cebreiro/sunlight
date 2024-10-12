@@ -20,7 +20,8 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 
-        void RefreshWeaponMotionCategory(GamePlayer& player);
+    public:
+        void UpdateEquipmentAppearance(GamePlayer& player);
 
     private:
         void HandleMultiPlayerSyncMessage(const ZoneMessage& message);

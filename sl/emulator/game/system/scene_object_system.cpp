@@ -1,5 +1,6 @@
 #include "scene_object_system.h"
 
+#include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
@@ -89,7 +90,7 @@ namespace sunlight
 
         Get<PlayerStatSystem>().OnInitialize(*player);
         Get<PlayerQuestSystem>().OnInitialize(*player);
-        Get<PlayerAppearanceSystem>().RefreshWeaponMotionCategory(*player);
+        Get<PlayerAppearanceSystem>().UpdateEquipmentAppearance(*player);
 
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
 
@@ -124,11 +125,23 @@ namespace sunlight
                     other.Defer(ZonePacketS2CCreator::CreateObjectMove(*player));
                     other.Defer(SceneObjectPacketCreator::CreateInformation(*player, true));
                     other.Defer(GamePlayerMessageCreator::CreateRemotePlayerState(*player));
+
+                    if (const PlayerAppearanceComponent& appearanceComponent = player->GetAppearanceComponent();
+                        appearanceComponent.GetHatModelId() != 0)
+                    {
+                        other.Defer(GamePlayerMessageCreator::CreatePlayerHairColorChange(*player, appearanceComponent.GetHairColor()));
+                    }
                     other.FlushDeferred();
 
                     player->Defer(ZonePacketS2CCreator::CreateObjectMove(other));
                     player->Defer(SceneObjectPacketCreator::CreateInformation(other, false));
                     player->Defer(GamePlayerMessageCreator::CreateRemotePlayerState(other));
+
+                    if (const PlayerAppearanceComponent& appearanceComponent = other.GetAppearanceComponent();
+                        appearanceComponent.GetHatModelId() != 0)
+                    {
+                        player->Defer(GamePlayerMessageCreator::CreatePlayerHairColorChange(other, appearanceComponent.GetHairColor()));
+                    }
 
                     if (const PlayerGroupComponent& otherGroupComponent = other.GetGroupComponent();
                         otherGroupComponent.HasGroup())
