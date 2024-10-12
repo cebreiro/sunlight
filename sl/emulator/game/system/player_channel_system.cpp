@@ -232,12 +232,21 @@ namespace sunlight
             return;
         }
 
-        if (notification.result == ChannelJoinResult::Success)
+        if (notification.information.has_value())
         {
-            player->Send(CharacterMessageCreator::CreatePartyQueryResult(notification.partyName, notification.players));
+            player->Defer(CharacterMessageCreator::CreatePartyCreate(*notification.information, notification.players[0], notification.players[1]));
+        }
+        else
+        {
+            player->Defer(CharacterMessageCreator::CreateJoinResult(notification.partyName, notification.result));
         }
 
-        player->Send(CharacterMessageCreator::CreateJoinResult(notification.partyName, notification.result));
+        if (notification.result == ChannelJoinResult::Success)
+        {
+            player->Defer(CharacterMessageCreator::CreatePartyQueryResult(notification.partyName, notification.players));
+        }
+
+        player->FlushDeferred();
     }
 
     void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyMemberAdd& notification)

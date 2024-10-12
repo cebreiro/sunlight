@@ -22,6 +22,40 @@ namespace sunlight
 
     auto CommunityService::Run() -> Future<void>
     {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_strand;
+
+        while (true)
+        {
+            co_await Delay(std::chrono::seconds(1));
+            assert(ExecutionContext::IsEqualTo(*_strand));
+
+            if (_shutdown.load())
+            {
+                break;
+            }
+
+            auto now = game_clock_type::now();
+
+            for (auto iter = _playerRemoveTimes.begin(); iter != _playerRemoveTimes.end(); )
+            {
+                const auto [playerId, timePoint] = *iter;
+
+                if (now >= timePoint)
+                {
+                    ProcessRemove(playerId);
+
+                    iter = _playerRemoveTimes.erase(iter);
+                }
+                else
+                {
+                    ++iter;
+                }
+            }
+        }
+
         co_return;
     }
 
@@ -164,60 +198,81 @@ namespace sunlight
     {
         CommunityPlayerStorage& playerStorage = GetPlayerStorage();
 
-        CommunityPlayer* newPlayer = playerStorage.Add(command.playerId, command.name);
-        if (!newPlayer)
-        {
+        CommunityPlayer* player = nullptr;
+        bool reconnection = false;
 
-            CommunityPlayer* oldPlayer = playerStorage.Find(command.playerId);
-            if (!oldPlayer)
+        const auto iter = _playerRemoveTimes.find(command.playerId);
+        if (iter != _playerRemoveTimes.end())
+        {
+            player = playerStorage.Find(command.playerId);
+            if (!player)
             {
                 assert(false);
 
                 return;
             }
 
-            auto notification = std::make_shared<CommunityNotificationPlayerKick>();
-            notification->playerId = command.playerId;
+            reconnection = true;
 
-            Notify(oldPlayer->GetZoneId(), std::move(notification));
+            _playerRemoveTimes.erase(iter);
+        }
+        else
+        {
+            player = playerStorage.Add(command.playerId, command.name);;
+            if (!player)
+            {
+                assert(false);
 
-            return;
+                return;
+            }
         }
 
-        newPlayer->SetZoneId(command.zoneId);
-        newPlayer->SetJobId(command.jobId);
-        newPlayer->SetJobLevel(command.jobLevel);
-        newPlayer->SetCharacterLevel(command.characterLevel);
-        newPlayer->SetMaxHP(command.maxHP);
+        player->SetZoneId(command.zoneId);
+        player->SetJobId(command.jobId);
+        player->SetJobLevel(command.jobLevel);
+        player->SetCharacterLevel(command.characterLevel);
+        player->SetMaxHP(command.maxHP);
 
-        // TODO: remove timer
+        if (reconnection)
+        {
+            _partyService->OnPlayerReconnect(*player);
+        }
     }
 
     void CommunityService::HandleCommand(const CommunityCommandPlayerDeregister& command)
     {
-        CommunityPlayerStorage& playerStorage = GetPlayerStorage();
+        ProcessRemove(command.playerId);
+    }
 
-        CommunityPlayer* player = playerStorage.Find(command.playerId);
+    void CommunityService::HandleCommand(const CommunityCommandPlayerDeregisterTimer& command)
+    {
+        const CommunityPlayer* player = GetPlayerStorage().Find(command.playerId);
         if (!player)
         {
             return;
         }
 
-        // TODO: impl process remove
-
-        playerStorage.Remove(command.playerId);
-    }
-
-    void CommunityService::HandleCommand(const CommunityCommandPlayerDeregisterTimer& command)
-    {
-        (void)command;
-
-        // TODO: impl
+        _playerRemoveTimes[command.playerId] = game_clock_type::now() + std::chrono::milliseconds(command.milliseconds);
     }
 
     void CommunityService::HandleCommand(const CommunityCommandPlayerUpdateInformation& command)
     {
         (void)command;
+    }
+
+    void CommunityService::ProcessRemove(int64_t playerId)
+    {
+        CommunityPlayerStorage& playerStorage = GetPlayerStorage();
+
+        CommunityPlayer* player = playerStorage.Find(playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        _partyService->OnPlayerExit(*player);
+
+        playerStorage.Remove(playerId);
     }
 
     auto CommunityService::FindNotificationChannel(int32_t zoneId) -> Channel<SharedPtrNotNull<ICommunityNotification>>*

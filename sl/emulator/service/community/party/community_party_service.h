@@ -23,6 +23,7 @@ namespace sunlight
 
     public:
         void OnPlayerExit(const CommunityPlayer& player);
+        void OnPlayerReconnect(const CommunityPlayer& player);
 
     public:
         void HandleCommand(const PartyCommandCreate& command);

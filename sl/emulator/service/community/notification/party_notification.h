@@ -66,6 +66,7 @@ namespace sunlight
         ChannelJoinResult result = {};
 
         std::vector<PartyPlayerInformation> players;
+        std::optional<PartyInformation> information;
 
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };

@@ -19,7 +19,40 @@ namespace sunlight
 
     void CommunityPartyService::OnPlayerExit(const CommunityPlayer& player)
     {
-        (void)player;
+        if (!player.HasParty())
+        {
+            return;
+        }
+
+        PartyCommandPartyLeave command;
+        command.playerId = player.GetId();
+
+        HandleCommand(command);
+    }
+
+    void CommunityPartyService::OnPlayerReconnect(const CommunityPlayer& player)
+    {
+        if (!player.HasParty())
+        {
+            return;
+        }
+
+        const Party* party = FindParty(player.GetPartyId());
+        if (!party)
+        {
+            assert(false);
+
+            return;
+        }
+
+        auto notification = std::make_shared<PartyNotificationPartyJoinResult>();
+        notification->playerId = player.GetId();
+        notification->partyName = party->GetName();
+        notification->result = ChannelJoinResult::Success;
+        notification->players = CreatePartyPlayerInformationList(*party);
+        notification->information = CreatePartyInformation(*party);
+
+        _communityService.Notify(player.GetZoneId(), std::move(notification));
     }
 
     void CommunityPartyService::HandleCommand(const PartyCommandCreate& command)

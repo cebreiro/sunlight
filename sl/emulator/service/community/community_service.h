@@ -1,4 +1,7 @@
 #pragma once
+#include <boost/unordered/unordered_flat_map.hpp>
+
+#include "sl/emulator/game/time/game_time.h"
 #include "sl/emulator/service/emulation_service_interface.h"
 #include "sl/emulator/service/community/command/community_command_interface.h"
 #include "sl/emulator/service/community/notification/community_notification_interface.h"
@@ -49,6 +52,10 @@ namespace sunlight
         void HandleCommand(const CommunityCommandPlayerDeregisterTimer& command);
         void HandleCommand(const CommunityCommandPlayerUpdateInformation& command);
 
+    private:
+        void ProcessRemove(int64_t playerId);
+
+    private:
         auto FindNotificationChannel(int32_t zoneId) -> Channel<SharedPtrNotNull<ICommunityNotification>>*;
 
     private:
@@ -58,6 +65,8 @@ namespace sunlight
 
         std::unordered_map<int32_t, SharedPtrNotNull<Channel<SharedPtrNotNull<ICommunityCommand>>>> _commandChannels;
         std::unordered_map<int32_t, SharedPtrNotNull<Channel<SharedPtrNotNull<ICommunityNotification>>>> _notificationChannels;
+
+        boost::unordered::unordered_flat_map<int64_t, game_time_point_type> _playerRemoveTimes;
 
         UniquePtrNotNull<CommunityPlayerStorage> _playerStorage;
         UniquePtrNotNull<CommunityPartyService> _partyService;
