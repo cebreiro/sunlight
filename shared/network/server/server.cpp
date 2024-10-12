@@ -297,7 +297,7 @@ namespace sunlight
         const int64_t prev = _sessionCount.fetch_sub(1);
 
         SUNLIGHT_LOG_DEBUG(_locator,
-            fmt::format("[{}] session[{}] destured. current session count: {}", GetName(), event.id, prev - 1));
+            fmt::format("[{}] session[{}] is destructed. current session count: {}", GetName(), event.id, prev - 1));
     }
 
     auto Server::PublishSessionId() -> session::id_type
