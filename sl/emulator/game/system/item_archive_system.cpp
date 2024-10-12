@@ -385,6 +385,13 @@ namespace sunlight
 
         boost::scope::scope_exit exit([&]()
             {
+                if (player.HasDeferred())
+                {
+                    AddDummyPacketForInventoryRefresh(player);
+
+                    player.FlushDeferred();
+                }
+
                 SaveChanges(player);
             });
 
@@ -407,7 +414,7 @@ namespace sunlight
             return false;
         }
 
-        player.Send(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *item));
+        player.Defer(ItemArchiveMessageCreator::CreateInventoryItemAdd(player, *item));
 
         return true;
     }
