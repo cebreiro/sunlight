@@ -633,47 +633,6 @@ namespace sunlight
         _communityService.Notify(requester->GetZoneId(), std::move(notification));
     }
 
-    void CommunityPartyService::HandleCommand(const PartyCommandPartyPlayerStateRequest& command)
-    {
-        const CommunityPlayerStorage& playerStorage = _communityService.GetPlayerStorage();
-
-        const CommunityPlayer* player = playerStorage.Find(command.playerId);
-        const CommunityPlayer* target = playerStorage.FindByName(command.targetName);
-
-        if (!player || !target)
-        {
-            return;
-        }
-
-        auto notification = std::make_shared<PartyNotificationPartyPlayerStateRequested>();
-        notification->playerId = target->GetId();
-        notification->requesterId = command.playerId;
-
-        _communityService.Notify(target->GetZoneId(), std::move(notification));
-    }
-
-    void CommunityPartyService::HandleCommand(const PartyCommandPartyPlayerStateResponse& command)
-    {
-        const CommunityPlayerStorage& playerStorage = _communityService.GetPlayerStorage();
-
-        const CommunityPlayer* player = playerStorage.Find(command.playerId);
-        const CommunityPlayer* requester = playerStorage.Find(command.requestId);
-
-        if (!player || !requester)
-        {
-            return;
-        }
-
-        auto notification = std::make_shared<PartyNotificationPartyPlayerState>();
-        notification->playerId = requester->GetId();
-        notification->targetName = player->GetName();
-        notification->x = command.x;
-        notification->y = command.y;
-        notification->hp = command.hp;
-
-        _communityService.Notify(requester->GetZoneId(), std::move(notification));
-    }
-
     void CommunityPartyService::ProcessPartyMemberAdd(Party& party, CommunityPlayer& newMember)
     {
         assert(!party.IsFull());

@@ -22,8 +22,6 @@ namespace sunlight
     struct PartyNotificationPartyOptionChange;
     struct PartyNotificationPartyJoinRequest;
     struct PartyNotificationPartyJoinRejected;
-    struct PartyNotificationPartyPlayerStateRequested;
-    struct PartyNotificationPartyPlayerState;
 }
 
 namespace sunlight
@@ -59,8 +57,6 @@ namespace sunlight
         void HandleNotification(const PartyNotificationPartyOptionChange& notification);
         void HandleNotification(const PartyNotificationPartyJoinRequest& notification);
         void HandleNotification(const PartyNotificationPartyJoinRejected& notification);
-        void HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification);
-        void HandleNotification(const PartyNotificationPartyPlayerState& notification);
 
     private:
         void HandleChannelInvite(const CharacterMessage& message);

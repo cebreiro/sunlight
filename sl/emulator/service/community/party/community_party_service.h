@@ -37,8 +37,6 @@ namespace sunlight
         void HandleCommand(const PartyCommandPartyJoin& command);
         void HandleCommand(const PartyCommandPartyJoinAck& command);
         void HandleCommand(const PartyCommandPartyJoinReject& command);
-        void HandleCommand(const PartyCommandPartyPlayerStateRequest& command);
-        void HandleCommand(const PartyCommandPartyPlayerStateResponse& command);
 
     private:
         void ProcessPartyMemberAdd(Party& party, CommunityPlayer& newMember);

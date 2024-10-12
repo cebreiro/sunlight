@@ -19,8 +19,6 @@ namespace sunlight
         (PartyJoin)
         (PartyJoinAck)
         (PartyJoinReject)
-        (PartyPlayerStateRequest)
-        (PartyPlayerStateResponse)
     )
 
     BOOST_DESCRIBE_ENUM(CommunityCommandType,
@@ -38,9 +36,7 @@ namespace sunlight
         PartyOptionChange,
         PartyJoin,
         PartyJoinAck,
-        PartyJoinReject,
-        PartyPlayerStateRequest,
-        PartyPlayerStateResponse
+        PartyJoinReject
     )
 
     template <CommunityCommandType E>

@@ -18,8 +18,6 @@ namespace sunlight
         (PartyOptionChange)
         (PartyJoinRequest)
         (PartyJoinRejected)
-        (PartyPlayerStateRequested)
-        (PartyPlayerState)
     )
 
     BOOST_DESCRIBE_ENUM(CommunityNotificationType,
@@ -36,9 +34,7 @@ namespace sunlight
         PartyLeaderChange,
         PartyOptionChange,
         PartyJoinRequest,
-        PartyJoinRejected,
-        PartyPlayerStateRequested,
-        PartyPlayerState
+        PartyJoinRejected
     )
 
     template <CommunityNotificationType E>

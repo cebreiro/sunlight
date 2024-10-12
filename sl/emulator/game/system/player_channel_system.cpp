@@ -347,37 +347,6 @@ namespace sunlight
         player->Send(CharacterMessageCreator::CreatePartyJoinRejected(notification.partyLeaderName));
     }
 
-    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyPlayerStateRequested& notification)
-    {
-        const GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
-        if (!player)
-        {
-            return;
-        }
-
-        auto command = std::make_shared<PartyCommandPartyPlayerStateResponse>();
-        command->playerId = player->GetCId();
-        command->requestId = notification.requesterId;
-
-        const Eigen::Vector2f position = player->GetSceneObjectComponent().GetPosition();
-        command->x = position.x();
-        command->y = position.y();
-        command->hp = player->GetStatComponent().GetFinalStat(RecoveryStatType::HP).As<float>();
-
-        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
-    }
-
-    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyPlayerState& notification)
-    {
-        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
-        if (!player)
-        {
-            return;
-        }
-
-        player->Send(CharacterMessageCreator::CreateIamHere(notification.targetName, 0, notification.x, notification.y, notification.hp));
-    }
-
     void PlayerChannelSystem::HandleChannelInvite(const CharacterMessage& message)
     {
         GamePlayer& player = message.player;
@@ -602,6 +571,7 @@ namespace sunlight
 
     void PlayerChannelSystem::HandleWhereAreYou(const CharacterMessage& message)
     {
+        GamePlayer& player = message.player;
         SlPacketReader& reader = message.reader;
 
         const int8_t type = reader.Read<int8_t>();
@@ -614,10 +584,16 @@ namespace sunlight
 
         // when client is in party play, constantly request to show party member's hp
 
-        auto command = std::make_shared<PartyCommandPartyPlayerStateRequest>();
-        command->playerId = message.player.GetCId();
-        command->targetName = message.targetName;
+        const GamePlayer* targetPlayer = Get<PlayerIndexSystem>().FindByName(message.targetName);
+        if (!targetPlayer)
+        {
+            return;
+        }
 
-        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+        const Eigen::Vector2f position = targetPlayer->GetSceneObjectComponent().GetPosition();
+        const float hp = targetPlayer->GetStatComponent().GetFinalStat(RecoveryStatType::HP).As<float>();
+
+        player.Send(CharacterMessageCreator::CreateIamHere(targetPlayer->GetName(),
+            type, position.x(), position.y(), hp));
     }
 }
