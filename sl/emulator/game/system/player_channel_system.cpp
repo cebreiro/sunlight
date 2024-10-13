@@ -1,6 +1,7 @@
 #include "player_channel_system.h"
 
 #include "sl/emulator/game/component/player_job_component.h"
+#include "sl/emulator/game/component/player_party_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/channel/game_channel_type.h"
@@ -193,7 +194,11 @@ namespace sunlight
             return;
         }
 
-        // TODO: Set Party information
+        PlayerPartyComponent& partyComponent = player->GetPartyComponent();
+        partyComponent.SetHasParty(true);
+        partyComponent.SetPartyName(notification.party.partyName);
+        partyComponent.AddMemberId(notification.leader.cid);
+        partyComponent.AddMemberId(notification.member.cid);
 
         player->Send(CharacterMessageCreator::CreatePartyCreate(notification.party,
             notification.leader, notification.member));
@@ -253,6 +258,15 @@ namespace sunlight
 
         if (notification.result == ChannelJoinResult::Success)
         {
+            PlayerPartyComponent& partyComponent = player->GetPartyComponent();
+            partyComponent.SetHasParty(true);
+            partyComponent.SetPartyName(notification.partyName);
+
+            for (const PartyPlayerInformation& partyPlayer : notification.players)
+            {
+                partyComponent.AddMemberId(partyPlayer.cid);
+            }
+
             player->Defer(CharacterMessageCreator::CreatePartyQueryResult(notification.partyName, notification.players));
         }
 
@@ -267,7 +281,8 @@ namespace sunlight
             return;
         }
 
-        // TODO: update party information
+        PlayerPartyComponent& partyComponent = player->GetPartyComponent();
+        partyComponent.AddMemberId(notification.member.cid);
 
         player->Defer(CharacterMessageCreator::CreatePartyMemberAdd(notification.partyName, notification.member));
         player->Defer(CharacterMessageCreator::CreatePartyMemberEnterNotify(notification.partyName, notification.member.name));
@@ -282,7 +297,8 @@ namespace sunlight
             return;
         }
 
-        // TODO: remove party member
+        PlayerPartyComponent& partyComponent = player->GetPartyComponent();
+        partyComponent.RemoveMemberId(notification.leaverId);
 
         player->Send(CharacterMessageCreator::CreatePartyMemberLeave(notification.partyName, notification.leaverName));
     }
@@ -295,7 +311,8 @@ namespace sunlight
             return;
         }
 
-        // TODO: remove party data all
+        PlayerPartyComponent& partyComponent = player->GetPartyComponent();
+        partyComponent.Clear();
 
         player->Send(CharacterMessageCreator::CreatePartyDisband(notification.partyName, notification.autoDisband));
     }
@@ -308,7 +325,16 @@ namespace sunlight
             return;
         }
 
-        // TODO: remove party member data
+        PlayerPartyComponent& partyComponent = player->GetPartyComponent();
+
+        if (player->GetCId() ==  notification.targetId)
+        {
+            partyComponent.Clear();
+        }
+        else
+        {
+            partyComponent.RemoveMemberId(notification.targetId);
+        }
 
         player->Send(CharacterMessageCreator::CreatePartyForceExit(notification.partyName, notification.targetName));
     }
@@ -429,6 +455,9 @@ namespace sunlight
             command->playerId = player.GetCId();
 
             _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
+
+            PlayerPartyComponent& partyComponent = player.GetPartyComponent();
+            partyComponent.Clear();
 
             player.Send(CharacterMessageCreator::CreatePartyLeave());
         }

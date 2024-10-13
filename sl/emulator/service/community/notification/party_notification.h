@@ -79,6 +79,7 @@ namespace sunlight
         int64_t playerId = 0;
         std::string partyName;
         std::string leaverName;
+        int64_t leaverId = 0;
 
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };
@@ -115,6 +116,7 @@ namespace sunlight
         int64_t playerId = 0;
         std::string partyName;
         std::string targetName;
+        int64_t targetId = 0;
 
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };

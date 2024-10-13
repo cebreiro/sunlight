@@ -395,6 +395,7 @@ namespace sunlight
                 notification->playerId = memberId;
                 notification->partyName = party->GetName();
                 notification->leaverName = player->GetName();
+                notification->leaverId = player->GetId();
 
                 _communityService.Notify(member->GetZoneId(), std::move(notification));
             }
@@ -435,12 +436,13 @@ namespace sunlight
             return;
         }
 
-        Visit(*party, [this, party, &command](const CommunityPlayer& member)
+        Visit(*party, [this, party, target](const CommunityPlayer& member)
             {
                 auto notification = std::make_shared<PartyNotificationPartyForceExit>();
                 notification->playerId = member.GetId();
                 notification->partyName = party->GetName();
-                notification->targetName = command.targetName;
+                notification->targetName = target->GetName();
+                notification->targetId = target->GetId();
 
                 _communityService.Notify(member.GetZoneId(), std::move(notification));
             });
@@ -757,6 +759,7 @@ namespace sunlight
             .jobLevel = player.GetJobLevel(),
             .hp = player.GetHP(),
             .maxHP = player.GetMaxHP(),
+            .cid = player.GetId(),
         };
     }
 

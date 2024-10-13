@@ -23,6 +23,7 @@ namespace sunlight
     class PlayerNPCShopComponent;
     class PlayerProfileComponent;
     class PlayerGroupComponent;
+    class PlayerPartyComponent;
     class SceneObjectComponent;
     class EntityMovementComponent;
     class EntityStateComponent;
@@ -88,6 +89,8 @@ namespace sunlight
         auto GetProfileComponent() const -> const PlayerProfileComponent&;
         auto GetGroupComponent() -> PlayerGroupComponent&;
         auto GetGroupComponent() const -> const PlayerGroupComponent&;
+        auto GetPartyComponent() -> PlayerPartyComponent&;
+        auto GetPartyComponent() const -> const PlayerPartyComponent&;
 
     private:
         int64_t _cid = 0;

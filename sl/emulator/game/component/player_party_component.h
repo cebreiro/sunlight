@@ -1,0 +1,27 @@
+#pragma once
+#include "sl/emulator/game/component/game_component.h"
+
+namespace sunlight
+{
+    class PlayerPartyComponent final : public GameComponent
+    {
+    public:
+        PlayerPartyComponent();
+
+        bool HasParty() const;
+
+        void Clear();
+
+        void AddMemberId(int64_t id);
+        void RemoveMemberId(int64_t id);
+
+        void SetHasParty(bool value);
+        void SetPartyName(const std::string& partyName);
+
+    private:
+        bool _hasParty = false;
+        std::string _partyName;
+
+        std::vector<int64_t> _memberIds;
+    };
+}
