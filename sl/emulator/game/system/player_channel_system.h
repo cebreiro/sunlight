@@ -7,6 +7,7 @@
 namespace sunlight
 {
     struct CharacterMessage;
+    struct ZoneMessage;
     struct ZoneCommunityMessage;
 
     struct PartyNotificationCreateResult;
@@ -70,6 +71,8 @@ namespace sunlight
         void HandlePartyJoinAck(const CharacterMessage& message);
         void HandlePartyJoinReject(const CharacterMessage& message);
         void HandleWhereAreYou(const CharacterMessage& message);
+
+        void HandleNormalChat(const ZoneMessage& message);
 
     private:
         const ServiceLocator& _serviceLocator;

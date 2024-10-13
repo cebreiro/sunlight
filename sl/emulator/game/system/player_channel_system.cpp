@@ -7,7 +7,10 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/character_message.h"
 #include "sl/emulator/game/message/zone_community_message.h"
+#include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/character_message_creator.h"
+#include "sl/emulator/game/message/creator/chat_message_creator.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -27,6 +30,7 @@ namespace sunlight
     void PlayerChannelSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<PlayerIndexSystem>());
+        Add(stage.Get<EntityViewRangeSystem>());
     }
 
     bool PlayerChannelSystem::Subscribe(Stage& stage)
@@ -93,6 +97,12 @@ namespace sunlight
 
         if (!stage.AddSubscriber(CharacterMessageType::WhereAreYou,
             std::bind_front(&PlayerChannelSystem::HandleWhereAreYou, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::CHAT_STRING,
+            std::bind_front(&PlayerChannelSystem::HandleNormalChat, this)))
         {
             return false;
         }
@@ -595,5 +605,19 @@ namespace sunlight
 
         player.Send(CharacterMessageCreator::CreateIamHere(targetPlayer->GetName(),
             type, position.x(), position.y(), hp));
+    }
+
+    void PlayerChannelSystem::HandleNormalChat(const ZoneMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        std::string chatMessage = reader.ReadString();
+
+        Get<EntityViewRangeSystem>().VisitPlayer(player,
+            [&player, chat = std::move(chatMessage)](GamePlayer& target)
+            {
+                target.Send(ChatMessageCreator::CreateNormalChat(player, chat));
+            });
     }
 }
