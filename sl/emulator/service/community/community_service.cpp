@@ -144,6 +144,14 @@ namespace sunlight
         channel->Send(std::move(notification), channel::ChannelSignal::NotifyOne);
     }
 
+    void CommunityService::Visit(const std::function<void(Channel<SharedPtrNotNull<ICommunityNotification>>&)>& visitor)
+    {
+        for (Channel<SharedPtrNotNull<ICommunityNotification>>& channel : _notificationChannels | std::views::values | notnull::reference)
+        {
+            visitor(channel);
+        }
+    }
+
     auto CommunityService::RunInputStreaming(int32_t zoneId, AsyncEnumerable<SharedPtrNotNull<ICommunityCommand>> commandChannel) -> Future<void>
     {
         assert(ExecutionContext::IsEqualTo(*_strand));
@@ -157,7 +165,7 @@ namespace sunlight
             {
                 SharedPtrNotNull<ICommunityCommand> command = co_await commandChannel;
 
-                Visit([this]<typename T>(const T& command)
+                sunlight::Visit([this]<typename T>(const T& command)
                     {
                         if constexpr (requires
                         {
@@ -258,6 +266,88 @@ namespace sunlight
     void CommunityService::HandleCommand(const CommunityCommandPlayerUpdateInformation& command)
     {
         (void)command;
+    }
+
+    void CommunityService::HandleCommand(const CommunityCommandChatDeliver& command)
+    {
+        switch (command.type)
+        {
+        case CommunityChatType::Shout:
+        case CommunityChatType::Trade:
+        case CommunityChatType::Echo:
+        {
+            const CommunityPlayer* requester = GetPlayerStorage().Find(command.requesterId);
+            if (!requester)
+            {
+                return;
+            }
+
+            Visit([requester, &command](Channel<SharedPtrNotNull<ICommunityNotification>>& channel)
+                {
+                    auto notification = std::make_shared<CommunityNotificationGlobalChat>();
+                    notification->type = command.type;
+                    notification->sender = requester->GetName();
+                    notification->message = command.message;
+
+                    channel.Send(std::move(notification), channel::ChannelSignal::NotifyOne);
+                });
+        }
+        break;
+        case CommunityChatType::Party:
+        {
+            const CommunityPlayer* player = GetPlayerStorage().Find(command.requesterId);
+            if (!player)
+            {
+                return;
+            }
+
+            if (!player->HasParty())
+            {
+                return;
+            }
+
+            _partyService->BroadcastPartyChatting(player->GetPartyId(), player->GetName(), command.message);
+        }
+        break;
+        case CommunityChatType::Whisper:
+        {
+            if (!command.target.has_value())
+            {
+                assert(false);
+
+                return;
+            }
+
+            const CommunityPlayerStorage& playerStorage = GetPlayerStorage();
+            const CommunityPlayer* requester = playerStorage.Find(command.requesterId);
+            if (!requester)
+            {
+                return;
+            }
+
+            if (const CommunityPlayer* target = playerStorage.FindByName(*command.target);
+                target)
+            {
+                auto notification = std::make_shared<CommunityNotificationWhisperChat>();
+                notification->playerId = target->GetId();
+                notification->sender = requester->GetName();
+                notification->message = command.message;
+
+                Notify(target->GetZoneId(), std::move(notification));
+            }
+            else
+            {
+                auto notification = std::make_shared<CommunityNotificationWhisperChatFail>();
+                notification->playerId = command.requesterId;
+                notification->whisperTarget = *command.target;
+
+                Notify(requester->GetZoneId(), std::move(notification));
+            }
+        }
+        break;
+        default:
+            assert(false);
+        }
     }
 
     void CommunityService::ProcessRemove(int64_t playerId)

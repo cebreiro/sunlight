@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/emulator/service/community/community_chat_type.h"
 #include "sl/emulator/service/community/command/community_command_interface.h"
 
 namespace sunlight
@@ -57,4 +58,18 @@ namespace sunlight
         auto GetType() const -> CommunityCommandType override { return TYPE; }
     };
     SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(CommunityCommandPlayerUpdateInformation);
+
+    struct CommunityCommandChatDeliver : ICommunityCommand
+    {
+        static constexpr auto TYPE = CommunityCommandType::ChatDeliver;
+
+        CommunityChatType type = {};
+        int64_t requesterId = 0;
+        std::string message;
+
+        std::optional<std::string> target = std::nullopt;
+
+        auto GetType() const -> CommunityCommandType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_COMMAND_MAPPER(CommunityCommandChatDeliver);
 }

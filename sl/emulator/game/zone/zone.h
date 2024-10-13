@@ -52,6 +52,7 @@ namespace sunlight
         auto GetStrand() const -> const Strand&;
         auto GetWorldId() const -> int8_t;
         auto GetId() const -> int32_t;
+        auto GetStages() const -> std::span<const UniquePtrNotNull<Stage>>;
 
     private:
         void HandleNetworkMessageImpl(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader);

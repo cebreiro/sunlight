@@ -56,4 +56,9 @@ namespace sunlight
 
         return iter != _nameIndex.end() ? iter->second : nullptr;
     }
+
+    auto PlayerIndexSystem::GetPlayerCount() const -> int64_t
+    {
+        return std::ssize(_cidIndex);
+    }
 }

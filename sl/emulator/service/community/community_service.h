@@ -12,6 +12,7 @@ namespace sunlight
     struct CommunityCommandPlayerDeregister;
     struct CommunityCommandPlayerDeregisterTimer;
     struct CommunityCommandPlayerUpdateInformation;
+    struct CommunityCommandChatDeliver;
 
     class CommunityPlayerStorage;
     class CommunityPartyService;
@@ -43,6 +44,7 @@ namespace sunlight
             -> AsyncEnumerable<SharedPtrNotNull<ICommunityNotification>>;
 
         void Notify(int32_t zoneId, SharedPtrNotNull<ICommunityNotification> notification);
+        void Visit(const std::function<void(Channel<SharedPtrNotNull<ICommunityNotification>>&)>& visitor);
 
     private:
         auto RunInputStreaming(int32_t zoneId, AsyncEnumerable<SharedPtrNotNull<ICommunityCommand>> commandChannel) -> Future<void>;
@@ -51,6 +53,7 @@ namespace sunlight
         void HandleCommand(const CommunityCommandPlayerDeregister& command);
         void HandleCommand(const CommunityCommandPlayerDeregisterTimer& command);
         void HandleCommand(const CommunityCommandPlayerUpdateInformation& command);
+        void HandleCommand(const CommunityCommandChatDeliver& command);
 
     private:
         void ProcessRemove(int64_t playerId);
@@ -63,8 +66,8 @@ namespace sunlight
         SharedPtrNotNull<Strand> _strand;
         std::atomic<bool> _shutdown = false;
 
-        std::unordered_map<int32_t, SharedPtrNotNull<Channel<SharedPtrNotNull<ICommunityCommand>>>> _commandChannels;
-        std::unordered_map<int32_t, SharedPtrNotNull<Channel<SharedPtrNotNull<ICommunityNotification>>>> _notificationChannels;
+        boost::unordered::unordered_flat_map<int32_t, SharedPtrNotNull<Channel<SharedPtrNotNull<ICommunityCommand>>>> _commandChannels;
+        boost::unordered::unordered_flat_map<int32_t, SharedPtrNotNull<Channel<SharedPtrNotNull<ICommunityNotification>>>> _notificationChannels;
 
         boost::unordered::unordered_flat_map<int64_t, game_time_point_type> _playerRemoveTimes;
 

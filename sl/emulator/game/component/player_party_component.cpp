@@ -33,6 +33,16 @@ namespace sunlight
         }
     }
 
+    auto PlayerPartyComponent::GetPartyName() const -> const std::string&
+    {
+        return _partyName;
+    }
+
+    auto PlayerPartyComponent::GetMemberIds() const -> std::span<const int64_t>
+    {
+        return _memberIds;
+    }
+
     void PlayerPartyComponent::SetHasParty(bool value)
     {
         _hasParty = value;

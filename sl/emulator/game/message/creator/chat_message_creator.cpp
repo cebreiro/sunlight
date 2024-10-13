@@ -1,7 +1,9 @@
 #include "chat_message_creator.h"
 
+#include "sl/emulator/game/contents/channel/game_channel_type.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/character_message_type.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/server/packet/zone_packet_s2c.h"
@@ -54,6 +56,34 @@ namespace sunlight
         writer.WriteString(sender);
         writer.WriteString(message);
         writer.Write<int32_t>(2);
+
+        return writer.Flush();
+    }
+
+    auto ChatMessageCreator::CreatePartyChat(const std::string& partyName, const std::string& sender, const std::string& message) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(partyName);
+        writer.Write(CharacterMessageType::ChannelMsg);
+        writer.WriteString("");
+        writer.WriteString(sender);
+        writer.Write(GameChannelType::Party); // GameChannelType::Channel -> client crash, Guild -> works
+        writer.Write<int8_t>(0);
+        writer.WriteString(message);
+
+        return writer.Flush();
+    }
+
+    auto ChatMessageCreator::CreateWhisperChat(const std::string& sender, const std::string& message) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_CHR_MESSAGE);
+        writer.WriteString(sender);
+        writer.Write(CharacterMessageType::Whisper);
+        writer.WriteString(message);
 
         return writer.Flush();
     }

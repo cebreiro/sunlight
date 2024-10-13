@@ -18,6 +18,10 @@ namespace sunlight
         (PartyOptionChange)
         (PartyJoinRequest)
         (PartyJoinRejected)
+        (PartyChat)
+        (GlobalChat)
+        (WhisperChat)
+        (WhisperChatFail)
     )
 
     BOOST_DESCRIBE_ENUM(CommunityNotificationType,
@@ -34,7 +38,11 @@ namespace sunlight
         PartyLeaderChange,
         PartyOptionChange,
         PartyJoinRequest,
-        PartyJoinRejected
+        PartyJoinRejected,
+        PartyChat,
+        GlobalChat,
+        WhisperChat,
+        WhisperChatFail
     )
 
     template <CommunityNotificationType E>

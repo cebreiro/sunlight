@@ -38,6 +38,8 @@ namespace sunlight
         void HandleCommand(const PartyCommandPartyJoinAck& command);
         void HandleCommand(const PartyCommandPartyJoinReject& command);
 
+        void BroadcastPartyChatting(int64_t partyId, const std::string& sender, const std::string& message);
+
     private:
         void ProcessPartyMemberAdd(Party& party, CommunityPlayer& newMember);
         void ProcessDisbandment(Party& party, bool isAutoDisbandment);

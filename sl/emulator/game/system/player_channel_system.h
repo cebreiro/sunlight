@@ -3,6 +3,7 @@
 #include "sl/emulator/game/system/game_system.h"
 #include "sl/emulator/game/zone/stage_enter_type.h"
 #include "sl/emulator/game/zone/stage_exit_type.h"
+#include "sl/emulator/service/community/community_chat_type.h"
 
 namespace sunlight
 {
@@ -23,6 +24,10 @@ namespace sunlight
     struct PartyNotificationPartyOptionChange;
     struct PartyNotificationPartyJoinRequest;
     struct PartyNotificationPartyJoinRejected;
+    struct PartyNotificationPartyChat;
+    struct CommunityNotificationWhisperChat;
+    struct CommunityNotificationWhisperChatFail;
+    struct CommunityNotificationGlobalChat;
 }
 
 namespace sunlight
@@ -58,6 +63,10 @@ namespace sunlight
         void HandleNotification(const PartyNotificationPartyOptionChange& notification);
         void HandleNotification(const PartyNotificationPartyJoinRequest& notification);
         void HandleNotification(const PartyNotificationPartyJoinRejected& notification);
+        void HandleNotification(const PartyNotificationPartyChat& notification);
+        void HandleNotification(const CommunityNotificationWhisperChat& notification);
+        void HandleNotification(const CommunityNotificationWhisperChatFail& notification);
+        void HandleNotification(const CommunityNotificationGlobalChat& notification);
 
     private:
         void HandleChannelInvite(const CharacterMessage& message);
@@ -72,7 +81,15 @@ namespace sunlight
         void HandlePartyJoinReject(const CharacterMessage& message);
         void HandleWhereAreYou(const CharacterMessage& message);
 
-        void HandleNormalChat(const ZoneMessage& message);
+        void HandleChatNormal(const ZoneMessage& message);
+        void HandleChannelChat(const ZoneCommunityMessage& message);
+        void HandleChatWhisper(const CharacterMessage& message);
+        void HandleChatShout(const ZoneCommunityMessage& message);
+        void HandleChatTrade(const ZoneCommunityMessage& message);
+        void HandleChatEcho(const ZoneCommunityMessage& message);
+
+    private:
+        void SendChatCommand(CommunityChatType type, int64_t playerId, std::string message, std::optional<std::string> target = std::nullopt);
 
     private:
         const ServiceLocator& _serviceLocator;

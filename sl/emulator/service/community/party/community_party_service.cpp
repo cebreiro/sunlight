@@ -635,6 +635,25 @@ namespace sunlight
         _communityService.Notify(requester->GetZoneId(), std::move(notification));
     }
 
+    void CommunityPartyService::BroadcastPartyChatting(int64_t partyId, const std::string& sender, const std::string& message)
+    {
+        const auto* party = FindParty(partyId);
+        if (!party)
+        {
+            return;
+        }
+
+        Visit(*party, [&, this](const CommunityPlayer& player)
+            {
+                auto notification = std::make_shared<PartyNotificationPartyChat>();
+                notification->playerId = player.GetId();
+                notification->sender = sender;
+                notification->message = message;
+
+                _communityService.Notify(player.GetZoneId(), std::move(notification));
+            });
+    }
+
     void CommunityPartyService::ProcessPartyMemberAdd(Party& party, CommunityPlayer& newMember)
     {
         assert(!party.IsFull());

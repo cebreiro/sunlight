@@ -18,6 +18,7 @@
 #include "sl/emulator/game/zone/service/game_community_service.h"
 #include "sl/emulator/service/community/command/community_command.h"
 #include "sl/emulator/service/community/command/party_command.h"
+#include "sl/emulator/service/community/notification/community_notification.h"
 #include "sl/emulator/service/community/notification/party_notification.h"
 
 namespace sunlight
@@ -103,7 +104,36 @@ namespace sunlight
         }
 
         if (!stage.AddSubscriber(ZoneMessageType::CHAT_STRING,
-            std::bind_front(&PlayerChannelSystem::HandleNormalChat, this)))
+            std::bind_front(&PlayerChannelSystem::HandleChatNormal, this)))
+        {
+            return false;
+        }
+        if (!stage.AddSubscriber(ZoneMessageType::CHANNEL_MESSAGE,
+            std::bind_front(&PlayerChannelSystem::HandleChannelChat, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(CharacterMessageType::Whisper,
+            std::bind_front(&PlayerChannelSystem::HandleChatWhisper, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::SLV2_CHAT_SHOUT,
+            std::bind_front(&PlayerChannelSystem::HandleChatShout, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::SLV2_CHAT_TRADE,
+            std::bind_front(&PlayerChannelSystem::HandleChatTrade, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZoneMessageType::SLV2_CHAT_ECHO,
+            std::bind_front(&PlayerChannelSystem::HandleChatEcho, this)))
         {
             return false;
         }
@@ -383,6 +413,82 @@ namespace sunlight
         player->Send(CharacterMessageCreator::CreatePartyJoinRejected(notification.partyLeaderName));
     }
 
+    void PlayerChannelSystem::HandleNotification(const PartyNotificationPartyChat& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        const PlayerPartyComponent& partyComponent = player->GetPartyComponent();
+        if (!partyComponent.HasParty())
+        {
+            return;
+        }
+
+        player->Send(ChatMessageCreator::CreatePartyChat(partyComponent.GetPartyName(), notification.sender, notification.message));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const CommunityNotificationWhisperChat& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        player->Send(ChatMessageCreator::CreateWhisperChat(notification.sender, notification.message));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const CommunityNotificationWhisperChatFail& notification)
+    {
+        GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(notification.playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        constexpr bool result = false;
+
+        player->Send(CharacterMessageCreator::CreateMessageResult(notification.whisperTarget, CharacterMessageType::Whisper, result));
+    }
+
+    void PlayerChannelSystem::HandleNotification(const CommunityNotificationGlobalChat& notification)
+    {
+        Buffer packet;
+
+        switch (notification.type)
+        {
+        case CommunityChatType::Shout:
+        {
+            packet = ChatMessageCreator::CreateShoutChat(notification.sender, notification.message);
+        }
+        break;
+        case CommunityChatType::Trade:
+        {
+            packet = ChatMessageCreator::CreateTradeChat(notification.sender, notification.message);
+        }
+        break;
+        case CommunityChatType::Echo:
+        {
+            packet = ChatMessageCreator::CreateEchoChat(notification.sender, notification.message);
+        }
+        break;
+        case CommunityChatType::Party:
+        case CommunityChatType::Whisper:
+        default:
+            assert(false);
+
+            return;
+        }
+
+        for (GamePlayer& player : Get<PlayerIndexSystem>().GetPlayerRange())
+        {
+            player.Send(packet.DeepCopy());
+        }
+    }
+
     void PlayerChannelSystem::HandleChannelInvite(const CharacterMessage& message)
     {
         GamePlayer& player = message.player;
@@ -636,7 +742,7 @@ namespace sunlight
             type, position.x(), position.y(), hp));
     }
 
-    void PlayerChannelSystem::HandleNormalChat(const ZoneMessage& message)
+    void PlayerChannelSystem::HandleChatNormal(const ZoneMessage& message)
     {
         GamePlayer& player = message.player;
         SlPacketReader& reader = message.reader;
@@ -648,5 +754,64 @@ namespace sunlight
             {
                 target.Send(ChatMessageCreator::CreateNormalChat(player, chat));
             });
+    }
+
+    void PlayerChannelSystem::HandleChannelChat(const ZoneCommunityMessage& message)
+    {
+        GamePlayer& player = message.player;
+        SlPacketReader& reader = message.reader;
+
+        const std::string partyName = reader.ReadString();
+        const GameChannelType channelType = static_cast<GameChannelType>(reader.Read<int8_t>());
+        std::string chatMessage = reader.ReadString();
+
+        switch (channelType)
+        {
+        case GameChannelType::Party:
+        {
+            if (!player.GetPartyComponent().HasParty())
+            {
+                return;
+            }
+
+            SendChatCommand(CommunityChatType::Party, player.GetCId(), std::move(chatMessage));
+        }
+        break;
+        case GameChannelType::Channel:
+        case GameChannelType::Guild:
+        default:
+            assert(false);
+        }
+    }
+
+    void PlayerChannelSystem::HandleChatWhisper(const CharacterMessage& message)
+    {
+        SendChatCommand(CommunityChatType::Whisper, message.player.GetCId(), message.reader.ReadString(), message.targetName);
+    }
+
+    void PlayerChannelSystem::HandleChatShout(const ZoneCommunityMessage& message)
+    {
+        SendChatCommand(CommunityChatType::Shout, message.player.GetCId(), message.reader.ReadString());
+    }
+
+    void PlayerChannelSystem::HandleChatTrade(const ZoneCommunityMessage& message)
+    {
+        SendChatCommand(CommunityChatType::Trade, message.player.GetCId(), message.reader.ReadString());
+    }
+
+    void PlayerChannelSystem::HandleChatEcho(const ZoneCommunityMessage& message)
+    {
+        SendChatCommand(CommunityChatType::Echo, message.player.GetCId(), message.reader.ReadString());
+    }
+
+    void PlayerChannelSystem::SendChatCommand(CommunityChatType type, int64_t playerId, std::string message, std::optional<std::string> target)
+    {
+        auto command = std::make_shared<CommunityCommandChatDeliver>();
+        command->type = type;
+        command->requesterId = playerId;
+        command->message = std::move(message);
+        command->target = std::move(target);
+
+        _serviceLocator.Get<GameCommunityService>().Send(std::move(command));
     }
 }

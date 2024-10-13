@@ -24,8 +24,16 @@ namespace sunlight
         auto FindByName(const std::string& name) -> GamePlayer*;
         auto FindByName(const std::string& name) const -> const GamePlayer*;
 
+        auto GetPlayerCount() const -> int64_t;
+        inline auto GetPlayerRange() const;
+
     private:
         boost::unordered::unordered_flat_map<int64_t, PtrNotNull<GamePlayer>> _cidIndex;
         boost::unordered::unordered_flat_map<std::string, PtrNotNull<GamePlayer>> _nameIndex;
     };
+
+    inline auto PlayerIndexSystem::GetPlayerRange() const
+    {
+        return _cidIndex | std::views::values | notnull::reference;
+    }
 }

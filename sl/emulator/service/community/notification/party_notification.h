@@ -167,4 +167,16 @@ namespace sunlight
         auto GetType() const -> CommunityNotificationType override { return TYPE; }
     };
     SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyJoinRejected);
+
+    struct PartyNotificationPartyChat : ICommunityNotification
+    {
+        static constexpr auto TYPE = CommunityNotificationType::PartyChat;
+
+        int64_t playerId = 0;
+        std::string sender;
+        std::string message;
+
+        auto GetType() const -> CommunityNotificationType override { return TYPE; }
+    };
+    SUNLIGHT_DEFINE_COMMUNITY_NOTIFICATION_MAPPER(PartyNotificationPartyChat);
 }

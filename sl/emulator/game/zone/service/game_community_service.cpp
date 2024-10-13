@@ -9,6 +9,15 @@
 #include "sl/emulator/service/community/notification/community_notification.h"
 #include "sl/emulator/service/community/notification/party_notification.h"
 
+namespace sunlight::detail
+{
+    template <typename T>
+    concept player_channel_system_callable = requires(T notification)
+    {
+        { std::declval<PlayerChannelSystem>().HandleNotification(notification) };
+    };
+}
+
 namespace sunlight
 {
     GameCommunityService::GameCommunityService(Zone& zone,
@@ -113,17 +122,25 @@ namespace sunlight
                                 return;
                             }
 
-                            if constexpr (requires
-                            {
-                                { std::declval<PlayerChannelSystem>().HandleNotification(notification) };
-
-                            })
+                            if constexpr (detail::player_channel_system_callable<T>)
                             {
                                 stage->Get<PlayerChannelSystem>().HandleNotification(notification);
                             }
                             else
                             {
                                 static_assert(!sizeof(T), "not implemented");
+                            }
+                        }
+                        else if constexpr (detail::player_channel_system_callable<T>)
+                        {
+                            for (Stage& stage : _zone.GetStages() | notnull::reference)
+                            {
+                                if (stage.Get<PlayerIndexSystem>().GetPlayerCount() <= 0)
+                                {
+                                    continue;
+                                }
+
+                                stage.Get<PlayerChannelSystem>().HandleNotification(notification);
                             }
                         }
                         else

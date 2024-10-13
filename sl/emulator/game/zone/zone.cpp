@@ -378,6 +378,11 @@ namespace sunlight
         return _id;
     }
 
+    auto Zone::GetStages() const -> std::span<const UniquePtrNotNull<Stage>>
+    {
+        return _stages;
+    }
+
     void Zone::HandleNetworkMessageImpl(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader)
     {
         const auto iter = _playerStages.find(id);
