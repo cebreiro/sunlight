@@ -129,7 +129,7 @@ namespace sunlight
             if (!Publish(request))
             {
                 SUNLIGHT_LOG_WARN(_serviceLocator,
-                    fmt::format("[{}] unhanlded zone request. player: {}, type: {}, buffer: {}",
+                    fmt::format("[{}] unhandled zone request. player: {}, type: {}, buffer: {}",
                         GetName(), player->GetCId(), ToString(opcode), reader->GetBuffer().ToString()));
             }
         }
@@ -152,7 +152,7 @@ namespace sunlight
                 if (!Publish(message))
                 {
                     SUNLIGHT_LOG_WARN(_serviceLocator,
-                        fmt::format("[{}] unhanlded zone community message. player: {}, type: {}, buffer: {}",
+                        fmt::format("[{}] unhandled zone community message. player: {}, type: {}, buffer: {}",
                             GetName(), player->GetCId(), ToString(message.type), message.reader.GetBuffer().ToString()));
                 }
             }
@@ -176,7 +176,7 @@ namespace sunlight
                 if (!Publish(message))
                 {
                     SUNLIGHT_LOG_WARN(_serviceLocator,
-                        fmt::format("[{}] unhanlded zone message. player: {}, target: [{}, {}], type: {}, buffer: {}",
+                        fmt::format("[{}] unhandled zone message. player: {}, target: [{}, {}], type: {}, buffer: {}",
                             GetName(), player->GetCId(), message.targetId, ToString(message.targetType), ToString(message.type),
                             message.reader.GetBuffer().ToString()));
                 }
@@ -194,7 +194,7 @@ namespace sunlight
                 if (!Publish(message))
                 {
                     SUNLIGHT_LOG_WARN(_serviceLocator,
-                        fmt::format("[{}] unhanlded character message. player: {}, target: {}, type: {}, buffer: {}",
+                        fmt::format("[{}] unhandled character message. player: {}, target: {}, type: {}, buffer: {}",
                             GetName(), player->GetCId(), message.targetName, ToString(message.type),
                             message.reader.GetBuffer().ToString()));
                 }
@@ -202,7 +202,7 @@ namespace sunlight
             break;
             default:
                 SUNLIGHT_LOG_WARN(_serviceLocator,
-                    fmt::format("[{}] unhanlded zone message. player: {}, event_type: {}, buffer: {}",
+                    fmt::format("[{}] unhandled zone message. player: {}, event_type: {}, buffer: {}",
                         GetName(), player->GetCId(), eventType, reader->GetBuffer().ToString()));
             }
         }
