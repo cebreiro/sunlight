@@ -7,6 +7,6 @@ namespace sunlight
         (Heal, 0)
         (None, 1)
         (PoisonDamage, 3)
-        (UnkRedYellowDamage, 4)
+        (DamagedByMonster, 4)
     )
 }
