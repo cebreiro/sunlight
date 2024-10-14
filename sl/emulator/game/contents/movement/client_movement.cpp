@@ -13,7 +13,7 @@ namespace sunlight
         result.destPosition.x() = reader.Read<float>();;
         result.destPosition.y() = reader.Read<float>();;
         result.unk2 = reader.Read<uint16_t>();
-        result.unk3 = reader.Read<uint16_t>();
+        result.movementTypeBitMask = reader.Read<uint16_t>();
 
         return result;
     }

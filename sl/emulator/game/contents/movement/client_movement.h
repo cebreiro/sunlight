@@ -16,7 +16,7 @@ namespace sunlight
         // 0b00000010 / unk1 // move backward (yaw) 
         // 0b00000001 / unk2 // move forward  (yaw)
         // 0b00000000 / stop
-        uint16_t unk3 = 0;
+        uint16_t movementTypeBitMask = 0;
 
         static auto CreateFrom(BufferReader& reader) -> ClientMovement;
     };

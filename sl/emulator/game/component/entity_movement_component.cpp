@@ -8,7 +8,7 @@ namespace sunlight
         {
             if constexpr (std::is_same_v<T, ClientMovement>)
             {
-                return item.unk3 == 0x10;
+                return item.movementTypeBitMask == 0x10;
             }
             else
             {
@@ -39,7 +39,7 @@ namespace sunlight
         {
             if constexpr (std::is_same_v<T, ClientMovement>)
             {
-                item.unk3 = value ? 0x10 : 0;
+                item.movementTypeBitMask = value ? 0x10 : 0;
             }
             else
             {

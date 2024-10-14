@@ -11,6 +11,7 @@
 namespace sunlight
 {
     struct MapStage;
+    struct ZoneRequest;
     struct ZoneMessage;
 
     class GameEntity;
@@ -58,6 +59,7 @@ namespace sunlight
         void HandlePlayerAllState(const ZoneMessage& message);
         void HandleRequestItemStructure(const ZoneMessage& message);
         void HandleNPCDirectionSet(const ZoneMessage& message);
+        void HandleDirectionSet(const ZoneRequest& message);
 
     private:
         const ServiceLocator& _serviceLocator;

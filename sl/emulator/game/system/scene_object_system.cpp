@@ -12,6 +12,7 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/entity/game_stored_item.h"
 #include "sl/emulator/game/message/zone_message.h"
+#include "sl/emulator/game/message/zone_request.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
@@ -62,6 +63,12 @@ namespace sunlight
 
         if (!stage.AddSubscriber(ZoneMessageType::NPC_SETDIRECTION,
             std::bind_front(&SceneObjectSystem::HandleNPCDirectionSet, this)))
+        {
+            return false;
+        }
+
+        if (!stage.AddSubscriber(ZonePacketC2S::NMC_REQ_SETDIRECTION,
+            std::bind_front(&SceneObjectSystem::HandleDirectionSet, this)))
         {
             return false;
         }
@@ -177,6 +184,13 @@ namespace sunlight
                 }
                 break;
                 case GameEntityType::Enemy:
+                {
+                    const GameMonster& monster = *entity.Cast<GameMonster>();
+
+                    player->Defer(ZonePacketS2CCreator::CreateObjectMove(monster));
+                    player->Defer(SceneObjectPacketCreator::CreateInformation(monster, false));
+                }
+                break;
                 default:
                     assert(false);
                 }
@@ -523,5 +537,20 @@ namespace sunlight
         movement.yaw = newYaw;
 
         Get<EntityViewRangeSystem>().Broadcast(*npc, ZonePacketS2CCreator::CreateObjectMove(*npc, movement), false);
+    }
+
+    void SceneObjectSystem::HandleDirectionSet(const ZoneRequest& message)
+    {
+        SlPacketReader& reader = message.reader;
+        GamePlayer& player = message.player;
+
+        const float yaw = reader.Read<float>();
+
+        SceneObjectComponent& sceneObjectComponent = player.GetSceneObjectComponent();
+        sceneObjectComponent.SetYaw(yaw);
+        sceneObjectComponent.SetMovementTypeBitMask(0);
+
+        constexpr bool includeSelf = false;
+        Get<EntityViewRangeSystem>().Broadcast(player, ZonePacketS2CCreator::CreateObjectMove(player), includeSelf);
     }
 }

@@ -29,7 +29,7 @@ namespace sunlight
             objectWriter.Write<float>(sceneObjectComponent.GetDestPosition().x());
             objectWriter.Write<float>(sceneObjectComponent.GetDestPosition().y());
             objectWriter.Write<uint16_t>(sceneObjectComponent.GetUnk2());
-            objectWriter.Write<uint16_t>(sceneObjectComponent.GetUnk3());
+            objectWriter.Write<uint16_t>(sceneObjectComponent.GetMovementTypeBitMask());
 
             writer.WriteObject(objectWriter);
         }
@@ -97,7 +97,7 @@ namespace sunlight
             objectWriter.Write<float>(sceneObjectComponent.GetDestPosition().x());
             objectWriter.Write<float>(sceneObjectComponent.GetDestPosition().y());
             objectWriter.Write<uint16_t>(sceneObjectComponent.GetUnk2());
-            objectWriter.Write<uint16_t>(sceneObjectComponent.GetUnk3());
+            objectWriter.Write<uint16_t>(sceneObjectComponent.GetMovementTypeBitMask());
 
             writer.WriteObject(objectWriter);
         }
@@ -122,7 +122,7 @@ namespace sunlight
             objectWriter.Write<float>(movement.destPosition.x());
             objectWriter.Write<float>(movement.destPosition.y());
             objectWriter.Write<uint16_t>(movement.unk2);
-            objectWriter.Write<uint16_t>(movement.unk3);
+            objectWriter.Write<uint16_t>(movement.movementTypeBitMask);
 
             writer.WriteObject(objectWriter);
         }
@@ -149,7 +149,7 @@ namespace sunlight
             objectWriter.Write<float>(sceneObjectComponent.GetDestPosition().x());
             objectWriter.Write<float>(sceneObjectComponent.GetDestPosition().y());
             objectWriter.Write<uint16_t>(sceneObjectComponent.GetUnk2());
-            objectWriter.Write<uint16_t>(sceneObjectComponent.GetUnk3());
+            objectWriter.Write<uint16_t>(sceneObjectComponent.GetMovementTypeBitMask());
 
             writer.WriteObject(objectWriter);
         }

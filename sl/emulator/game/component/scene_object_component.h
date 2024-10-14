@@ -16,7 +16,7 @@ namespace sunlight
         auto GetSpeed() const -> float;
         auto GetUnk1() const -> float;
         auto GetUnk2() const -> uint16_t;
-        auto GetUnk3() const -> uint16_t;
+        auto GetMovementTypeBitMask() const -> uint16_t;
         auto GetMovement() const -> const ClientMovement&;
 
         void SetId(int32_t id);
@@ -26,7 +26,7 @@ namespace sunlight
         void SetSpeed(float speed);
         void SetUnk1(float unk1);
         void SetUnk2(uint16_t value);
-        void SetUnk3(uint16_t value);
+        void SetMovementTypeBitMask(uint16_t value);
 
         void Set(const ClientMovement& movement);
         void SetMoving(bool value);
@@ -34,6 +34,6 @@ namespace sunlight
     private:
         int32_t _id = 0;
 
-        ClientMovement _forwardMovement;
+        ClientMovement _clientMovement;
     };
 }

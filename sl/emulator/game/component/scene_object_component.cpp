@@ -4,7 +4,7 @@ namespace sunlight
 {
     bool SceneObjectComponent::IsMoving() const
     {
-        return _forwardMovement.unk3 == 0x10;
+        return _clientMovement.movementTypeBitMask == 0x10;
     }
 
     auto SceneObjectComponent::GetId() const -> int32_t
@@ -14,42 +14,42 @@ namespace sunlight
 
     auto SceneObjectComponent::GetPosition() const -> const Eigen::Vector2f&
     {
-        return _forwardMovement.position;
+        return _clientMovement.position;
     }
 
     auto SceneObjectComponent::GetDestPosition() const -> const Eigen::Vector2f&
     {
-        return _forwardMovement.destPosition;
+        return _clientMovement.destPosition;
     }
 
     auto SceneObjectComponent::GetYaw() const -> float
     {
-        return _forwardMovement.yaw;
+        return _clientMovement.yaw;
     }
 
     auto SceneObjectComponent::GetSpeed() const -> float
     {
-        return _forwardMovement.speed;
+        return _clientMovement.speed;
     }
 
     auto SceneObjectComponent::GetUnk1() const -> float
     {
-        return _forwardMovement.unk1;
+        return _clientMovement.unk1;
     }
 
     auto SceneObjectComponent::GetUnk2() const -> uint16_t
     {
-        return _forwardMovement.unk2;
+        return _clientMovement.unk2;
     }
 
-    auto SceneObjectComponent::GetUnk3() const -> uint16_t
+    auto SceneObjectComponent::GetMovementTypeBitMask() const -> uint16_t
     {
-        return _forwardMovement.unk3;
+        return _clientMovement.movementTypeBitMask;
     }
 
     auto SceneObjectComponent::GetMovement() const -> const ClientMovement&
     {
-        return _forwardMovement;
+        return _clientMovement;
     }
 
     void SceneObjectComponent::SetId(int32_t id)
@@ -59,46 +59,46 @@ namespace sunlight
 
     void SceneObjectComponent::SetPosition(const Eigen::Vector2f& pos)
     {
-        _forwardMovement.position = pos;
+        _clientMovement.position = pos;
     }
 
     void SceneObjectComponent::SetDestPosition(const Eigen::Vector2f& pos)
     {
-        _forwardMovement.destPosition = pos;
+        _clientMovement.destPosition = pos;
     }
 
     void SceneObjectComponent::SetYaw(float yaw)
     {
-        _forwardMovement.yaw = yaw;
+        _clientMovement.yaw = yaw;
     }
 
     void SceneObjectComponent::SetSpeed(float speed)
     {
-        _forwardMovement.speed = speed;
+        _clientMovement.speed = speed;
     }
 
     void SceneObjectComponent::SetUnk1(float unk1)
     {
-        _forwardMovement.unk1 = unk1;
+        _clientMovement.unk1 = unk1;
     }
 
     void SceneObjectComponent::SetUnk2(uint16_t value)
     {
-        _forwardMovement.unk2 = value;
+        _clientMovement.unk2 = value;
     }
 
-    void SceneObjectComponent::SetUnk3(uint16_t value)
+    void SceneObjectComponent::SetMovementTypeBitMask(uint16_t value)
     {
-        _forwardMovement.unk3 = value;
+        _clientMovement.movementTypeBitMask = value;
     }
 
     void SceneObjectComponent::Set(const ClientMovement& movement)
     {
-        _forwardMovement = movement;
+        _clientMovement = movement;
     }
 
     void SceneObjectComponent::SetMoving(bool value)
     {
-        _forwardMovement.unk3 = value ? 0x10 : 0;
+        _clientMovement.movementTypeBitMask = value ? 0x10 : 0;
     }
 }
