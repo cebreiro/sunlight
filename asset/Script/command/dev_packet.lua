@@ -1,10 +1,10 @@
 return function (player)
 
-    function writeGlobalMessageHead (writer, player)
+    function writeGlobalMessageHead (writer, entity)
         writer:writeUInt8(64)
         writer:writeUInt8(6)
         writer:writeUInt32(0)
-        writer:writeInt64(player:getId(), player:getTypeValue())
+        writer:writeInt64(entity:getId(), entity:getTypeValue())
 
     end
 
@@ -45,49 +45,6 @@ return function (player)
 
         writer:writeObject(objectWriter)
         --]]
-
-        player:send(writer)
-    end
-
-    function sendStreetVender (player)
-
-        local writer = SlPacketWriter:new()
-
-        writeNormalMessageHead(writer)
-
-        writer:writeInt32(704) -- ZMSG_GROUP_MSG
-        writer:writeInt32(1601) -- ZMSG_GROUP_MSG
-        writer:writeString('<#00A0F3>asdasdasd')
-        writer:writeInt32(0) -- 3
-        writer:writeInt32(6002) -- 4 -> type
-        writer:writeInt32(1) -- 5    -> 0 이면 '노점상 판매 물건 정리 중'
-        writer:writeInt8(0)
-
-        player:send(writer)
-    end
-
-    function createOpenTradeGroup (player)
-
-        local writer = SlPacketWriter:new()
-
-        writeNormalMessageHead(writer)
-
-        writer:writeInt32(701)
-        writer:writeInt32(1) -- 1 ? 0 ?  이게 그룹 아이디인 것 같은데? GroupMessage 에서 이걸로 찾는듯?
-        writer:writeInt32(5001) -- 
-
-        player:send(writer)
-    end
-
-    function createOpenStreetVenderGroup (player)
-
-        local writer = SlPacketWriter:new()
-
-        writeNormalMessageHead(writer)
-
-        writer:writeInt32(701)
-        writer:writeInt32(1) -- 
-        writer:writeInt32(5001) -- 
 
         player:send(writer)
     end
@@ -146,47 +103,6 @@ return function (player)
         player:broadcast(writer, true)
     end
 
-    function sendTest2 (player)
-
-        local writer = SlPacketWriter:new()
-        writeNormalMessageHead(writer)
-
-        writer:writeInt32(704)
-        writer:writeInt32(1) -- id 맞는듯 ㅇㅅㅇ
-        writer:writeInt32(900)
-        writer:writeInt32(1310)
-        writer:writeInt32(0)
-        writer:writeString('aaaaaaaaa')
-
-        writer:writeInt32(1310) -- 
-        writer:writeInt32(10) --  -2   operation type, 1이 가격 설정?
-        writer:writeInt32(1) --  -3
-        writer:writeInt32(0) --  -4   index
-        writer:writeInt32(333441) --  -5  item 가격
-        writer:writeInt32(0)
-        writer:writeInt32(0)
-        writer:writeInt32(0)
-        writer:writeInt32(1234)
-
-        player:send(writer)
-
-    end
-
-    function sendTest3 (player)
-
-        local writer = SlPacketWriter:new()
-
-        writeGlobalMessageHead(writer, player)
-
-        writer:writeInt32(5000)
-        writer:writeInt32(142) 
-        writer:writeInt32(1301) 
-        writer:writeInt32(900) 
-        writer:writeInt32(50) 
-
-        player:send(writer)
-    end
-
     function sendTest4 (player)
 
         local writer = SlPacketWriter:new()
@@ -197,21 +113,6 @@ return function (player)
         writer:writeInt32(5031) -- change skill mix exp
         writer:writeInt32(1301) 
         writer:writeInt32(166852)
-
-        player:send(writer)
-    end
-
-    function sendTest5 (player)
-
-        local writer = SlPacketWriter:new()
-
-        writeGlobalMessageHead(writer, player)
-
-        writer:writeInt32(5000)
-        writer:writeInt32(5007) 
-        writer:writeInt32(1) 
-        writer:writeInt32(2)
-        writer:writeInt32(0)
 
         player:send(writer)
     end
@@ -231,11 +132,98 @@ return function (player)
         player:send(writer)
     end
 
-    --createOpenStreetVenderGroup(player)
-    --sendTest2(player)
-    --send1705(player)
+    function writeMonsterAttackState (writer, player)
 
-    sendTest4(player)
-    --sendTest4(player)
+        local objectWriter = PacketWriter:new()
+
+        objectWriter:writeUInt8(0xFF)
+        objectWriter:writeUInt8(0x0F)
+        objectWriter:writeUInt8(2) -- state_type normal attack
+        objectWriter:writeUInt8(2) -- move type
+        objectWriter:writeUInt8(0) -- unk4  --> client 0x495ECA 에 이 값이 그대로 나옴. 이후 1씩 증가. 범위 case [0, 3], sequence 인듯
+        objectWriter:writeUInt8(0xFF) -- unk5
+
+        objectWriter:writeFloat(0) -- destPosX
+        objectWriter:writeFloat(0) -- destPosY
+        objectWriter:writeFloat(0) -- destPosZ
+
+        objectWriter:writeInt32(player:getId()) -- targetId
+        objectWriter:writeInt32(player:getTypeValue()) -- targetType
+
+        objectWriter:writeInt32(2) -- attackId
+        objectWriter:writeInt32(0) -- motionId
+        objectWriter:writeInt32(0) -- fxId
+        objectWriter:writeInt32(0) -- param1
+        objectWriter:writeInt32(0) -- param2
+        objectWriter:writeInt32(1) -- 0: normalAttack, 1: skill1, 2: skill2 -> 다른 Animation 재생을 위해 필요
+
+        writer:writeObject(objectWriter)
+
+    end
+
+    function writeMonsterSkillState (writer, player)
+
+        local objectWriter = PacketWriter:new()
+
+        objectWriter:writeUInt8(0xFF)
+        objectWriter:writeUInt8(0x0F)
+        objectWriter:writeUInt8(7) -- state_type normal attack
+        objectWriter:writeUInt8(0) -- move type
+        objectWriter:writeUInt8(0) -- unk4  --> client 0x495ECA 에 이 값이 그대로 나옴. 이후 1씩 증가. 범위 case [0, 4]
+        objectWriter:writeUInt8(0xFF) -- unk5
+
+        objectWriter:writeFloat(0) -- destPosX
+        objectWriter:writeFloat(0) -- destPosY
+        objectWriter:writeFloat(0) -- destPosZ
+
+        objectWriter:writeInt32(player:getId()) -- targetId
+        objectWriter:writeInt32(player:getTypeValue()) -- targetType
+
+        objectWriter:writeInt32(2) -- attackId
+        objectWriter:writeInt32(0xAA) -- motionId
+        objectWriter:writeInt32(0xBB) -- fxId
+        objectWriter:writeInt32(0xCC) -- param1
+        objectWriter:writeInt32(1) -- param2  -> skill 사용할 땐 얘가 index 네
+        objectWriter:writeInt32(140171) -- skillId
+
+        writer:writeObject(objectWriter)
+
+    end
+
+    function SendMosnterAttackState (player)
+
+        local monster = player:findNearestMonster()
+        if monster ~= nil then
+
+            local writer = SlPacketWriter:new()
+
+            writeGlobalMessageHead(writer, monster)
+
+            writer:writeInt32(0x71)
+            writeMonsterAttackState(writer, player)
+
+            player:send(writer)
+
+        end
+    end
+
+    function SendMosnterSkillState (player)
+        local monster = player:findNearestMonster()
+        if monster ~= nil then
+
+            local writer = SlPacketWriter:new()
+
+            writeGlobalMessageHead(writer, monster)
+
+            writer:writeInt32(0x71)
+            writeMonsterSkillState(writer, player)
+
+            player:send(writer)
+
+        end
+    end
+
+    SendMosnterSkillState(player)
+    --sendGuildDESTROY(player)
     
 end

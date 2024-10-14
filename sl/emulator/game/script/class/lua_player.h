@@ -1,5 +1,6 @@
 #pragma once
 #include "sl/emulator/game/contents/quest/quest.h"
+#include "sl/emulator/game/script/class/lua_monster.h"
 
 namespace sol
 {
@@ -51,6 +52,8 @@ namespace sunlight
 
         void Send(SlPacketWriter& writer);
         void Broadcast(SlPacketWriter& writer, bool includeSelf);
+
+        auto FindNearestMonster() const -> std::optional<LuaMonster>;
 
         auto GetId() const -> int32_t;
         auto GetTypeValue() const -> int32_t;

@@ -442,9 +442,31 @@ namespace sunlight
             HandlePlayerInteraction(player, state.targetId);
         }
         break;
+        case GameEntityStateType::PlaySkill:
+        {
+            std::ostringstream oss;
+            oss << "--------------------------------------------\n";
+            oss << "type: " << ToString(state.type) << '\n';
+            oss << "moveType: " << (int32_t)state.moveType << '\n';
+            oss << "unk4: " << state.unk4 << '\n';
+            oss << "unk5: " << state.unk5 << '\n';
+            oss << "destX: " << state.destPosition.x() << '\n';
+            oss << "destY: " << state.destPosition.y() << '\n';
+            oss << "targetId: " << state.targetId.Unwrap() << '\n';
+            oss << "targetType: " << ToString(state.targetType) << '\n';
+            oss << "attackId: " << state.attackId << '\n';
+            oss << "motionId: " << state.motionId << '\n';
+            oss << "fxId: " << state.fxId << '\n';
+            oss << "param1: " << state.param1 << '\n';
+            oss << "param2: " << state.param2 << '\n';
+            oss << "skillId: " << state.skillId << '\n';
+            oss << "--------------------------------------------";
+
+            SUNLIGHT_LOG_DEBUG(_serviceLocator, oss.str());
+        }
+        break;
         case GameEntityStateType::None:
         case GameEntityStateType::NormalAttack:
-        case GameEntityStateType::PlaySkill:
         case GameEntityStateType::DamagedMotion:
         case GameEntityStateType::Dying:
         case GameEntityStateType::Dead:

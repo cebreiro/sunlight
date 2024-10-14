@@ -425,6 +425,38 @@ namespace sunlight
         }
     }
 
+    void EntityViewRangeSystem::VisitMonster(const GameEntity& centerEntity, const std::function<void(GameMonster&)>& function)
+    {
+        const auto iter = _entitySectorIndex.find(centerEntity.GetId());
+        if (iter == _entitySectorIndex.end())
+        {
+            assert(false);
+
+            return;
+        }
+
+        GameSpatialSector& sector = *iter->second;
+
+        auto range = sector.GetEntities(GameMonster::TYPE);
+        if (range.begin() == range.end())
+        {
+            return;
+        }
+
+        for (GameEntity& entity : range)
+        {
+            GameMonster* monster = entity.Cast<GameMonster>();
+            if (!monster)
+            {
+                assert(false);
+
+                continue;
+            }
+
+            function(*monster);
+        }
+    }
+
     void EntityViewRangeSystem::Broadcast(const Eigen::Vector2f& position, const Buffer& buffer)
     {
         GameSpatialSector& sector = GetSector(position);

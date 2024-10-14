@@ -17,6 +17,7 @@ namespace sunlight
     {
         LuaPlayer::Bind(luaState);
         LuaNPC::Bind(luaState);
+        LuaMonster::Bind(luaState);
         LuaSystem::Bind(luaState);
 
         BindPacket(luaState);

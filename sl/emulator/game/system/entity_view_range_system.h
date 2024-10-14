@@ -9,6 +9,7 @@ namespace sunlight
     class GameEntity;
     class GamePlayer;
     class GameItem;
+    class GameMonster;
 
     class GameSpatialSector;
     class GameSpatialCell;
@@ -37,6 +38,7 @@ namespace sunlight
         void VisitEntity(const GameEntity& centerEntity, const std::function<void(GameEntity&)>& function);
         void VisitPlayer(const Eigen::Vector2f& position, const std::function<void(GamePlayer&)>& function);
         void VisitPlayer(const GameEntity& centerEntity, const std::function<void(GamePlayer&)>& function);
+        void VisitMonster(const GameEntity& centerEntity, const std::function<void(GameMonster&)>& function);
 
         void Broadcast(const Eigen::Vector2f& position, const Buffer& buffer);
         void Broadcast(const GameEntity& centerEntity, const Buffer& buffer, bool includeCenter);

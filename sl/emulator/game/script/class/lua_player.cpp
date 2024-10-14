@@ -10,6 +10,8 @@
 #include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/player_quest_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
+#include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/script/class/lua_npc.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
@@ -118,6 +120,26 @@ namespace sunlight
         _system.Get<EntityViewRangeSystem>().Broadcast(_player, writer.Flush(), includeSelf);
     }
 
+    auto LuaPlayer::FindNearestMonster() const -> std::optional<LuaMonster>
+    {
+        GameMonster* result = nullptr;
+        float distSq = std::numeric_limits<float>::max();
+
+        Eigen::Vector2f playerPos = _player.GetSceneObjectComponent().GetPosition();
+
+        _system.Get<EntityViewRangeSystem>().VisitMonster(_player, [&, playerPos](GameMonster& monster)
+            {
+                const float newDistSq = (monster.GetComponent<SceneObjectComponent>().GetPosition() - playerPos).squaredNorm();
+                if (newDistSq < distSq)
+                {
+                    distSq = newDistSq;
+                    result = &monster;
+                }
+            });
+
+        return result ? LuaMonster(*result) : std::optional<LuaMonster>();
+    }
+
     auto LuaPlayer::GetId() const -> int32_t
     {
         return static_cast<int32_t>(_player.GetId().Unwrap());
@@ -172,6 +194,7 @@ namespace sunlight
             "changeZone", &LuaPlayer::ChangeZone,
             "send", &LuaPlayer::Send,
             "broadcast", &LuaPlayer::Broadcast,
+            "findNearestMonster", &LuaPlayer::FindNearestMonster,
             "getId", &LuaPlayer::GetId,
             "getTypeValue", &LuaPlayer::GetTypeValue,
             "getNoviceJobLevel", &LuaPlayer::GetNoviceJobLevel,
