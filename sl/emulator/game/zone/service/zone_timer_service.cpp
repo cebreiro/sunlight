@@ -1,0 +1,53 @@
+#include "zone_timer_service.h"
+
+#include "sl/emulator/game/debug/game_debugger.h"
+#include "sl/emulator/game/system/player_index_system.h"
+#include "sl/emulator/game/time/game_time_service.h"
+#include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/zone.h"
+
+namespace sunlight
+{
+    ZoneTimerService::ZoneTimerService(Zone& zone)
+        : _zone(zone)
+    {
+    }
+
+    auto ZoneTimerService::GetName() const -> std::string_view
+    {
+        return "zone_timer_service";
+    }
+
+    void ZoneTimerService::AddTimer(std::chrono::milliseconds delay, int64_t playerId, int32_t stageId, const std::function<void(GamePlayer&)>& function)
+    {
+        Delay(delay).Then(_zone.GetStrand(),
+            [weak = _zone.weak_from_this(), playerId, stageId, function]()
+            {
+                const std::shared_ptr<Zone> zone = weak.lock();
+                if (!zone)
+                {
+                    return;
+                }
+
+                Stage* stage = zone->FindPlayerStage(playerId);
+                if (!stage || stage->GetId() != stageId)
+                {
+                    return;
+                }
+
+                GamePlayer* player = stage->Get<PlayerIndexSystem>().FindByCId(playerId);
+                assert(player);
+
+                if (GameDebugger* debugger = zone->GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
+                {
+                    GameDebugger::SetInstance(debugger);
+                }
+
+                GameTimeService::SetNow(game_clock_type::now());
+
+                function(*player);
+
+                GameDebugger::SetInstance(nullptr);
+            });
+    }
+}

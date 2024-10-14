@@ -1095,6 +1095,15 @@ namespace sunlight
             const auto [targetItemId, targetItemType] = reader.ReadInt64();
             const int32_t quantity = reader.Read<int32_t>();
 
+            if (targetItemId == 0 || targetItemId == 2)
+            {
+                // dummy item for preventing quick slot item and skill overlapped
+
+                success = true;
+
+                break;
+            }
+
             success = HandleLiftItem(player, game_entity_id_type(targetItemId), quantity);
         }
         break;
@@ -1678,7 +1687,7 @@ namespace sunlight
 
     void ItemArchiveSystem::AddDummyPacketForInventoryRefresh(GamePlayer& player)
     {
-        player.Defer(ItemArchiveMessageCreator::CreateItemAddForRefresh(player));
+        player.Defer(ItemArchiveMessageCreator::CreateItemAddForRefresh(player, 12500060));
         player.Defer(ItemArchiveMessageCreator::CreateItemRemoveForRefresh(player));
     }
 

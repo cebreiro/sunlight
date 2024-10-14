@@ -1,21 +1,25 @@
 #include "player_job_system.h"
 
+#include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/data/sox/job_reference.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/zone_timer_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/exp/exp_data_provider.h"
 #include "sl/emulator/service/gamedata/skill/skill_data_provider.h"
 
 namespace sunlight
 {
-    PlayerJobSystem::PlayerJobSystem(const ServiceLocator& serviceLocator)
+    PlayerJobSystem::PlayerJobSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
+        , _stageId(stageId)
     {
     }
 
@@ -243,6 +247,22 @@ namespace sunlight
         player.FlushDeferred();
     }
 
+    void PlayerJobSystem::OnLocalActivate(GamePlayer& player)
+    {
+        // fix to invisible quick slot skills on login
+        // when server send 'item add' packet, client ignores server's item position, calculates item position and put item on them.
+        // it seems that the 'quick slot dummy item (item_id = 2)' exists to prevent new item from overlapping with skill when calculating item position.
+        // I think that the skill and quick slot dummy item were in the same slot, and skill was rendered when dummy item was rendered
+        // it exists to refresh quick slot UI because this emulator doesn't use 'item add' packet
+        _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(1200), player.GetCId(), _stageId,
+            [](GamePlayer& player)
+            {
+                player.Defer(ItemArchiveMessageCreator::CreateItemAddForRefresh(player, GameConstant::QUICK_SLOT_DUMMY_ITEM_ID));
+                player.Defer(ItemArchiveMessageCreator::CreateItemRemoveForRefresh(player));
+                player.FlushDeferred();
+            });
+    }
+
     void PlayerJobSystem::OnSkillLevelSet(const ZoneMessage& message)
     {
         SlPacketReader& reader = message.reader;
@@ -310,6 +330,34 @@ namespace sunlight
         SUNLIGHT_LOG_INFO(_serviceLocator,
             fmt::format("[{}] fail to handle. player: {}, error: {}",
                 GetName(), player.GetCId(), error));
+    }
+
+    void PlayerJobSystem::OnSkillQuickSlotPositionSet(const ZoneMessage& message)
+    {
+        SlPacketReader& reader = message.reader;
+        GamePlayer& player = message.player;
+
+        const int32_t skillId = reader.Read<int32_t>();
+        const int8_t page = static_cast<int8_t>(reader.Read<int32_t>());
+        const int8_t x = static_cast<int8_t>(reader.Read<int32_t>());
+        const int8_t y = static_cast<int8_t>(reader.Read<int32_t>());
+
+        PlayerSkill* skill = player.GetSkillComponent().FindSkill(skillId);
+        if (!skill)
+        {
+            return;
+        }
+
+        if (skill->GetPage() == page && skill->GetX() == x && skill->GetY() == y)
+        {
+            return;
+        }
+
+        skill->SetPage(page);
+        skill->SetX(x);
+        skill->SetX(y);
+
+        Get<GameRepositorySystem>().SaveSkillPosition(player, skillId, page, x, y);
     }
 
     auto PlayerJobSystem::GetJobGainSkills(JobId id, int32_t level) const -> std::vector<int32_t>

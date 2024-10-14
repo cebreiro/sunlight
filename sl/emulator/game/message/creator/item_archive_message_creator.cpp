@@ -167,7 +167,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto ItemArchiveMessageCreator::CreateItemAddForRefresh(const GamePlayer& player) -> Buffer
+    auto ItemArchiveMessageCreator::CreateItemAddForRefresh(const GamePlayer& player, int32_t itemId) -> Buffer
     {
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
@@ -185,7 +185,7 @@ namespace sunlight
             objectWriter.Write<int16_t>(-1);
             objectWriter.Write<int16_t>(-1);
             objectWriter.Write<int16_t>(1);
-            objectWriter.Write<int32_t>(12500060);
+            objectWriter.Write<int32_t>(itemId);
             objectWriter.Write<int8_t>(0); // unk
             objectWriter.Write<int32_t>(GameConstant::ITEM_ENTITY_ID_FOR_INVENTORY_REFRESH);
             objectWriter.Write<int32_t>(static_cast<uint32_t>(GameEntityType::Item));

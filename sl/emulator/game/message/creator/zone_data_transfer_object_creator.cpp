@@ -272,7 +272,7 @@ namespace sunlight
             writer.Write<int32_t>(skill.GetCooldown()); // client 0x4B1F70
             writer.Write<int32_t>(0); // delay? -> client set on 0x0047D0CF
             writer.Write<int32_t>(isMixSkill ? 1 : 0); // choose whether displayed on skill window or mix skill window
-            writer.Write<int32_t>(0); // can use skill? -> client 0x48D200
+            writer.Write<int32_t>(1); // can use skill? -> client 0x48D200
             writer.Write<int32_t>(skill.GetPage());
             writer.Write<int32_t>(skill.GetX());
             writer.Write<int32_t>(skill.GetY());

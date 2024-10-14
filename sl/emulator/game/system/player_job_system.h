@@ -14,7 +14,7 @@ namespace sunlight
     class PlayerJobSystem final : public GameSystem
     {
     public:
-        explicit PlayerJobSystem(const ServiceLocator& serviceLocator);
+        PlayerJobSystem(const ServiceLocator& serviceLocator, int32_t stageId);
 
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
@@ -28,7 +28,9 @@ namespace sunlight
         void GainJobExp(GamePlayer& player, int32_t exp);
 
     public:
+        void OnLocalActivate(GamePlayer& player);
         void OnSkillLevelSet(const ZoneMessage& message);
+        void OnSkillQuickSlotPositionSet(const ZoneMessage& message);
 
     private:
         auto GetJobGainSkills(JobId id, int32_t level) const -> std::vector<int32_t>;
@@ -38,5 +40,6 @@ namespace sunlight
 
     private:
         const ServiceLocator& _serviceLocator;
+        int32_t _stageId = 0;
     };
 }

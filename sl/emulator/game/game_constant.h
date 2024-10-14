@@ -45,5 +45,8 @@ namespace sunlight
         // even though client doesn't refresh UI when receives 'inventory add item'
         // sending dummy 'item add' and 'item remove' is required to refresh UI
         static constexpr int32_t ITEM_ENTITY_ID_FOR_INVENTORY_REFRESH = 0x2F2F2F2F; // magic number. no intention
+
+        // item_etc.sox
+        static constexpr int32_t QUICK_SLOT_DUMMY_ITEM_ID = 2;
     };
 }

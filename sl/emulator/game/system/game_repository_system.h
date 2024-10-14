@@ -51,6 +51,7 @@ namespace sunlight
         void SaveNewSkill(const GamePlayer& player, int32_t job, int32_t skillId, int32_t skillLevel);
         void SaveSkillLevel(const GamePlayer& player, int32_t job, int32_t skillPoint, int32_t skillId, int32_t skillLevel);
         void SaveMixSkillExp(const GamePlayer& player, int32_t skillId, int32_t skillLevel, int32_t exp);
+        void SaveSkillPosition(const GamePlayer& player, int32_t skillId, int8_t page, int8_t x, int8_t y);
         void SaveNewQuest(const GamePlayer& player, int32_t questId, int32_t state, std::string flags, std::string data);
         void SaveQuestChange(const GamePlayer& player, int32_t questId, int32_t state, std::string flags, std::string data);
 

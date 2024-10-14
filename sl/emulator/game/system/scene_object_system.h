@@ -54,8 +54,6 @@ namespace sunlight
 
     private:
         void HandlePlayerAllState(const ZoneMessage& message);
-        void HandlePlayerActivate(const ZoneMessage& message);
-
         void HandleRequestItemStructure(const ZoneMessage& message);
         void HandleNPCDirectionSet(const ZoneMessage& message);
 

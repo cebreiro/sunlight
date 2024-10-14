@@ -53,12 +53,6 @@ namespace sunlight
             return false;
         }
 
-        if (!stage.AddSubscriber(ZoneMessageType::LOCAL_ACTIVATED,
-            std::bind_front(&SceneObjectSystem::HandlePlayerActivate, this)))
-        {
-            return false;
-        }
-
         if (!stage.AddSubscriber(ZoneMessageType::REQUESTITEMSTRUCT,
             std::bind_front(&SceneObjectSystem::HandleRequestItemStructure, this)))
         {
@@ -437,18 +431,12 @@ namespace sunlight
 
     void SceneObjectSystem::HandlePlayerAllState(const ZoneMessage& message)
     {
-        message.player.Send(ZonePacketS2CCreator::CreateObjectVisibleRange(1000.f));
-        message.player.Send(GamePlayerMessageCreator::CreateAllState(message.player));
-        message.player.Send(GamePlayerMessageCreator::CreateQuestAllState(message.player));
-    }
-
-    void SceneObjectSystem::HandlePlayerActivate(const ZoneMessage& message)
-    {
         GamePlayer& player = message.player;
 
-        player.SetActive(true);
-
-        Get<PlayerStatSystem>().OnLocalActivate(player);
+        player.Defer(ZonePacketS2CCreator::CreateObjectVisibleRange(1000.f));
+        player.Defer(GamePlayerMessageCreator::CreateAllState(player));
+        player.Defer(GamePlayerMessageCreator::CreateQuestAllState(player));
+        player.FlushDeferred();
     }
 
     void SceneObjectSystem::HandleRequestItemStructure(const ZoneMessage& message)

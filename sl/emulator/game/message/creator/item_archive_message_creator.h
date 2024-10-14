@@ -25,7 +25,7 @@ namespace sunlight
         static auto CreateItemLift(const GamePlayer& player, const GameItem& pickedItem, const GameItem& origin, int32_t decreaseQuantity) -> Buffer;
 
         static auto CreateInventoryItemAdd(const GamePlayer& player, const GameItem& item) -> Buffer;
-        static auto CreateItemAddForRefresh(const GamePlayer& player) -> Buffer;
+        static auto CreateItemAddForRefresh(const GamePlayer& player, int32_t itemId) -> Buffer;
         static auto CreateItemRemoveForRefresh(const GamePlayer& player) -> Buffer;
 
         static auto CreateItemDecrease(const GamePlayer& player, const GameItem& item, int32_t quantity) -> Buffer;

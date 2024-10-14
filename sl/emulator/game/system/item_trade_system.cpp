@@ -235,7 +235,7 @@ namespace sunlight
             }
 
             // to refresh client inventory UI
-            player.Defer(ItemArchiveMessageCreator::CreateItemAddForRefresh(player));
+            player.Defer(ItemArchiveMessageCreator::CreateItemAddForRefresh(player, 12500060));
             player.Defer(ItemArchiveMessageCreator::CreateItemRemoveForRefresh(player));
 
             player.FlushDeferred();

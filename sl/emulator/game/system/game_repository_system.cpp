@@ -310,6 +310,24 @@ namespace sunlight
                 });
     }
 
+    void GameRepositorySystem::SaveSkillPosition(const GamePlayer& player, int32_t skillId, int8_t page, int8_t x, int8_t y)
+    {
+        ++_pending[player.GetCId()].first;
+
+        _serviceLocator.Get<DatabaseService>().SetSkillPosition(player.GetCId(), skillId, page, x, y)
+            .Then(*ExecutionContext::GetExecutor(), [this, cid = player.GetCId()](bool success)
+                {
+                    if (success)
+                    {
+                        OnComplete(cid);
+                    }
+                    else
+                    {
+                        OnError(cid);
+                    }
+                });
+    }
+
     void GameRepositorySystem::SaveNewQuest(const GamePlayer& player, int32_t questId, int32_t state, std::string flags, std::string data)
     {
         ++_pending[player.GetCId()].first;

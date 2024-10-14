@@ -345,7 +345,7 @@ namespace sunlight
         Add(std::make_shared<ServerCommandSystem>(_serviceLocator));
         Add(std::make_shared<ItemArchiveSystem>(_serviceLocator));
         Add(std::make_shared<PlayerStatSystem>(_serviceLocator));
-        Add(std::make_shared<PlayerJobSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerJobSystem>(_serviceLocator, _stageData.id));
         Add(std::make_shared<PlayerStateSystem>(_serviceLocator, _stageData));
         Add(std::make_shared<PlayerAppearanceSystem>(_serviceLocator));
         Add(std::make_shared<GameRepositorySystem>(_serviceLocator));

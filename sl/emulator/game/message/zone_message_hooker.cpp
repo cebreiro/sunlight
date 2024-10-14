@@ -27,6 +27,16 @@ namespace sunlight
 
         switch (message.type)
         {
+        case ZoneMessageType::LOCAL_ACTIVATED:
+        {
+            GamePlayer& player = message.player;
+
+            player.SetActive(true);
+
+            _stage.Get<PlayerStatSystem>().OnLocalActivate(player);
+            _stage.Get<PlayerJobSystem>().OnLocalActivate(player);
+        }
+        break;
         case ZoneMessageType::ITEMARCHIVEMSG:
         {
             const ZoneMessageType subType = reader.Peek<ZoneMessageType>();
@@ -132,6 +142,14 @@ namespace sunlight
                 reader.Skip();
 
                 _stage.Get<ItemArchiveSystem>().OnWeaponSwap(message);
+
+                return true;
+            }
+            case ZoneMessageType::SLV2_SKILL_QUICKSLOT_POSITION_SET:
+            {
+                reader.Skip();
+
+                _stage.Get<PlayerJobSystem>().OnSkillQuickSlotPositionSet(message);
 
                 return true;
             }
