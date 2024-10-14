@@ -43,6 +43,9 @@ namespace sunlight
         void Broadcast(const Eigen::Vector2f& position, const Buffer& buffer);
         void Broadcast(const GameEntity& centerEntity, const Buffer& buffer, bool includeCenter);
 
+        auto GetSector(const GameEntity& entity) -> GameSpatialSector&;
+        auto GetSector(const GameEntity& entity) const -> const GameSpatialSector&;
+
     private:
         auto GetSector(int32_t x, int32_t y) -> GameSpatialSector&;
         auto GetSector(int32_t x, int32_t y) const -> const GameSpatialSector&;

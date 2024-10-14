@@ -7,12 +7,15 @@ namespace sunlight
 {
     struct MapStage;
     struct ZoneMessage;
+    struct GameEntityState;
 
     class NPCTalkBox;
     class EventScript;
 
     class GamePlayer;
     class GameNPC;
+
+    class PlayerSkillTargetSelector;
 }
 
 namespace sunlight
@@ -21,6 +24,7 @@ namespace sunlight
     {
     public:
         PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData);
+        ~PlayerStateSystem();
 
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
@@ -49,9 +53,12 @@ namespace sunlight
         bool HandleCharacterState(const ZoneMessage& message);
 
         void HandlePickGroundItem(GamePlayer& player, game_entity_id_type itemId);
+        void HandlePlayerSkill(GamePlayer& player, const GameEntityState& state);
 
     private:
         const ServiceLocator& _serviceLocator;
         const MapStage& _stageData;
+
+        UniquePtrNotNull<PlayerSkillTargetSelector> _skillTargetSelector;
     };
 }

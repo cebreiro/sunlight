@@ -4,7 +4,7 @@ namespace sunlight
 {
     // category
     // 1: type -> damage?
-    // 2: type -> buff
+    // 2: type -> status effect
     // 3: type -> stat
     // 4: type -> weaponClassType, restriction
     // 5: type -> summon

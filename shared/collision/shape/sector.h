@@ -7,24 +7,24 @@ namespace sunlight::collision
     {
     public:
         Sector() = default;
-        Sector(Eigen::Vector2d center, double radius, double startAngle, double endAngle);
+        Sector(Eigen::Vector2f center, float radius, float startAngle, float endAngle);
 
-        bool Contains(const Eigen::Vector2d& point) const;
+        bool Contains(const Eigen::Vector2f& point) const;
 
-        auto GetCenter() const -> Eigen::Vector2d;
-        auto GetRadius() const -> double;
-        auto GetStartAngle() const -> double;
-        auto GetEndAngle() const -> double;
+        auto GetCenter() const -> Eigen::Vector2f;
+        auto GetRadius() const -> float;
+        auto GetStartAngle() const -> float;
+        auto GetEndAngle() const -> float;
 
-        void SetCenter(const Eigen::Vector2d& center);
-        void SetRadius(double radius);
-        void SetStartAngle(double angle);
-        void SetEndAngle(double angle);
+        void SetCenter(const Eigen::Vector2f& center);
+        void SetRadius(float radius);
+        void SetStartAngle(float angle);
+        void SetEndAngle(float angle);
 
     private:
-        Eigen::Vector2d _center = {};
-        double _radius = 0.0;
-        double _startAngle = 0.0;
-        double _endAngle = 0.0;
+        Eigen::Vector2f _center = {};
+        float _radius = 0.0;
+        float _startAngle = 0.0;
+        float _endAngle = 0.0;
     };
 }

@@ -50,8 +50,8 @@ namespace sunlight
         result.delayType = data.delayType;
         result.delayTime = data.delayTime;
         result.useType = data.useType;
-        result.applyTargetType = data.applyTargetType;
-        result.applyDamageType = data.applyDamageType;
+        result.applyTargetType = static_cast<PlayerSkillTargetSelectType>(data.applyTargetType);
+        result.applyDamageType = static_cast<PlayerSkillTargetingAreaType>(data.applyDamageType);
         result.damageLength = data.damageLength;
         result.damageLength2 = data.damageLength2;
         result.damageMaxCount = data.damageMaxcount;

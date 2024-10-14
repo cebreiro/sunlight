@@ -23,14 +23,14 @@ namespace sunlight::collision
         const auto circleCenter = circle.GetCenter();
         const auto circleRadius = circle.GetRadius();
 
-        const std::array<Eigen::Vector2d, 2> arcPoints = {
-            sectorCenter + sectorRadius * Eigen::Vector2d(std::cos(sectorStartAngle), std::sin(sectorStartAngle)),
-            sectorCenter + sectorRadius * Eigen::Vector2d(std::cos(sectorEndAngle), std::sin(sectorEndAngle))
+        const std::array<Eigen::Vector2f, 2> arcPoints = {
+            sectorCenter + sectorRadius * Eigen::Vector2f(std::cos(sectorStartAngle), std::sin(sectorStartAngle)),
+            sectorCenter + sectorRadius * Eigen::Vector2f(std::cos(sectorEndAngle), std::sin(sectorEndAngle))
         };
 
-        for (const Eigen::Vector2d& point : arcPoints)
+        for (const Eigen::Vector2f& point : arcPoints)
         {
-            Eigen::Vector2d toCenter = circleCenter - point;
+            Eigen::Vector2f toCenter = circleCenter - point;
 
             if (toCenter.norm() <= circleRadius)
             {
@@ -38,12 +38,12 @@ namespace sunlight::collision
             }
         }
 
-        const Eigen::Vector2d toCircle = circleCenter - sectorCenter;
+        const Eigen::Vector2f toCircle = circleCenter - sectorCenter;
 
-        double angleToCircle = std::atan2(toCircle.y(), toCircle.x());
+        float angleToCircle = std::atan2(toCircle.y(), toCircle.x());
         if (angleToCircle < 0)
         {
-            angleToCircle += 2 * std::numbers::pi;
+            angleToCircle += 2 * static_cast<float>(std::numbers::pi);
         }
 
         bool contains = false;
@@ -58,7 +58,7 @@ namespace sunlight::collision
 
         if (contains)
         {
-            const double sum = sectorRadius + circleRadius;
+            const float sum = sectorRadius + circleRadius;
 
             if (toCircle.squaredNorm() <= (sum * sum))
             {
@@ -71,13 +71,13 @@ namespace sunlight::collision
 
     bool Intersect(const OBB& obb, const Circle& circle)
     {
-        const Eigen::Vector2d diff = circle.GetCenter() - obb.GetCenter();
-        const Eigen::Vector2d localCircleCenter = obb.GetRotation().transpose() * diff;
+        const Eigen::Vector2f diff = circle.GetCenter() - obb.GetCenter();
+        const Eigen::Vector2f localCircleCenter = obb.GetRotation().transpose() * diff;
 
-        const double halfSizeX = obb.GetHalfSize().x();
-        const double halfSizeY = obb.GetHalfSize().y();
+        const float halfSizeX = obb.GetHalfSize().x();
+        const float halfSizeY = obb.GetHalfSize().y();
 
-        Eigen::Vector2d clamped;
+        Eigen::Vector2f clamped;
         clamped.x() = std::max(-halfSizeX, std::min(localCircleCenter.x(), halfSizeX));
         clamped.y() = std::max(-halfSizeY, std::min(localCircleCenter.y(), halfSizeY));
 
@@ -86,7 +86,7 @@ namespace sunlight::collision
 
     bool Intersect(const Circle& lhs, const Circle& rhs)
     {
-        const double distance = (lhs.GetCenter() - rhs.GetCenter()).norm();
+        const float distance = (lhs.GetCenter() - rhs.GetCenter()).norm();
 
         return distance <= (lhs.GetRadius() + rhs.GetRadius());
     }

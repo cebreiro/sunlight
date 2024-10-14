@@ -90,15 +90,15 @@ namespace sunlight
 
         for (int32_t y = 0; y < _ySize; ++y)
         {
-            const double minY = y * cell_size;
-            const double maxY = minY + cell_size;
+            const float minY = static_cast<float>(y * cell_size);
+            const float maxY = static_cast<float>(minY) + cell_size;
 
             for (int32_t x = 0; x < _xSize; ++x)
             {
-                const double minX = x * cell_size;
-                const double maxX = minX + cell_size;
+                const float minX = static_cast<float>(x * cell_size);
+                const float maxX = static_cast<float>(minX + cell_size);
 
-                const GameSpatialMBR mbr(Eigen::Vector2d(minX, minY), Eigen::Vector2d(maxX, maxY));
+                const GameSpatialMBR mbr(Eigen::Vector2f(minX, minY), Eigen::Vector2f(maxX, maxY));
 
                 GameSpatialCell& cell = *_cells.emplace_back(std::make_unique<GameSpatialCell>(game_spatial_cell_id_type(x, y), mbr));
 
@@ -516,6 +516,32 @@ namespace sunlight
 
             player->Send(buffer.DeepCopy());
         }
+    }
+
+    auto EntityViewRangeSystem::GetSector(const GameEntity& entity) -> GameSpatialSector&
+    {
+        const auto iter = _entitySectorIndex.find(entity.GetId());
+        if (iter == _entitySectorIndex.end())
+        {
+            assert(false);
+
+            return *_sectors[0];
+        }
+
+        return *iter->second;
+    }
+
+    auto EntityViewRangeSystem::GetSector(const GameEntity& entity) const -> const GameSpatialSector&
+    {
+        const auto iter = _entitySectorIndex.find(entity.GetId());
+        if (iter == _entitySectorIndex.end())
+        {
+            assert(false);
+
+            return *_sectors[0];
+        }
+
+        return *iter->second;
     }
 
     auto EntityViewRangeSystem::GetSector(int32_t x, int32_t y) -> GameSpatialSector&

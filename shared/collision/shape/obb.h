@@ -7,32 +7,32 @@ namespace sunlight::collision
     {
     public:
         OBB() = default;
-        OBB(Eigen::Vector2d center, Eigen::Vector2d halfSize, Eigen::Matrix2d rotation);
+        OBB(Eigen::Vector2f center, Eigen::Vector2f halfSize, Eigen::Matrix2f rotation);
 
-        auto GetCenter() const -> Eigen::Vector2d;
-        auto GetHalfSize() const -> Eigen::Vector2d;
-        auto GetRotation() const -> Eigen::Matrix2d;
+        auto GetCenter() const -> Eigen::Vector2f;
+        auto GetHalfSize() const -> Eigen::Vector2f;
+        auto GetRotation() const -> Eigen::Matrix2f;
 
     private:
-        Eigen::Vector2d _center = {};
-        Eigen::Vector2d _halfSize = {};
-        Eigen::Matrix2d _rotation = {};
+        Eigen::Vector2f _center = {};
+        Eigen::Vector2f _halfSize = {};
+        Eigen::Matrix2f _rotation = {};
     };
 
-    class OBB3d
+    class OBB3f
     {
     public:
-        OBB3d(const Eigen::Vector3d& center, const Eigen::Vector3d& halfSize, const Eigen::Matrix3d& rotation);
+        OBB3f(const Eigen::Vector3f& center, const Eigen::Vector3f& halfSize, const Eigen::Matrix3f& rotation);
 
         auto Project() const -> OBB;
 
-        auto GetCenter() const -> const Eigen::Vector3d&;
-        auto GetHalfSize() const -> const Eigen::Vector3d&;
-        auto GetRotation() const -> const Eigen::Matrix3d&;
+        auto GetCenter() const -> const Eigen::Vector3f&;
+        auto GetHalfSize() const -> const Eigen::Vector3f&;
+        auto GetRotation() const -> const Eigen::Matrix3f&;
 
     private:
-        Eigen::Vector3d _center = {};
-        Eigen::Vector3d _halfSize = {};
-        Eigen::Matrix3d _rotation = {};
+        Eigen::Vector3f _center = {};
+        Eigen::Vector3f _halfSize = {};
+        Eigen::Matrix3f _rotation = {};
     };
 }

@@ -4,16 +4,16 @@
 
 namespace sunlight
 {
-    GameSpatialMBR::GameSpatialMBR(const Eigen::Vector2d& min, const Eigen::Vector2d& max)
+    GameSpatialMBR::GameSpatialMBR(const Eigen::Vector2f& min, const Eigen::Vector2f& max)
     {
         _box.min() = min;
         _box.max() = max;
     }
 
-    GameSpatialMBR::GameSpatialMBR(const Eigen::Vector2d& pos, double radius)
+    GameSpatialMBR::GameSpatialMBR(const Eigen::Vector2f& pos, double radius)
         : GameSpatialMBR(
-            Eigen::Vector2d(pos.x() - radius, pos.y() - radius),
-            Eigen::Vector2d(pos.x() + radius, pos.y() + radius))
+            Eigen::Vector2f(pos.x() - radius, pos.y() - radius),
+            Eigen::Vector2f(pos.x() + radius, pos.y() + radius))
     {
     }
 
@@ -27,28 +27,28 @@ namespace sunlight
         return _box.intersects(other._box);
     }
 
-    auto GameSpatialMBR::GetMin() const -> Eigen::Vector2d
+    auto GameSpatialMBR::GetMin() const -> Eigen::Vector2f
     {
         return _box.min();
     }
 
-    auto GameSpatialMBR::GetMax() const -> Eigen::Vector2d
+    auto GameSpatialMBR::GetMax() const -> Eigen::Vector2f
     {
         return _box.max();
     }
 
     auto GameSpatialMBR::CreateFrom(const collision::OBB& obb) -> GameSpatialMBR
     {
-        const auto getVertices = [](const collision::OBB& obb) -> std::array<Eigen::Vector2d, 4>
+        const auto getVertices = [](const collision::OBB& obb) -> std::array<Eigen::Vector2f, 4>
             {
-                std::array<Eigen::Vector2d, 4> vertices;
+                std::array<Eigen::Vector2f, 4> vertices;
 
-                const Eigen::Vector2d& center = obb.GetCenter();
-                const Eigen::Vector2d& extents = obb.GetHalfSize();
-                const Eigen::Matrix2d& rotation = obb.GetRotation();
+                const Eigen::Vector2f& center = obb.GetCenter();
+                const Eigen::Vector2f& extents = obb.GetHalfSize();
+                const Eigen::Matrix2f& rotation = obb.GetRotation();
 
-                const Eigen::Vector2d axis1 = rotation * Eigen::Vector2d(extents.x(), 0);
-                const Eigen::Vector2d axis2 = rotation * Eigen::Vector2d(0, extents.y());
+                const Eigen::Vector2f axis1 = rotation * Eigen::Vector2f(extents.x(), 0);
+                const Eigen::Vector2f axis2 = rotation * Eigen::Vector2f(0, extents.y());
 
                 vertices[0] = center + axis1 + axis2;
                 vertices[1] = center + axis1 - axis2;
@@ -58,10 +58,10 @@ namespace sunlight
                 return vertices;
             };
 
-        Eigen::Vector2d min;
-        Eigen::Vector2d max;
+        Eigen::Vector2f min;
+        Eigen::Vector2f max;
 
-        for (const Eigen::Vector2d& vertex : getVertices(obb))
+        for (const Eigen::Vector2f& vertex : getVertices(obb))
         {
             min = min.cwiseMin(vertex);
             max = max.cwiseMax(vertex);

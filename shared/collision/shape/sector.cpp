@@ -4,7 +4,7 @@
 
 namespace sunlight::collision
 {
-    Sector::Sector(Eigen::Vector2d center, double radius, double startAngle, double endAngle)
+    Sector::Sector(Eigen::Vector2f center, float radius, float startAngle, float endAngle)
         : _center(std::move(center))
         , _radius(radius)
         , _startAngle(startAngle)
@@ -12,19 +12,19 @@ namespace sunlight::collision
     {
     }
 
-    bool Sector::Contains(const Eigen::Vector2d& point) const
+    bool Sector::Contains(const Eigen::Vector2f& point) const
     {
-        const Eigen::Vector2d relativePoint = point - _center;
+        const Eigen::Vector2f relativePoint = point - _center;
 
         if (relativePoint.squaredNorm() > (_radius * _radius))
         {
             return false;
         }
 
-        double angle = std::atan2(relativePoint.y(), relativePoint.x());
+        float angle = std::atan2(relativePoint.y(), relativePoint.x());
         if (angle < 0)
         {
-            angle += 2 * std::numbers::pi;
+            angle += 2 * static_cast<float>(std::numbers::pi);
         }
 
         if (_startAngle < _endAngle)
@@ -35,42 +35,42 @@ namespace sunlight::collision
         return angle >= _startAngle || angle <= _endAngle;
     }
 
-    auto Sector::GetCenter() const -> Eigen::Vector2d
+    auto Sector::GetCenter() const -> Eigen::Vector2f
     {
         return _center;
     }
 
-    auto Sector::GetRadius() const -> double
+    auto Sector::GetRadius() const -> float
     {
         return _radius;
     }
 
-    auto Sector::GetStartAngle() const -> double
+    auto Sector::GetStartAngle() const -> float
     {
         return _startAngle;
     }
 
-    auto Sector::GetEndAngle() const -> double
+    auto Sector::GetEndAngle() const -> float
     {
         return _endAngle;
     }
 
-    void Sector::SetCenter(const Eigen::Vector2d& center)
+    void Sector::SetCenter(const Eigen::Vector2f& center)
     {
         _center = center;
     }
 
-    void Sector::SetRadius(double radius)
+    void Sector::SetRadius(float radius)
     {
         _radius = radius;
     }
 
-    void Sector::SetStartAngle(double angle)
+    void Sector::SetStartAngle(float angle)
     {
         _startAngle = angle;
     }
 
-    void Sector::SetEndAngle(double angle)
+    void Sector::SetEndAngle(float angle)
     {
         _endAngle = angle;
     }

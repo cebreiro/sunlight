@@ -14,11 +14,13 @@
 #include "sl/emulator/game/contents/event_script/event_script.h"
 #include "sl/emulator/game/contents/group/item_mix_prop_item_mapping.h"
 #include "sl/emulator/game/contents/npc/npc_talk_box.h"
+#include "sl/emulator/game/contents/skill/skill_target_selector.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
+#include "sl/emulator/game/message/creator/chat_message_creator.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/item_mix_message_creator.h"
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
@@ -29,9 +31,11 @@
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_group_system.h"
+#include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
@@ -43,6 +47,11 @@ namespace sunlight
     PlayerStateSystem::PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData)
         : _serviceLocator(serviceLocator)
         , _stageData(stageData)
+        , _skillTargetSelector(std::make_unique<PlayerSkillTargetSelector>(*this))
+    {
+    }
+
+    PlayerStateSystem::~PlayerStateSystem()
     {
     }
 
@@ -55,6 +64,7 @@ namespace sunlight
         Add(stage.Get<NPCShopSystem>());
         Add(stage.Get<PlayerGroupSystem>());
         Add(stage.Get<PlayerStatSystem>());
+        Add(stage.Get<PlayerIndexSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)
@@ -463,6 +473,8 @@ namespace sunlight
             oss << "--------------------------------------------";
 
             SUNLIGHT_LOG_DEBUG(_serviceLocator, oss.str());
+
+            HandlePlayerSkill(player, state);
         }
         break;
         case GameEntityStateType::None:
@@ -529,6 +541,37 @@ namespace sunlight
         else
         {
             assert(item->GetQuantity() > 0);
+        }
+    }
+
+    void PlayerStateSystem::HandlePlayerSkill(GamePlayer& player, const GameEntityState& state)
+    {
+        PlayerSkill* skill = player.GetSkillComponent().FindSkill(state.skillId);
+        if (!skill)
+        {
+            return;
+        }
+
+        GameEntity* mainTarget = state.targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(state.targetType, state.targetId).get() : nullptr;
+        std::ostringstream oss;
+        oss << std::chrono::zoned_time{ std::chrono::current_zone(), GameTimeService::Now() };
+        const std::string time = oss.str();
+
+        PlayerSkillTargetSelector::result_type result;
+        if (_skillTargetSelector->SelectTarget(result, player, skill->GetData(), mainTarget))
+        {
+            for (GameEntity* target : result)
+            {
+                player.Send(ChatMessageCreator::CreateServerMessage(
+                    fmt::format("{} skill: {}, target: [{}, {}]",
+                        time, state.skillId, target->GetId(), ToString(target->GetType()))));
+            }
+        }
+        else
+        {
+            player.Send(ChatMessageCreator::CreateServerMessage(
+                fmt::format("{} fail to select skill target. skill: {}",
+                    time, state.skillId)));
         }
     }
 }

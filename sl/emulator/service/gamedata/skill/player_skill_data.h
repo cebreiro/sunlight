@@ -9,6 +9,20 @@ namespace sunlight::sox
 }
 namespace sunlight
 {
+    ENUM_CLASS(PlayerSkillTargetSelectType, int32_t,
+        (Enemy, 1)
+        (Ally, 2)
+        (MaybeGroundPoint, 3)
+        (Party, 5)
+        (Self, 6)
+    );
+
+    ENUM_CLASS(PlayerSkillTargetingAreaType, int32_t,
+        (OneUnit, 1)
+        (Sphere, 2)
+        (OBB, 4)
+    );
+
     struct PlayerSkillData
     {
         struct PrevSkill
@@ -38,8 +52,8 @@ namespace sunlight
         int32_t delayType = 0;
         int32_t delayTime = 0;
         int32_t useType = 0;
-        int32_t applyTargetType = 0;
-        int32_t applyDamageType = 0;
+        PlayerSkillTargetSelectType applyTargetType = {};
+        PlayerSkillTargetingAreaType applyDamageType = {};
         int32_t damageLength = 0;
         int32_t damageLength2 = 0;
         int32_t damageMaxCount = 0;
