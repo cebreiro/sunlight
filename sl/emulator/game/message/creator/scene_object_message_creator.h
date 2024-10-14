@@ -9,6 +9,7 @@ namespace sunlight
     class GameNPC;
     class GameItem;
     class GameStoredItem;
+    class GameMonster;
 }
 
 namespace sunlight
@@ -25,6 +26,7 @@ namespace sunlight
         static auto CreateInformation(const GameNPC& npc) -> Buffer;
         static auto CreateInformation(const GameItem& item) -> Buffer;
         static auto CreateInformation(const GameStoredItem& item) -> Buffer;
+        static auto CreateInformation(const GameMonster& monster, bool showSpawnEffect) -> Buffer;
 
         static auto CreateItemDisplay(const GameItem& item, int64_t characterId) -> Buffer;
         static auto CreateItemSpawn(const GameItem& item, int64_t characterId, Eigen::Vector2f originPos) -> Buffer;

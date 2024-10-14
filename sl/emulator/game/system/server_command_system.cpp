@@ -20,6 +20,7 @@ namespace sunlight
 {
     ServerCommandSystem::ServerCommandSystem(const ServiceLocator& serviceLocator)
         : _serviceLocator(serviceLocator)
+        , _mt(std::random_device{}())
     {
     }
 
@@ -71,6 +72,11 @@ namespace sunlight
     auto ServerCommandSystem::GetServiceLocator() const -> const ServiceLocator&
     {
         return _serviceLocator;
+    }
+
+    auto ServerCommandSystem::GetRandomEngine() -> std::mt19937&
+    {
+        return _mt;
     }
 
     void ServerCommandSystem::HandleCommand(const ZoneCommunityMessage& message)

@@ -6,6 +6,7 @@
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
 #include "sl/emulator/service/gamedata/item_mix/item_mix_data_provider.h"
 #include "sl/emulator/service/gamedata/map/map_data_provider.h"
+#include "sl/emulator/service/gamedata/monster/monster_data_provider.h"
 #include "sl/emulator/service/gamedata/shop/npc_shop_data_provider.h"
 #include "sl/emulator/service/gamedata/skill/skill_data_provider.h"
 
@@ -39,6 +40,7 @@ namespace sunlight
         _skillDataProvider = std::make_shared<SkillDataProvider>(_serviceLocator, *_soxTableSet);
         _expDataProvider = std::make_shared<ExpDataProvider>(*_soxTableSet);
         _npcShopDataProvider = std::make_shared<NPCShopDataProvider>(*_soxTableSet);
+        _monsterDataProvider = std::make_shared<MonsterDataProvider>(*_soxTableSet);
     }
 
     auto GameDataProvideService::GetAssetPath() const -> const std::filesystem::path&
@@ -98,5 +100,12 @@ namespace sunlight
         assert(_npcShopDataProvider);
 
         return *_npcShopDataProvider;
+    }
+
+    auto GameDataProvideService::GetMonsterDataProvider() const -> const MonsterDataProvider&
+    {
+        assert(_monsterDataProvider);
+
+        return *_monsterDataProvider;
     }
 }

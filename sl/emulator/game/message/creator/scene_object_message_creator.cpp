@@ -8,6 +8,7 @@
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/entity/game_stored_item.h"
@@ -122,6 +123,23 @@ namespace sunlight
         writer.Write(static_cast<int32_t>(item.GetId().Unwrap()));
         writer.Write(item.GetData().GetModelId());
         writer.Write(item.GetGroupId());
+
+        return writer.Flush();
+    }
+
+    auto SceneObjectPacketCreator::CreateInformation(const GameMonster& monster, bool showSpawnEffect) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_USERINFO); // handled on client 4E6A40
+        writer.Write<int32_t>(monster.GetComponent<SceneObjectComponent>().GetId());
+        writer.Write(static_cast<int32_t>(monster.GetType()));
+        writer.Write(static_cast<int32_t>(monster.GetId().Unwrap()));
+        writer.Write<int8_t>(monster.IsInvisible() ? 1 : 0);
+        writer.Write<int32_t>(monster.GetDataId());
+        writer.Write<int32_t>(30); // hp
+        writer.Write<int8_t>(showSpawnEffect ? 0 : 1);
+        writer.Write<int32_t>(0); // buff count
+        // buffs
 
         return writer.Flush();
     }

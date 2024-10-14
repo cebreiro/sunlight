@@ -14,6 +14,7 @@
 #include "sl/emulator/game/contents/sector/game_spatial_sector.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/entity/game_stored_item.h"
@@ -299,6 +300,13 @@ namespace sunlight
                             }
                             break;
                             case GameEntityType::Enemy:
+                            {
+                                const GameMonster& monster = *target.Cast<GameMonster>();
+
+                                constexpr bool spawnEffect = false;
+                                player->Defer(SceneObjectPacketCreator::CreateInformation(monster, spawnEffect));
+                            }
+                            break;
                             default:
                                 assert(false);
                             }

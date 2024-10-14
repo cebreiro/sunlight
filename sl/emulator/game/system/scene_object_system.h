@@ -18,6 +18,7 @@ namespace sunlight
     class GameNPC;
     class GameItem;
     class GameStoredItem;
+    class GameMonster;
 
     class GameSpatialSector;
     class GameSpatialCell;
@@ -41,6 +42,7 @@ namespace sunlight
         bool SpawnNPC(SharedPtrNotNull<GameNPC> npc);
         void SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos);
         void SpawnItem(SharedPtrNotNull<GameStoredItem> item);
+        void SpawnMonster(SharedPtrNotNull<GameMonster> monster, Eigen::Vector2f pos, float yaw);
 
         bool DespawnPlayer(game_entity_id_type id, StageExitType exitType);
         void RemoveItem(game_entity_id_type id);

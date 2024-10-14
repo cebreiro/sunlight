@@ -25,6 +25,7 @@ namespace sunlight
         void AddCommand(SharedPtrNotNull<IServerCommand> command);
 
         auto GetServiceLocator() const -> const ServiceLocator&;
+        auto GetRandomEngine() -> std::mt19937&;
 
     private:
         void HandleCommand(const ZoneCommunityMessage& message);
@@ -38,5 +39,7 @@ namespace sunlight
 
         std::vector<std::string> _splitStringBuffer;
         std::unordered_map<std::string, SharedPtrNotNull<IServerCommand>> _commands;
+
+        std::mt19937 _mt;
     };
 }

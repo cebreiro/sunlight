@@ -7,6 +7,7 @@
 #include "sl/emulator/game/contents/group/item_mix_prop_item_mapping.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/entity/game_stored_item.h"
@@ -264,6 +265,33 @@ namespace sunlight
                 player.FlushDeferred();
             });
         viewRangeSystem.Add(*item);
+    }
+
+    void SceneObjectSystem::SpawnMonster(SharedPtrNotNull<GameMonster> monster, Eigen::Vector2f pos, float yaw)
+    {
+        if (!monster->HasComponent<SceneObjectComponent>())
+        {
+            monster->AddComponent(std::make_unique<SceneObjectComponent>());
+        }
+
+        _entities[monster->GetType()][monster->GetId()] = monster;
+
+        SceneObjectComponent& sceneObjectComponent = monster->GetComponent<SceneObjectComponent>();
+        sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(monster->GetType()));
+        sceneObjectComponent.SetPosition(pos);
+        sceneObjectComponent.SetDestPosition(pos);
+        sceneObjectComponent.SetYaw(yaw);
+
+        EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
+
+        viewRangeSystem.VisitPlayer(pos, [&](GamePlayer& player)
+            {
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(*monster));
+                player.Defer(SceneObjectPacketCreator::CreateInformation(*monster, true));
+
+                player.FlushDeferred();
+            });
+        viewRangeSystem.Add(*monster);
     }
 
     bool SceneObjectSystem::DespawnPlayer(game_entity_id_type id, StageExitType exitType)
