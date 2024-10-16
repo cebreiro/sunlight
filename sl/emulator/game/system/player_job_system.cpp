@@ -371,14 +371,31 @@ namespace sunlight
             result.push_back(skillData.index);
         }
 
-        const int32_t jobCommon = static_cast<int32_t>(id) % 1000 / 100 * 100;
-
-        for (const PlayerSkillData& skillData : skillDataProvider.FindByJob(jobCommon, level) | notnull::reference)
+        if (!IsNovice(id))
         {
-            result.push_back(skillData.index);
+            const int32_t jobCommon = static_cast<int32_t>(id) % 1000 / 100 * 100;
+
+            for (const PlayerSkillData& skillData : skillDataProvider.FindByJob(jobCommon, level) | notnull::reference)
+            {
+                result.push_back(skillData.index);
+            }
         }
 
         return result;
+    }
+
+    bool PlayerJobSystem::IsNovice(JobId job)
+    {
+        switch (job)
+        {
+        case JobId::NoviceFighter:
+        case JobId::NoviceRanger:
+        case JobId::NoviceMagician:
+        case JobId::NoviceArtisan:
+            return true;
+        }
+
+        return false;
     }
 
     bool PlayerJobSystem::IsPromotable(JobId novice, JobId advanced)

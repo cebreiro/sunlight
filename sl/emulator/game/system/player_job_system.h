@@ -36,6 +36,7 @@ namespace sunlight
         auto GetJobGainSkills(JobId id, int32_t level) const -> std::vector<int32_t>;
 
     private:
+        static bool IsNovice(JobId job);
         static bool IsPromotable(JobId novice, JobId advanced);
 
     private:
