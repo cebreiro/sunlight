@@ -27,6 +27,7 @@ namespace sunlight
     class SceneObjectComponent;
     class EntityMovementComponent;
     class EntityStateComponent;
+    class EntityStatusEffectComponent;
 }
 
 namespace sunlight
@@ -94,6 +95,8 @@ namespace sunlight
         auto GetGroupComponent() const -> const PlayerGroupComponent&;
         auto GetPartyComponent() -> PlayerPartyComponent&;
         auto GetPartyComponent() const -> const PlayerPartyComponent&;
+        auto GetStatusEffectComponent() -> EntityStatusEffectComponent&;
+        auto GetStatusEffectComponent() const -> const EntityStatusEffectComponent&;
 
     private:
         int64_t _cid = 0;

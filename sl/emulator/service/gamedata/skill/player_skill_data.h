@@ -31,6 +31,13 @@ namespace sunlight
             int32_t level = 0;
         };
 
+        PlayerSkillData(const PlayerSkillData& other) = delete;
+        PlayerSkillData& operator=(const PlayerSkillData& other) = delete;
+
+        PlayerSkillData() = default;
+        PlayerSkillData(PlayerSkillData&& other) noexcept = default;
+        PlayerSkillData& operator=(PlayerSkillData&& other) noexcept = default;
+
         int32_t index = 0;
         int32_t routineId = 0;
         int32_t abilityType = 0;
@@ -65,7 +72,7 @@ namespace sunlight
         int32_t applyCharging = 0;
         int32_t chargingDelay = 0;
         int32_t damageMotionType = 0;
-        boost::container::static_vector<SkillEffectData, 4> effects;
+        std::vector<SkillEffectData> effects;
 
         std::optional<PlayerSkillEffectDamage> damage = std::nullopt;
         boost::container::static_vector<SkillEffectStatusEffect, 4> statusEffects;

@@ -7,6 +7,7 @@ namespace sunlight
     PlayerSkillEffectDamage::PlayerSkillEffectDamage(const SkillEffectData& skillEffectData)
         : _data(&skillEffectData)
         , _type(skillEffectData.type)
+        , _damagePerSkillLevel(skillEffectData.value1)
         , _baseDamage(skillEffectData.value2)
         , _randMin(skillEffectData.value3)
         , _randMax(skillEffectData.value4)
@@ -29,6 +30,12 @@ namespace sunlight
     {
         return _type;
     }
+
+    auto PlayerSkillEffectDamage::GetDamagePerSkillLevel() const -> int32_t
+    {
+        return _damagePerSkillLevel;
+    }
+
     auto PlayerSkillEffectDamage::GetBaseDamage() const -> int32_t
     {
         return _baseDamage;
@@ -47,13 +54,15 @@ namespace sunlight
     SkillEffectStatusEffect::SkillEffectStatusEffect(const SkillEffectData& skillEffectData)
         : _data(&skillEffectData)
         , _type(static_cast<StatusEffectType>(skillEffectData.type))
+        , _valuePerSkillLevel(skillEffectData.value1)
+        , _baseValue(skillEffectData.value2)
         , _durationPerSkillLevel(skillEffectData.value3)
         , _baseDuration(skillEffectData.value4)
         , _id(skillEffectData.value5)
     {
     }
 
-    auto SkillEffectStatusEffect::GetData() const -> const SkillEffectData&
+    auto SkillEffectStatusEffect::GetRawData() const -> const SkillEffectData&
     {
         assert(_data);
 
@@ -63,6 +72,16 @@ namespace sunlight
     auto SkillEffectStatusEffect::GetType() const -> StatusEffectType
     {
         return _type;
+    }
+
+    auto SkillEffectStatusEffect::GetValuePerSkillLevel() const -> int32_t
+    {
+        return _valuePerSkillLevel;
+    }
+
+    auto SkillEffectStatusEffect::GetBaseValue() const -> int32_t
+    {
+        return _baseValue;
     }
 
     auto SkillEffectStatusEffect::GetDurationPerSkillLevel() const -> int32_t
@@ -80,9 +99,12 @@ namespace sunlight
         return _id;
     }
 
-    PlayerSkillEffectPassiveStat::PlayerSkillEffectPassiveStat(PlayerStatType statType, int32_t value)
-        : _statType(statType)
-        , _value(value)
+    PlayerSkillEffectPassiveStat::PlayerSkillEffectPassiveStat(const SkillEffectData& skillEffectData)
+        : _statType(static_cast<PlayerStatType>(skillEffectData.type))
+        , _valuePerSkillLevel(skillEffectData.value1)
+        , _baseValue(skillEffectData.value2)
+        , _percentageValuePerSkillLevel(skillEffectData.value3)
+        , _percentageBaseValue(skillEffectData.value4)
     {
     }
 
@@ -91,9 +113,24 @@ namespace sunlight
         return _statType;
     }
 
-    auto PlayerSkillEffectPassiveStat::GetValue() const -> int32_t
+    auto PlayerSkillEffectPassiveStat::GetValuePerSkillLevel() const -> int32_t
     {
-        return _value;
+        return _valuePerSkillLevel;
+    }
+
+    auto PlayerSkillEffectPassiveStat::GetBaseValue() const -> int32_t
+    {
+        return _baseValue;
+    }
+
+    auto PlayerSkillEffectPassiveStat::GetPercentageValuePerSkillLevel() const -> int32_t
+    {
+        return _percentageValuePerSkillLevel;
+    }
+
+    auto PlayerSkillEffectPassiveStat::GetPercentageBaseValue() const -> int32_t
+    {
+        return _percentageBaseValue;
     }
 
     PlayerSkillEffectWeaponClassRestriction::PlayerSkillEffectWeaponClassRestriction(int32_t value)

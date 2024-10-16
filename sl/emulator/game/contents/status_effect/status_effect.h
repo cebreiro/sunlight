@@ -4,7 +4,7 @@
 
 namespace sunlight
 {
-    struct SkillEffectData;
+    class SkillEffectStatusEffect;
 }
 
 namespace sunlight
@@ -13,16 +13,21 @@ namespace sunlight
     {
     public:
         StatusEffect() = default;
-        StatusEffect(int32_t skillId, StatusEffectType type, int32_t effectId, game_time_point_type endTimePoint,
-            const SkillEffectData& skillEffectData);
+        StatusEffect(int32_t skillId, int32_t skillLevel, StatusEffectType type, int32_t id,
+            game_time_point_type endTimePoint, const SkillEffectStatusEffect& skillEffectData);
 
         bool IsHidden() const;
 
         auto GetSkillId() const -> int32_t;
+        auto GetSkillLevel() const -> int32_t;
         auto GetType() const -> StatusEffectType;
         auto GetId() const -> int32_t;
         auto GetEndTimePoint() const -> game_time_point_type;
-        auto GetSkillEffectData() const -> const SkillEffectData&;
+        auto GetData() const -> const SkillEffectStatusEffect&;
+
+        auto GetStatType() const -> int32_t;
+        auto GetStatValue() const -> int32_t;
+        auto GetStatPercentageValue() const -> int32_t;
 
         void SetHidden(bool value);
 
@@ -30,10 +35,11 @@ namespace sunlight
         bool _hidden = false;
 
         int32_t _skillId = 0;
-        StatusEffectType _effectType = {};
-        int32_t _effectId = 0;
+        int32_t _skillLevel = 0;
+        StatusEffectType _type = {};
+        int32_t _id = 0;
         game_time_point_type _endTimePoint = {};
 
-        PtrNotNull<const SkillEffectData> _skillEffectData = nullptr;
+        PtrNotNull<const SkillEffectStatusEffect> _skillEffectData = nullptr;
     };
 }

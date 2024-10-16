@@ -64,6 +64,8 @@ namespace sunlight
         result.chargingDelay = data.chargingDelay;
         result.damageMotionType = data.damageMotionType;
         {
+            result.effects.reserve(4);
+
             std::initializer_list<SkillEffectData> list{
                 {
                     data.effect1, data.effect1Type,
@@ -99,9 +101,9 @@ namespace sunlight
                 }
             };
 
-            for (const auto& effect : list)
+            for (const auto& temp : list)
             {
-                result.effects.emplace_back(effect);
+                SkillEffectData& effect = result.effects.emplace_back(temp);
 
                 if (effect.category == 1)
                 {
@@ -113,7 +115,7 @@ namespace sunlight
                 }
                 else if (effect.category == 3)
                 {
-                    result.passiveStat = PlayerSkillEffectPassiveStat(static_cast<PlayerStatType>(effect.type), effect.value1);
+                    result.passiveStat = PlayerSkillEffectPassiveStat(effect);
                 }
                 else if (effect.category == 4)
                 {

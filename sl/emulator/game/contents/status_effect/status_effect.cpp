@@ -1,11 +1,15 @@
 #include "status_effect.h"
 
+#include "sl/emulator/service/gamedata/skill/player_skill_effect_data.h"
+
 namespace sunlight
 {
-    StatusEffect::StatusEffect(int32_t skillId, StatusEffectType type, int32_t effectId, game_time_point_type endTimePoint, const SkillEffectData& skillEffectData)
+    StatusEffect::StatusEffect(int32_t skillId, int32_t skillLevel, StatusEffectType type,
+        int32_t id, game_time_point_type endTimePoint, const SkillEffectStatusEffect& skillEffectData)
         : _skillId(skillId)
-        , _effectType(type)
-        , _effectId(effectId)
+        , _skillLevel(skillLevel)
+        , _type(type)
+        , _id(id)
         , _endTimePoint(endTimePoint)
         , _skillEffectData(&skillEffectData)
     {
@@ -21,14 +25,19 @@ namespace sunlight
         return _skillId;
     }
 
+    auto StatusEffect::GetSkillLevel() const -> int32_t
+    {
+        return _skillLevel;
+    }
+
     auto StatusEffect::GetType() const -> StatusEffectType
     {
-        return _effectType;
+        return _type;
     }
 
     auto StatusEffect::GetId() const -> int32_t
     {
-        return _effectId;
+        return _id;
     }
 
     auto StatusEffect::GetEndTimePoint() const -> game_time_point_type
@@ -36,11 +45,45 @@ namespace sunlight
         return _endTimePoint;
     }
 
-    auto StatusEffect::GetSkillEffectData() const -> const SkillEffectData&
+    auto StatusEffect::GetData() const -> const SkillEffectStatusEffect&
     {
         assert(_skillEffectData);
 
         return *_skillEffectData;
+    }
+
+    auto StatusEffect::GetStatType() const -> int32_t
+    {
+        if (_type == StatusEffectType::StatIncrease)
+        {
+            return GetData().GetRawData().value7;
+        }
+
+        return 0;
+    }
+
+    auto StatusEffect::GetStatValue() const -> int32_t
+    {
+        if (_type == StatusEffectType::StatIncrease)
+        {
+            const SkillEffectStatusEffect& data = GetData();
+
+            return data.GetBaseValue() + data.GetValuePerSkillLevel() * GetSkillLevel() + data.GetRawData().value8;
+        }
+
+        return 0;
+    }
+
+    auto StatusEffect::GetStatPercentageValue() const -> int32_t
+    {
+        if (_type == StatusEffectType::StatIncrease)
+        {
+            const SkillEffectStatusEffect& data = GetData();
+
+            return data.GetRawData().value9;
+        }
+
+        return 0;
     }
 
     void StatusEffect::SetHidden(bool value)

@@ -53,11 +53,16 @@ namespace sunlight
 
         for (const SkillEffectStatusEffect& statusEffectData : statusEffectDataList)
         {
-            const std::chrono::milliseconds duration(statusEffectData.GetBaseDuration() + statusEffectData.GetDurationPerSkillLevel() * skillLevel);
-            const StatusEffect statusEffect(skillId, statusEffectData.GetType(), statusEffectData.GetId(), now + duration, statusEffectData.GetData());
+            const int32_t durationMilli = statusEffectData.GetBaseDuration() + statusEffectData.GetDurationPerSkillLevel() * skillLevel;
+
+            const StatusEffect statusEffect(skillId,
+                skillLevel,
+                statusEffectData.GetType(),
+                statusEffectData.GetId(),
+                now + std::chrono::milliseconds(durationMilli),
+                statusEffectData);
 
             // TODO: add status effect to StatusEffectComponent
-            
 
             for (GameEntity& entity : targets | notnull::reference)
             {

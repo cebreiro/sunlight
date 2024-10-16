@@ -20,6 +20,7 @@ namespace sunlight
 
         auto GetData() const -> const SkillEffectData&;
         auto GetType() const -> int32_t;
+        auto GetDamagePerSkillLevel() const -> int32_t;
         auto GetBaseDamage() const -> int32_t;
         auto GetDamageRandMin() const -> int32_t;
         auto GetDamageRandMax() const -> int32_t;
@@ -28,6 +29,7 @@ namespace sunlight
         PtrNotNull<const SkillEffectData> _data = nullptr;
 
         int32_t _type = 0;
+        int32_t _damagePerSkillLevel = 0;
         int32_t _baseDamage = 0; // value2
         int32_t _randMin = 0; // value3
         int32_t _randMax = 0; // value4
@@ -39,8 +41,10 @@ namespace sunlight
         SkillEffectStatusEffect() = default;
         explicit SkillEffectStatusEffect(const SkillEffectData& skillEffectData);
 
-        auto GetData() const -> const SkillEffectData&;
+        auto GetRawData() const -> const SkillEffectData&;
         auto GetType() const -> StatusEffectType;
+        auto GetValuePerSkillLevel() const -> int32_t;
+        auto GetBaseValue() const -> int32_t;
         auto GetDurationPerSkillLevel() const -> int32_t;
         auto GetBaseDuration() const -> int32_t;
         auto GetId() const -> int32_t;
@@ -49,6 +53,8 @@ namespace sunlight
         PtrNotNull<const SkillEffectData> _data = nullptr;
 
         StatusEffectType _type = {}; // type
+        int32_t _valuePerSkillLevel = 0; // value1
+        int32_t _baseValue = 0; // value2
         int32_t _durationPerSkillLevel = 0; // value3
         int32_t _baseDuration = 0; // value4
         int32_t _id = 0; // value5
@@ -58,14 +64,20 @@ namespace sunlight
     {
     public:
         PlayerSkillEffectPassiveStat() = default;
-        PlayerSkillEffectPassiveStat(PlayerStatType statType, int32_t value);
+        explicit PlayerSkillEffectPassiveStat(const SkillEffectData& skillEffectData);
 
         auto GetStatType() const -> PlayerStatType;
-        auto GetValue() const -> int32_t;
+        auto GetValuePerSkillLevel() const -> int32_t;
+        auto GetBaseValue() const -> int32_t;
+        auto GetPercentageValuePerSkillLevel() const -> int32_t;
+        auto GetPercentageBaseValue() const -> int32_t;
 
     private:
         PlayerStatType _statType = {};
-        int32_t _value = 0;
+        int32_t _valuePerSkillLevel = 0; // value1
+        int32_t _baseValue = 0; // value2
+        int32_t _percentageValuePerSkillLevel = 0; // value3
+        int32_t _percentageBaseValue = 0; // value4
     };
 
     class PlayerSkillEffectWeaponClassRestriction
