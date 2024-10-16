@@ -26,4 +26,26 @@ namespace sunlight
 
         return true;
     }
+
+    ServerCommandStatSPSet::ServerCommandStatSPSet(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandStatSPSet::GetName() const -> std::string_view
+    {
+        return "stat_sp_set";
+    }
+
+    auto ServerCommandStatSPSet::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandStatSPSet::Execute(GamePlayer& player, int32_t value) const
+    {
+        _system.Get<PlayerStatSystem>().SetSP(player, value, SPChangeFloaterType::None);
+
+        return true;
+    }
 }

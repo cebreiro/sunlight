@@ -38,4 +38,40 @@ namespace sunlight
     private:
         ServerCommandSystem& _system;
     };
+
+    class ServerCommandDebugPlayerHP final : public ServerCommandT<>
+    {
+    public:
+        ServerCommandDebugPlayerHP(ServerCommandSystem& system);
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+    public:
+        bool Execute(GamePlayer& player) const override;
+
+    private:
+        void DebugNotify(GamePlayer& player) const;
+
+    private:
+        ServerCommandSystem& _system;
+    };
+
+    class ServerCommandDebugPlayerSP final : public ServerCommandT<>
+    {
+    public:
+        ServerCommandDebugPlayerSP(ServerCommandSystem& system);
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+    public:
+        bool Execute(GamePlayer& player) const override;
+
+    private:
+        void DebugNotify(GamePlayer& player) const;
+
+    private:
+        ServerCommandSystem& _system;
+    };
 }

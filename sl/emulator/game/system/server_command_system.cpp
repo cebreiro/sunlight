@@ -18,8 +18,9 @@
 
 namespace sunlight
 {
-    ServerCommandSystem::ServerCommandSystem(const ServiceLocator& serviceLocator)
+    ServerCommandSystem::ServerCommandSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
+        , _stageId(stageId)
         , _mt(std::random_device{}())
     {
     }
@@ -72,6 +73,11 @@ namespace sunlight
     auto ServerCommandSystem::GetServiceLocator() const -> const ServiceLocator&
     {
         return _serviceLocator;
+    }
+
+    auto ServerCommandSystem::GetStageId() const -> int32_t
+    {
+        return _stageId;
     }
 
     auto ServerCommandSystem::GetRandomEngine() -> std::mt19937&

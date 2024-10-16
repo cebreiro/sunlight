@@ -22,4 +22,19 @@ namespace sunlight
     private:
         ServerCommandSystem& _system;
     };
+
+    class ServerCommandStatSPSet final : public ServerCommandT<int32_t>
+    {
+    public:
+        explicit ServerCommandStatSPSet(ServerCommandSystem& system);
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+    public:
+        bool Execute(GamePlayer& player, int32_t value) const override;
+
+    private:
+        ServerCommandSystem& _system;
+    };
 }

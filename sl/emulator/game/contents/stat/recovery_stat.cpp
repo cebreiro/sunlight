@@ -21,12 +21,11 @@ namespace sunlight
             return;
         }
 
-        _lastUpdateTimePoint = timePoint;
-
         const double tickCount = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(timePoint - _lastUpdateTimePoint).count());
         const double count = tickCount / _regenTickCount;
 
         _value =  std::clamp(_value + _regenValue * count, _minValue, _maxValue);
+        _lastUpdateTimePoint = timePoint;
     }
 
     void RecoveryStat::ChangeRegenValue(game_time_point_type timePoint, StatValue value)
