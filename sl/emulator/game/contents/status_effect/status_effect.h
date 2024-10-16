@@ -13,8 +13,8 @@ namespace sunlight
     {
     public:
         StatusEffect() = default;
-        StatusEffect(int32_t skillId, int32_t skillLevel, StatusEffectType type, int32_t id,
-            game_time_point_type endTimePoint, const SkillEffectStatusEffect& skillEffectData);
+        StatusEffect(int32_t skillId, int32_t skillLevel, const SkillEffectStatusEffect& skillEffectData,
+            game_time_point_type now, std::chrono::milliseconds duration);
 
         bool IsHidden() const;
 
@@ -23,6 +23,8 @@ namespace sunlight
         auto GetType() const -> StatusEffectType;
         auto GetId() const -> int32_t;
         auto GetEndTimePoint() const -> game_time_point_type;
+        auto GetLastTickTimePoint() const -> game_time_point_type;
+        auto GetNextTickTimePoint() const -> game_time_point_type;
         auto GetData() const -> const SkillEffectStatusEffect&;
 
         auto GetStatType() const -> int32_t;
@@ -30,6 +32,8 @@ namespace sunlight
         auto GetStatPercentageValue() const -> int32_t;
 
         void SetHidden(bool value);
+        void SetLastTickTimePoint(game_time_point_type timePoint);
+        void SetNextTickTimePoint(game_time_point_type timePoint);
 
     private:
         bool _hidden = false;
@@ -39,6 +43,8 @@ namespace sunlight
         StatusEffectType _type = {};
         int32_t _id = 0;
         game_time_point_type _endTimePoint = {};
+        game_time_point_type _lastTickTimePoint = {};
+        game_time_point_type _nextTickTimePoint = {};
 
         PtrNotNull<const SkillEffectStatusEffect> _skillEffectData = nullptr;
     };

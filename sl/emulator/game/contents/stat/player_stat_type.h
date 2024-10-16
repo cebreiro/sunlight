@@ -44,6 +44,6 @@ namespace sunlight
         (AllElemental, 100)
         (AllBaseStat, 101)
         (BaseAttack, 102)
-        (RecoveryHPContinue, 2000)
+        (RecoveryHPContinue, 1000)
     )
 }

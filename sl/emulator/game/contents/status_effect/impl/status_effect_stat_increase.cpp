@@ -7,13 +7,13 @@ namespace sunlight
         return StatusEffectType::StatIncrease;
     }
 
-    void StatusEffectStatIncreaseHandler::Apply(GameEntity& entity, const StatusEffect& statusEffect) const
+    void StatusEffectStatIncreaseHandler::Apply(GameEntity& entity, StatusEffect& statusEffect) const
     {
         (void)entity;
         (void)statusEffect;
     }
 
-    void StatusEffectStatIncreaseHandler::Revert(GameEntity& entity, const StatusEffect& statusEffect) const
+    void StatusEffectStatIncreaseHandler::Revert(GameEntity& entity, StatusEffect& statusEffect) const
     {
         (void)entity;
         (void)statusEffect;

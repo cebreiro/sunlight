@@ -4,13 +4,14 @@
 
 namespace sunlight
 {
-    StatusEffect::StatusEffect(int32_t skillId, int32_t skillLevel, StatusEffectType type,
-        int32_t id, game_time_point_type endTimePoint, const SkillEffectStatusEffect& skillEffectData)
+    StatusEffect::StatusEffect(int32_t skillId, int32_t skillLevel, const SkillEffectStatusEffect& skillEffectData,
+        game_time_point_type now, std::chrono::milliseconds duration)
         : _skillId(skillId)
         , _skillLevel(skillLevel)
-        , _type(type)
-        , _id(id)
-        , _endTimePoint(endTimePoint)
+        , _type(skillEffectData.GetType())
+        , _id(skillEffectData.GetId())
+        , _endTimePoint(now + duration)
+        , _lastTickTimePoint(now)
         , _skillEffectData(&skillEffectData)
     {
     }
@@ -45,6 +46,16 @@ namespace sunlight
         return _endTimePoint;
     }
 
+    auto StatusEffect::GetLastTickTimePoint() const -> game_time_point_type
+    {
+        return _lastTickTimePoint;
+    }
+
+    auto StatusEffect::GetNextTickTimePoint() const -> game_time_point_type
+    {
+        return _nextTickTimePoint;
+    }
+
     auto StatusEffect::GetData() const -> const SkillEffectStatusEffect&
     {
         assert(_skillEffectData);
@@ -54,7 +65,7 @@ namespace sunlight
 
     auto StatusEffect::GetStatType() const -> int32_t
     {
-        if (_type == StatusEffectType::StatIncrease)
+        if (_type == StatusEffectType::StatIncrease || _type == StatusEffectType::Heal)
         {
             return GetData().GetRawData().value7;
         }
@@ -64,7 +75,7 @@ namespace sunlight
 
     auto StatusEffect::GetStatValue() const -> int32_t
     {
-        if (_type == StatusEffectType::StatIncrease)
+        if (_type == StatusEffectType::StatIncrease || _type == StatusEffectType::Heal)
         {
             const SkillEffectStatusEffect& data = GetData();
 
@@ -76,11 +87,9 @@ namespace sunlight
 
     auto StatusEffect::GetStatPercentageValue() const -> int32_t
     {
-        if (_type == StatusEffectType::StatIncrease)
+        if (_type == StatusEffectType::StatIncrease || _type == StatusEffectType::Heal)
         {
-            const SkillEffectStatusEffect& data = GetData();
-
-            return data.GetRawData().value9;
+            return GetData().GetRawData().value9;
         }
 
         return 0;
@@ -89,5 +98,15 @@ namespace sunlight
     void StatusEffect::SetHidden(bool value)
     {
         _hidden = value;
+    }
+
+    void StatusEffect::SetLastTickTimePoint(game_time_point_type timePoint)
+    {
+        _lastTickTimePoint = timePoint;
+    }
+
+    void StatusEffect::SetNextTickTimePoint(game_time_point_type timePoint)
+    {
+        _nextTickTimePoint = timePoint;
     }
 }

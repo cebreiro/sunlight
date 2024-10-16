@@ -232,6 +232,7 @@ namespace sunlight
         Get<PlayerIndexSystem>().OnStageEnter(*player);
         Get<SceneObjectSystem>().SpawnPlayer(player, enterType);
         Get<PlayerChannelSystem>().OnStageEnter(*player, enterType);
+        Get<EntityStatusEffectSystem>().OnStageEnter(*player, enterType);
 
         GameDebugger::SetInstance(nullptr);
     }
@@ -260,6 +261,7 @@ namespace sunlight
         Get<NPCShopSystem>().OnStageExit(*player);
         Get<PlayerGroupSystem>().OnStageExit(*player);
         Get<PlayerChannelSystem>().OnStageExit(*player, exitType);
+        Get<EntityStatusEffectSystem>().OnStageExit(*player, exitType);
 
         switch (exitType)
         {
@@ -359,7 +361,7 @@ namespace sunlight
         Add(std::make_shared<PlayerChannelSystem>(_serviceLocator, _zoneId));
         Add(std::make_shared<PlayerIndexSystem>());
         Add(std::make_shared<PlayerSkillEffectSystem>(_serviceLocator));
-        Add(std::make_shared<EntityStatusEffectSystem>(_serviceLocator));
+        Add(std::make_shared<EntityStatusEffectSystem>(_serviceLocator, _stageData.id));
 
         const auto range = _systems | std::views::values;
 

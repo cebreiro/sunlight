@@ -1,11 +1,15 @@
 #pragma once
+#include <boost/unordered/unordered_flat_map.hpp>
 #include "sl/emulator/game/contents/status_effect/status_effect_handler_interface.h"
 #include "sl/emulator/game/system/game_system.h"
+#include "sl/emulator/game/zone/stage_enter_type.h"
+#include "sl/emulator/game/zone/stage_exit_type.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_effect_data.h"
 
 namespace sunlight
 {
     class GameEntity;
+    class GamePlayer;
 }
 
 namespace sunlight
@@ -13,7 +17,7 @@ namespace sunlight
     class EntityStatusEffectSystem final : public GameSystem
     {
     public:
-        explicit EntityStatusEffectSystem(const ServiceLocator& serviceLocator);
+        EntityStatusEffectSystem(const ServiceLocator& serviceLocator, int32_t stageId);
 
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
@@ -23,22 +27,36 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        template <typename T> requires std::derived_from<T, IStatusEffectHandler>
-        void AddHandler(UniquePtrNotNull<T> handler);
+        void OnStageEnter(GamePlayer& player, StageEnterType enterType);
+        void OnStageExit(GamePlayer& player, StageExitType exitType);
 
     public:
-        void AddStatusEffect(int32_t skillId, int32_t skillLevel,
+        void AddStatusEffectBySkill(int32_t skillId, int32_t skillLevel,
             std::span<PtrNotNull<GameEntity>> targets,
             std::span<const SkillEffectStatusEffect> statusEffectDataList);
 
+        bool RemoveStatusEffect(GameEntity& entity, int32_t statusEffectId);
 
-    
+    public:
+        template <typename T> requires std::derived_from<T, IStatusEffectHandler>
+        void AddHandler(UniquePtrNotNull<T> handler);
+
+    private:
+        void ClearStatusEffect(GameEntity& entity, StatusEffect& statusEffect);
+        void AddStatusEffectRemoveTimer(const GameEntity& entity, const StatusEffect& statusEffect);
+
+    private:
+        auto GetApplyHandler(StatusEffectType type) const -> const IStatusEffectApplyHandler*;
+        auto GetRevertHandler(StatusEffectType type) const -> const IStatusEffectRevertHandler*;
+        auto GetTickHandler(StatusEffectType type) const -> const IStatusEffectTickHandler*;
 
     private:
         const ServiceLocator& _serviceLocator;
+        int32_t _stageId = 0;
+
+        boost::unordered::unordered_flat_map<PtrNotNull<GameEntity>, std::vector<PtrNotNull<StatusEffect>>> _tickStatusEffects;
 
         std::unordered_map<StatusEffectType, UniquePtrNotNull<IStatusEffectHandler>> _handlers;
-
         std::unordered_map<StatusEffectType, PtrNotNull<const IStatusEffectApplyHandler>> _applyHandlers;
         std::unordered_map<StatusEffectType, PtrNotNull<const IStatusEffectRevertHandler>> _revertHandlers;
         std::unordered_map<StatusEffectType, PtrNotNull<const IStatusEffectTickHandler>> _tickHandlers;

@@ -78,7 +78,7 @@ namespace sunlight
 
         if (!data.statusEffects.empty())
         {
-            Get<EntityStatusEffectSystem>().AddStatusEffect(skillId, skill->GetLevel(), skillTargets, data.statusEffects);
+            Get<EntityStatusEffectSystem>().AddStatusEffectBySkill(skillId, skill->GetLevel(), skillTargets, data.statusEffects);
         }
 
         if (data.damage)

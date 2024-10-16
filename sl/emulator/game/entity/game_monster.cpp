@@ -1,5 +1,6 @@
 #include "game_monster.h"
 
+#include "sl/emulator/game/component/entity_status_effect_component.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
 
 namespace sunlight
@@ -9,6 +10,7 @@ namespace sunlight
         , _data(data)
         , _spawnerId(spawnerId)
     {
+        AddComponent(std::make_unique<EntityStatusEffectComponent>());
     }
 
     bool GameMonster::IsInvisible() const
