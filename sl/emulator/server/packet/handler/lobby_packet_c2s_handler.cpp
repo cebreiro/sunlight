@@ -334,6 +334,17 @@ namespace sunlight
                 });
         }
 
+        // item mix skill
+        for (const PlayerSkillData& skillData : skillDataProvider.FindByJob(900, 1) | notnull::reference)
+        {
+            request.skills.emplace_back(req::SkillCreate{
+                .cid = request.id,
+                .id = skillData.index,
+                .job = 900,
+                .level = 1
+                });
+        }
+
         success = co_await _serviceLocator.Get<DatabaseService>().CreateCharacter(request);
         if (!success)
         {
