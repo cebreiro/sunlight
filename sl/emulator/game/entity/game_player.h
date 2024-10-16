@@ -48,6 +48,9 @@ namespace sunlight
         void Send(Buffer buffer);
 
     public:
+        void Notice(const std::string& message);
+
+    public:
         bool IsArmed() const;
         bool IsRunning() const;
 

@@ -39,7 +39,7 @@ namespace sunlight
             }
         }
 
-        result.passive = data.passive;
+        result.passive = data.passive == 0;
         result.spConsumption = data.spConsumption;
         result.spConsumptionDelay = data.spConsumptionDelay;
         result.furyOnly = data.furyOnly;
@@ -64,7 +64,7 @@ namespace sunlight
         result.chargingDelay = data.chargingDelay;
         result.damageMotionType = data.damageMotionType;
         {
-            std::initializer_list<PlayerSkillEffectData> list{
+            std::initializer_list<SkillEffectData> list{
                 {
                     data.effect1, data.effect1Type,
                     data.effect1Reserved1, data.effect1Reserved2, data.effect1Reserved3,
@@ -101,10 +101,33 @@ namespace sunlight
 
             for (const auto& effect : list)
             {
-                if (effect.category != 0)
+                result.effects.emplace_back(effect);
+
+                if (effect.category == 1)
                 {
-                    result.effects.push_back(effect);
+                    result.damage = PlayerSkillEffectDamage(effect);
                 }
+                else if (effect.category == 2)
+                {
+                    result.statusEffects.emplace_back(effect);
+                }
+                else if (effect.category == 3)
+                {
+                    result.passiveStat = PlayerSkillEffectPassiveStat(static_cast<PlayerStatType>(effect.type), effect.value1);
+                }
+                else if (effect.category == 4)
+                {
+                    if (effect.category == 2)
+                    {
+                        result.attackProbability = PlayerSkillEffectAttackProbability(effect.value3);
+                    }
+                    else
+                    {
+                        result.weaponClassRestriction = PlayerSkillEffectWeaponClassRestriction(effect.type);
+                    }
+                }
+                // TODO: 5 -> summon
+                // TODO: 6 -> weapon combo, casting, etc...
             }
         }
 

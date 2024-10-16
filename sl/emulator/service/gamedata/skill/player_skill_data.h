@@ -1,12 +1,12 @@
 #pragma once
 #include <boost/container/static_vector.hpp>
-#include "sl/emulator/game/contents/job/job_id.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_effect_data.h"
 
 namespace sunlight::sox
 {
     struct SkillBasic;
 }
+
 namespace sunlight
 {
     ENUM_CLASS(PlayerSkillTargetSelectType, int32_t,
@@ -41,7 +41,7 @@ namespace sunlight
         int32_t canSubJob = 0;
         int32_t levelQualification = 0;
         boost::container::static_vector<PrevSkill, 2> prevSkills;
-        int32_t passive = 0;
+        bool passive = false;
         int32_t spConsumption = 0;
         int32_t spConsumptionDelay = 0;
         int32_t furyOnly = 0;
@@ -65,7 +65,14 @@ namespace sunlight
         int32_t applyCharging = 0;
         int32_t chargingDelay = 0;
         int32_t damageMotionType = 0;
-        boost::container::static_vector<PlayerSkillEffectData, 4> effects;
+        boost::container::static_vector<SkillEffectData, 4> effects;
+
+        std::optional<PlayerSkillEffectDamage> damage = std::nullopt;
+        boost::container::static_vector<SkillEffectStatusEffect, 4> statusEffects;
+        std::optional<PlayerSkillEffectWeaponClassRestriction> weaponClassRestriction = std::nullopt;
+        std::optional<PlayerSkillEffectAttackProbability> attackProbability = std::nullopt;
+        std::optional<PlayerSkillEffectPassiveStat> passiveStat = std::nullopt;
+
 
         static auto CreateFrom(const sox::SkillBasic& skillBasic) -> PlayerSkillData;
     };

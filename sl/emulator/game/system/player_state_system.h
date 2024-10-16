@@ -14,8 +14,6 @@ namespace sunlight
 
     class GamePlayer;
     class GameNPC;
-
-    class PlayerSkillTargetSelector;
 }
 
 namespace sunlight
@@ -58,7 +56,5 @@ namespace sunlight
     private:
         const ServiceLocator& _serviceLocator;
         const MapStage& _stageData;
-
-        UniquePtrNotNull<PlayerSkillTargetSelector> _skillTargetSelector;
     };
 }

@@ -33,6 +33,7 @@
 #include "sl/emulator/game/system/player_group_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
+#include "sl/emulator/game/system/player_skill_effect_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -47,7 +48,6 @@ namespace sunlight
     PlayerStateSystem::PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData)
         : _serviceLocator(serviceLocator)
         , _stageData(stageData)
-        , _skillTargetSelector(std::make_unique<PlayerSkillTargetSelector>(*this))
     {
     }
 
@@ -65,6 +65,7 @@ namespace sunlight
         Add(stage.Get<PlayerGroupSystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerIndexSystem>());
+        Add(stage.Get<PlayerSkillEffectSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)
@@ -546,32 +547,6 @@ namespace sunlight
 
     void PlayerStateSystem::HandlePlayerSkill(GamePlayer& player, const GameEntityState& state)
     {
-        PlayerSkill* skill = player.GetSkillComponent().FindSkill(state.skillId);
-        if (!skill)
-        {
-            return;
-        }
-
-        GameEntity* mainTarget = state.targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(state.targetType, state.targetId).get() : nullptr;
-        std::ostringstream oss;
-        oss << std::chrono::zoned_time{ std::chrono::current_zone(), GameTimeService::Now() };
-        const std::string time = oss.str();
-
-        PlayerSkillTargetSelector::result_type result;
-        if (_skillTargetSelector->SelectTarget(result, player, skill->GetData(), mainTarget))
-        {
-            for (GameEntity* target : result)
-            {
-                player.Send(ChatMessageCreator::CreateServerMessage(
-                    fmt::format("{} skill: {}, target: [{}, {}]",
-                        time, state.skillId, target->GetId(), ToString(target->GetType()))));
-            }
-        }
-        else
-        {
-            player.Send(ChatMessageCreator::CreateServerMessage(
-                fmt::format("{} fail to select skill target. skill: {}",
-                    time, state.skillId)));
-        }
+        Get<PlayerSkillEffectSystem>().OnSkillUse(player, state.skillId, state.targetId, state.targetType, state.param1);
     }
 }

@@ -27,7 +27,7 @@ namespace sunlight
         (RageUpSpeed, 21)
         (RageDownSpeed, 22)
         (AttackSpeed, 23)
-        (AttackDelayDecrease, 24)
+        (AttackDelay, 24)
         (Unk25, 25)
         (Unk26, 26)
         (PhysicalAttackStr, 27)

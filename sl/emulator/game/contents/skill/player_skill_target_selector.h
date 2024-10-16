@@ -7,7 +7,7 @@ namespace sunlight
 
     class GameEntity;
     class GamePlayer;
-    class PlayerStateSystem;
+    class PlayerSkillEffectSystem;
 }
 
 namespace sunlight
@@ -19,11 +19,11 @@ namespace sunlight
         using result_type = boost::container::small_vector<PtrNotNull<GameEntity>, 8>;
 
     public:
-        explicit PlayerSkillTargetSelector(PlayerStateSystem& system);
+        explicit PlayerSkillTargetSelector(PlayerSkillEffectSystem& system);
 
         bool SelectTarget(result_type& result, const GamePlayer& caster, const PlayerSkillData& skillData, GameEntity* optMainTarget) const;
 
     private:
-        PlayerStateSystem& _system;
+        PlayerSkillEffectSystem& _system;
     };
 }

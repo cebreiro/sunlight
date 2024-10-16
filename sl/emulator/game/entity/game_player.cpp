@@ -15,6 +15,7 @@
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/item/equipment_position.h"
+#include "sl/emulator/game/message/creator/chat_message_creator.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
@@ -227,6 +228,11 @@ namespace sunlight
         assert(_client);
 
         _client->Send(ServerType::Zone, std::move(buffer));
+    }
+
+    void GamePlayer::Notice(const std::string& message)
+    {
+        Send(ChatMessageCreator::CreateServerMessage(message));
     }
 
     bool GamePlayer::IsArmed() const

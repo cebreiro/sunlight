@@ -10,12 +10,12 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
-#include "sl/emulator/game/system/player_state_system.h"
+#include "sl/emulator/game/system/player_skill_effect_system.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_data.h"
 
 namespace sunlight
 {
-    PlayerSkillTargetSelector::PlayerSkillTargetSelector(PlayerStateSystem& system)
+    PlayerSkillTargetSelector::PlayerSkillTargetSelector(PlayerSkillEffectSystem& system)
         : _system(system)
     {
     }
