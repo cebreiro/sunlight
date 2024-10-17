@@ -1,6 +1,6 @@
 #pragma once
 #include <boost/container/static_vector.hpp>
-#include "sl/emulator/service/gamedata/skill/player_skill_effect_data.h"
+#include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
 namespace sunlight::sox
 {
@@ -72,14 +72,11 @@ namespace sunlight
         int32_t applyCharging = 0;
         int32_t chargingDelay = 0;
         int32_t damageMotionType = 0;
-        std::vector<SkillEffectData> effects;
+        boost::container::static_vector<SkillEffectData, 4> effects;
 
-        std::optional<PlayerSkillEffectDamage> damage = std::nullopt;
-        boost::container::static_vector<SkillEffectStatusEffect, 4> statusEffects;
-        std::optional<PlayerSkillEffectWeaponClassRestriction> weaponClassRestriction = std::nullopt;
-        std::optional<PlayerSkillEffectAttackProbability> attackProbability = std::nullopt;
-        std::optional<PlayerSkillEffectPassiveStat> passiveStat = std::nullopt;
-
+        std::optional<SkillEffectWeaponCondition> effectWeaponClassCondition = std::nullopt;
+        std::optional<SkillEffectRangeWeaponCondition> effectRangeWeaponCondition = std::nullopt;
+        std::optional<SkillEffectAttackProbabilityCondition> effectAttackProbabilityCondition = std::nullopt;
 
         static auto CreateFrom(const sox::SkillBasic& skillBasic) -> PlayerSkillData;
     };

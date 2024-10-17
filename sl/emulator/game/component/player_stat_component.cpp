@@ -69,12 +69,10 @@ namespace sunlight
         stat.SetUpdateTimePoint(GameTimeService::Now());
     }
 
-    void PlayerStatComponent::AddBaseStat(PlayerStatType type, StatValue value)
+    void PlayerStatComponent::AddStat(PlayerStatType type, StatOriginType origin, StatValue value)
     {
-        constexpr StatOriginType origin = StatOriginType::Base;
-
         Stat& stat = Mutable(type);
-        
+
         stat.Set(origin, stat.Get(origin) + value);
         stat.SetChanges(true);
     }
@@ -99,7 +97,7 @@ namespace sunlight
         stat.Update(GameTimeService::Now());
 
         // client 48C620h
-        const StatValue regen = GetFinalStat(PlayerStatType::RecoveryRateHP) * 0.2;
+        const StatValue regen = GetFinalStat(PlayerStatType::RecoveryRateHP) * stat.GetRegenStateFactor();
 
         stat.SetRegenValue(regen);
     }
@@ -110,7 +108,7 @@ namespace sunlight
         stat.Update(GameTimeService::Now());
 
         // client 48C620h
-        const StatValue regen = GetFinalStat(PlayerStatType::RecoveryRateSP) * 0.25;
+        const StatValue regen = GetFinalStat(PlayerStatType::RecoveryRateSP) * stat.GetRegenStateFactor();
 
         stat.SetRegenValue(regen);
     }
@@ -184,6 +182,11 @@ namespace sunlight
         Mutable(type).SetValue(value);
     }
 
+    void PlayerStatComponent::SetRecoveryStateFactor(RecoveryStatType type, StatValue value)
+    {
+        Mutable(type).SetRegenStateFactor(value);
+    }
+
     void PlayerStatComponent::SetLevel(int32_t level)
     {
         _level = level;
@@ -209,10 +212,10 @@ namespace sunlight
 
         stat.SetChanges(false);
 
-        stat.SetFinalValue(CalculateStatSum(type));
+        stat.SetFinalValue(CalculateStat(type));
     }
 
-    auto PlayerStatComponent::CalculateStatSum(PlayerStatType type) const -> StatValue
+    auto PlayerStatComponent::CalculateStat(PlayerStatType type, bool includePassive) const -> StatValue
     {
         const Stat& stat = Get(type);
 
@@ -242,11 +245,28 @@ namespace sunlight
         }
 
         const StatValue base = stat.Get(StatOriginType::Base);
+        const StatValue item = stat.Get(StatOriginType::Item);
+        const StatValue statusEffect = stat.Get(StatOriginType::StatusEffect);
+        const StatValue statusEffectPercentage = stat.Get(StatOriginType::StatusEffectPercentage);;
+        const StatValue jobReference = stat.Get(StatOriginType::JobReference);
+        StatValue passive = StatValue(0);
 
-        const StatValue sum = base + stat.Get(StatOriginType::Item) + stat.Get(StatOriginType::Skill) + stat.Get(StatOriginType::StatusEffect);
-        const StatValue percentage = base * stat.Get(StatOriginType::StatusEffectPercentage);
+        if (includePassive)
+        {
+            // client 0x4B0280
+            // passive effect specialization
 
-        const StatValue result = sum + percentage + allStat + stat.Get(StatOriginType::JobReference);
+            const StatValue percentage = CalculateStat(type, false) * stat.Get(StatOriginType::SkillPassivePercentage);
+
+            passive = stat.Get(StatOriginType::SkillPassive) + static_cast<int32_t>(std::round(percentage.As<double>()));
+        }
+
+        // client 0x48554A maybe_GetFinalStat
+
+        const StatValue sum = base + item + statusEffect + passive;
+        const StatValue percentage = base * statusEffectPercentage;
+
+        const StatValue result = sum + percentage + allStat + jobReference;
 
         return result;
     }

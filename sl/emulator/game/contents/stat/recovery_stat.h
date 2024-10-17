@@ -22,11 +22,13 @@ namespace sunlight
         void ChangeRegenValue(game_time_point_type timePoint, StatValue value);
 
         auto GetValue(game_time_point_type timePoint) const -> StatValue;
+        auto GetRegenStateFactor() const -> StatValue;
         auto GetMaxValue() const -> StatValue;
         auto GetLastUpdateTimePoint() const -> game_time_point_type;
 
         void SetValue(StatValue value);
         void SetRegenValue(StatValue value);
+        void SetRegenStateFactor(StatValue value);
         void SetMinValue(StatValue value);
         void SetMaxValue(StatValue value);
         void SetRegenTickCount(int32_t value);
@@ -38,6 +40,7 @@ namespace sunlight
         StatValue _minValue = {};
         StatValue _maxValue = {};
         StatValue _regenValue = {};
+        StatValue _regenStateFactor = {};
         int32_t _regenTickCount = 1;
 
         game_time_point_type _lastUpdateTimePoint = game_clock_type::now();

@@ -1,10 +1,14 @@
 #include "player_skill_component.h"
 
+#include "sl/emulator/game/contents/passive/passive.h"
+
 namespace sunlight
 {
-    bool PlayerSkillComponent::AddSkill(const PlayerSkill& skill)
+    bool PlayerSkillComponent::AddSkill(PlayerSkill skill)
     {
-        return _skills.try_emplace(skill.GetId(), skill).second;
+        const int32_t id = skill.GetId();
+
+        return _skills.try_emplace(id, std::move(skill)).second;
     }
 
     auto PlayerSkillComponent::FindSkill(int32_t skillId) -> PlayerSkill*

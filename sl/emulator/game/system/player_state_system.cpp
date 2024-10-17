@@ -422,6 +422,8 @@ namespace sunlight
         const GameEntityState state = GameEntityState::CreateFrom(reader);
 
         EntityStateComponent& stateComponent = player.GetStateComponent();
+        const GameEntityStateType oldState = stateComponent.GetState().type;
+
         stateComponent.SetState(state);
 
         Get<EntityViewRangeSystem>().Broadcast(player,
@@ -501,6 +503,11 @@ namespace sunlight
             SUNLIGHT_LOG_DEBUG(_serviceLocator,
                 fmt::format("[{}] unhandled player state. player: {}, state: {}",
                     GetName(), player.GetCId(), ToString(state.type)));
+        }
+
+        if (oldState != state.type)
+        {
+            Get<PlayerStatSystem>().OnStateChange(player, oldState, state.type);
         }
 
         return true;

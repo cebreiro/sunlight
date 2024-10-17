@@ -6,7 +6,8 @@ namespace sunlight
     ENUM_CLASS(StatOriginType, int32_t,
         (Base, 0)
         (Item)
-        (Skill)
+        (SkillPassive)
+        (SkillPassivePercentage)
         (StatusEffect)
         (StatusEffectPercentage)
         (JobReference)

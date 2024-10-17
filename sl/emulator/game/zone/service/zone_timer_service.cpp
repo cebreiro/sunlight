@@ -74,7 +74,10 @@ namespace sunlight
                 }
 
                 GamePlayer* player = stage->Get<PlayerIndexSystem>().FindByCId(playerId);
-                assert(player);
+                if (!player)
+                {
+                    return;
+                }
 
                 if (GameDebugger* debugger = zone->GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
                 {

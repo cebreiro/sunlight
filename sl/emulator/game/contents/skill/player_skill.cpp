@@ -1,5 +1,6 @@
 #include "player_skill.h"
 
+#include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_data.h"
 
 namespace sunlight
@@ -9,6 +10,15 @@ namespace sunlight
         , _data(data)
     {
         assert(_data);
+    }
+
+    PlayerSkill::~PlayerSkill()
+    {
+    }
+
+    bool PlayerSkill::HasPassive() const
+    {
+        return _passive.operator bool();
     }
 
     auto PlayerSkill::GetId() const -> int32_t
@@ -68,6 +78,20 @@ namespace sunlight
         return *_data;
     }
 
+    auto PlayerSkill::GetPassive() -> Passive&
+    {
+        assert(HasPassive());
+
+        return *_passive;
+    }
+
+    auto PlayerSkill::GetPassive() const -> const Passive&
+    {
+        assert(HasPassive());
+
+        return *_passive;
+    }
+
     void PlayerSkill::SetBaseLevel(int32_t value)
     {
         _baseLevel = value;
@@ -101,5 +125,10 @@ namespace sunlight
     void PlayerSkill::SetEXP(int32_t value)
     {
         _exp = value;
+    }
+
+    void PlayerSkill::SetPassive(UniquePtrNotNull<Passive> passive)
+    {
+        _passive = std::move(passive);
     }
 }

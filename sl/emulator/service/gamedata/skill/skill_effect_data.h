@@ -1,17 +1,12 @@
 #pragma once
+#include "sl/emulator/service/gamedata/item/weapon_class_type.h"
+#include "sl/emulator/service/gamedata/skill/skill_effect_category.h"
 
 namespace sunlight
 {
-    // category
-    // 1: type -> damage?
-    // 2: type -> status effect
-    // 3: type -> stat
-    // 4: type -> weaponClassType, restriction
-    // 5: type -> summon
-    // 6: type -> special skill passive effect
     struct SkillEffectData
     {
-        int32_t category = 0;
+        SkillEffectCategory category = SkillEffectCategory::None;
         int32_t type = 0;
         int32_t value1 = 0;
         int32_t value2 = 0;
@@ -28,5 +23,25 @@ namespace sunlight
         int32_t hopType = 0;
         int32_t hopA = 0;
         int32_t hopB = 0;
+    };
+
+    struct SkillEffectWeaponCondition
+    {
+        static constexpr auto CATEGORY = SkillEffectCategory::WeaponCondition;
+
+        WeaponClassType weaponClass = WeaponClassType::None;
+    };
+
+    struct SkillEffectRangeWeaponCondition
+    {
+        static constexpr auto CATEGORY = SkillEffectCategory::WeaponCondition;
+    };
+
+    struct SkillEffectAttackProbabilityCondition
+    {
+        static constexpr auto CATEGORY = SkillEffectCategory::WeaponCondition;
+
+        int32_t probabilityPerLevel = 0; //value2
+        int32_t baseProbability = 0; // value3
     };
 }

@@ -233,6 +233,7 @@ namespace sunlight
         Get<SceneObjectSystem>().SpawnPlayer(player, enterType);
         Get<PlayerChannelSystem>().OnStageEnter(*player, enterType);
         Get<EntityStatusEffectSystem>().OnStageEnter(*player, enterType);
+        Get<PlayerSkillEffectSystem>().OnStageEnter(*player, enterType);
 
         GameDebugger::SetInstance(nullptr);
     }

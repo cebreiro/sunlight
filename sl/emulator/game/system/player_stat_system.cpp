@@ -34,6 +34,16 @@ namespace sunlight
         return true;
     }
 
+    auto PlayerStatSystem::GetName() const -> std::string_view
+    {
+        return "player_stat_system";
+    }
+
+    auto PlayerStatSystem::GetClassId() const -> game_system_id_type
+    {
+        return GameSystem::GetClassId<PlayerStatSystem>();
+    }
+
     void PlayerStatSystem::GainCharacterExp(GamePlayer& player, int32_t exp)
     {
         PlayerStatComponent& statComponent = player.GetStatComponent();
@@ -72,28 +82,6 @@ namespace sunlight
         {
             repositorySystem.SaveCharacterExp(player, statComponent.GetExp());
         }
-    }
-
-    auto PlayerStatSystem::GetName() const -> std::string_view
-    {
-        return "player_stat_system";
-    }
-
-    auto PlayerStatSystem::GetClassId() const -> game_system_id_type
-    {
-        return GameSystem::GetClassId<PlayerStatSystem>();
-    }
-
-    void PlayerStatSystem::AddItemStat(GamePlayer& player, const GameItem& item)
-    {
-        (void)player;
-        (void)item;
-    }
-
-    void PlayerStatSystem::RemoveItemStat(GamePlayer& player, const GameItem& item)
-    {
-        (void)player;
-        (void)item;
     }
 
     void PlayerStatSystem::RecoverHP(GamePlayer& player, HPChangeFloaterType floater)
@@ -146,7 +134,7 @@ namespace sunlight
             GamePlayerMessageCreator::CreateSPChange(player, maxSP, sp, floater), true);
     }
 
-    void PlayerStatSystem::OnInitialize(GamePlayer& player)
+    void PlayerStatSystem::UpdateStat(GamePlayer& player)
     {
         PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
         PlayerJobComponent& jobComponent = player.GetComponent<PlayerJobComponent>();
@@ -176,19 +164,28 @@ namespace sunlight
 
         const StatValue jobRecoveryHP = CalculateJobRecoveryHP(*data, statComponent);
         statComponent.SetJobReferenceStat(PlayerStatType::RecoveryRateHP, jobRecoveryHP);
-        statComponent.OnChangeRecoveryHP();
 
         const StatValue jobRecoverySP = CalculateJobRecoverySP(*data, statComponent);
         statComponent.SetJobReferenceStat(PlayerStatType::RecoveryRateSP, jobRecoverySP);
-        statComponent.OnChangeRecoverySP();
 
-        if (!statComponent.IsDead())
+        statComponent.SetRecoveryStateFactor(RecoveryStatType::HP, StatValue(0.2));
+        statComponent.SetRecoveryStateFactor(RecoveryStatType::SP, StatValue(0.25));
+
+        statComponent.OnChangeRecoveryHP();
+        statComponent.OnChangeRecoverySP();
+    }
+
+    void PlayerStatSystem::OnInitialize(GamePlayer& player)
+    {
+        UpdateStat(player);
+
+        if (PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
+            !statComponent.IsDead())
         {
             if (const double hp = statComponent.GetFinalStat(RecoveryStatType::HP).As<double>();
                 hp <= 0.0)
             {
                 statComponent.SetRecoveryStat(RecoveryStatType::HP,
-
                     statComponent.GetFinalStat(PlayerStatType::MaxHP));
             }
 
@@ -207,6 +204,50 @@ namespace sunlight
 
         statComponent.Resume(RecoveryStatType::HP);
         statComponent.Resume(RecoveryStatType::SP);
+    }
+
+    void PlayerStatSystem::OnStateChange(GamePlayer& player, GameEntityStateType oldState, GameEntityStateType newState)
+    {
+        // client 0x48C620
+        if (oldState == GameEntityStateType::Sitting && newState != GameEntityStateType::Sitting)
+        {
+            PlayerStatComponent& statComponent = player.GetStatComponent();
+
+            statComponent.SetRecoveryStateFactor(RecoveryStatType::HP, StatValue(0.2));
+            statComponent.SetRecoveryStateFactor(RecoveryStatType::SP, StatValue(0.25));
+
+            statComponent.OnChangeRecoveryHP();
+            statComponent.OnChangeRecoverySP();
+        }
+        else if (oldState != GameEntityStateType::Sitting && newState == GameEntityStateType::Sitting)
+        {
+            PlayerStatComponent& statComponent = player.GetStatComponent();
+
+            statComponent.SetRecoveryStateFactor(RecoveryStatType::HP, StatValue(1.0));
+            statComponent.SetRecoveryStateFactor(RecoveryStatType::SP, StatValue(1.0));
+
+            statComponent.OnChangeRecoveryHP();
+            statComponent.OnChangeRecoverySP();
+        }
+    }
+
+    void PlayerStatSystem::OnItemEquip(GamePlayer& player, const GameItem& item)
+    {
+        (void)player;
+        (void)item;
+    }
+
+    void PlayerStatSystem::OnItemUnequip(GamePlayer& player, const GameItem& item)
+    {
+        (void)player;
+        (void)item;
+    }
+
+    void PlayerStatSystem::OnItemEquipmentChange(GamePlayer& player, const GameItem& removed, const GameItem& added)
+    {
+        (void)player;
+        (void)removed;
+        (void)added;
     }
 
     void PlayerStatSystem::OnStatPointUse(const ZoneMessage& message)
@@ -247,13 +288,13 @@ namespace sunlight
         }
 
         statComponent.SetStatPoint(statComponent.GetStatPoint() - sum);
-        statComponent.AddBaseStat(PlayerStatType::Str, addStats[0]);
-        statComponent.AddBaseStat(PlayerStatType::Dex, addStats[1]);
-        statComponent.AddBaseStat(PlayerStatType::Accr, addStats[2]);
-        statComponent.AddBaseStat(PlayerStatType::Health, addStats[3]);
-        statComponent.AddBaseStat(PlayerStatType::Intell, addStats[4]);
-        statComponent.AddBaseStat(PlayerStatType::Wisdom, addStats[5]);
-        statComponent.AddBaseStat(PlayerStatType::Will, addStats[6]);
+        statComponent.AddStat(PlayerStatType::Str, StatOriginType::Base, addStats[0]);
+        statComponent.AddStat(PlayerStatType::Dex, StatOriginType::Base, addStats[1]);
+        statComponent.AddStat(PlayerStatType::Accr, StatOriginType::Base, addStats[2]);
+        statComponent.AddStat(PlayerStatType::Health, StatOriginType::Base, addStats[3]);
+        statComponent.AddStat(PlayerStatType::Intell, StatOriginType::Base, addStats[4]);
+        statComponent.AddStat(PlayerStatType::Wisdom, StatOriginType::Base, addStats[5]);
+        statComponent.AddStat(PlayerStatType::Will, StatOriginType::Base, addStats[6]);
 
         Get<GameRepositorySystem>().SaveStat(player,
             statComponent.GetStatPoint(),

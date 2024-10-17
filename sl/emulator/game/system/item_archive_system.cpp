@@ -1423,7 +1423,7 @@ namespace sunlight
         }
 
         Get<PlayerAppearanceSystem>().UpdateEquipmentAppearance(player);
-        Get<PlayerStatSystem>().RemoveItemStat(player, *itemComponent.GetEquipmentItem(position));
+        Get<PlayerStatSystem>().OnItemUnequip(player, *itemComponent.GetPickedItem());
 
         Get<EntityViewRangeSystem>().VisitPlayer(player,
             [&](GamePlayer& other)
@@ -1491,10 +1491,7 @@ namespace sunlight
                 return false;
             }
 
-            PlayerStatSystem& playerStatUpdateSystem = Get<PlayerStatSystem>();
-
-            playerStatUpdateSystem.RemoveItemStat(player, *itemComponent.GetPickedItem());
-            playerStatUpdateSystem.AddItemStat(player, *itemComponent.GetEquipmentItem(position));
+            Get<PlayerStatSystem>().OnItemEquipmentChange(player, *itemComponent.GetPickedItem(), *itemComponent.GetEquipmentItem(position));
         }
         else
         {
@@ -1505,7 +1502,7 @@ namespace sunlight
                 return false;
             }
 
-            Get<PlayerStatSystem>().AddItemStat(player, *itemComponent.GetEquipmentItem(position));
+            Get<PlayerStatSystem>().OnItemEquip(player, *itemComponent.GetEquipmentItem(position));
         }
 
         Get<PlayerAppearanceSystem>().UpdateEquipmentAppearance(player);

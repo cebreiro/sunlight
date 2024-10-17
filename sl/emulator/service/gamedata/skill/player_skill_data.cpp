@@ -64,11 +64,9 @@ namespace sunlight
         result.chargingDelay = data.chargingDelay;
         result.damageMotionType = data.damageMotionType;
         {
-            result.effects.reserve(4);
-
-            std::initializer_list<SkillEffectData> list{
+            const std::initializer_list<SkillEffectData> list{
                 {
-                    data.effect1, data.effect1Type,
+                    static_cast<SkillEffectCategory>(data.effect1), data.effect1Type,
                     data.effect1Reserved1, data.effect1Reserved2, data.effect1Reserved3,
                     data.effect1Reserved4, data.effect1Reserved5, data.effect1Reserved6,
                     data.effect1Reserved7, data.effect1Reserved8, data.effect1Reserved9,
@@ -76,7 +74,7 @@ namespace sunlight
                     data.effect1HopType, data.effect1HopA, data.effect1HopB,
                 },
                 {
-                    data.effect2, data.effect2Type,
+                    static_cast<SkillEffectCategory>(data.effect2), data.effect2Type,
                     data.effect2Reserved1, data.effect2Reserved2, data.effect2Reserved3,
                     data.effect2Reserved4, data.effect2Reserved5, data.effect2Reserved6,
                     data.effect2Reserved7, data.effect2Reserved8, data.effect2Reserved9,
@@ -84,7 +82,7 @@ namespace sunlight
                     data.effect2HopType, data.effect2HopA, data.effect2HopB,
                 },
                 {
-                    data.effect3, data.effect3Type,
+                    static_cast<SkillEffectCategory>(data.effect3), data.effect3Type,
                     data.effect3Reserved1, data.effect3Reserved2, data.effect3Reserved3,
                     data.effect3Reserved4, data.effect3Reserved5, data.effect3Reserved6,
                     data.effect3Reserved7, data.effect3Reserved8, data.effect3Reserved9,
@@ -92,7 +90,7 @@ namespace sunlight
                     data.effect3HopType, data.effect3HopA, data.effect3HopB,
                 },
                 {
-                    data.effect4, data.effect4Type,
+                    static_cast<SkillEffectCategory>(data.effect4), data.effect4Type,
                     data.effect4Reserved1, data.effect4Reserved2, data.effect4Reserved3,
                     data.effect4Reserved4, data.effect4Reserved5, data.effect4Reserved6,
                     data.effect4Reserved7, data.effect4Reserved8, data.effect4Reserved9,
@@ -101,35 +99,32 @@ namespace sunlight
                 }
             };
 
-            for (const auto& temp : list)
+            for (const SkillEffectData& skillEffectData : list)
             {
-                SkillEffectData& effect = result.effects.emplace_back(temp);
+                if (skillEffectData.category == SkillEffectCategory::None)
+                {
+                    continue;
+                }
 
-                if (effect.category == 1)
+                if (skillEffectData.category == SkillEffectCategory::WeaponCondition)
                 {
-                    result.damage = PlayerSkillEffectDamage(effect);
-                }
-                else if (effect.category == 2)
-                {
-                    result.statusEffects.emplace_back(effect);
-                }
-                else if (effect.category == 3)
-                {
-                    result.passiveStat = PlayerSkillEffectPassiveStat(effect);
-                }
-                else if (effect.category == 4)
-                {
-                    if (effect.category == 2)
+                    if (skillEffectData.type == 1)
                     {
-                        result.attackProbability = PlayerSkillEffectAttackProbability(effect.value3);
+                        result.effectRangeWeaponCondition.emplace();
+                    }
+                    else if (skillEffectData.type == 2)
+                    {
+                        result.effectAttackProbabilityCondition.emplace(skillEffectData.value2, skillEffectData.value3);
                     }
                     else
                     {
-                        result.weaponClassRestriction = PlayerSkillEffectWeaponClassRestriction(effect.type);
+                        result.effectWeaponClassCondition.emplace(static_cast<WeaponClassType>(skillEffectData.type));
                     }
                 }
-                // TODO: 5 -> summon
-                // TODO: 6 -> weapon combo, casting, etc...
+                else
+                {
+                    result.effects.emplace_back(skillEffectData);
+                }
             }
         }
 

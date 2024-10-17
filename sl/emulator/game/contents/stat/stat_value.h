@@ -29,7 +29,7 @@ namespace sunlight
 		bool operator>=(const StatValue& other) const;
 
 		template <typename T> requires std::is_arithmetic_v<T>
-		auto As() -> T
+		auto As() const -> T
 		{
 			return static_cast<T>(_value);
 		}

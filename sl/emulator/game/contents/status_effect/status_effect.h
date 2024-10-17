@@ -4,7 +4,7 @@
 
 namespace sunlight
 {
-    class SkillEffectStatusEffect;
+    struct SkillEffectData;
 }
 
 namespace sunlight
@@ -13,7 +13,7 @@ namespace sunlight
     {
     public:
         StatusEffect() = default;
-        StatusEffect(int32_t skillId, int32_t skillLevel, const SkillEffectStatusEffect& skillEffectData,
+        StatusEffect(int32_t skillId, int32_t skillLevel, const SkillEffectData& skillEffectData,
             game_time_point_type now, std::chrono::milliseconds duration);
 
         bool IsHidden() const;
@@ -25,7 +25,7 @@ namespace sunlight
         auto GetEndTimePoint() const -> game_time_point_type;
         auto GetLastTickTimePoint() const -> game_time_point_type;
         auto GetNextTickTimePoint() const -> game_time_point_type;
-        auto GetData() const -> const SkillEffectStatusEffect&;
+        auto GetData() const -> const SkillEffectData&;
 
         auto GetStatType() const -> int32_t;
         auto GetStatValue() const -> int32_t;
@@ -46,6 +46,6 @@ namespace sunlight
         game_time_point_type _lastTickTimePoint = {};
         game_time_point_type _nextTickTimePoint = {};
 
-        PtrNotNull<const SkillEffectStatusEffect> _skillEffectData = nullptr;
+        PtrNotNull<const SkillEffectData> _skillEffectData = nullptr;
     };
 }

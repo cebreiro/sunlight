@@ -4,10 +4,11 @@
 #include "sl/emulator/game/system/game_system.h"
 #include "sl/emulator/game/zone/stage_enter_type.h"
 #include "sl/emulator/game/zone/stage_exit_type.h"
-#include "sl/emulator/service/gamedata/skill/player_skill_effect_data.h"
 
 namespace sunlight
 {
+    struct SkillEffectData;
+
     class GameEntity;
     class GamePlayer;
 }
@@ -32,8 +33,7 @@ namespace sunlight
 
     public:
         void AddStatusEffectBySkill(int32_t skillId, int32_t skillLevel,
-            std::span<PtrNotNull<GameEntity>> targets,
-            std::span<const SkillEffectStatusEffect> statusEffectDataList);
+            std::span<PtrNotNull<GameEntity>> targets, const SkillEffectData& skillEffectData);
 
         bool RemoveStatusEffect(GameEntity& entity, int32_t statusEffectId);
 

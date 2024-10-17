@@ -9,6 +9,7 @@
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
 namespace sunlight
 {
@@ -117,61 +118,65 @@ namespace sunlight
     }
 
     void EntityStatusEffectSystem::AddStatusEffectBySkill(int32_t skillId, int32_t skillLevel,
-        std::span<PtrNotNull<GameEntity>> targets, std::span<const SkillEffectStatusEffect> statusEffectDataList)
+        std::span<PtrNotNull<GameEntity>> targets, const SkillEffectData& skillEffectData)
     {
+        if (skillEffectData.category != SkillEffectCategory::StatusEffect)
+        {
+            assert(false);
+
+            return;
+        }
+
         const game_time_point_type now = GameTimeService::Now();
 
         EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
 
-        for (const SkillEffectStatusEffect& statusEffectData : statusEffectDataList)
+        const int32_t durationMilli = skillEffectData.value4 + skillEffectData.value3 * skillLevel;
+        StatusEffect statusEffect(skillId, skillLevel, skillEffectData, now, std::chrono::milliseconds(durationMilli));
+
+        const IStatusEffectApplyHandler* applyHandler = GetApplyHandler(statusEffect.GetType());
+        const IStatusEffectTickHandler* tickHandler = GetTickHandler(statusEffect.GetType());
+
+        for (GameEntity& entity : targets | notnull::reference)
         {
-            const int32_t durationMilli = statusEffectData.GetBaseDuration() + statusEffectData.GetDurationPerSkillLevel() * skillLevel;
-            StatusEffect statusEffect(skillId, skillLevel, statusEffectData, now, std::chrono::milliseconds(durationMilli));
+            EntityStatusEffectComponent& statusEffectComponent = entity.GetComponent<EntityStatusEffectComponent>();
+            std::optional<StatusEffect> prevStatusEffect = std::nullopt;
 
-            const IStatusEffectApplyHandler* applyHandler = GetApplyHandler(statusEffect.GetType());
-            const IStatusEffectTickHandler* tickHandler = GetTickHandler(statusEffect.GetType());
-
-            for (GameEntity& entity : targets | notnull::reference)
+            if (StatusEffect* prevStatusEffectPtr = statusEffectComponent.Find(statusEffect.GetId());
+                prevStatusEffectPtr)
             {
-                EntityStatusEffectComponent& statusEffectComponent = entity.GetComponent<EntityStatusEffectComponent>();
-                std::optional<StatusEffect> prevStatusEffect = std::nullopt;
+                ClearStatusEffect(entity, *prevStatusEffectPtr);
 
-                if (StatusEffect* prevStatusEffectPtr = statusEffectComponent.Find(statusEffect.GetId());
-                    prevStatusEffectPtr)
+                prevStatusEffect = statusEffectComponent.Release(statusEffect.GetId());
+            }
+
+            if (applyHandler)
+            {
+                applyHandler->Apply(entity, statusEffect);
+            }
+
+            viewRangeSystem.VisitPlayer(entity, [&](GamePlayer& player)
+            {
+                if (prevStatusEffect.has_value())
                 {
-                    ClearStatusEffect(entity, *prevStatusEffectPtr);
-
-                    prevStatusEffect = statusEffectComponent.Release(statusEffect.GetId());
+                    player.Defer(StatusMessageCreator::CreateStatusEffectRemove(entity, *prevStatusEffect));
                 }
 
-                if (applyHandler)
+                player.Defer(StatusMessageCreator::CreateStatusEffectAdd(entity, statusEffect));
+                player.FlushDeferred();
+            });
+
+            if (durationMilli > 0)
+            {
+                StatusEffect* addStatusEffectPtr = statusEffectComponent.Add(statusEffect);
+                assert(addStatusEffectPtr);
+
+                if (tickHandler)
                 {
-                    applyHandler->Apply(entity, statusEffect);
+                    _tickStatusEffects[&entity].push_back(addStatusEffectPtr);
                 }
 
-                viewRangeSystem.VisitPlayer(entity, [&](GamePlayer& player)
-                    {
-                        if (prevStatusEffect.has_value())
-                        {
-                            player.Defer(StatusMessageCreator::CreateStatusEffectRemove(entity, *prevStatusEffect));
-                        }
-
-                        player.Defer(StatusMessageCreator::CreateStatusEffectAdd(entity, statusEffect));
-                        player.FlushDeferred();
-                    });
-
-                if (durationMilli > 0)
-                {
-                    StatusEffect* addStatusEffectPtr = statusEffectComponent.Add(statusEffect);
-                    assert(addStatusEffectPtr);
-
-                    if (tickHandler)
-                    {
-                        _tickStatusEffects[&entity].push_back(addStatusEffectPtr);
-                    }
-
-                    AddStatusEffectRemoveTimer(entity, *addStatusEffectPtr);
-                }
+                AddStatusEffectRemoveTimer(entity, *addStatusEffectPtr);
             }
         }
     }

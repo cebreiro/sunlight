@@ -1,6 +1,7 @@
 #include "game_player.h"
 
 #include "sl/emulator/game/component/entity_movement_component.h"
+#include "sl/emulator/game/component/entity_passive_effect_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/entity_status_effect_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
@@ -17,6 +18,7 @@
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/item/equipment_position.h"
+#include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/game/message/creator/chat_message_creator.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -125,7 +127,7 @@ namespace sunlight
                 playerSkill.SetY(dtoSkill.y);
                 playerSkill.SetEXP(dtoSkill.exp);
 
-                if (!result->AddSkill(playerSkill))
+                if (!result->AddSkill(std::move(playerSkill)))
                 {
                     throw std::runtime_error(fmt::format("fail to add player_skill. skill_id: {}", dtoSkill.id));
                 }
@@ -205,6 +207,7 @@ namespace sunlight
         (void)AddComponent(std::make_unique<PlayerPartyComponent>());
         (void)AddComponent(std::make_unique<EntityStatusEffectComponent>());
         (void)AddComponent(std::make_unique<PlayerDebugComponent>());
+        (void)AddComponent(std::make_unique<EntityPassiveEffectComponent>());
     }
 
     bool GamePlayer::HasDeferred() const
@@ -456,5 +459,15 @@ namespace sunlight
     auto GamePlayer::GetDebugComponent() const -> const PlayerDebugComponent&
     {
         return GetComponent<PlayerDebugComponent>();
+    }
+
+    auto GamePlayer::GetPassiveEffectComponent() -> EntityPassiveEffectComponent&
+    {
+        return GetComponent<EntityPassiveEffectComponent>();
+    }
+
+    auto GamePlayer::GetPassiveEffectComponent() const -> const EntityPassiveEffectComponent&
+    {
+        return GetComponent<EntityPassiveEffectComponent>();
     }
 }

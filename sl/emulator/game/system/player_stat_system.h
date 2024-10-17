@@ -2,6 +2,7 @@
 #include "sl/emulator/game/contents/stat/hp_change_floater_type.h"
 #include "sl/emulator/game/contents/stat/sp_change_floater_type.h"
 #include "sl/emulator/game/contents/stat/stat_value.h"
+#include "sl/emulator/game/contents/state/game_entity_state_type.h"
 #include "sl/emulator/game/system/game_system.h"
 
 namespace sunlight::sox
@@ -12,6 +13,7 @@ namespace sunlight::sox
 namespace sunlight
 {
     struct ZoneMessage;
+    class PlayerSkill;
 
     class GameItem;
     class GamePlayer;
@@ -28,14 +30,11 @@ namespace sunlight
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
 
-        void GainCharacterExp(GamePlayer& player, int32_t exp);
-
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        void AddItemStat(GamePlayer& player, const GameItem& item);
-        void RemoveItemStat(GamePlayer& player, const GameItem& item);
+        void GainCharacterExp(GamePlayer& player, int32_t exp);
 
         void RecoverHP(GamePlayer& player, HPChangeFloaterType floater);
         void RecoverSP(GamePlayer& player, SPChangeFloaterType floater);
@@ -44,8 +43,17 @@ namespace sunlight
         void SetSP(GamePlayer& player, int32_t value, SPChangeFloaterType floater);
 
     public:
+        void UpdateStat(GamePlayer& player);
+
+    public:
         void OnInitialize(GamePlayer& player);
         void OnLocalActivate(GamePlayer& player);
+        void OnStateChange(GamePlayer& player, GameEntityStateType oldState, GameEntityStateType newState);
+
+        void OnItemEquip(GamePlayer& player, const GameItem& item);
+        void OnItemUnequip(GamePlayer& player, const GameItem& item);
+        void OnItemEquipmentChange(GamePlayer& player, const GameItem& removed, const GameItem& added);
+
         void OnStatPointUse(const ZoneMessage& message);
 
     private:

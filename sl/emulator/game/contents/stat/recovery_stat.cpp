@@ -42,6 +42,11 @@ namespace sunlight
         return _value;
     }
 
+    auto RecoveryStat::GetRegenStateFactor() const -> StatValue
+    {
+        return _regenStateFactor;
+    }
+
     auto RecoveryStat::GetMaxValue() const -> StatValue
     {
         return _maxValue;
@@ -60,6 +65,11 @@ namespace sunlight
     void RecoveryStat::SetRegenValue(StatValue value)
     {
         _regenValue = value;
+    }
+
+    void RecoveryStat::SetRegenStateFactor(StatValue value)
+    {
+        _regenStateFactor = value;
     }
 
     void RecoveryStat::SetMinValue(StatValue value)

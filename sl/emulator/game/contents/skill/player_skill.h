@@ -4,6 +4,8 @@
 namespace sunlight
 {
     struct PlayerSkillData;
+
+    class Passive;
 }
 
 namespace sunlight
@@ -12,7 +14,17 @@ namespace sunlight
     {
     public:
         PlayerSkill() = default;
+        PlayerSkill(PlayerSkill&& other) noexcept = default;
+        PlayerSkill& operator=(PlayerSkill&& other) noexcept = default;
+
+        PlayerSkill(const PlayerSkill& other) = delete;
+        PlayerSkill& operator=(const PlayerSkill& other) = delete;
+
+    public:
         PlayerSkill(JobId id ,PtrNotNull<const PlayerSkillData> data);
+        ~PlayerSkill();
+
+        bool HasPassive() const;
 
         auto GetId() const -> int32_t;
         auto GetJobId() const -> JobId;
@@ -25,6 +37,8 @@ namespace sunlight
         auto GetY() const -> int8_t;
         auto GetEXP() const -> int32_t;
         auto GetData() const -> const PlayerSkillData&;
+        auto GetPassive() -> Passive&;
+        auto GetPassive() const -> const Passive&;
 
         void SetBaseLevel(int32_t value);
         void SetAdditionalLevel(int32_t value);
@@ -33,6 +47,7 @@ namespace sunlight
         void SetX(int8_t value);
         void SetY(int8_t value);
         void SetEXP(int32_t value);
+        void SetPassive(UniquePtrNotNull<Passive> passive);
 
     private:
         JobId _jobId = JobId::None;
@@ -45,5 +60,6 @@ namespace sunlight
         int32_t _exp = 0;
 
         PtrNotNull<const PlayerSkillData> _data = nullptr;
+        UniquePtrNotNull<Passive> _passive;
     };
 }

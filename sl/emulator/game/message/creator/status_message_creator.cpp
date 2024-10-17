@@ -7,8 +7,6 @@
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/server/packet/zone_packet_s2c.h"
 #include "sl/emulator/server/packet/io/sl_packet_writer.h"
-#include "sl/emulator/service/gamedata/skill/player_skill_effect_data.h"
-#include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
 namespace sunlight
 {

@@ -1,15 +1,16 @@
 #include "status_effect.h"
 
-#include "sl/emulator/service/gamedata/skill/player_skill_effect_data.h"
+#include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
+
 
 namespace sunlight
 {
-    StatusEffect::StatusEffect(int32_t skillId, int32_t skillLevel, const SkillEffectStatusEffect& skillEffectData,
+    StatusEffect::StatusEffect(int32_t skillId, int32_t skillLevel, const SkillEffectData& skillEffectData,
         game_time_point_type now, std::chrono::milliseconds duration)
         : _skillId(skillId)
         , _skillLevel(skillLevel)
-        , _type(skillEffectData.GetType())
-        , _id(skillEffectData.GetId())
+        , _type(static_cast<StatusEffectType>(skillEffectData.type))
+        , _id(skillEffectData.value5)
         , _endTimePoint(now + duration)
         , _lastTickTimePoint(now)
         , _skillEffectData(&skillEffectData)
@@ -56,7 +57,7 @@ namespace sunlight
         return _nextTickTimePoint;
     }
 
-    auto StatusEffect::GetData() const -> const SkillEffectStatusEffect&
+    auto StatusEffect::GetData() const -> const SkillEffectData&
     {
         assert(_skillEffectData);
 
@@ -67,7 +68,7 @@ namespace sunlight
     {
         if (_type == StatusEffectType::StatIncrease || _type == StatusEffectType::Heal)
         {
-            return GetData().GetRawData().value7;
+            return GetData().value7;
         }
 
         return 0;
@@ -77,9 +78,9 @@ namespace sunlight
     {
         if (_type == StatusEffectType::StatIncrease || _type == StatusEffectType::Heal)
         {
-            const SkillEffectStatusEffect& data = GetData();
+            const SkillEffectData& data = GetData();
 
-            return data.GetBaseValue() + data.GetValuePerSkillLevel() * GetSkillLevel() + data.GetRawData().value8;
+            return data.value2 + data.value1 * GetSkillLevel() + data.value8;
         }
 
         return 0;
@@ -89,7 +90,7 @@ namespace sunlight
     {
         if (_type == StatusEffectType::StatIncrease || _type == StatusEffectType::Heal)
         {
-            return GetData().GetRawData().value9;
+            return GetData().value9;
         }
 
         return 0;

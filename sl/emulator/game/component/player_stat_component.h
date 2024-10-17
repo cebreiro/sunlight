@@ -27,7 +27,7 @@ namespace sunlight
         void Suspend(RecoveryStatType type);
         void Resume(RecoveryStatType type);
 
-        void AddBaseStat(PlayerStatType type, StatValue value);
+        void AddStat(PlayerStatType type, StatOriginType origin, StatValue value);
 
         void OnChangeMaxHP();
         void OnChangeMaxSP();
@@ -48,6 +48,7 @@ namespace sunlight
         void SetRecoveryTimePoint(RecoveryStatType type, game_time_point_type timePoint);
         void SetJobReferenceStat(PlayerStatType type, StatValue value);
         void SetRecoveryStat(RecoveryStatType type, StatValue value);
+        void SetRecoveryStateFactor(RecoveryStatType type, StatValue value);
 
         void SetLevel(int32_t level);
         void SetExp(int32_t exp);
@@ -56,7 +57,7 @@ namespace sunlight
     private:
         void UpdateFinalStat(PlayerStatType type);
 
-        auto CalculateStatSum(PlayerStatType type) const -> StatValue;
+        auto CalculateStat(PlayerStatType type, bool includePassive = true) const -> StatValue;
 
         auto Mutable(RecoveryStatType type) -> RecoveryStat&;
         auto Mutable(PlayerStatType type) -> Stat&;
