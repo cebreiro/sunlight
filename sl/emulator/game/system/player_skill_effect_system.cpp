@@ -270,12 +270,12 @@ namespace sunlight
         }
     }
 
-    bool PlayerSkillEffectSystem::Apply(GamePlayer& player, const IPassiveEffect& passiveEffect, int32_t skillLevel) const
+    bool PlayerSkillEffectSystem::Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
     {
         const PassiveEffectType type = passiveEffect.GetType();
         if (type == PassiveEffectType::Stat)
         {
-            const PassiveEffectStat* statEffect = Cast<PassiveEffectStat>(passiveEffect);
+            PassiveEffectStat* statEffect = Cast<PassiveEffectStat>(passiveEffect);
             assert(statEffect);
 
             if (const auto statType = static_cast<PlayerStatType>(statEffect->GetStatType());
@@ -291,8 +291,13 @@ namespace sunlight
                 const int32_t fixedValue = data.value2 + skillLevel * data.value1;
                 double percentageValue = (data.value4 + skillLevel * data.value3) / 100.0;
 
-                player.GetStatComponent().AddStat(statType, StatOriginType::SkillPassive, fixedValue);
-                player.GetStatComponent().AddStat(statType, StatOriginType::SkillPassivePercentage, percentageValue);
+                PlayerStatComponent& statComponent = player.GetStatComponent();
+
+                statComponent.AddStat(statType, StatOriginType::SkillPassive, fixedValue);
+                statComponent.AddStat(statType, StatOriginType::SkillPassivePercentage, percentageValue);
+
+                statEffect->SetStatValue(fixedValue);
+                statEffect->SetStatPercentageValue(percentageValue);
             }
 
             return true;
@@ -301,20 +306,26 @@ namespace sunlight
         return false;
     }
 
-    bool PlayerSkillEffectSystem::Revert(GamePlayer& player, const IPassiveEffect& passiveEffect, int32_t skillLevel) const
+    bool PlayerSkillEffectSystem::Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
     {
+        (void)skillLevel;
+
         const PassiveEffectType type = passiveEffect.GetType();
         if (type == PassiveEffectType::Stat)
         {
-            const PassiveEffectStat* statEffect = Cast<PassiveEffectStat>(passiveEffect);
+            PassiveEffectStat* statEffect = Cast<PassiveEffectStat>(passiveEffect);
             assert(statEffect);
 
             if (const auto statType = static_cast<PlayerStatType>(statEffect->GetStatType());
                 IsValid(statType))
             {
-                (void)player;
-                (void)skillLevel;
-                //player.GetStatComponent().AddStat(statType, StatOriginType::SkillPassive, -statEffect->GetValue(skillLevel));
+                PlayerStatComponent& statComponent = player.GetStatComponent();
+
+                statComponent.AddStat(statType, StatOriginType::SkillPassive, -statEffect->GetStatValue());
+                statComponent.AddStat(statType, StatOriginType::SkillPassivePercentage, -statEffect->GetStatPercentageValue());
+
+                statEffect->SetStatValue(0);
+                statEffect->SetStatPercentageValue(0.0);
             }
 
             return true;

@@ -37,6 +37,7 @@ namespace sunlight
         static constexpr auto CATEGORY = SkillEffectCategory::WeaponCondition;
     };
 
+    // client 0x4B14F0
     struct SkillEffectAttackProbabilityCondition
     {
         static constexpr auto CATEGORY = SkillEffectCategory::WeaponCondition;

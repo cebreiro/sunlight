@@ -19,7 +19,16 @@ namespace sunlight
         auto GetData() const -> const SkillEffectData&;
         auto GetStatType() const -> int32_t;
 
+        auto GetStatValue() const -> int32_t;
+        auto GetStatPercentageValue() const -> double;
+
+        void SetStatValue(int32_t value);
+        void SetStatPercentageValue(double value);
+
     private:
         const SkillEffectData& _data;
+
+        int32_t _statValue = 0;
+        double _statPercentageValue = 0.0;
     };
 }
