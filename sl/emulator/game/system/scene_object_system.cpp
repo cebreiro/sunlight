@@ -113,6 +113,8 @@ namespace sunlight
         break;
         }
 
+        player->Defer(ZonePacketS2CCreator::CreateObjectVisibleRange(1400.f));
+
         EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
 
         viewRangeSystem.VisitEntity(sceneObjectComponent.GetPosition(),
@@ -475,7 +477,6 @@ namespace sunlight
     {
         GamePlayer& player = message.player;
 
-        player.Defer(ZonePacketS2CCreator::CreateObjectVisibleRange(1000.f));
         player.Defer(GamePlayerMessageCreator::CreateAllState(player));
         player.Defer(GamePlayerMessageCreator::CreateQuestAllState(player));
         player.FlushDeferred();
