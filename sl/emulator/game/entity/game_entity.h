@@ -95,7 +95,7 @@ namespace sunlight
     {
         if (_type == T::TYPE)
         {
-            const T* result = static_cast<T*>(this);
+            const T* result = static_cast<const T*>(this);
             assert(result == dynamic_cast<const T*>(this));
 
             return result;
