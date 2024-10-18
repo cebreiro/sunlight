@@ -34,6 +34,8 @@ namespace sunlight
 			return static_cast<T>(_value);
 		}
 
+        static auto Zero() -> StatValue;
+
 	private:
         value_type _value = {};
 	};

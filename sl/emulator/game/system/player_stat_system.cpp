@@ -134,7 +134,7 @@ namespace sunlight
             GamePlayerMessageCreator::CreateSPChange(player, maxSP, sp, floater), true);
     }
 
-    void PlayerStatSystem::UpdateStat(GamePlayer& player)
+    void PlayerStatSystem::UpdateJobStat(GamePlayer& player)
     {
         PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
         PlayerJobComponent& jobComponent = player.GetComponent<PlayerJobComponent>();
@@ -168,19 +168,36 @@ namespace sunlight
         const StatValue jobRecoverySP = CalculateJobRecoverySP(*data, statComponent);
         statComponent.SetJobReferenceStat(PlayerStatType::RecoveryRateSP, jobRecoverySP);
 
-        statComponent.SetRecoveryStateFactor(RecoveryStatType::HP, StatValue(0.2));
-        statComponent.SetRecoveryStateFactor(RecoveryStatType::SP, StatValue(0.25));
-
         statComponent.OnChangeRecoveryHP();
         statComponent.OnChangeRecoverySP();
     }
 
+    void PlayerStatSystem::UpdateRegenStat(GamePlayer& player)
+    {
+        PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
+
+        if (statComponent.IsStatChanged(PlayerStatType::RecoveryRateHP))
+        {
+            statComponent.OnChangeRecoveryHP();
+        }
+
+        if (statComponent.IsStatChanged(PlayerStatType::RecoveryRateSP))
+        {
+            statComponent.OnChangeRecoverySP();
+        }
+    }
+
     void PlayerStatSystem::OnInitialize(GamePlayer& player)
     {
-        UpdateStat(player);
+        UpdateJobStat(player);
 
-        if (PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
-            !statComponent.IsDead())
+        PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();
+
+        statComponent.SetRecoveryStateFactor(RecoveryStatType::HP, StatValue(0.2));
+        statComponent.SetRecoveryStateFactor(RecoveryStatType::SP, StatValue(0.25));
+        UpdateRegenStat(player);
+
+        if (!statComponent.IsDead())
         {
             if (const double hp = statComponent.GetFinalStat(RecoveryStatType::HP).As<double>();
                 hp <= 0.0)

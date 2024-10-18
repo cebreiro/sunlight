@@ -7,6 +7,8 @@ namespace sunlight
     class StatusEffect;
 
     class GameEntity;
+
+    class EntityStatusEffectSystem;
 }
 
 namespace sunlight
@@ -24,7 +26,7 @@ namespace sunlight
     public:
         virtual ~IStatusEffectApplyHandler() = default;
 
-        virtual void Apply(GameEntity& entity, StatusEffect& statusEffect) const = 0;
+        virtual void Apply(EntityStatusEffectSystem& system, GameEntity& entity, StatusEffect& statusEffect) const = 0;
     };
 
     class IStatusEffectRevertHandler
@@ -32,7 +34,7 @@ namespace sunlight
     public:
         virtual ~IStatusEffectRevertHandler() = default;
 
-        virtual void Revert(GameEntity& entity, StatusEffect& statusEffect) const = 0;
+        virtual void Revert(EntityStatusEffectSystem& system, GameEntity& entity, StatusEffect& statusEffect) const = 0;
     };
 
     class IStatusEffectTickHandler
@@ -40,6 +42,6 @@ namespace sunlight
     public:
         virtual ~IStatusEffectTickHandler() = default;
 
-        virtual void Tick(GameEntity& entity, StatusEffect& statusEffect) const = 0;
+        virtual void Tick(EntityStatusEffectSystem& system, GameEntity& entity, StatusEffect& statusEffect) const = 0;
     };
 }

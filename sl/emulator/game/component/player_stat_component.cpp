@@ -56,6 +56,11 @@ namespace sunlight
         return _dead;
     }
 
+    bool PlayerStatComponent::IsStatChanged(PlayerStatType type) const
+    {
+        return Get(type).HasChanges();
+    }
+
     void PlayerStatComponent::Suspend(RecoveryStatType type)
     {
         Mutable(type).SetDisable(true);
@@ -215,7 +220,7 @@ namespace sunlight
         stat.SetFinalValue(CalculateStat(type));
     }
 
-    auto PlayerStatComponent::CalculateStat(PlayerStatType type, bool includePassive) const -> StatValue
+    auto PlayerStatComponent::CalculateStat(PlayerStatType type, bool includePassive, bool includeStatusEffect) const -> StatValue
     {
         const Stat& stat = Get(type);
 
@@ -246,25 +251,48 @@ namespace sunlight
 
         const StatValue base = stat.Get(StatOriginType::Base);
         const StatValue item = stat.Get(StatOriginType::Item);
-        const StatValue statusEffect = stat.Get(StatOriginType::StatusEffect);
-        const StatValue statusEffectPercentage = stat.Get(StatOriginType::StatusEffectPercentage);;
+        const StatValue itemPercentage = stat.Get(StatOriginType::ItemPercentage);
         const StatValue jobReference = stat.Get(StatOriginType::JobReference);
-        StatValue passive = StatValue(0);
+        StatValue passive = StatValue::Zero();
+        StatValue statusEffect = StatValue::Zero();
 
         if (includePassive)
         {
             // client 0x4B0280
             // passive effect specialization
 
-            const StatValue percentage = CalculateStat(type, false) * stat.Get(StatOriginType::SkillPassivePercentage);
+            StatValue percentage = {};
+
+            if (const StatValue passivePercentage = stat.Get(StatOriginType::SkillPassivePercentage);
+                passivePercentage != StatValue::Zero())
+            {
+                percentage = CalculateStat(type, false, true) * passivePercentage;
+            }
 
             passive = stat.Get(StatOriginType::SkillPassive) + static_cast<int32_t>(std::round(percentage.As<double>()));
         }
 
+        if (includeStatusEffect)
+        {
+            // client 0x4B47A3
+            // status effect specialization
+
+            StatValue percentage = {};
+
+            if (const StatValue statusEffectPercentage = stat.Get(StatOriginType::StatusEffectPercentage);
+                statusEffectPercentage != StatValue::Zero())
+            {
+                percentage = CalculateStat(type, true, false) * statusEffectPercentage;
+            }
+
+            statusEffect = stat.Get(StatOriginType::StatusEffect) + percentage;
+        }
+
+
         // client 0x48554A maybe_GetFinalStat
 
         const StatValue sum = base + item + statusEffect + passive;
-        const StatValue percentage = base * statusEffectPercentage;
+        const StatValue percentage = base * itemPercentage;
 
         const StatValue result = sum + percentage + allStat + jobReference;
 

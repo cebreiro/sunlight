@@ -72,7 +72,7 @@ namespace sunlight
             OnSkillAdd(player, skill);
         }
 
-        Get<PlayerStatSystem>().UpdateStat(player);
+        Get<PlayerStatSystem>().UpdateRegenStat(player);
     }
 
     void PlayerSkillEffectSystem::OnSkillAdd(GamePlayer& player, PlayerSkill& skill)
@@ -119,8 +119,6 @@ namespace sunlight
             ? static_cast<WeaponClassType>(weaponItem->GetData().GetWeaponData()->weaponClass)
             : WeaponClassType::None;
 
-        bool applied = false;
-
         if (passive->CanBeActivatedBy(weaponClass))
         {
             passive->SetActive(true);
@@ -129,18 +127,14 @@ namespace sunlight
 
             for (IPassiveEffect& effect : passive->GetEffectRange())
             {
-                applied |= Apply(player, effect, skill.GetLevel());
+                Apply(player, effect, skill.GetLevel());
 
                 passiveEffectComponent.AddEffect(skill.GetId(), &effect);
             }
         }
 
         skill.SetPassive(std::move(passive));
-
-        if (applied)
-        {
-            Get<PlayerStatSystem>().UpdateStat(player);
-        }
+        Get<PlayerStatSystem>().UpdateRegenStat(player);
     }
 
     void PlayerSkillEffectSystem::OnSkillLevelChange(GamePlayer& player, const PlayerSkill& skill, int32_t oldLevel, int32_t newLevel)
@@ -156,18 +150,13 @@ namespace sunlight
             return;
         }
 
-        bool applied = false;
-
         for (IPassiveEffect& effect : passive.GetEffectRange())
         {
-            applied |= Revert(player, effect, oldLevel);
-            applied |= Apply(player, effect, newLevel);
+            Revert(player, effect, oldLevel);
+            Apply(player, effect, newLevel);
         }
 
-        if (applied)
-        {
-            Get<PlayerStatSystem>().UpdateStat(player);
-        }
+        Get<PlayerStatSystem>().UpdateRegenStat(player);
     }
 
     void PlayerSkillEffectSystem::OnMainWeaponChange(GamePlayer& player)
@@ -270,7 +259,7 @@ namespace sunlight
         }
     }
 
-    bool PlayerSkillEffectSystem::Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
+    void PlayerSkillEffectSystem::Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
     {
         const PassiveEffectType type = passiveEffect.GetType();
         if (type == PassiveEffectType::Stat)
@@ -299,14 +288,10 @@ namespace sunlight
                 statEffect->SetStatValue(fixedValue);
                 statEffect->SetStatPercentageValue(percentageValue);
             }
-
-            return true;
         }
-
-        return false;
     }
 
-    bool PlayerSkillEffectSystem::Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
+    void PlayerSkillEffectSystem::Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
     {
         (void)skillLevel;
 
@@ -327,10 +312,6 @@ namespace sunlight
                 statEffect->SetStatValue(0);
                 statEffect->SetStatPercentageValue(0.0);
             }
-
-            return true;
         }
-
-        return false;
     }
 }

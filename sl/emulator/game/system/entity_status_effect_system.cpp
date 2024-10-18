@@ -2,10 +2,12 @@
 
 #include "sl/emulator/game/component/entity_status_effect_component.h"
 #include "sl/emulator/game/contents/status_effect/status_effect.h"
+#include "sl/emulator/game/contents/status_effect/status_effect_handler_register.h"
 #include "sl/emulator/game/entity/game_entity.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/status_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
@@ -17,11 +19,13 @@ namespace sunlight
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
     {
+        PlayerSkillEffectStatusEffectHandlerRegister::Configure(*this);
     }
 
     void EntityStatusEffectSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<EntityViewRangeSystem>());
+        Add(stage.Get<PlayerStatSystem>());
     }
 
     bool EntityStatusEffectSystem::Subscribe(Stage& stage)
@@ -52,7 +56,7 @@ namespace sunlight
                     const IStatusEffectTickHandler* tickHandler = GetTickHandler(statusEffect.GetType());
                     assert(tickHandler);
 
-                    tickHandler->Tick(*entity, statusEffect);
+                    tickHandler->Tick(*this, *entity, statusEffect);
                 }
             }
         }
@@ -81,7 +85,7 @@ namespace sunlight
                 if (const IStatusEffectApplyHandler* applyHandler = GetApplyHandler(statusEffect.GetType());
                     applyHandler)
                 {
-                    applyHandler->Apply(player, statusEffect);
+                    applyHandler->Apply(*this, player, statusEffect);
                 }
             }
 
@@ -152,7 +156,7 @@ namespace sunlight
 
             if (applyHandler)
             {
-                applyHandler->Apply(entity, statusEffect);
+                applyHandler->Apply(*this, entity, statusEffect);
             }
 
             viewRangeSystem.VisitPlayer(entity, [&](GamePlayer& player)
@@ -226,7 +230,7 @@ namespace sunlight
         if (const IStatusEffectRevertHandler* revertHandler = GetRevertHandler(statusEffect.GetType());
             revertHandler)
         {
-            revertHandler->Revert(entity, statusEffect);
+            revertHandler->Revert(*this, entity, statusEffect);
         }
     }
 

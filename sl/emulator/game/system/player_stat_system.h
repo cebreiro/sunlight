@@ -43,7 +43,8 @@ namespace sunlight
         void SetSP(GamePlayer& player, int32_t value, SPChangeFloaterType floater);
 
     public:
-        void UpdateStat(GamePlayer& player);
+        void UpdateJobStat(GamePlayer& player);
+        void UpdateRegenStat(GamePlayer& player);
 
     public:
         void OnInitialize(GamePlayer& player);

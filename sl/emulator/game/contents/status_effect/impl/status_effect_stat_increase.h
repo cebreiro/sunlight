@@ -11,7 +11,7 @@ namespace sunlight
     public:
         auto GetType() const -> StatusEffectType override;
 
-        void Apply(GameEntity& entity, StatusEffect& statusEffect) const override;
-        void Revert(GameEntity& entity, StatusEffect& statusEffect) const override;
+        void Apply(EntityStatusEffectSystem& system, GameEntity& entity, StatusEffect& statusEffect) const override;
+        void Revert(EntityStatusEffectSystem& system, GameEntity& entity, StatusEffect& statusEffect) const override;
     };
 }

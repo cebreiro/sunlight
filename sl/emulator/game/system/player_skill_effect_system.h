@@ -37,8 +37,8 @@ namespace sunlight
         void OnSkillUse(GamePlayer& player, int32_t skillId, game_entity_id_type targetId, GameEntityType targetType, int32_t chargeTime);
 
     private:
-        bool Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
-        bool Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
+        void Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
+        void Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
 
     private:
         const ServiceLocator& _serviceLocator;

@@ -80,4 +80,9 @@ namespace sunlight
     {
         return _value >= other._value;
     }
+
+    auto StatValue::Zero() -> StatValue
+    {
+        return StatValue(0.0);
+    }
 }

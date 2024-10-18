@@ -8,7 +8,10 @@
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/player_skill_effect_system.h"
+#include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -26,6 +29,9 @@ namespace sunlight
     void PlayerJobSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<GameRepositorySystem>());
+        Add(stage.Get<PlayerStatSystem>());
+        Add(stage.Get<PlayerSkillEffectSystem>());
+        Add(stage.Get<EntityViewRangeSystem>());
     }
 
     bool PlayerJobSystem::Subscribe(Stage& stage)
@@ -125,7 +131,7 @@ namespace sunlight
         player.Defer(GamePlayerMessageCreator::CreateJobPromotion(player, advanced));
         player.FlushDeferred();
 
-        // TODO: update stat
+        Get<PlayerStatSystem>().UpdateJobStat(player);
 
         return true;
     }
@@ -157,12 +163,15 @@ namespace sunlight
             return false;
         }
 
-        if (!player.GetSkillComponent().AddSkill(PlayerSkill(jobId, skillData)))
+        PlayerSkillComponent& skillComponent = player.GetSkillComponent();
+
+        if (!skillComponent.AddSkill(PlayerSkill(jobId, skillData)))
         {
             return false;
         }
 
         Get<GameRepositorySystem>().SaveNewSkill(player, static_cast<int32_t>(jobId), skillData->index, 1);
+        Get<PlayerSkillEffectSystem>().OnSkillAdd(player, *skillComponent.FindSkill(skillData->index));
 
         player.Send(GamePlayerMessageCreator::CreateJobSkillAdd(player, jobId, skillId, 0));
 
@@ -236,8 +245,9 @@ namespace sunlight
                             .level = 1,
                         };
                     })));
+            Get<PlayerStatSystem>().UpdateJobStat(player);
 
-            player.Defer(GamePlayerMessageCreator::CreateJobExpLevelUp(player));
+            Get<EntityViewRangeSystem>().Broadcast(player, GamePlayerMessageCreator::CreateJobExpLevelUp(player), true);
         }
         else
         {
@@ -320,6 +330,8 @@ namespace sunlight
 
             Get<GameRepositorySystem>().SaveSkillLevel(player,
                 static_cast<int32_t>(job->GetId()), job->GetSkillPoint(), skill->GetId(), newLevel);
+
+            Get<PlayerSkillEffectSystem>().OnSkillLevelChange(player, *skill, skillLevel, newLevel);
 
             player.Send(GamePlayerMessageCreator::CreateJobSkillPointChange(player, job->GetId(), job->GetSkillPoint(), false));
 

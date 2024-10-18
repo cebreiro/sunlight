@@ -23,6 +23,7 @@ namespace sunlight
         explicit PlayerStatComponent(const db::dto::Character& dto);
 
         bool IsDead() const;
+        bool IsStatChanged(PlayerStatType type) const;
 
         void Suspend(RecoveryStatType type);
         void Resume(RecoveryStatType type);
@@ -57,7 +58,7 @@ namespace sunlight
     private:
         void UpdateFinalStat(PlayerStatType type);
 
-        auto CalculateStat(PlayerStatType type, bool includePassive = true) const -> StatValue;
+        auto CalculateStat(PlayerStatType type, bool includePassive = true, bool includeStatusEffect = true) const -> StatValue;
 
         auto Mutable(RecoveryStatType type) -> RecoveryStat&;
         auto Mutable(PlayerStatType type) -> Stat&;
