@@ -14,6 +14,7 @@
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/service/database/dto/character.h"
 #include "sl/emulator/service/database/transaction/item/item_log.h"
+#include "sl/emulator/service/gamedata/item/weapon_class_type.h"
 
 namespace sunlight
 {
@@ -117,6 +118,8 @@ namespace sunlight
         auto GetPickedItem() const -> const GameItem*;
         auto GetEquipmentItem(EquipmentPosition position) const -> const GameItem*;
         auto GetVendorSaleItem(int32_t page) const -> const GameItem*;
+
+        auto GetWeaponClass() const -> WeaponClassType;
 
         inline auto GetItemRange() const;
         inline auto GetEquipItems() const;

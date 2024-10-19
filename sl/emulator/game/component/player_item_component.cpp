@@ -2,6 +2,7 @@
 
 #include "sl/emulator/game/component/item_position_component.h"
 #include "sl/emulator/game/contents/item/item_slot_stroage.h"
+#include "sl/emulator/game/data/sox/item_weapon.h"
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
@@ -1248,6 +1249,17 @@ namespace sunlight
         }
 
         return _vendorSaleItems[page];
+    }
+
+    auto PlayerItemComponent::GetWeaponClass() const -> WeaponClassType
+    {
+        const GameItem* item = GetEquipmentItem(EquipmentPosition::Weapon1);
+        if (!item)
+        {
+            return WeaponClassType::None;
+        }
+
+        return static_cast<WeaponClassType>(item->GetData().GetWeaponData()->weaponClass);
     }
 
     auto PlayerItemComponent::Mutable(EquipmentPosition position) -> GameItem*&

@@ -554,6 +554,6 @@ namespace sunlight
 
     void PlayerStateSystem::HandlePlayerSkill(GamePlayer& player, const GameEntityState& state)
     {
-        Get<PlayerSkillEffectSystem>().OnSkillUse(player, state.skillId, state.targetId, state.targetType, state.param1);
+        Get<PlayerSkillEffectSystem>().OnSkillUse(player, state);
     }
 }

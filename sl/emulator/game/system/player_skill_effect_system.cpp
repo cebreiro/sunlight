@@ -4,15 +4,18 @@
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
+#include "sl/emulator/game/contents/attack/attack_result.h"
 #include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_factory.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_interface.h"
 #include "sl/emulator/game/contents/passive/effect/impl/passive_effect_stat.h"
 #include "sl/emulator/game/contents/skill/player_skill_target_selector.h"
 #include "sl/emulator/game/contents/stat/player_stat_type.h"
+#include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/item_weapon.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/creator/status_message_creator.h"
 #include "sl/emulator/game/system/entity_status_effect_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
@@ -208,8 +211,13 @@ namespace sunlight
         }
     }
 
-    void PlayerSkillEffectSystem::OnSkillUse(GamePlayer& player, int32_t skillId, game_entity_id_type targetId, GameEntityType targetType, int32_t chargeTime)
+    void PlayerSkillEffectSystem::OnSkillUse(GamePlayer& player, const GameEntityState& state)
     {
+        const int32_t skillId = state.skillId;
+        const game_entity_id_type targetId = state.targetId;
+        const GameEntityType targetType = state.targetType;
+        const int32_t chargeTime = state.param1;
+
         (void)chargeTime;
 
         PlayerSkillComponent& skillComponent = player.GetSkillComponent();
@@ -218,6 +226,17 @@ namespace sunlight
         if (!skill)
         {
             return;
+        }
+
+        if (skill->GetData().applyCasting)
+        {
+            if (state.param1 <= 0)
+            {
+                // state.param1 < 0 -> cancel
+                // state.param1 = 0 -> start
+
+                return;
+            }
         }
 
         GameEntity* mainTarget = targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(targetType, targetId).get() : nullptr;
@@ -243,7 +262,31 @@ namespace sunlight
             {
             case SkillEffectCategory::Damage:
             {
+                const auto weaponClass = player.GetItemComponent().GetWeaponClass();
 
+                const AttackResult result{
+                    .attackerId = player.GetId(),
+                    .attackerType = player.GetType(),
+                    .damageType = AttackDamageType::DamageMonster,
+                    .id = state.attackId,
+                    .motionId = 3,
+                    .skillId = skillId,
+                    .weaponClass = weaponClass,
+                    .damage = 1234,
+                    .damageCount = 1,
+                    .damageInterval = 0,
+                    .attackBlowGroup = 0,
+                    .attackTargetBlowType = AttackTargetBlowType::BlowSmall,
+                    .attackedResultType = AttackedResultType::Damage_A,
+                };
+
+                for (GameEntity* target : skillTargets)
+                {
+                    Get<EntityViewRangeSystem>().VisitPlayer(*target, [target , &result](GamePlayer& player)
+                        {
+                            player.Send(StatusMessageCreator::CreateAttackResult(*target, result));
+                        });
+                }
             }
             break;
             case SkillEffectCategory::StatusEffect:

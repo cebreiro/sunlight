@@ -1,11 +1,10 @@
 #pragma once
-#include "sl/emulator/game/entity/game_entity_id_type.h"
-#include "sl/emulator/game/entity/game_entity_type.h"
 #include "sl/emulator/game/system/game_system.h"
 #include "sl/emulator/game/zone/stage_enter_type.h"
 
 namespace sunlight
 {
+    struct GameEntityState;
     class IPassiveEffect;
     class PlayerSkill;
     class PlayerSkillTargetSelector;
@@ -34,7 +33,7 @@ namespace sunlight
         void OnSkillLevelChange(GamePlayer& player, const PlayerSkill& skill, int32_t oldLevel, int32_t newLevel);
         void OnMainWeaponChange(GamePlayer& player);
 
-        void OnSkillUse(GamePlayer& player, int32_t skillId, game_entity_id_type targetId, GameEntityType targetType, int32_t chargeTime);
+        void OnSkillUse(GamePlayer& player, const GameEntityState& state);
 
     private:
         void Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
