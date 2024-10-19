@@ -52,6 +52,7 @@ namespace sunlight
 
         void HandlePickGroundItem(GamePlayer& player, game_entity_id_type itemId);
         void HandlePlayerSkill(GamePlayer& player, const GameEntityState& state);
+        void HandleNormalAttack(GamePlayer& player, const GameEntityState& state);
 
     private:
         const ServiceLocator& _serviceLocator;

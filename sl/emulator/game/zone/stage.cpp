@@ -361,7 +361,7 @@ namespace sunlight
         Add(std::make_shared<ItemTradeSystem>(_serviceLocator));
         Add(std::make_shared<PlayerChannelSystem>(_serviceLocator, _zoneId));
         Add(std::make_shared<PlayerIndexSystem>());
-        Add(std::make_shared<PlayerSkillEffectSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerSkillEffectSystem>(_serviceLocator, _stageData.id));
         Add(std::make_shared<EntityStatusEffectSystem>(_serviceLocator, _stageData.id));
 
         const auto range = _systems | std::views::values;

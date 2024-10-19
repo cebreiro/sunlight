@@ -480,8 +480,12 @@ namespace sunlight
             HandlePlayerSkill(player, state);
         }
         break;
-        case GameEntityStateType::None:
         case GameEntityStateType::NormalAttack:
+        {
+            HandleNormalAttack(player, state);
+        }
+        break;
+        case GameEntityStateType::None:
         case GameEntityStateType::DamagedMotion:
         case GameEntityStateType::Dying:
         case GameEntityStateType::Dead:
@@ -555,5 +559,10 @@ namespace sunlight
     void PlayerStateSystem::HandlePlayerSkill(GamePlayer& player, const GameEntityState& state)
     {
         Get<PlayerSkillEffectSystem>().OnSkillUse(player, state);
+    }
+
+    void PlayerStateSystem::HandleNormalAttack(GamePlayer& player, const GameEntityState& state)
+    {
+        Get<PlayerSkillEffectSystem>().OnNormalAttackUse(player, state);
     }
 }

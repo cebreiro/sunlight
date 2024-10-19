@@ -1,6 +1,7 @@
 #include "player_skill_effect_system.h"
 
 #include "sl/emulator/game/component/entity_passive_effect_component.h"
+#include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
@@ -13,7 +14,9 @@
 #include "sl/emulator/game/contents/stat/player_stat_type.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/item_weapon.h"
+#include "sl/emulator/game/data/sox/motion_data.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/status_message_creator.h"
 #include "sl/emulator/game/system/entity_status_effect_system.h"
@@ -22,13 +25,17 @@
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
+#include "sl/emulator/service/gamedata/motion/player_motion_data_provider.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_data.h"
 
 namespace sunlight
 {
-    PlayerSkillEffectSystem::PlayerSkillEffectSystem(const ServiceLocator& serviceLocator)
+    PlayerSkillEffectSystem::PlayerSkillEffectSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
+        , _stageId(stageId)
         , _skillTargetSelector(std::make_unique<PlayerSkillTargetSelector>(*this))
     {
     }
@@ -300,6 +307,65 @@ namespace sunlight
             default:;
             }
         }
+    }
+
+    void PlayerSkillEffectSystem::OnNormalAttackUse(GamePlayer& player, const GameEntityState& state)
+    {
+        const int32_t weaponMotion = player.GetAppearanceComponent().GetWeaponMotionCategory();
+
+        const sox::MotionData* motionData = _serviceLocator.Get<GameDataProvideService>().GetPlayerMotionDataProvider().FindNormalAttackMotion(
+            weaponMotion == 0 ? 1 : weaponMotion, state.motionId);
+        if (!motionData)
+        {
+            return;
+        }
+
+        const auto findTargetAndProcess = [this, targetId = state.targetId, attackId = state.attackId, motionData](GamePlayer& player)
+            {
+                const auto& target = Get<SceneObjectSystem>().FindEntity(GameEntityType::Enemy, targetId);
+                if (!target)
+                {
+                    return;
+                }
+
+                ProcessNormalAttack(player, *target->Cast<GameMonster>(), attackId , *motionData);
+            };
+
+        if (motionData->hitTime == 0)
+        {
+            findTargetAndProcess(player);
+        }
+        else
+        {
+            _serviceLocator.Get<ZoneTimerService>().AddTimer(
+                std::chrono::milliseconds(motionData->hitTime), player.GetCId(), _stageId, findTargetAndProcess);
+        }
+    }
+
+    void PlayerSkillEffectSystem::ProcessNormalAttack(GamePlayer& player, GameMonster& monster, int32_t attackId, const sox::MotionData& motionData)
+    {
+        (void)motionData;
+
+        const AttackResult result{
+            .attackerId = player.GetId(),
+            .attackerType = player.GetType(),
+            .damageType = AttackDamageType::DamageMonster,
+            .id = attackId,
+            .motionId = 3,
+            .skillId = 0,
+            .weaponClass = player.GetItemComponent().GetWeaponClass(),
+            .damage = 1234,
+            .damageCount = 1,
+            .damageInterval = 0,
+            .attackBlowGroup = 0,
+            .attackTargetBlowType = AttackTargetBlowType::BlowSmall,
+            .attackedResultType = AttackedResultType::Damage_A,
+        };
+
+        Get<EntityViewRangeSystem>().VisitPlayer(monster, [&monster, &result](GamePlayer& player)
+            {
+                player.Send(StatusMessageCreator::CreateAttackResult(monster, result));
+            });
     }
 
     void PlayerSkillEffectSystem::Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const

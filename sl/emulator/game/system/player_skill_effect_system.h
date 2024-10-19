@@ -2,6 +2,11 @@
 #include "sl/emulator/game/system/game_system.h"
 #include "sl/emulator/game/zone/stage_enter_type.h"
 
+namespace sunlight::sox
+{
+    struct MotionData;
+}
+
 namespace sunlight
 {
     struct GameEntityState;
@@ -10,6 +15,7 @@ namespace sunlight
     class PlayerSkillTargetSelector;
 
     class GamePlayer;
+    class GameMonster;
 }
 
 namespace sunlight
@@ -17,7 +23,7 @@ namespace sunlight
     class PlayerSkillEffectSystem final : public GameSystem
     {
     public:
-        explicit PlayerSkillEffectSystem(const ServiceLocator& serviceLocator);
+        PlayerSkillEffectSystem(const ServiceLocator& serviceLocator, int32_t stageId);
         ~PlayerSkillEffectSystem();
 
         void InitializeSubSystem(Stage& stage) override;
@@ -34,13 +40,17 @@ namespace sunlight
         void OnMainWeaponChange(GamePlayer& player);
 
         void OnSkillUse(GamePlayer& player, const GameEntityState& state);
+        void OnNormalAttackUse(GamePlayer& player, const GameEntityState& state);
 
     private:
+        void ProcessNormalAttack(GamePlayer& player, GameMonster& monster, int32_t attackId, const sox::MotionData& motionData);
+
         void Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
         void Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
 
     private:
         const ServiceLocator& _serviceLocator;
+        int32_t _stageId = 0;
 
         UniquePtrNotNull<PlayerSkillTargetSelector> _skillTargetSelector;
     };

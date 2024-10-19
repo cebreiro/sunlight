@@ -12,6 +12,7 @@ namespace sunlight
     class ExpDataProvider;
     class NPCShopDataProvider;
     class MonsterDataProvider;
+    class PlayerMotionDataProvider;
 }
 
 namespace sunlight
@@ -43,6 +44,7 @@ namespace sunlight
         auto GetExpDataProvider() const -> const ExpDataProvider&;
         auto GetNPCShopDataProvider() const -> const NPCShopDataProvider&;
         auto GetMonsterDataProvider() const -> const MonsterDataProvider&;
+        auto GetPlayerMotionDataProvider() const -> const PlayerMotionDataProvider&;
 
     private:
         const ServiceLocator& _serviceLocator;
@@ -58,6 +60,7 @@ namespace sunlight
         SharedPtrNotNull<ExpDataProvider> _expDataProvider;
         SharedPtrNotNull<NPCShopDataProvider> _npcShopDataProvider;
         SharedPtrNotNull<MonsterDataProvider> _monsterDataProvider;
+        SharedPtrNotNull<PlayerMotionDataProvider> _playerMotionDataProvider;
     };
 
     template <typename T> requires std::derived_from<T, sox::ISoxTable>
