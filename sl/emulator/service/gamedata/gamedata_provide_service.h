@@ -5,6 +5,7 @@
 namespace sunlight
 {
     class AssetDataProvider;
+    class AbilityFileDataProvider;
     class MapDataProvider;
     class ItemDataProvider;
     class ItemMixDataProvider;
@@ -54,6 +55,7 @@ namespace sunlight
         SharedPtrNotNull<AssetDataProvider> _assetDataProvider;
         SharedPtrNotNull<MapDataProvider> _mapDataProvider;
         SharedPtrNotNull<SoxTableSet> _soxTableSet;
+        SharedPtrNotNull<AbilityFileDataProvider> _abilityFileDataProvider;
         SharedPtrNotNull<ItemDataProvider> _itemDataProvider;
         SharedPtrNotNull<ItemMixDataProvider> _itemMixDataProvider;
         SharedPtrNotNull<SkillDataProvider> _skillDataProvider;

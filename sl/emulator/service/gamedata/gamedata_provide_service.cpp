@@ -2,6 +2,7 @@
 
 #include "sl/data/asset_data_provider.h"
 #include "sl/emulator/game/data/sox_table_set.h"
+#include "sl/emulator/service/gamedata/abf/abf_data_provider.h"
 #include "sl/emulator/service/gamedata/exp/exp_data_provider.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
 #include "sl/emulator/service/gamedata/item_mix/item_mix_data_provider.h"
@@ -35,10 +36,12 @@ namespace sunlight
         _assetDataProvider = std::make_shared<AssetDataProvider>(assetPath / "Soda.dat");
         _mapDataProvider = std::make_shared<MapDataProvider>(assetPath / "Zone");
         _soxTableSet = std::make_shared<SoxTableSet>(assetPath / "Misc");
+        _abilityFileDataProvider = std::make_shared<AbilityFileDataProvider>(
+            assetPath / "Misc/Ability", *_assetDataProvider, *_soxTableSet);
 
         _itemDataProvider = std::make_shared<ItemDataProvider>(_serviceLocator, *_soxTableSet);
         _itemMixDataProvider = std::make_shared<ItemMixDataProvider>(_serviceLocator, *_soxTableSet, *_itemDataProvider);
-        _skillDataProvider = std::make_shared<SkillDataProvider>(_serviceLocator, *_soxTableSet);
+        _skillDataProvider = std::make_shared<SkillDataProvider>(_serviceLocator, *_soxTableSet, *_abilityFileDataProvider);
         _expDataProvider = std::make_shared<ExpDataProvider>(*_soxTableSet);
         _npcShopDataProvider = std::make_shared<NPCShopDataProvider>(*_soxTableSet);
         _monsterDataProvider = std::make_shared<MonsterDataProvider>(*_soxTableSet);

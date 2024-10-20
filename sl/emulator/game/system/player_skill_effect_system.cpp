@@ -224,6 +224,7 @@ namespace sunlight
         const game_entity_id_type targetId = state.targetId;
         const GameEntityType targetType = state.targetType;
         const int32_t chargeTime = state.param1;
+        const WeaponClassType weaponClass = static_cast<WeaponClassType>(state.motionId);
 
         (void)chargeTime;
 
@@ -256,56 +257,88 @@ namespace sunlight
             return;
         }
 
-        for (GameEntity* target : skillTargets)
-        {
-            player.Notice(fmt::format("skill: {}, target: [{}, {}]", skillId, target->GetId(), ToString(target->GetType())));
-        }
-
-        const PlayerSkillData& data = skill->GetData();
-
-        for (const SkillEffectData& skillEffect : data.effects)
-        {
-            switch (skillEffect.category)
+        auto applySkillEffect = [this, attackId = state.attackId, skillId, weaponClass, skillTargets](GamePlayer& player) mutable
             {
-            case SkillEffectCategory::Damage:
-            {
-                const auto weaponClass = player.GetItemComponent().GetWeaponClass();
+                PlayerSkillComponent& skillComponent = player.GetSkillComponent();
+                PlayerSkill* skill = skillComponent.FindSkill(skillId);
 
-                const AttackResult result{
-                    .attackerId = player.GetId(),
-                    .attackerType = player.GetType(),
-                    .damageType = AttackDamageType::DamageMonster,
-                    .id = state.attackId,
-                    .motionId = 3,
-                    .skillId = skillId,
-                    .weaponClass = weaponClass,
-                    .damage = 1234,
-                    .damageCount = 1,
-                    .damageInterval = 0,
-                    .attackBlowGroup = 0,
-                    .attackTargetBlowType = AttackTargetBlowType::BlowSmall,
-                    .attackedResultType = AttackedResultType::Damage_A,
-                };
-
-                for (GameEntity* target : skillTargets)
+                if (!skill)
                 {
-                    Get<EntityViewRangeSystem>().VisitPlayer(*target, [target , &result](GamePlayer& player)
+                    return;
+                }
+
+                for (const GameEntity* target : skillTargets)
+                {
+                    player.Notice(fmt::format("skill: {}, target: [{}, {}]", skillId, target->GetId(), ToString(target->GetType())));
+                }
+
+                const PlayerSkillData& data = skill->GetData();
+
+                for (const SkillEffectData& skillEffect : data.effects)
+                {
+                    switch (skillEffect.category)
+                    {
+                    case SkillEffectCategory::Damage:
+                    {
+                        const AttackResult result{
+                            .attackerId = player.GetId(),
+                            .attackerType = player.GetType(),
+                            .damageType = AttackDamageType::DamageMonster,
+                            .id = attackId,
+                            .motionId = 3,
+                            .skillId = skillId,
+                            .weaponClass = weaponClass,
+                            .damage = 1234,
+                            .damageCount = 1,
+                            .damageInterval = 0,
+                            .attackBlowGroup = 0,
+                            .attackTargetBlowType = AttackTargetBlowType::BlowSmall,
+                            .attackedResultType = AttackedResultType::Damage_A,
+                        };
+
+                        for (GameEntity* target : skillTargets)
                         {
-                            player.Send(StatusMessageCreator::CreateAttackResult(*target, result));
-                        });
+                            Get<EntityViewRangeSystem>().VisitPlayer(*target, [target, &result](GamePlayer& player)
+                                {
+                                    player.Send(StatusMessageCreator::CreateAttackResult(*target, result));
+                                });
+                        }
+                    }
+                    break;
+                    case SkillEffectCategory::StatusEffect:
+                    {
+                        Get<EntityStatusEffectSystem>().AddStatusEffectBySkill(skillId, skill->GetLevel(), skillTargets, skillEffect);
+                    }
+                    break;
+                    case SkillEffectCategory::Summon:
+                    case SkillEffectCategory::JobEffect:
+                    case SkillEffectCategory::Stat:
+                    default:;
+                    }
+                }
+            };
+
+        const auto& effectApplyTimes = skill->GetData().effectApplyTimes;
+
+        if (const auto iter = effectApplyTimes.find(weaponClass);
+            iter != effectApplyTimes.end())
+        {
+            for (int32_t time : iter->second)
+            {
+                if (time == 0)
+                {
+                    applySkillEffect(player);
+                }
+                else
+                {
+                    _serviceLocator.Get<ZoneTimerService>().AddTimer(
+                        std::chrono::milliseconds(time), player.GetCId(), _stageId, applySkillEffect);
                 }
             }
-            break;
-            case SkillEffectCategory::StatusEffect:
-            {
-                Get<EntityStatusEffectSystem>().AddStatusEffectBySkill(skillId, skill->GetLevel(), skillTargets, skillEffect);
-            }
-            break;
-            case SkillEffectCategory::Summon:
-            case SkillEffectCategory::JobEffect:
-            case SkillEffectCategory::Stat:
-            default:;
-            }
+        }
+        else
+        {
+            applySkillEffect(player);
         }
     }
 

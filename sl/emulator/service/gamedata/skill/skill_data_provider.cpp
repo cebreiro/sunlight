@@ -2,10 +2,11 @@
 
 #include "sl/emulator/game/data/sox_table_set.h"
 #include "sl/emulator/game/data/sox/skill_basic.h"
+#include "sl/emulator/service/gamedata/abf/abf_data_provider.h"
 
 namespace sunlight
 {
-    SkillDataProvider::SkillDataProvider(const ServiceLocator& serviceLocator, const SoxTableSet& tableSet)
+    SkillDataProvider::SkillDataProvider(const ServiceLocator& serviceLocator, const SoxTableSet& tableSet, const AbilityFileDataProvider& abilityFileDataProvider)
     {
         for (const sox::SkillBasic& soxData : tableSet.Get<sox::SkillBasicTable>().Get())
         {
@@ -17,7 +18,21 @@ namespace sunlight
                         __FUNCTION__, soxData.index));
             }
 
-            const PlayerSkillData& data = iter->second;
+            PlayerSkillData& data = iter->second;
+
+            for (const AbilityRoutine& routine : abilityFileDataProvider.Get(data.routineId))
+            {
+                for (const AbilityProperty& property : routine.properties)
+                {
+                    for (const AbilityValue& value : property.values)
+                    {
+                        if (value.type == 2)
+                        {
+                            data.effectApplyTimes[static_cast<WeaponClassType>(routine.weaponClass)].push_back(value.begin);
+                        }
+                    }
+                }
+            }
 
             for (const int32_t job : data.jobs)
             {

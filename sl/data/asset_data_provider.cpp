@@ -9,6 +9,7 @@ namespace sunlight
     {
         for (const AssetData& data : _sodaDat->data | std::views::values)
         {
+            _nameIndex.try_emplace(data.name, &data);
             _partIdIndex.emplace(data.partId, &data);
         }
     }
@@ -22,5 +23,12 @@ namespace sunlight
         const auto iter = _sodaDat->data.find(id);
 
         return iter != _sodaDat->data.end() ? &iter->second : nullptr;
+    }
+
+    auto AssetDataProvider::FindByName(const std::string& name) const -> const AssetData*
+    {
+        const auto iter = _nameIndex.find(name);
+
+        return iter != _nameIndex.end() ? iter->second : nullptr;
     }
 }

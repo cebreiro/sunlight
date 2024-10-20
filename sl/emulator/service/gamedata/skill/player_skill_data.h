@@ -73,6 +73,7 @@ namespace sunlight
         int32_t chargingDelay = 0;
         int32_t damageMotionType = 0;
         boost::container::static_vector<SkillEffectData, 4> effects;
+        std::unordered_map<WeaponClassType, boost::container::static_vector<int32_t, 4>> effectApplyTimes;
 
         std::optional<SkillEffectWeaponCondition> effectWeaponClassCondition = std::nullopt;
         std::optional<SkillEffectRangeWeaponCondition> effectRangeWeaponCondition = std::nullopt;
