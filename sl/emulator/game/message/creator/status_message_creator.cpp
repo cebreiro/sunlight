@@ -115,4 +115,34 @@ namespace sunlight
 
         return writer.Flush();
     }
+
+    auto StatusMessageCreator::CreateHPChange(const GameEntity& entity, int32_t maxHP, int32_t hp, HPChangeFloaterType floater) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(entity).ToBuffer());
+        writer.Write(ZoneMessageType::CONTAIN_HP);
+        writer.Write<int32_t>(maxHP);
+        writer.Write<int32_t>(hp);
+        writer.Write(floater);
+
+        return writer.Flush();
+    }
+
+    auto StatusMessageCreator::CreateSPChange(const GameEntity& entity, int32_t maxSP, int32_t sp, SPChangeFloaterType floater) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(entity).ToBuffer());
+        writer.Write(ZoneMessageType::CONTAIN_SP);
+        writer.Write<int32_t>(maxSP);
+        writer.Write<int32_t>(sp);
+        writer.Write(floater);
+
+        return writer.Flush();
+    }
 }

@@ -15,6 +15,7 @@
 #include "sl/emulator/game/message/zone_message_hooker.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/message/zone_request.h"
+#include "sl/emulator/game/system/entity_damage_system.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_status_effect_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
@@ -363,6 +364,7 @@ namespace sunlight
         Add(std::make_shared<PlayerIndexSystem>());
         Add(std::make_shared<PlayerSkillEffectSystem>(_serviceLocator, _stageData.id));
         Add(std::make_shared<EntityStatusEffectSystem>(_serviceLocator, _stageData.id));
+        Add(std::make_shared<EntityDamageSystem>(_serviceLocator, _stageData.id));
 
         const auto range = _systems | std::views::values;
 

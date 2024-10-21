@@ -223,7 +223,106 @@ return function (player)
         end
     end
 
-    SendMosnterSkillState(player)
+    function sendStatusEffect (player)
+
+        local writer = SlPacketWriter:new()
+
+        writeGlobalMessageHead(writer, player)
+
+        writer:writeInt32(2000) -- CHARSTATUSMSG
+        writer:writeInt32(800)  -- CONDITION_STATE
+        writer:writeInt32(1301) 
+        writer:writeInt32(29)
+        writer:writeInt32(0)
+
+        player:send(writer)
+    end
+
+    function sendMonsterAttackResult (player)
+
+        local monster = player:findNearestMonster()
+
+        if monster ~= nil then
+
+            local writer = SlPacketWriter:new()
+
+            writeGlobalMessageHead(writer, monster)
+
+            writer:writeInt32(126)
+
+            local objectWriter = PacketWriter:new()
+
+            objectWriter:writeInt32(player:getId()) -- targetId
+            objectWriter:writeInt32(player:getTypeValue()) -- targetType
+            objectWriter:writeInt32(76) -- id
+            objectWriter:writeInt32(3) -- motionId (newEntityStateMotionId)
+            objectWriter:writeInt32(0) --
+
+            objectWriter:writeInt32(0) -- attackBlowType a[12]??
+            objectWriter:writeInt32(104) -- a[11] -- maybe skillId
+            objectWriter:writeInt32(1234) -- damage
+            objectWriter:writeInt32(1700) -- a[10] --> weapon_class 네
+            objectWriter:writeInt32(1) -- damgae_type
+            objectWriter:writeInt32(1) -- damage count
+            objectWriter:writeInt32(0) -- damage interval    a[5]
+            objectWriter:writeInt32(0) -- attackBlowGroupId  a[14]
+            objectWriter:writeInt32(0) -- attackedResultType
+
+            writer:writeObject(objectWriter)
+
+            player:send(writer)
+
+        end
+    end
+
+        function writeMonsterAttackedState (writer, player)
+
+        local objectWriter = PacketWriter:new()
+
+        objectWriter:writeUInt8(0xFF)
+        objectWriter:writeUInt8(0x0F)
+        objectWriter:writeUInt8(0) -- state_type normal attack
+        objectWriter:writeUInt8(0) -- move type
+        objectWriter:writeUInt8(0) -- unk4  --> client 0x495ECA 에 이 값이 그대로 나옴. 이후 1씩 증가. 범위 case [0, 4]
+        objectWriter:writeUInt8(0xFF) -- unk5
+
+        objectWriter:writeFloat(0) -- destPosX
+        objectWriter:writeFloat(0) -- destPosY
+        objectWriter:writeFloat(0) -- destPosZ
+
+        objectWriter:writeInt32(player:getId()) -- targetId
+        objectWriter:writeInt32(player:getTypeValue()) -- targetType
+
+        objectWriter:writeInt32(609) -- attackId
+        objectWriter:writeInt32(3) -- motionId
+        objectWriter:writeInt32(0) -- fxId
+        objectWriter:writeInt32(0) -- param1
+        objectWriter:writeInt32(1700) -- param2  -> skill 사용할 땐 얘가 index 네
+        objectWriter:writeInt32(104) -- skillId
+
+        writer:writeObject(objectWriter)
+
+    end
+
+    function SendMosnterAttackedState (player)
+
+        local monster = player:findNearestMonster()
+        if monster ~= nil then
+
+            local writer = SlPacketWriter:new()
+
+            writeGlobalMessageHead(writer, monster)
+
+            writer:writeInt32(0x71)
+            writeMonsterAttackedState(writer, player)
+
+            player:send(writer)
+
+        end
+    end
+
+    sendMonsterAttackResult(player)
+    SendMosnterAttackedState(player)
     --sendGuildDESTROY(player)
     
 end

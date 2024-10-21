@@ -20,6 +20,30 @@ namespace sunlight
         return "zone_timer_service";
     }
 
+    void ZoneTimerService::AddTimer(std::chrono::milliseconds delay, const std::function<void()>& function)
+    {
+        Delay(delay).Then(_zone.GetStrand(),
+            [weak = _zone.weak_from_this(), function]()
+            {
+                const std::shared_ptr<Zone> zone = weak.lock();
+                if (!zone)
+                {
+                    return;
+                }
+
+                if (GameDebugger* debugger = zone->GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
+                {
+                    GameDebugger::SetInstance(debugger);
+                }
+
+                GameTimeService::SetNow(game_clock_type::now());
+
+                function();
+
+                GameDebugger::SetInstance(nullptr);
+            });
+    }
+
     void ZoneTimerService::AddTimer(std::chrono::milliseconds delay, const GameEntity& entity, int32_t stageId, const std::function<void(GameEntity&)>& function)
     {
         Delay(delay).Then(_zone.GetStrand(),

@@ -48,6 +48,7 @@ namespace sunlight
         bool DespawnPlayer(game_entity_id_type id, StageExitType exitType);
         void RemoveItem(game_entity_id_type id);
         bool RemoveStoredItem(game_entity_id_type id);
+        bool RemoveMonster(game_entity_id_type id);
 
     public:
         auto FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&;

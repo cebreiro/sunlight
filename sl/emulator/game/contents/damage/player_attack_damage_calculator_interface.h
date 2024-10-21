@@ -48,9 +48,6 @@ namespace sunlight
     {
         bool isDodged = false;
         int32_t damage = 0;
-
-        int32_t damageCount = 1;
-        int32_t damageInterval = 0;
     };
 
     class IPlayerAttackDamageCalculator

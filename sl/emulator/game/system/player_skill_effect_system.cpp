@@ -22,6 +22,7 @@
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/status_message_creator.h"
+#include "sl/emulator/game/system/entity_damage_system.h"
 #include "sl/emulator/game/system/entity_status_effect_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
@@ -40,7 +41,6 @@ namespace sunlight
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
         , _skillTargetSelector(std::make_unique<PlayerSkillTargetSelector>(*this))
-        , _damageCalculator(std::make_unique<PlayerAttackDamageCalculator>())
     {
     }
 
@@ -55,6 +55,7 @@ namespace sunlight
         Add(stage.Get<PlayerIndexSystem>());
         Add(stage.Get<EntityStatusEffectSystem>());
         Add(stage.Get<PlayerStatSystem>());
+        Add(stage.Get<EntityDamageSystem>());
     }
 
     bool PlayerSkillEffectSystem::Subscribe(Stage& stage)
@@ -228,6 +229,7 @@ namespace sunlight
         const game_entity_id_type targetId = state.targetId;
         const GameEntityType targetType = state.targetType;
         const int32_t chargeTime = state.param1;
+        const int32_t chargeCount = state.param2;
         const WeaponClassType weaponClass = static_cast<WeaponClassType>(state.motionId);
 
         (void)chargeTime;
@@ -263,7 +265,7 @@ namespace sunlight
             return;
         }
 
-        auto applySkillEffect = [this, attackId = state.attackId, skillId, weaponClass, skillTargets](GamePlayer& player, const AbilityValue* abilityValue) mutable
+        auto applySkillEffect = [this, attackId = state.attackId, skillId, weaponClass, chargeCount, skillTargets](GamePlayer& player, const AbilityValue* abilityValue) mutable
             {
                 PlayerSkillComponent& skillComponent = player.GetSkillComponent();
                 PlayerSkill* skill = skillComponent.FindSkill(skillId);
@@ -291,38 +293,8 @@ namespace sunlight
                                 continue;
                             }
 
-                            const PlayerSkillDamageCalculateParam damageCalculateParam{
-                                .player = player,
-                                .target = *target->Cast<GameMonster>(),
-                                .skill = *skill,
-                                .skillEffectData = skillEffect,
-                                .chargingCount = 0,
-                                .attackSequence = 0,
-                                .abilityValue = abilityValue
-                            };
-
-                            PlayerSkillDamageCalculateResult damageCalculateResult;
-                            _damageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
-
-                            const DamageResult result{
-                                .attackerId = player.GetId(),
-                                .attackerType = player.GetType(),
-                                .damageType = damageCalculateResult.isDodged ? DamageType::DodgeMonster : DamageType::DamageMonster,
-                                .id = attackId,
-                                .motionId = 3,
-                                .skillId = skillId,
-                                .weaponClass = weaponClass,
-                                .damage = damageCalculateResult.damage,
-                                .damageCount = damageCalculateResult.damageCount,
-                                .damageInterval = damageCalculateResult.damageInterval,
-                                .blowType = DamageBlowType::BlowSmall,
-                                .attackedResultType = DamageResultType::Damage_A,
-                            };
-
-                            Get<EntityViewRangeSystem>().VisitPlayer(*target, [target, &result](GamePlayer& player)
-                                {
-                                    player.Send(StatusMessageCreator::CreateDamageResult(*target, result));
-                                });
+                            Get<EntityDamageSystem>().ProcessPlayerSkillEffect(player, *target->Cast<GameMonster>(), *skill, skillEffect,
+                                attackId, chargeCount, weaponClass, abilityValue);
                         }
                     }
                     break;

@@ -408,6 +408,31 @@ namespace sunlight
         return true;
     }
 
+    bool SceneObjectSystem::RemoveMonster(game_entity_id_type id)
+    {
+        const auto iter1 = _entities.find(GameMonster::TYPE);
+        if (iter1 == _entities.end())
+        {
+            return false;
+        }
+
+        const auto iter2 = iter1->second.find(id);
+        if (iter2 == iter1->second.end())
+        {
+            return false;
+        }
+
+        GameEntity& entity = *iter2->second;
+        EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
+
+        viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectLeave(entity), false);
+        viewRangeSystem.Remove(entity);
+
+        iter1->second.erase(iter2);
+
+        return true;
+    }
+
     auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&
     {
         const auto iter1 = _entities.find(type);

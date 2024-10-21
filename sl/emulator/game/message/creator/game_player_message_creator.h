@@ -63,8 +63,5 @@ namespace sunlight
 
         static auto CreatePlayerStateProposition(const GamePlayer& player, const std::string& title, int32_t groupId, GameGroupType groupType, int32_t unk2) -> Buffer;
         static auto CreatePlayerStateProposition(const GamePlayer& player, const GameGroupState& groupState) -> Buffer;
-
-        static auto CreateHPChange(const GamePlayer& player, int32_t maxHP, int32_t hp, HPChangeFloaterType floater) -> Buffer;
-        static auto CreateSPChange(const GamePlayer& player, int32_t maxSP, int32_t sp, SPChangeFloaterType floater) -> Buffer;
     };
 }

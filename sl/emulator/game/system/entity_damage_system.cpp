@@ -1,0 +1,252 @@
+#include "entity_damage_system.h"
+
+#include "sl/emulator/game/component/entity_state_component.h"
+#include "sl/emulator/game/component/monster_stat_component.h"
+#include "sl/emulator/game/contents/damage/damage_result.h"
+#include "sl/emulator/game/contents/damage/player_attack_damage_calculator.h"
+#include "sl/emulator/game/contents/skill/player_skill.h"
+#include "sl/emulator/game/contents/stat/stat_value.h"
+#include "sl/emulator/game/contents/state/game_entity_state.h"
+#include "sl/emulator/game/data/sox/monster_base.h"
+#include "sl/emulator/game/entity/game_monster.h"
+#include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/creator/scene_object_message_creator.h"
+#include "sl/emulator/game/message/creator/status_message_creator.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/player_index_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
+
+namespace sunlight
+{
+    EntityDamageSystem::EntityDamageSystem(const ServiceLocator& serviceLocator, int32_t stageId)
+        : _serviceLocator(serviceLocator)
+        , _stageId(stageId)
+        , _damageCalculator(std::make_unique<PlayerAttackDamageCalculator>())
+    {
+    }
+
+    EntityDamageSystem::~EntityDamageSystem()
+    {
+    }
+
+    void EntityDamageSystem::InitializeSubSystem(Stage& stage)
+    {
+        Add(stage.Get<EntityViewRangeSystem>());
+        Add(stage.Get<PlayerIndexSystem>());
+        Add(stage.Get<SceneObjectSystem>());
+    }
+
+    bool EntityDamageSystem::Subscribe(Stage& stage)
+    {
+        return GameSystem::Subscribe(stage);
+    }
+
+    auto EntityDamageSystem::GetName() const -> std::string_view
+    {
+        return "entity_damage_system";
+    }
+
+    auto EntityDamageSystem::GetClassId() const -> game_system_id_type
+    {
+        return GameSystem::GetClassId<EntityDamageSystem>();
+    }
+
+    void EntityDamageSystem::ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill,
+        const SkillEffectData& effect, int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue)
+    {
+        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
+        if (monsterStatComponent.IsDead())
+        {
+            return;
+        }
+
+        const PlayerSkillDamageCalculateParam damageCalculateParam{
+            .player = player,
+            .target = target,
+            .skill = skill,
+            .skillEffectData = effect,
+            .chargingCount = chargeCount,
+            .attackSequence = 0,
+            .abilityValue = abilityValue
+        };
+
+        PlayerSkillDamageCalculateResult damageCalculateResult;
+        _damageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
+
+        const DamageResult result{
+            .attackerId = player.GetId(),
+            .attackerType = player.GetType(),
+            .damageType = damageCalculateResult.isDodged ? DamageType::DodgeMonster : DamageType::DamageMonster,
+            .id = attackId,
+            .motionId = 3,
+            .skillId = skill.GetId(),
+            .weaponClass = weaponClass,
+            .damage = damageCalculateResult.damage,
+            .damageCount = std::max(1, effect.value6),
+            .damageInterval = effect.value7,
+            .blowType = DamageBlowType::BlowSmall,
+            .attackedResultType = DamageResultType::Damage_A,
+        };
+
+        EntityStateComponent& monsterStateComponent = target.GetStateComponent();
+
+        bool shouldStiffen = [&]() -> bool
+            {
+                const GameEntityStateType currentState = monsterStateComponent.GetState().type;
+
+                // client 0x49648A
+                if (currentState == GameEntityStateType::NormalAttack || currentState == GameEntityStateType::DamagedMotion)
+                {
+                    return false;
+                }
+
+                // TODO: implement
+
+                return false;
+            }();
+
+        if (damageCalculateResult.isDodged)
+        {
+            Get<EntityViewRangeSystem>().VisitPlayer(target, [&target, &result](GamePlayer& player)
+                {
+                    player.Send(StatusMessageCreator::CreateDamageResult(target, result));
+                });
+
+            return;
+        }
+
+        const int32_t firstDamage = result.damageCount > 1
+            ? result.damage / result.damageCount + result.damage % result.damageCount
+            : result.damage;
+
+        const StatValue currentHP(monsterStatComponent.GetHP());
+
+        const int32_t newHP = std::max(0, currentHP.As<int32_t>() - firstDamage);
+        const int32_t maxHP = monsterStatComponent.GetData().hp;
+
+        monsterStatComponent.SetHP(newHP);
+
+        if (newHP <= 0)
+        {
+            monsterStatComponent.SetDead(true);
+
+            monsterStateComponent.SetState(GameEntityState{
+                .type = GameEntityStateType::Dying,
+                });
+
+            _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(3000),
+                target, _stageId, [this](const GameEntity& target)
+                {
+                    assert(target.GetType() == GameMonster::TYPE);
+
+                    Get<SceneObjectSystem>().RemoveMonster(target.GetId());
+                });
+        }
+
+        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            {
+                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
+                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+
+                if (newHP <= 0 || !shouldStiffen)
+                {
+                    player.Defer(SceneObjectPacketCreator::CreateState(target, monsterStateComponent.GetState()));
+                }
+
+                player.FlushDeferred();
+            });
+
+        if (newHP <= 0)
+        {
+            // TODO: drop item
+
+            return;
+        }
+
+        const int32_t tickDamage = result.damage / result.damageCount;
+        const int32_t tickCount = result.damageCount - 1;
+
+        for (int32_t i = 0; i < tickCount; ++i)
+        {
+            _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds((1 + i) * result.damageInterval),
+                [this, tickDamage, playerId = player.GetCId(), targetId = target.GetId()]()
+                {
+                    this->OnDelayDamage(playerId, targetId, tickDamage);
+                });
+        }
+    }
+
+    void EntityDamageSystem::OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage)
+    {
+        const GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(playerId);
+        if (!player)
+        {
+            return;
+        }
+
+        const auto& targetEntity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, targetMonsterId);
+        if (!targetEntity)
+        {
+            return;
+        }
+
+        if (damage <= 0)
+        {
+            return;
+        }
+
+        GameMonster& target = *targetEntity->Cast<GameMonster>();
+
+        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
+        if (monsterStatComponent.IsDead())
+        {
+            return;
+        }
+
+        const StatValue currentHP(monsterStatComponent.GetHP());
+
+        const int32_t newHP = std::max(0, currentHP.As<int32_t>() - damage);
+        const int32_t maxHP = monsterStatComponent.GetData().hp;
+
+        if (newHP < 0)
+        {
+            target.GetStateComponent().SetState(GameEntityState{
+                .type = GameEntityStateType::Dying,
+                });
+        }
+
+        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            {
+                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+
+                if (newHP <= 0)
+                {
+                    player.Defer(SceneObjectPacketCreator::CreateState(target, GameEntityState{
+                        .type = GameEntityStateType::Dying,
+                        }));
+                }
+
+                player.FlushDeferred();
+            });
+
+        monsterStatComponent.SetHP(newHP);
+
+        if (newHP <= 0)
+        {
+            monsterStatComponent.SetDead(true);
+
+            // TODO: drop item
+
+            _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(3000),
+                target, _stageId, [this](const GameEntity& target)
+                {
+                    assert(target.GetType() == GameMonster::TYPE);
+
+                    Get<SceneObjectSystem>().RemoveMonster(target.GetId());
+                });
+        }
+    }
+}

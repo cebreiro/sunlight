@@ -1,0 +1,46 @@
+#pragma once
+#include "sl/emulator/game/entity/game_entity_id_type.h"
+#include "sl/emulator/game/system/game_system.h"
+#include "sl/emulator/service/gamedata/item/weapon_class_type.h"
+
+namespace sunlight
+{
+    struct AbilityValue;
+    struct SkillEffectData;
+
+    class PlayerSkill;
+
+    class GamePlayer;
+    class GameMonster;
+
+    class IPlayerAttackDamageCalculator;
+}
+
+namespace sunlight
+{
+    class EntityDamageSystem final : public GameSystem
+    {
+    public:
+        EntityDamageSystem(const ServiceLocator& serviceLocator, int32_t stageId);
+        ~EntityDamageSystem();
+
+        void InitializeSubSystem(Stage& stage) override;
+        bool Subscribe(Stage& stage) override;
+        auto GetName() const -> std::string_view override;
+        auto GetClassId() const -> game_system_id_type override;
+
+    public:
+        void ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill, const SkillEffectData& effect,
+            int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue);
+
+
+    private:
+        void OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage);
+
+    private:
+        const ServiceLocator& _serviceLocator;
+        int32_t _stageId = 0;
+
+        UniquePtrNotNull<IPlayerAttackDamageCalculator> _damageCalculator;
+    };
+}

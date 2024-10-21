@@ -13,7 +13,6 @@ namespace sunlight
     class IPassiveEffect;
     class PlayerSkill;
     class PlayerSkillTargetSelector;
-    class IPlayerAttackDamageCalculator;
 
     class GamePlayer;
     class GameMonster;
@@ -54,6 +53,5 @@ namespace sunlight
         int32_t _stageId = 0;
 
         UniquePtrNotNull<PlayerSkillTargetSelector> _skillTargetSelector;
-        UniquePtrNotNull<IPlayerAttackDamageCalculator> _damageCalculator;
     };
 }

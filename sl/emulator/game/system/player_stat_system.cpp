@@ -7,6 +7,7 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/message/creator/status_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -92,7 +93,7 @@ namespace sunlight
         statComponent.SetRecoveryStat(RecoveryStatType::HP, maxHP);
 
         Get<EntityViewRangeSystem>().Broadcast(player,
-            GamePlayerMessageCreator::CreateHPChange(player, maxHP, maxHP, floater), true);
+            StatusMessageCreator::CreateHPChange(player, maxHP, maxHP, floater), true);
     }
 
     void PlayerStatSystem::RecoverSP(GamePlayer& player, SPChangeFloaterType floater)
@@ -103,7 +104,7 @@ namespace sunlight
         statComponent.SetRecoveryStat(RecoveryStatType::SP, maxSP);
 
         Get<EntityViewRangeSystem>().Broadcast(player,
-            GamePlayerMessageCreator::CreateSPChange(player, maxSP, maxSP, floater), true);
+            StatusMessageCreator::CreateSPChange(player, maxSP, maxSP, floater), true);
     }
 
     void PlayerStatSystem::SetHP(GamePlayer& player, int32_t value, HPChangeFloaterType floater)
@@ -117,7 +118,7 @@ namespace sunlight
         statComponent.SetRecoveryTimePoint(RecoveryStatType::HP, GameTimeService::Now());
 
         Get<EntityViewRangeSystem>().Broadcast(player,
-            GamePlayerMessageCreator::CreateHPChange(player, maxHP, hp, floater), true);
+            StatusMessageCreator::CreateHPChange(player, maxHP, hp, floater), true);
     }
 
     void PlayerStatSystem::SetSP(GamePlayer& player, int32_t value, SPChangeFloaterType floater)
@@ -131,7 +132,7 @@ namespace sunlight
         statComponent.SetRecoveryTimePoint(RecoveryStatType::SP, GameTimeService::Now());
 
         Get<EntityViewRangeSystem>().Broadcast(player,
-            GamePlayerMessageCreator::CreateSPChange(player, maxSP, sp, floater), true);
+            StatusMessageCreator::CreateSPChange(player, maxSP, sp, floater), true);
     }
 
     void PlayerStatSystem::UpdateJobStat(GamePlayer& player)
