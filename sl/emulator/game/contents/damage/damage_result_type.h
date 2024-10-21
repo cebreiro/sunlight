@@ -3,7 +3,7 @@
 namespace sunlight
 {
     // client 0x4963FF, 0x4A67EB, 0x493278
-    ENUM_CLASS(AttackDamageType, int32_t,
+    ENUM_CLASS(DamageType, int32_t,
         (None, 0)
         (DamageMonster, 1)
         (DodgeMonster, 2)
@@ -13,7 +13,7 @@ namespace sunlight
         (Critical, 6)
     )
 
-    ENUM_CLASS(AttackedResultType, int32_t,
+    ENUM_CLASS(DamageResultType, int32_t,
         (Damage_A, 0)
         (Damage_B, 1) // swirl
         (Damage_C, 2) // airborne
@@ -21,7 +21,7 @@ namespace sunlight
     )
 
     // client 0x49181C
-    ENUM_CLASS(AttackTargetBlowType, int32_t,
+    ENUM_CLASS(DamageBlowType, int32_t,
 
         // player: 0x70000397  TARGETBLOW_NORMAL_SIZES.PNX
         // monster: 0x70000498 TARGETBLOW_NORMAL_SIZES0LED.PNX

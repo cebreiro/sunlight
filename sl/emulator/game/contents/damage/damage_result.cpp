@@ -1,4 +1,4 @@
-#include "attack_result.h"
+#include "damage_result.h"
 
 namespace sunlight
 {

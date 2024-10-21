@@ -1,6 +1,6 @@
 #include "status_message_creator.h"
 
-#include "sl/emulator/game/contents/attack/attack_result.h"
+#include "sl/emulator/game/contents/damage/damage_result.h"
 #include "sl/emulator/game/contents/status_effect/status_effect.h"
 #include "sl/emulator/game/entity/game_entity.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
@@ -82,7 +82,7 @@ namespace sunlight
         return writer.Flush();
     }
 
-    auto StatusMessageCreator::CreateAttackResult(const GameEntity& entity, const AttackResult& attackResult) -> Buffer
+    auto StatusMessageCreator::CreateDamageResult(const GameEntity& entity, const DamageResult& damageResult) -> Buffer
     {
         SlPacketWriter writer;
         writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
@@ -94,21 +94,21 @@ namespace sunlight
         {
             // client 0x48EB80
             PacketWriter objectWriter;
-            /* a3 + 00 */objectWriter.Write<int32_t>(static_cast<int32_t>(attackResult.attackerId.Unwrap()));// + 2
-            /* a3 + 04 */objectWriter.Write<int32_t>(static_cast<int32_t>(attackResult.attackerType)); // + 3
-            /* a3 + 08 */objectWriter.Write<int32_t>(attackResult.id);
-            /* a3 + 12 */objectWriter.Write<int32_t>(attackResult.motionId); // 3
+            /* a3 + 00 */objectWriter.Write<int32_t>(static_cast<int32_t>(damageResult.attackerId.Unwrap()));// + 2
+            /* a3 + 04 */objectWriter.Write<int32_t>(static_cast<int32_t>(damageResult.attackerType)); // + 3
+            /* a3 + 08 */objectWriter.Write<int32_t>(damageResult.id);
+            /* a3 + 12 */objectWriter.Write<int32_t>(damageResult.motionId); // 3
             /* a3 + 16 */objectWriter.Write<int32_t>(0);
 
-            /* a3 + 20, a2[12] */objectWriter.Write<int32_t>(static_cast<int32_t>(attackResult.attackTargetBlowType));
-            /* a3 + 24, a2[11] */objectWriter.Write<int32_t>(attackResult.skillId);
-            /* a3 + 28,        */objectWriter.Write<int32_t>(attackResult.damage);
-            /* a3 + 32, a2[10] */objectWriter.Write<int32_t>(static_cast<int32_t>(attackResult.weaponClass)); // weapon class
-            /* a3 + 36         */objectWriter.Write<int32_t>(static_cast<int32_t>(attackResult.damageType));
-            /* a3 + 40         */objectWriter.Write<int32_t>(attackResult.damageCount);
-            /* a3 + 44, a2[5]  */objectWriter.Write<int32_t>(attackResult.damageInterval);
-            /* a3 + 48, a2[14] */objectWriter.Write<int32_t>(attackResult.attackBlowGroup);
-            /* a3 + 52*/objectWriter.Write<int32_t>(static_cast<int32_t>(attackResult.attackedResultType));
+            /* a3 + 20, a2[12] */objectWriter.Write<int32_t>(static_cast<int32_t>(damageResult.blowType));
+            /* a3 + 24, a2[11] */objectWriter.Write<int32_t>(damageResult.skillId);
+            /* a3 + 28,        */objectWriter.Write<int32_t>(damageResult.damage);
+            /* a3 + 32, a2[10] */objectWriter.Write<int32_t>(static_cast<int32_t>(damageResult.weaponClass)); // weapon class
+            /* a3 + 36         */objectWriter.Write<int32_t>(static_cast<int32_t>(damageResult.damageType));
+            /* a3 + 40         */objectWriter.Write<int32_t>(damageResult.damageCount);
+            /* a3 + 44, a2[5]  */objectWriter.Write<int32_t>(damageResult.damageInterval);
+            /* a3 + 48, a2[14] */objectWriter.Write<int32_t>(damageResult.blowGroup);
+            /* a3 + 52*/objectWriter.Write<int32_t>(static_cast<int32_t>(damageResult.attackedResultType));
 
             writer.WriteObject(objectWriter);
         }

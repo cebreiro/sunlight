@@ -5,7 +5,7 @@
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
-#include "sl/emulator/game/contents/attack/attack_result.h"
+#include "sl/emulator/game/contents/damage/damage_result.h"
 #include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_factory.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_interface.h"
@@ -280,10 +280,10 @@ namespace sunlight
                     {
                     case SkillEffectCategory::Damage:
                     {
-                        const AttackResult result{
+                        const DamageResult result{
                             .attackerId = player.GetId(),
                             .attackerType = player.GetType(),
-                            .damageType = AttackDamageType::DamageMonster,
+                            .damageType = DamageType::DamageMonster,
                             .id = attackId,
                             .motionId = 3,
                             .skillId = skillId,
@@ -291,16 +291,16 @@ namespace sunlight
                             .damage = 1234,
                             .damageCount = 1,
                             .damageInterval = 0,
-                            .attackBlowGroup = 0,
-                            .attackTargetBlowType = AttackTargetBlowType::BlowSmall,
-                            .attackedResultType = AttackedResultType::Damage_A,
+                            .blowGroup = 0,
+                            .blowType = DamageBlowType::BlowSmall,
+                            .attackedResultType = DamageResultType::Damage_A,
                         };
 
                         for (GameEntity* target : skillTargets)
                         {
                             Get<EntityViewRangeSystem>().VisitPlayer(*target, [target, &result](GamePlayer& player)
                                 {
-                                    player.Send(StatusMessageCreator::CreateAttackResult(*target, result));
+                                    player.Send(StatusMessageCreator::CreateDamageResult(*target, result));
                                 });
                         }
                     }
@@ -379,10 +379,10 @@ namespace sunlight
     {
         (void)motionData;
 
-        const AttackResult result{
+        const DamageResult result{
             .attackerId = player.GetId(),
             .attackerType = player.GetType(),
-            .damageType = AttackDamageType::DamageMonster,
+            .damageType = DamageType::DamageMonster,
             .id = attackId,
             .motionId = 3,
             .skillId = 0,
@@ -390,14 +390,14 @@ namespace sunlight
             .damage = 1234,
             .damageCount = 1,
             .damageInterval = 0,
-            .attackBlowGroup = 0,
-            .attackTargetBlowType = AttackTargetBlowType::BlowSmall,
-            .attackedResultType = AttackedResultType::Damage_A,
+            .blowGroup = 0,
+            .blowType = DamageBlowType::BlowSmall,
+            .attackedResultType = DamageResultType::Damage_A,
         };
 
         Get<EntityViewRangeSystem>().VisitPlayer(monster, [&monster, &result](GamePlayer& player)
             {
-                player.Send(StatusMessageCreator::CreateAttackResult(monster, result));
+                player.Send(StatusMessageCreator::CreateDamageResult(monster, result));
             });
     }
 

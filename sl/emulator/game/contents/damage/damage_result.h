@@ -1,17 +1,17 @@
 #pragma once
-#include "sl/emulator/game/contents/attack/attack_result_type.h"
+#include "sl/emulator/game/contents/damage/damage_result_type.h"
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/entity/game_entity_type.h"
 #include "sl/emulator/service/gamedata/item/weapon_class_type.h"
 
 namespace sunlight
 {
-    struct AttackResult
+    struct DamageResult
     {
         game_entity_id_type attackerId = {};
         GameEntityType attackerType = {};
 
-        AttackDamageType damageType = AttackDamageType::None;
+        DamageType damageType = DamageType::None;
         int32_t id = 0;
 
         // motionId 3 -> display skill effect to attacked
@@ -29,9 +29,9 @@ namespace sunlight
 
         // client 0x491802
         // 0 -> default: 0x10000969
-        int32_t attackBlowGroup = 0;
-        AttackTargetBlowType attackTargetBlowType = AttackTargetBlowType::BlowSmall;
+        int32_t blowGroup = 0;
+        DamageBlowType blowType = DamageBlowType::BlowSmall;
 
-        AttackedResultType attackedResultType = AttackedResultType::Damage_A;
+        DamageResultType attackedResultType = DamageResultType::Damage_A;
     };
 }
