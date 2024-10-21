@@ -1,11 +1,14 @@
 #include "player_skill_effect_system.h"
 
+#include "sl/data/abf/ability_value.h"
 #include "sl/emulator/game/component/entity_passive_effect_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/contents/damage/damage_result.h"
+#include "sl/emulator/game/contents/damage/player_attack_damage_calculator.h"
+#include "sl/emulator/game/contents/damage/player_attack_damage_calculator_interface.h"
 #include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_factory.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_interface.h"
@@ -37,6 +40,7 @@ namespace sunlight
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
         , _skillTargetSelector(std::make_unique<PlayerSkillTargetSelector>(*this))
+        , _damageCalculator(std::make_unique<PlayerAttackDamageCalculator>())
     {
     }
 
@@ -236,7 +240,9 @@ namespace sunlight
             return;
         }
 
-        if (skill->GetData().applyCasting)
+        const PlayerSkillData& skillData = skill->GetData();
+
+        if (skillData.applyCasting)
         {
             if (state.param1 <= 0)
             {
@@ -250,14 +256,14 @@ namespace sunlight
         GameEntity* mainTarget = targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(targetType, targetId).get() : nullptr;
 
         PlayerSkillTargetSelector::result_type skillTargets;
-        if (!_skillTargetSelector->SelectTarget(skillTargets, player, skill->GetData(), mainTarget))
+        if (!_skillTargetSelector->SelectTarget(skillTargets, player, skillData, mainTarget))
         {
             player.Notice(fmt::format("fail to select skill target. skill: {}", skillId));
 
             return;
         }
 
-        auto applySkillEffect = [this, attackId = state.attackId, skillId, weaponClass, skillTargets](GamePlayer& player) mutable
+        auto applySkillEffect = [this, attackId = state.attackId, skillId, weaponClass, skillTargets](GamePlayer& player, const AbilityValue* abilityValue) mutable
             {
                 PlayerSkillComponent& skillComponent = player.GetSkillComponent();
                 PlayerSkill* skill = skillComponent.FindSkill(skillId);
@@ -272,32 +278,47 @@ namespace sunlight
                     player.Notice(fmt::format("skill: {}, target: [{}, {}]", skillId, target->GetId(), ToString(target->GetType())));
                 }
 
-                const PlayerSkillData& data = skill->GetData();
-
-                for (const SkillEffectData& skillEffect : data.effects)
+                for (const SkillEffectData& skillEffect : skill->GetData().effects)
                 {
                     switch (skillEffect.category)
                     {
                     case SkillEffectCategory::Damage:
                     {
-                        const DamageResult result{
-                            .attackerId = player.GetId(),
-                            .attackerType = player.GetType(),
-                            .damageType = DamageType::DamageMonster,
-                            .id = attackId,
-                            .motionId = 3,
-                            .skillId = skillId,
-                            .weaponClass = weaponClass,
-                            .damage = 1234,
-                            .damageCount = 1,
-                            .damageInterval = 0,
-                            .blowGroup = 0,
-                            .blowType = DamageBlowType::BlowSmall,
-                            .attackedResultType = DamageResultType::Damage_A,
-                        };
-
                         for (GameEntity* target : skillTargets)
                         {
+                            if (target->GetType() != GameEntityType::Enemy)
+                            {
+                                continue;
+                            }
+
+                            const PlayerSkillDamageCalculateParam damageCalculateParam{
+                                .player = player,
+                                .target = *target->Cast<GameMonster>(),
+                                .skill = *skill,
+                                .skillEffectData = skillEffect,
+                                .chargingCount = 0,
+                                .attackSequence = 0,
+                                .abilityValue = abilityValue
+                            };
+
+                            PlayerSkillDamageCalculateResult damageCalculateResult;
+                            _damageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
+
+                            const DamageResult result{
+                                .attackerId = player.GetId(),
+                                .attackerType = player.GetType(),
+                                .damageType = damageCalculateResult.isDodged ? DamageType::DodgeMonster : DamageType::DamageMonster,
+                                .id = attackId,
+                                .motionId = 3,
+                                .skillId = skillId,
+                                .weaponClass = weaponClass,
+                                .damage = damageCalculateResult.damage,
+                                .damageCount = damageCalculateResult.damageCount,
+                                .damageInterval = damageCalculateResult.damageInterval,
+                                .blowType = DamageBlowType::BlowSmall,
+                                .attackedResultType = DamageResultType::Damage_A,
+                            };
+
                             Get<EntityViewRangeSystem>().VisitPlayer(*target, [target, &result](GamePlayer& player)
                                 {
                                     player.Send(StatusMessageCreator::CreateDamageResult(*target, result));
@@ -318,27 +339,28 @@ namespace sunlight
                 }
             };
 
-        const auto& effectApplyTimes = skill->GetData().effectApplyTimes;
-
-        if (const auto iter = effectApplyTimes.find(weaponClass);
-            iter != effectApplyTimes.end())
+        if (const auto iter = skillData.effectAttackValues.find(weaponClass);
+            iter != skillData.effectAttackValues.end())
         {
-            for (int32_t time : iter->second)
+            for (const AbilityValue& abilityValue : iter->second | notnull::reference)
             {
-                if (time == 0)
+                if (abilityValue.begin == 0)
                 {
-                    applySkillEffect(player);
+                    applySkillEffect(player, &abilityValue);
                 }
                 else
                 {
-                    _serviceLocator.Get<ZoneTimerService>().AddTimer(
-                        std::chrono::milliseconds(time), player.GetCId(), _stageId, applySkillEffect);
+                    _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(abilityValue.begin),
+                        player.GetCId(), _stageId, [applySkillEffect, &abilityValue](GamePlayer& player) mutable
+                        {
+                            applySkillEffect(player, &abilityValue);
+                        });
                 }
             }
         }
         else
         {
-            applySkillEffect(player);
+            applySkillEffect(player, nullptr);
         }
     }
 

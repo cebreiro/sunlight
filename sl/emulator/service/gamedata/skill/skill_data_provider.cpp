@@ -28,7 +28,7 @@ namespace sunlight
                     {
                         if (value.type == 2)
                         {
-                            data.effectApplyTimes[static_cast<WeaponClassType>(routine.weaponClass)].push_back(value.begin);
+                            data.effectAttackValues[static_cast<WeaponClassType>(routine.weaponClass)].push_back(&value);
                         }
                     }
                 }
