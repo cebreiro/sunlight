@@ -6,7 +6,6 @@ namespace sunlight
     class ServerCommandSystem;
 }
 
-
 namespace sunlight
 {
     class ServerCommandDebugServer final : public ServerCommandT<int32_t, int32_t>
