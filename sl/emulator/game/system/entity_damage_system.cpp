@@ -146,13 +146,13 @@ namespace sunlight
 
         Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
             {
+                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
+                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+
 				if (newHP <= 0)
 				{
 					player.Defer(SceneObjectPacketCreator::CreateState(target, monsterStateComponent.GetState()));
 				}
-
-                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
-                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
 
                 player.FlushDeferred();
             });
