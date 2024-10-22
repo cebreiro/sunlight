@@ -532,12 +532,14 @@ namespace sunlight
         assert(item->GetQuantity() > 0);
 
         bool shouldRemove = false;
+        bool added = false;
 
         if (item->GetData().GetId() == GameConstant::ITEM_ID_GOLD)
         {
             Get<ItemArchiveSystem>().AddGold(player, item->GetQuantity());
 
             shouldRemove = true;
+            added = true;
         }
         else
         {
@@ -546,18 +548,20 @@ namespace sunlight
             shouldRemove = Get<ItemArchiveSystem>().GainItem(player,
                 std::static_pointer_cast<GameItem>(entity), addQuantity);
 
-            if (addQuantity > 0)
-            {
-                const Eigen::Vector2f& position = entity->GetComponent<SceneObjectComponent>().GetPosition();
-
-                player.Send(GamePlayerMessageCreator::CreatePlayerGainGroupItem(player,
-                    static_cast<int32_t>(position.x()), static_cast<int32_t>(position.y())));
-            }
+            added = addQuantity > 0;
 
             if (!shouldRemove)
             {
                 assert(item->GetQuantity() > 0);
             }
+        }
+
+        if (added)
+        {
+            const Eigen::Vector2f& position = entity->GetComponent<SceneObjectComponent>().GetPosition();
+
+            player.Send(GamePlayerMessageCreator::CreatePlayerGainGroupItem(player,
+                static_cast<int32_t>(position.x()), static_cast<int32_t>(position.y())));
         }
 
         if (shouldRemove)

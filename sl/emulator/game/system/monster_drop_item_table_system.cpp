@@ -224,6 +224,8 @@ namespace sunlight
                     dropItemSet.items.emplace_back(itemPtr, itemProbability);
                     dropItemSet.maxWeight += itemProbability;
                 }
+
+                itemSetList.emplace_back(std::move(dropItemSet));
             }
         }
 
@@ -243,6 +245,8 @@ namespace sunlight
                     dropItemSet.items.emplace_back(itemPtr, itemProbability);
                     dropItemSet.maxWeight += itemProbability;
                 }
+
+                itemSetList.emplace_back(std::move(dropItemSet));
             }
         }
     }
