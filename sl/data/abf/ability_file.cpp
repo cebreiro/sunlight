@@ -92,6 +92,10 @@ namespace sunlight
                     value.assetName = reader.ReadString(64);
                     value.unk5 = reader.Read<int32_t>();
 
+                    value.otherUnk1 = reader.Read<int32_t>();
+                    value.otherUnk2 = reader.Read<int32_t>();
+                    value.otherUnk3 = reader.Read<float>();
+                    value.damageCount = reader.Read<int32_t>();
                     reader.ReadBuffer(value.buffer.data(), std::ssize(value.buffer));
                 }
             }

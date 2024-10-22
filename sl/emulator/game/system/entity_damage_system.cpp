@@ -1,5 +1,6 @@
 #include "entity_damage_system.h"
 
+#include "sl/data/abf/ability_value.h"
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/item_ownership_component.h"
@@ -95,8 +96,8 @@ namespace sunlight
             .skillId = skill.GetId(),
             .weaponClass = weaponClass,
             .damage = damageCalculateResult.damage,
-            .damageCount = std::max(1, effect.value6),
-            .damageInterval = effect.value7,
+            .damageCount = abilityValue ? std::max(1, abilityValue->damageCount) : 1,
+            .damageInterval = (abilityValue && abilityValue->damageCount > 1) ? (abilityValue->end - abilityValue->begin) / abilityValue->damageCount : 0,
             .blowType = DamageBlowType::BlowSmall,
             .attackedResultType = DamageResultType::Damage_A,
         };
