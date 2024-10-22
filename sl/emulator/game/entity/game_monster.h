@@ -5,6 +5,7 @@ namespace sunlight
 {
     class MonsterData;
 
+    class SceneObjectComponent;
     class EntityStateComponent;
     class MonsterStatComponent;
 }
@@ -26,6 +27,8 @@ namespace sunlight
         auto GetSpawnerId() const -> std::optional<game_entity_id_type>;
 
     public:
+        auto GetSceneObjectComponent() -> SceneObjectComponent&;
+        auto GetSceneObjectComponent() const -> const SceneObjectComponent&;
         auto GetStateComponent() -> EntityStateComponent&;
         auto GetStateComponent() const -> const EntityStateComponent&;
         auto GetStatComponent() -> MonsterStatComponent&;

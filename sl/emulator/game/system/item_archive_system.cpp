@@ -353,6 +353,19 @@ namespace sunlight
         player.Defer(ItemArchiveMessageCreator::CreateGoldAddOrSub(player, price));
     }
 
+    void ItemArchiveSystem::AddGold(GamePlayer& player, int32_t value)
+    {
+        if (value == 0)
+        {
+            return;
+        }
+
+        player.GetItemComponent().AddOrSubGold(value);
+        player.Send(ItemArchiveMessageCreator::CreateGoldAddOrSub(player, value));
+
+        SaveChanges(player);
+    }
+
     bool ItemArchiveSystem::AddItem(GamePlayer& player, int32_t itemId, int32_t quantity)
     {
         const ItemDataProvider& itemDataProvider = _serviceLocator.Get<GameDataProvideService>().GetItemDataProvider();

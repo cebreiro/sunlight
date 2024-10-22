@@ -44,7 +44,7 @@ namespace sunlight
         _skillDataProvider = std::make_shared<SkillDataProvider>(_serviceLocator, *_soxTableSet, *_abilityFileDataProvider);
         _expDataProvider = std::make_shared<ExpDataProvider>(*_soxTableSet);
         _npcShopDataProvider = std::make_shared<NPCShopDataProvider>(*_soxTableSet);
-        _monsterDataProvider = std::make_shared<MonsterDataProvider>(*_soxTableSet);
+        _monsterDataProvider = std::make_shared<MonsterDataProvider>(*_soxTableSet, *_itemDataProvider);
         _playerMotionDataProvider = std::make_shared<PlayerMotionDataProvider>(*_soxTableSet);
     }
 

@@ -1,21 +1,29 @@
 #include "entity_damage_system.h"
 
+#include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/entity_state_component.h"
+#include "sl/emulator/game/component/item_ownership_component.h"
 #include "sl/emulator/game/component/monster_stat_component.h"
+#include "sl/emulator/game/component/player_party_component.h"
+#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/damage/damage_result.h"
 #include "sl/emulator/game/contents/damage/player_attack_damage_calculator.h"
 #include "sl/emulator/game/contents/skill/player_skill.h"
 #include "sl/emulator/game/contents/stat/stat_value.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/monster_base.h"
+#include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/message/creator/status_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/monster_drop_item_table_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
 #include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
@@ -25,6 +33,7 @@ namespace sunlight
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
         , _damageCalculator(std::make_unique<PlayerAttackDamageCalculator>())
+        , _mt(std::random_device{}())
     {
     }
 
@@ -37,6 +46,7 @@ namespace sunlight
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<PlayerIndexSystem>());
         Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<MonsterDropItemTableSystem>());
     }
 
     bool EntityDamageSystem::Subscribe(Stage& stage)
@@ -93,21 +103,6 @@ namespace sunlight
 
         EntityStateComponent& monsterStateComponent = target.GetStateComponent();
 
-        bool shouldStiffen = [&]() -> bool
-            {
-                const GameEntityStateType currentState = monsterStateComponent.GetState().type;
-
-                // client 0x49648A
-                if (currentState == GameEntityStateType::NormalAttack || currentState == GameEntityStateType::DamagedMotion)
-                {
-                    return false;
-                }
-
-                // TODO: implement
-
-                return false;
-            }();
-
         if (damageCalculateResult.isDodged)
         {
             Get<EntityViewRangeSystem>().VisitPlayer(target, [&target, &result](GamePlayer& player)
@@ -128,13 +123,14 @@ namespace sunlight
         const int32_t maxHP = monsterStatComponent.GetData().hp;
 
         monsterStatComponent.SetHP(newHP);
+		const bool dead = newHP <= 0;
 
-        if (newHP <= 0)
+        if (dead)
         {
             monsterStatComponent.SetDead(true);
 
             monsterStateComponent.SetState(GameEntityState{
-                .type = GameEntityStateType::Dying,
+                .type = GameEntityStateType::Dead,
                 });
 
             _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(3000),
@@ -144,39 +140,42 @@ namespace sunlight
 
                     Get<SceneObjectSystem>().RemoveMonster(target.GetId());
                 });
+
+			DropMonsterItem(*target.Cast<GameMonster>(), &player);
         }
 
         Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
             {
+				if (newHP <= 0)
+				{
+					player.Defer(SceneObjectPacketCreator::CreateState(target, monsterStateComponent.GetState()));
+				}
+
                 player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
                 player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
-
-                if (newHP <= 0 || !shouldStiffen)
-                {
-                    player.Defer(SceneObjectPacketCreator::CreateState(target, monsterStateComponent.GetState()));
-                }
 
                 player.FlushDeferred();
             });
 
-        if (newHP <= 0)
+        if (dead)
         {
-            // TODO: drop item
-
             return;
         }
 
-        const int32_t tickDamage = result.damage / result.damageCount;
-        const int32_t tickCount = result.damageCount - 1;
+		if (result.damageCount > 1)
+		{
+			const int32_t tickDamage = result.damage / result.damageCount;
+			const int32_t tickCount = result.damageCount - 1;
 
-        for (int32_t i = 0; i < tickCount; ++i)
-        {
-            _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds((1 + i) * result.damageInterval),
-                [this, tickDamage, playerId = player.GetCId(), targetId = target.GetId()]()
-                {
-                    this->OnDelayDamage(playerId, targetId, tickDamage);
-                });
-        }
+			for (int32_t i = 0; i < tickCount; ++i)
+			{
+				_serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds((1 + i) * result.damageInterval),
+					[this, tickDamage, playerId = player.GetCId(), targetId = target.GetId()]()
+					{
+						this->OnDelayDamage(playerId, targetId, tickDamage);
+					});
+			}
+		}
     }
 
     void EntityDamageSystem::OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage)
@@ -206,16 +205,30 @@ namespace sunlight
             return;
         }
 
+		const int32_t maxHP = monsterStatComponent.GetData().hp;
         const StatValue currentHP(monsterStatComponent.GetHP());
 
         const int32_t newHP = std::max(0, currentHP.As<int32_t>() - damage);
-        const int32_t maxHP = monsterStatComponent.GetData().hp;
+		monsterStatComponent.SetHP(newHP);
 
-        if (newHP < 0)
+		const bool dead = newHP <= 0;
+        if (dead)
         {
+			monsterStatComponent.SetDead(true);
+
             target.GetStateComponent().SetState(GameEntityState{
-                .type = GameEntityStateType::Dying,
+                .type = GameEntityStateType::Dead,
                 });
+
+			_serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(3000),
+				target, _stageId, [this](const GameEntity& target)
+				{
+					assert(target.GetType() == GameMonster::TYPE);
+
+					Get<SceneObjectSystem>().RemoveMonster(target.GetId());
+				});
+
+			DropMonsterItem(*target.Cast<GameMonster>(), player);
         }
 
         Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
@@ -224,29 +237,60 @@ namespace sunlight
 
                 if (newHP <= 0)
                 {
-                    player.Defer(SceneObjectPacketCreator::CreateState(target, GameEntityState{
-                        .type = GameEntityStateType::Dying,
-                        }));
+                    player.Defer(SceneObjectPacketCreator::CreateState(target, target.GetStateComponent().GetState()));
                 }
 
                 player.FlushDeferred();
             });
+    }
 
-        monsterStatComponent.SetHP(newHP);
+    void EntityDamageSystem::DropMonsterItem(const GameMonster& monster, const GamePlayer* player)
+    {
+		_dropItemQueryResult.clear();
+		Get<MonsterDropItemTableSystem>().GetMonsterDropItem(_dropItemQueryResult, monster);
 
-        if (newHP <= 0)
-        {
-            monsterStatComponent.SetDead(true);
+		if (_dropItemQueryResult.empty())
+		{
+			return;
+		}
 
-            // TODO: drop item
+        GameEntityIdPublisher& entityIdPublisher = _serviceLocator.Get<GameEntityIdPublisher>();
+        SceneObjectSystem& sceneObjectSystem = Get<SceneObjectSystem>();
 
-            _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(3000),
-                target, _stageId, [this](const GameEntity& target)
-                {
-                    assert(target.GetType() == GameMonster::TYPE);
+		const Eigen::Vector2f monsterPos = monster.GetSceneObjectComponent().GetPosition();
 
-                    Get<SceneObjectSystem>().RemoveMonster(target.GetId());
-                });
-        }
+		std::uniform_real_distribution<float> dist(-15.f, 15.f);
+
+		for (const auto& [itemPtr, quantity] : _dropItemQueryResult)
+		{
+			auto item = std::make_shared<GameItem>(entityIdPublisher, *itemPtr, quantity);
+
+			if (player)
+			{
+				auto ownershipComponent = std::make_unique<ItemOwnershipComponent>();
+				ownershipComponent->SetEndTimePoint(GameTimeService::Now() + GameConstant::DROP_ITEM_OWNERSHIP_DURATION);
+
+				if (player->GetPartyComponent().HasParty())
+				{
+				    for (int64_t memberId : player->GetPartyComponent().GetMemberIds())
+				    {
+						ownershipComponent->Add(memberId);
+				    }
+				}
+				else
+				{
+					ownershipComponent->Add(player->GetCId());
+				}
+
+				item->AddComponent(std::move(ownershipComponent));
+			}
+
+			// TODO: query movable area, spawn on that
+			Eigen::Vector2f spawnPos = monsterPos;
+			spawnPos.x() += dist(_mt);
+			spawnPos.x() += dist(_mt);
+
+			sceneObjectSystem.SpawnItem(std::move(item), monsterPos, spawnPos);
+		}
     }
 }

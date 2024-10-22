@@ -46,6 +46,8 @@ namespace sunlight
         void Purchase(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId, int32_t itemId, int32_t page, int32_t x, int32_t y, int32_t quantity);
         void SellOwnItem(GamePlayer& player, GameNPC& npc, game_entity_id_type targetId);
 
+        void AddGold(GamePlayer& player, int32_t value);
+
         bool AddItem(GamePlayer& player, int32_t itemId, int32_t quantity);
         bool AddItem(GamePlayer& player, SharedPtrNotNull<GameItem> item);
 

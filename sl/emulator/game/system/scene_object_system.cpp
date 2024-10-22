@@ -285,14 +285,9 @@ namespace sunlight
 
     void SceneObjectSystem::SpawnMonster(SharedPtrNotNull<GameMonster> monster, Eigen::Vector2f pos, float yaw)
     {
-        if (!monster->HasComponent<SceneObjectComponent>())
-        {
-            monster->AddComponent(std::make_unique<SceneObjectComponent>());
-        }
-
         _entities[monster->GetType()][monster->GetId()] = monster;
 
-        SceneObjectComponent& sceneObjectComponent = monster->GetComponent<SceneObjectComponent>();
+        SceneObjectComponent& sceneObjectComponent = monster->GetSceneObjectComponent();
         sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(monster->GetType()));
         sceneObjectComponent.SetPosition(pos);
         sceneObjectComponent.SetDestPosition(pos);

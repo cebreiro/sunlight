@@ -2,11 +2,12 @@
 
 namespace sunlight
 {
-    MonsterData::MonsterData(int32_t id, const sox::MonsterBase& base, const sox::MonsterAction& action, const MonsterAttackData& attack)
+    MonsterData::MonsterData(int32_t id, const sox::MonsterBase& base, const sox::MonsterAction& action, const MonsterAttackData& attack, MonsterDropItemData dropItemData)
         : _id(id)
         , _base(&base)
         , _action(&action)
         , _attack(attack)
+        , _dropItemData(std::move(dropItemData))
     {
     }
 
@@ -32,5 +33,10 @@ namespace sunlight
     auto MonsterData::GetAttack() const -> const MonsterAttackData&
     {
         return _attack;
+    }
+
+    auto MonsterData::GetDropItemData() const -> const MonsterDropItemData&
+    {
+        return _dropItemData;
     }
 }

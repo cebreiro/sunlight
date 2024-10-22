@@ -8,6 +8,7 @@ namespace sunlight
     struct AbilityValue;
     struct SkillEffectData;
 
+    class ItemData;
     class PlayerSkill;
 
     class GamePlayer;
@@ -33,14 +34,17 @@ namespace sunlight
         void ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill, const SkillEffectData& effect,
             int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue);
 
-
     private:
         void OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage);
+        void DropMonsterItem(const GameMonster& monster, const GamePlayer* player);
 
     private:
         const ServiceLocator& _serviceLocator;
         int32_t _stageId = 0;
 
         UniquePtrNotNull<IPlayerAttackDamageCalculator> _damageCalculator;
+
+        std::vector<std::pair<PtrNotNull<const ItemData>, int32_t>> _dropItemQueryResult;
+        std::mt19937 _mt;
     };
 }

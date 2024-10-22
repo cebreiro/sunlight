@@ -51,5 +51,11 @@ namespace sunlight
 
         static constexpr float GAME_PLAYER_RADIUS = 15.f;
         static constexpr float OBB_COLLISION_NETWORK_DELAY_MARGIN = 10.f;
+
+        static constexpr int32_t ITEM_ID_GOLD = 1;
+        static constexpr int32_t ITEM_PROBABILITY_MAX = 100'0000;
+
+        // TODO: move to GameSetting
+        static constexpr auto DROP_ITEM_OWNERSHIP_DURATION = std::chrono::seconds(30);
     };
 }

@@ -531,28 +531,38 @@ namespace sunlight
         assert(item);
         assert(item->GetQuantity() > 0);
 
-        [[maybe_unused]]
-        const int32_t quantity = item->GetQuantity();
-        int32_t addQuantity = 0;
+        bool shouldRemove = false;
 
-        const bool shouldRemove = Get<ItemArchiveSystem>().GainItem(player,
-            std::static_pointer_cast<GameItem>(entity), addQuantity);
-
-        if (addQuantity > 0)
+        if (item->GetData().GetId() == GameConstant::ITEM_ID_GOLD)
         {
-            const Eigen::Vector2f& position = entity->GetComponent<SceneObjectComponent>().GetPosition();
+            Get<ItemArchiveSystem>().AddGold(player, item->GetQuantity());
 
-            player.Send(GamePlayerMessageCreator::CreatePlayerGainGroupItem(player,
-                static_cast<int32_t>(position.x()), static_cast<int32_t>(position.y())));
+            shouldRemove = true;
+        }
+        else
+        {
+            int32_t addQuantity = 0;
+
+            shouldRemove = Get<ItemArchiveSystem>().GainItem(player,
+                std::static_pointer_cast<GameItem>(entity), addQuantity);
+
+            if (addQuantity > 0)
+            {
+                const Eigen::Vector2f& position = entity->GetComponent<SceneObjectComponent>().GetPosition();
+
+                player.Send(GamePlayerMessageCreator::CreatePlayerGainGroupItem(player,
+                    static_cast<int32_t>(position.x()), static_cast<int32_t>(position.y())));
+            }
+
+            if (!shouldRemove)
+            {
+                assert(item->GetQuantity() > 0);
+            }
         }
 
         if (shouldRemove)
         {
             sceneObjectSystem.RemoveItem(itemId);
-        }
-        else
-        {
-            assert(item->GetQuantity() > 0);
         }
     }
 
