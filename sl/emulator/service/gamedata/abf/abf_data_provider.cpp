@@ -16,16 +16,12 @@ namespace sunlight
             const AssetData* assetData = assetDataProvider.Find(soxSkillBasicData.routineId);
             if (!assetData)
             {
-                std::cout << fmt::format("fail to find routine asset. skill: {}, passive: {}\n", soxSkillBasicData.name, soxSkillBasicData.passive);
-
                 continue;
             }
 
             const std::filesystem::path& filePath = assetDirectory / assetData->name;
             if (!exists(filePath))
             {
-                std::cout << fmt::format("fail to find abf. skill: {}, passive: {}\n", soxSkillBasicData.name, soxSkillBasicData.passive);
-
                 continue;
             }
 
