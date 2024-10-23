@@ -7,6 +7,7 @@ namespace sunlight
 {
     struct AbilityValue;
     struct SkillEffectData;
+    struct DamageResult;
 
     class ItemData;
     class PlayerSkill;
@@ -31,11 +32,15 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
+        void KillMonster(GamePlayer& player, game_entity_id_type mobId);
+
         void ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill, const SkillEffectData& effect,
             int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue);
 
     private:
         void OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage);
+
+        void ProcessMonsterDead(const GamePlayer& player, GameMonster& monster, const DamageResult* damageResult);
         void DropMonsterItem(const GameMonster& monster, const GamePlayer* player);
 
     private:

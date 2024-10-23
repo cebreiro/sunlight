@@ -6,6 +6,7 @@
 #include "sl/emulator/game/contents/server_command/server_command_register.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_community_message.h"
+#include "sl/emulator/game/system/entity_damage_system.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
@@ -35,6 +36,7 @@ namespace sunlight
         Add(stage.Get<EntityMovementSystem>());
         Add(stage.Get<NPCShopSystem>());
         Add(stage.Get<PlayerStateSystem>());
+        Add(stage.Get<EntityDamageSystem>());
 
         ServerCommandRegister::Register(*this);
     }
