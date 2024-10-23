@@ -1,10 +1,12 @@
 #include "entity_movement_system.h"
 
 #include "sl/emulator/game/component/entity_movement_component.h"
+#include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/movement/client_movement.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_request.h"
+#include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -60,12 +62,16 @@ namespace sunlight
 
                     const Eigen::Vector2f newPosition = ((1.f - t) * forwardMovement->position) + (t * forwardMovement->destPosition);
 
-                    entity.GetComponent<SceneObjectComponent>().SetPosition(newPosition);
+                    SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
+                    sceneObjectComponent.SetPosition(newPosition);
 
                     Get<EntityViewRangeSystem>().UpdateViewRange(entity, newPosition);
 
                     if (t >= 1.f)
                     {
+                        movementComponent.SetIsMoving(false);
+                        sceneObjectComponent.SetMoving(false);
+
                         iter = _movingEntities.erase(iter);
 
                         continue;
@@ -120,6 +126,44 @@ namespace sunlight
         Get<EntityViewRangeSystem>().UpdateViewRange(entity, sceneObjectComponent->GetPosition());
     }
 
+    void EntityMovementSystem::MoveTo(GameEntity& entity, Eigen::Vector2f position, float speed)
+    {
+        if (speed <= 0.f)
+        {
+            return;
+        }
+
+        EntityStateComponent& stateComponent = entity.GetComponent<EntityStateComponent>();
+        stateComponent.SetState(GameEntityState{
+            .type = GameEntityStateType::Moving,
+            .moveType = GameEntityState::MoveType::Walk,
+            .destPosition = Eigen::Vector3f(position.x(), position.y(), 0.f),
+            });
+
+        EntityMovementComponent& movementComponent = entity.GetComponent<EntityMovementComponent>();
+        SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
+
+        ClientMovement movement;
+        movement.position = sceneObjectComponent.GetPosition();
+        movement.destPosition = position;
+        movement.speed = speed;
+        movement.yaw = CreateYaw(sceneObjectComponent.GetPosition(), position);
+        movement.movementTypeBitMask = 0x10;
+
+        movementComponent.SetStartTimePoint(GameTimeService::Now());
+        movementComponent.SetClientMovement(movement);
+        sceneObjectComponent.Set(movement);
+
+        _movingEntities[entity.GetId()] = &entity;
+
+        Get<EntityViewRangeSystem>().VisitPlayer(entity, [&entity](GamePlayer& player)
+            {
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(entity));
+                player.Defer(SceneObjectPacketCreator::CreateState(entity));
+                player.FlushDeferred();
+            });
+    }
+
     void EntityMovementSystem::HandleMovement(const ZoneRequest& request)
     {
         GamePlayer& player = request.player;
@@ -133,7 +177,7 @@ namespace sunlight
 
         EntityMovementComponent& movementComponent = player.GetMovementComponent();
         movementComponent.SetStartTimePoint(GameTimeService::Now());
-        movementComponent.SetForwardMovement(movement2);
+        movementComponent.SetClientMovement(movement2);
 
         SceneObjectComponent& sceneObjectComponent = player.GetSceneObjectComponent();
         sceneObjectComponent.Set(movement2);
@@ -150,5 +194,12 @@ namespace sunlight
         EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
         viewRangeSystem.Broadcast(player, ZonePacketS2CCreator::CreateObjectMove(player), false);
         viewRangeSystem.UpdateViewRange(player, sceneObjectComponent.GetPosition());
+    }
+
+    auto EntityMovementSystem::CreateYaw(const Eigen::Vector2f& from, const Eigen::Vector2f& to) -> float
+    {
+        const Eigen::Vector2f vector = (to - from);
+
+        return std::atan2f(vector.y(), vector.x())* (180.f / static_cast<float>(std::numbers::pi));
     }
 }

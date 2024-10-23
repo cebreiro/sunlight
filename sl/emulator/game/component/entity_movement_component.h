@@ -16,7 +16,7 @@ namespace sunlight
 
         void SetIsMoving(bool value);
         void SetStartTimePoint(game_time_point_type startTimePoint);
-        void SetForwardMovement(const ClientMovement& movement);
+        void SetClientMovement(const ClientMovement& movement);
 
     private:
         game_time_point_type _startTimePoint;

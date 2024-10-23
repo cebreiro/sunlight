@@ -85,6 +85,24 @@ namespace sunlight
         StateMachine() = default;
         virtual ~StateMachine() = default;
 
+        auto AddState(bool setCurrent, SharedPtrNotNull<state_type> instance) -> StateTransition&
+        {
+            EState state = instance->GetState();
+
+            assert(!_transitions.contains(state));
+
+            state_type* ptr = _states.emplace_back(std::move(instance)).get();
+            auto iter = _transitions.try_emplace(state, StateTransition{}).first;
+
+            if (setCurrent)
+            {
+                _currentState = ptr;
+                _currentTransition = &iter->second;
+            }
+
+            return iter->second;
+        }
+
         template <typename T, typename... Args>
         auto AddState(bool setCurrent, Args&&... args) -> StateTransition&
         {
@@ -142,6 +160,13 @@ namespace sunlight
             assert(_currentState);
 
             return _currentState->GetState();
+        }
+
+        auto GetTransition(EState state) -> StateTransition*
+        {
+            const auto iter = _transitions.find(state);
+
+            return iter != _transitions.end() ? &iter->second : nullptr;
         }
 
     private:

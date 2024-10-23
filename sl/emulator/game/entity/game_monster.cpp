@@ -1,5 +1,6 @@
 #include "game_monster.h"
 
+#include "sl/emulator/game/component/entity_movement_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/entity_status_effect_component.h"
 #include "sl/emulator/game/component/monster_stat_component.h"
@@ -17,6 +18,7 @@ namespace sunlight
         AddComponent(std::make_unique<EntityStateComponent>());
         AddComponent(std::make_unique<EntityStatusEffectComponent>());
         AddComponent(std::make_unique<MonsterStatComponent>(_data.GetBase()));
+        AddComponent(std::make_unique<EntityMovementComponent>());
     }
 
     bool GameMonster::IsInvisible() const
@@ -57,6 +59,16 @@ namespace sunlight
     auto GameMonster::GetStateComponent() const -> const EntityStateComponent&
     {
         return GetComponent<EntityStateComponent>();
+    }
+
+    auto GameMonster::GetMovementComponent() -> EntityMovementComponent&
+    {
+        return GetComponent<EntityMovementComponent>();
+    }
+
+    auto GameMonster::GetMovementComponent() const -> const EntityMovementComponent&
+    {
+        return GetComponent<EntityMovementComponent>();
     }
 
     auto GameMonster::GetStatComponent() -> MonsterStatComponent&

@@ -54,7 +54,7 @@ namespace sunlight
         _startTimePoint = startTimePoint;
     }
 
-    void EntityMovementComponent::SetForwardMovement(const ClientMovement& movement)
+    void EntityMovementComponent::SetClientMovement(const ClientMovement& movement)
     {
         _movement = movement;
     }
