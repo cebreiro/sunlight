@@ -104,9 +104,7 @@ namespace sunlight
 
         writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerWeaponMotion(player));
         writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerStat(player));
-        
-        // unk maybe status_effect
-        writer.WriteZeroBytes(24);
+        writer.WriteObject(ZoneDataTransferObjectCreator::CreatePlayerStatusEffect(player));
 
         return writer.Flush();
     }

@@ -1,10 +1,12 @@
 #include "zone_data_transfer_object_creator.h"
 
+#include "sl/emulator/game/component/entity_status_effect_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_job_component.h"
 #include "sl/emulator/game/component/player_profile_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
+#include "sl/emulator/game/contents/status_effect/status_effect.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_data.h"
 
@@ -283,12 +285,19 @@ namespace sunlight
 
     auto ZoneDataTransferObjectCreator::CreatePlayerStatusEffect(const GamePlayer& player) -> Buffer
     {
-        (void)player;
+        const EntityStatusEffectComponent& statusEffectComponent = player.GetStatusEffectComponent();
+        const int32_t count = static_cast<int32_t>(statusEffectComponent.GetCount());
 
         PacketWriter writer;
+        writer.Write<int32_t>(count);
 
-        constexpr int32_t statusEffectCount = 0;
-        writer.Write<int32_t>(statusEffectCount);
+        if (count > 0)
+        {
+            for (const StatusEffect& statusEffect : statusEffectComponent.GetRange())
+            {
+                writer.WriteBuffer(CreateStatusEffect(player, statusEffect));
+            }
+        }
 
         return writer.Flush();
     }
@@ -354,5 +363,30 @@ namespace sunlight
         }
 
         return writer.Flush();
+    }
+
+    auto ZoneDataTransferObjectCreator::CreateStatusEffect(const GameEntity& owner, const StatusEffect& statusEffect) -> boost::container::static_vector<char, 56>
+    {
+        boost::container::static_vector<char, 56> result = {};
+        StreamWriter writer(result);
+
+        /* a3 + 00 */writer.Write<int32_t>(static_cast<int32_t>(owner.GetId().Unwrap()));
+        /* a3 + 04 */writer.Write<int32_t>(static_cast<int32_t>(owner.GetType()));
+        /* a3 + 08 */writer.Write<int32_t>(statusEffect.IsHidden() ? 1 : 0);
+        /* a3 + 12 */writer.Write<int32_t>(0);
+
+        // client 0x4B443F
+        /* a3 + 16 */writer.Write<int32_t>(statusEffect.GetSkillId()); // CONDITION_ACTION.sox -> index
+        /* a3 + 20 */writer.Write<int32_t>(1700); // client 0x4787E0. param 1700 works
+        /* a3 + 24 */writer.Write<int32_t>(static_cast<int32_t>(statusEffect.GetType()));
+        /* a3 + 28 */writer.Write<int32_t>(0);
+        /* a3 + 32 */writer.Write<int32_t>(0);
+        /* a3 + 36 */writer.Write<int32_t>(statusEffect.GetId());
+        /* a3 + 40 */writer.Write<int32_t>(statusEffect.GetStatValue());
+        /* a3 + 44 */writer.Write<int32_t>(statusEffect.GetStatType());
+        /* a3 + 48 */writer.Write<float>(static_cast<float>(statusEffect.GetStatPercentageValue()) / 100.f);
+        /* a3 + 52 */writer.Write<int32_t>(statusEffect.GetType() == StatusEffectType::DyingResistance ? 777 : 0); // client 0x4B49F0
+
+        return result;
     }
 }

@@ -1,7 +1,11 @@
 #pragma once
+#include <boost/container/static_vector.hpp>
 
 namespace sunlight
 {
+    class StatusEffect;
+
+    class GameEntity;
     class GamePlayer;
 }
 
@@ -21,5 +25,7 @@ namespace sunlight
 
         static auto CreatePlayerStat(const GamePlayer& player) -> Buffer;
         static auto CreatePlayerWeaponMotion(const GamePlayer& player) -> Buffer;
+
+        static auto CreateStatusEffect(const GameEntity& owner, const StatusEffect& statusEffect) -> boost::container::static_vector<char, 56>;
     };
 }

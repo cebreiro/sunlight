@@ -4,6 +4,7 @@
 
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/item_ownership_component.h"
+#include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_entity_network_id.h"
@@ -136,7 +137,7 @@ namespace sunlight
         writer.Write(static_cast<int32_t>(monster.GetId().Unwrap()));
         writer.Write<int8_t>(monster.IsInvisible() ? 1 : 0);
         writer.Write<int32_t>(monster.GetDataId());
-        writer.Write<int32_t>(30); // hp
+        writer.Write<int32_t>(monster.GetStatComponent().GetHP().As<int32_t>());
         writer.Write<int8_t>(showSpawnEffect ? 0 : 1);
         writer.Write<int32_t>(0); // buff count
         // buffs

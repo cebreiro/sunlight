@@ -191,6 +191,9 @@ namespace sunlight
         , _zoneId(dto.zone)
         , _client(std::move(client))
     {
+        _armed = dto.arms;
+        _running = dto.running;
+
         (void)AddComponent(CreatePlayerAppearanceComponent(dataProvider.GetItemDataProvider(), dto));
         (void)AddComponent(std::make_unique<PlayerItemComponent>(idPublisher, dataProvider.GetItemDataProvider(), dto));
         (void)AddComponent(std::make_unique<PlayerJobComponent>(dataProvider, dto.jobs));
