@@ -5,6 +5,7 @@
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/time/game_time_service.h"
 
 namespace sunlight
 {
@@ -43,6 +44,28 @@ namespace sunlight
 
     MonsterController::~MonsterController()
     {
+    }
+
+    bool MonsterController::ShouldStopCoroutine() const
+    {
+        const auto& entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
+        if (!entity)
+        {
+            return true;
+        }
+
+        if (entity->GetId().GetRecycleSequence() != _entityId.GetRecycleSequence())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    void MonsterController::ConfigureCoroutineExecutionContext()
+    {
+        const auto now = game_clock_type::now();
+        GameTimeService::SetNow(now);
     }
 
     void MonsterController::Start()

@@ -10,7 +10,6 @@ namespace sunlight
     public:
         MonsterAIStateWander();
 
-        void OnEnter() override;
         auto OnEvent(const MonsterAIStateParam& event) -> Future<void> override;
 
     private:

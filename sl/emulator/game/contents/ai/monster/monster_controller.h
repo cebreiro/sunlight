@@ -17,6 +17,9 @@ namespace sunlight
         MonsterController(EntityAIControlSystem& system, game_entity_id_type entityId, const MonsterData& data);
         ~MonsterController();
 
+        bool ShouldStopCoroutine() const;
+        void ConfigureCoroutineExecutionContext();
+
         void Start();
         void Shutdown();
 

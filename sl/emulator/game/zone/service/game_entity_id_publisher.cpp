@@ -18,7 +18,7 @@ namespace sunlight
 
         if (_nextValue < 1000 || _recycleQueue.empty())
         {
-            const game_entity_id_type result = game_entity_id_type(++_nextValue);
+            const game_entity_id_type result = game_entity_id_type(++_nextValue, 1);
 
             assert(result != game_entity_id_type(NULL_ID));
 
@@ -27,7 +27,9 @@ namespace sunlight
 
         assert(!_recycleQueue.empty());
 
-        const game_entity_id_type result = _recycleQueue.front();
+        game_entity_id_type result = _recycleQueue.front();
+        result.SetRecycleSequence(result.GetRecycleSequence() + 1);
+
         _recycleQueue.pop();
 
         return result;

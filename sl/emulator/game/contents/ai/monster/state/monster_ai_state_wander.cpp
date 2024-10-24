@@ -2,6 +2,7 @@
 
 #include "sl/emulator/game/component/monster_aggro_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/contents/ai/monster/monster_controller.h"
 #include "sl/emulator/game/data/sox/monster_action.h"
 #include "sl/emulator/game/data/sox/monster_base.h"
 #include "sl/emulator/game/entity/game_monster.h"
@@ -21,14 +22,10 @@ namespace sunlight
     {
     }
 
-    void MonsterAIStateWander::OnEnter()
-    {
-        _lastScanTime = GameTimeService::Now();
-    }
-
     auto MonsterAIStateWander::OnEvent(const MonsterAIStateParam& event) -> Future<void>
     {
         EntityAIControlSystem& system = event.system;
+        MonsterController& controller = event.controller;
         GameMonster& monster = event.monster;
         MonsterAggroComponent& monsterAggroComponent = monster.GetAggroComponent();
 
@@ -39,20 +36,17 @@ namespace sunlight
             const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(GameTimeService::Now() - _lastScanTime);
             if (duration >= std::chrono::milliseconds(actionData.scanTime))
             {
-                const game_entity_id_type monsterId = monster.GetId();
-
                 _playerScanResult.clear();
                 co_await system.Get<EntityScanSystem>().ScanPlayerAsync(_playerScanResult, monster, static_cast<float>(actionData.sightRange));
 
-                if (!system.Get<SceneObjectSystem>().Contains(GameMonster::TYPE, monsterId))
+                if (controller.ShouldStopCoroutine())
                 {
                     co_return;
                 }
 
-                const auto now = game_clock_type::now();
-                GameTimeService::SetNow(now);
+                controller.ConfigureCoroutineExecutionContext();
 
-                _lastScanTime = now;
+                _lastScanTime = GameTimeService::Now();
 
                 if (!_playerScanResult.empty())
                 {

@@ -180,7 +180,7 @@ namespace sunlight
         }
 
         const auto& targetEntity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, targetMonsterId);
-        if (!targetEntity)
+        if (!targetEntity || targetEntity->GetId().GetRecycleSequence() != targetMonsterId.GetRecycleSequence())
         {
             return;
         }
