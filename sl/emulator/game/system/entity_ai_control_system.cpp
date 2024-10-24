@@ -3,6 +3,7 @@
 #include "sl/emulator/game/contents/ai/monster/monster_controller.h"
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
+#include "sl/emulator/game/system/entity_scan_system.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/event_bubbling/ai_event_bubbling.h"
@@ -23,6 +24,7 @@ namespace sunlight
     {
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<EntityMovementSystem>());
+        Add(stage.Get<EntityScanSystem>());
     }
 
     bool EntityAIControlSystem::Subscribe(Stage& stage)

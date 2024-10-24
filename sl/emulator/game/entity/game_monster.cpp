@@ -3,8 +3,10 @@
 #include "sl/emulator/game/component/entity_movement_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/entity_status_effect_component.h"
+#include "sl/emulator/game/component/monster_aggro_component.h"
 #include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/data/sox/monster_action.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
 
 namespace sunlight
@@ -19,6 +21,9 @@ namespace sunlight
         AddComponent(std::make_unique<EntityStatusEffectComponent>());
         AddComponent(std::make_unique<MonsterStatComponent>(_data.GetBase()));
         AddComponent(std::make_unique<EntityMovementComponent>());
+        AddComponent(std::make_unique<MonsterAggroComponent>(_data.GetAction()));
+
+        GetSceneObjectComponent().SetBodySize(data.GetAction().bodySize);
     }
 
     bool GameMonster::IsInvisible() const
@@ -79,5 +84,15 @@ namespace sunlight
     auto GameMonster::GetStatComponent() const -> const MonsterStatComponent&
     {
         return GetComponent<MonsterStatComponent>();
+    }
+
+    auto GameMonster::GetAggroComponent() -> MonsterAggroComponent&
+    {
+        return GetComponent<MonsterAggroComponent>();
+    }
+
+    auto GameMonster::GetAggroComponent() const -> const MonsterAggroComponent&
+    {
+        return GetComponent<MonsterAggroComponent>();
     }
 }

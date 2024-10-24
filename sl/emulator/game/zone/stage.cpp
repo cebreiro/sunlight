@@ -18,6 +18,7 @@
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/entity_damage_system.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
+#include "sl/emulator/game/system/entity_scan_system.h"
 #include "sl/emulator/game/system/entity_status_effect_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
@@ -371,6 +372,7 @@ namespace sunlight
         Add(std::make_shared<MonsterDropItemTableSystem>(_serviceLocator, _stageData.id));
         Add(std::make_shared<EventBubblingSystem>());
         Add(std::make_shared<EntityAIControlSystem>(_serviceLocator));
+        Add(std::make_shared<EntityScanSystem>());
 
         const auto range = _systems | std::views::values;
 

@@ -89,6 +89,11 @@ namespace sunlight
         return GameSystem::GetClassId<SceneObjectSystem>();
     }
 
+    bool SceneObjectSystem::Contains(GameEntityType type, game_entity_id_type id) const
+    {
+        return FindEntity(type, id) != nullptr;
+    }
+
     void SceneObjectSystem::SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType)
     {
         _entities[player->GetType()][player->GetId()] = player;

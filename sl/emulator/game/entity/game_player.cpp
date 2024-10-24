@@ -211,6 +211,8 @@ namespace sunlight
         (void)AddComponent(std::make_unique<EntityStatusEffectComponent>());
         (void)AddComponent(std::make_unique<PlayerDebugComponent>());
         (void)AddComponent(std::make_unique<EntityPassiveEffectComponent>());
+
+        GetSceneObjectComponent().SetBodySize(GameConstant::PLAYER_BODY_SIZE);
     }
 
     bool GamePlayer::HasDeferred() const

@@ -18,6 +18,7 @@ namespace sunlight
         auto GetUnk2() const -> uint16_t;
         auto GetMovementTypeBitMask() const -> uint16_t;
         auto GetMovement() const -> const ClientMovement&;
+        auto GetBodySize() const -> int32_t;
 
         void SetId(int32_t id);
         void SetPosition(const Eigen::Vector2f& pos);
@@ -30,9 +31,11 @@ namespace sunlight
 
         void Set(const ClientMovement& movement);
         void SetMoving(bool value);
+        void SetBodySize(int32_t value);
 
     private:
         int32_t _id = 0;
+        int32_t _bodySize = 0;
 
         ClientMovement _clientMovement;
     };

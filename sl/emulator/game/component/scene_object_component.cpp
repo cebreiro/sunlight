@@ -52,6 +52,11 @@ namespace sunlight
         return _clientMovement;
     }
 
+    auto SceneObjectComponent::GetBodySize() const -> int32_t
+    {
+        return _bodySize;
+    }
+
     void SceneObjectComponent::SetId(int32_t id)
     {
         _id = id;
@@ -100,5 +105,10 @@ namespace sunlight
     void SceneObjectComponent::SetMoving(bool value)
     {
         _clientMovement.movementTypeBitMask = value ? 0x10 : 0;
+    }
+
+    void SceneObjectComponent::SetBodySize(int32_t value)
+    {
+        _bodySize = value;
     }
 }

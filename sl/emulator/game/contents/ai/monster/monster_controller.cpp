@@ -25,6 +25,20 @@ namespace sunlight
 
             _stateMachine.GetTransition(MonsterAIStateType::Spawn)->Add(MonsterAIStateType::Wander);
         }
+
+        if (auto combatState = MonsterAIStateFactory::Create(data, MonsterAIStateType::Combat);
+            combatState)
+        {
+            _stateMachine.AddState(false, std::move(combatState));
+
+            if (MonsterAIStateMachine::StateTransition* transition = _stateMachine.GetTransition(MonsterAIStateType::Wander);
+                transition)
+            {
+                transition->Add(MonsterAIStateType::Combat);
+
+                _stateMachine.GetTransition(MonsterAIStateType::Combat)->Add(MonsterAIStateType::Wander);
+            }
+        }
     }
 
     MonsterController::~MonsterController()

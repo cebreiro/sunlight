@@ -39,6 +39,9 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
+        bool Contains(GameEntityType type, game_entity_id_type id) const;
+
+    public:
         void SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType);
         bool SpawnNPC(SharedPtrNotNull<GameNPC> npc);
         void SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos);

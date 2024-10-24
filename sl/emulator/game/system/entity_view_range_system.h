@@ -45,13 +45,12 @@ namespace sunlight
 
         auto GetSector(const GameEntity& entity) -> GameSpatialSector&;
         auto GetSector(const GameEntity& entity) const -> const GameSpatialSector&;
-
-    private:
         auto GetSector(int32_t x, int32_t y) -> GameSpatialSector&;
         auto GetSector(int32_t x, int32_t y) const -> const GameSpatialSector&;
         auto GetSector(const Eigen::Vector2f& position) -> GameSpatialSector&;
         auto GetSector(const Eigen::Vector2f& position) const -> const GameSpatialSector&;
 
+    private:
         auto CalculateXIndex(float x) const -> int32_t;
         auto CalculateYIndex(float y) const -> int32_t;
         auto CalculateIndex(int32_t x, int32_t y) const -> int64_t;
