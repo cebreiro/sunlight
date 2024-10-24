@@ -18,7 +18,6 @@ namespace sunlight
 {
     MonsterAIStateWander::MonsterAIStateWander()
         : IState(MonsterAIStateType::Wander)
-        , _mt(std::random_device{}())
     {
     }
 
@@ -30,8 +29,9 @@ namespace sunlight
         MonsterAggroComponent& monsterAggroComponent = monster.GetAggroComponent();
 
         const sox::MonsterAction& actionData = monster.GetData().GetAction();
+        std::mt19937& randomEngine = controller.GetRandomEngine();
 
-        if (actionData.characteristic > 1 && actionData.scanTime > 0)
+        if (actionData.characteristic == 1 && actionData.scanTime > 0)
         {
             const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(GameTimeService::Now() - _lastScanTime);
             if (duration >= std::chrono::milliseconds(actionData.scanTime))
@@ -111,8 +111,14 @@ namespace sunlight
             co_return;
         }
 
-        constexpr int32_t distance = 300;
-        const double angle = std::uniform_int_distribution{ 0, 360 }(_mt) * std::numbers::pi / 180.0;
+        const game_time_point_type now = GameTimeService::Now();
+        if (now < _nextMoveTimePoint)
+        {
+            co_return;
+        }
+
+        const int32_t distance = std::uniform_int_distribution{ actionData.moveRangeMin, actionData.moveRangeMax }(randomEngine);
+        const double angle = std::uniform_int_distribution{ 0, 360 }(randomEngine) * std::numbers::pi / 180.0;
 
         Eigen::Vector2f destPos = sceneObjectComponent.GetPosition();
         destPos.x() += static_cast<float>(std::cos(angle) * distance);
@@ -121,5 +127,10 @@ namespace sunlight
         const float speed = static_cast<float>(monster.GetData().GetBase().speed) / 100.f;
 
         system.Get<EntityMovementSystem>().MoveTo(monster, destPos, speed);
+
+        int32_t moveDelay = std::uniform_int_distribution{ actionData.moveDelayMin, actionData.moveDelayMax }(randomEngine);
+        moveDelay += static_cast<int32_t>(static_cast<float>(distance) / speed);
+
+        _nextMoveTimePoint = now + std::chrono::milliseconds(moveDelay);
     }
 }

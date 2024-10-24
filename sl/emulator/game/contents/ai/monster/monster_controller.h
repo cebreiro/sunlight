@@ -17,9 +17,6 @@ namespace sunlight
         MonsterController(EntityAIControlSystem& system, game_entity_id_type entityId, const MonsterData& data);
         ~MonsterController();
 
-        bool ShouldStopCoroutine() const;
-        void ConfigureCoroutineExecutionContext();
-
         void Start();
         void Shutdown();
 
@@ -27,7 +24,11 @@ namespace sunlight
         void Resume();
 
     public:
+        bool ShouldStopCoroutine() const;
+        void ConfigureCoroutineExecutionContext();
+
         auto GetData() const -> const MonsterData&;
+        auto GetRandomEngine() -> std::mt19937&;
 
         void SetTickInterval(std::chrono::milliseconds interval);
 
@@ -38,6 +39,8 @@ namespace sunlight
         EntityAIControlSystem& _system;
         game_entity_id_type _entityId;
         const MonsterData& _data;
+
+        std::mt19937 _mt;
 
         bool _shutdown = false;
         SharedPtrNotNull<future::SharedContext<void>> _suspendContext;

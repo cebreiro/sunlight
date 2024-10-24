@@ -13,6 +13,7 @@ namespace sunlight
         : _system(system)
         , _entityId(entityId)
         , _data(data)
+        , _mt(std::random_device{}())
     {
         auto spawnState = MonsterAIStateFactory::Create(data, MonsterAIStateType::Spawn);
         assert(spawnState);
@@ -44,28 +45,6 @@ namespace sunlight
 
     MonsterController::~MonsterController()
     {
-    }
-
-    bool MonsterController::ShouldStopCoroutine() const
-    {
-        const auto& entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
-        if (!entity)
-        {
-            return true;
-        }
-
-        if (entity->GetId().GetRecycleSequence() != _entityId.GetRecycleSequence())
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    void MonsterController::ConfigureCoroutineExecutionContext()
-    {
-        const auto now = game_clock_type::now();
-        GameTimeService::SetNow(now);
     }
 
     void MonsterController::Start()
@@ -107,9 +86,36 @@ namespace sunlight
         _suspendContext->OnSuccess();
     }
 
+    bool MonsterController::ShouldStopCoroutine() const
+    {
+        const auto& entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
+        if (!entity)
+        {
+            return true;
+        }
+
+        if (entity->GetId().GetRecycleSequence() != _entityId.GetRecycleSequence())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    void MonsterController::ConfigureCoroutineExecutionContext()
+    {
+        const auto now = game_clock_type::now();
+        GameTimeService::SetNow(now);
+    }
+
     auto MonsterController::GetData() const -> const MonsterData&
     {
         return _data;
+    }
+
+    auto MonsterController::GetRandomEngine() -> std::mt19937&
+    {
+        return _mt;
     }
 
     void MonsterController::SetTickInterval(std::chrono::milliseconds interval)

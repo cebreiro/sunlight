@@ -13,8 +13,7 @@ namespace sunlight
         auto OnEvent(const MonsterAIStateParam& event) -> Future<void> override;
 
     private:
-        std::mt19937 _mt;
-
+		game_time_point_type _nextMoveTimePoint = {};
         game_time_point_type _lastScanTime = {};
         std::vector<std::pair<game_entity_id_type, float>> _playerScanResult;
     };
