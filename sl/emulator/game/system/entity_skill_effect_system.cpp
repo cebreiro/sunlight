@@ -1,11 +1,13 @@
-#include "player_skill_effect_system.h"
+#include "entity_skill_effect_system.h"
 
 #include "sl/data/abf/ability_value.h"
 #include "sl/emulator/game/component/entity_passive_effect_component.h"
+#include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
+#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/damage/damage_result.h"
 #include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_factory.h"
@@ -19,8 +21,11 @@
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/message/creator/status_message_creator.h"
 #include "sl/emulator/game/system/entity_damage_system.h"
+#include "sl/emulator/game/system/entity_movement_system.h"
+#include "sl/emulator/game/system/entity_scan_system.h"
 #include "sl/emulator/game/system/entity_status_effect_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
@@ -28,25 +33,29 @@
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
+#include "sl/emulator/service/gamedata/monster/monster_attack_data.h"
+#include "sl/emulator/service/gamedata/monster/monster_data.h"
 #include "sl/emulator/service/gamedata/motion/player_motion_data_provider.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_data.h"
+#include "sl/emulator/service/gamedata/skill/skill_data_provider.h"
 
 namespace sunlight
 {
-    PlayerSkillEffectSystem::PlayerSkillEffectSystem(const ServiceLocator& serviceLocator, int32_t stageId)
+    EntitySkillEffectSystem::EntitySkillEffectSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
         , _skillTargetSelector(std::make_unique<SkillTargetSelector>(*this))
     {
     }
 
-    PlayerSkillEffectSystem::~PlayerSkillEffectSystem()
+    EntitySkillEffectSystem::~EntitySkillEffectSystem()
     {
     }
 
-    void PlayerSkillEffectSystem::InitializeSubSystem(Stage& stage)
+    void EntitySkillEffectSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<EntityViewRangeSystem>());
@@ -54,26 +63,28 @@ namespace sunlight
         Add(stage.Get<EntityStatusEffectSystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<EntityDamageSystem>());
+        Add(stage.Get<EntityScanSystem>());
+        Add(stage.Get<EntityMovementSystem>());
     }
 
-    bool PlayerSkillEffectSystem::Subscribe(Stage& stage)
+    bool EntitySkillEffectSystem::Subscribe(Stage& stage)
     {
         (void)stage;
 
         return true;
     }
 
-    auto PlayerSkillEffectSystem::GetName() const -> std::string_view
+    auto EntitySkillEffectSystem::GetName() const -> std::string_view
     {
         return "player_skill_effect_system";
     }
 
-    auto PlayerSkillEffectSystem::GetClassId() const -> game_system_id_type
+    auto EntitySkillEffectSystem::GetClassId() const -> game_system_id_type
     {
-        return GameSystem::GetClassId<PlayerSkillEffectSystem>();
+        return GameSystem::GetClassId<EntitySkillEffectSystem>();
     }
 
-    void PlayerSkillEffectSystem::OnStageEnter(GamePlayer& player, StageEnterType type)
+    void EntitySkillEffectSystem::OnStageEnter(GamePlayer& player, StageEnterType type)
     {
         if (type != StageEnterType::Login)
         {
@@ -88,7 +99,7 @@ namespace sunlight
         Get<PlayerStatSystem>().UpdateRegenStat(player);
     }
 
-    void PlayerSkillEffectSystem::OnSkillAdd(GamePlayer& player, PlayerSkill& skill)
+    void EntitySkillEffectSystem::OnSkillAdd(GamePlayer& player, PlayerSkill& skill)
     {
         const PlayerSkillData& skillData = skill.GetData();
 
@@ -150,7 +161,7 @@ namespace sunlight
         Get<PlayerStatSystem>().UpdateRegenStat(player);
     }
 
-    void PlayerSkillEffectSystem::OnSkillLevelChange(GamePlayer& player, const PlayerSkill& skill, int32_t oldLevel, int32_t newLevel)
+    void EntitySkillEffectSystem::OnSkillLevelChange(GamePlayer& player, const PlayerSkill& skill, int32_t oldLevel, int32_t newLevel)
     {
         if (!skill.HasPassive())
         {
@@ -172,7 +183,7 @@ namespace sunlight
         Get<PlayerStatSystem>().UpdateRegenStat(player);
     }
 
-    void PlayerSkillEffectSystem::OnMainWeaponChange(GamePlayer& player)
+    void EntitySkillEffectSystem::OnMainWeaponChange(GamePlayer& player)
     {
         const GameItem* weaponItem = player.GetItemComponent().GetEquipmentItem(EquipmentPosition::Weapon1);
 
@@ -221,10 +232,9 @@ namespace sunlight
         }
     }
 
-    void PlayerSkillEffectSystem::OnSkillUse(GamePlayer& player, const GameEntityState& state)
+    void EntitySkillEffectSystem::OnSkillUse(GamePlayer& player, const GameEntityState& state)
     {
         const int32_t skillId = state.skillId;
-        const game_entity_id_type targetId = state.targetId;
         const GameEntityType targetType = state.targetType;
         const int32_t chargeTime = state.param1;
         const int32_t chargeCount = state.param2;
@@ -253,7 +263,7 @@ namespace sunlight
             }
         }
 
-        GameEntity* mainTarget = targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(targetType, targetId) : nullptr;
+        GameEntity* mainTarget = targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(targetType, state.targetId) : nullptr;
 
         SkillTargetSelector::result_type skillTargets;
         if (!_skillTargetSelector->SelectTarget(skillTargets, player, skillData, mainTarget))
@@ -273,10 +283,12 @@ namespace sunlight
                     return;
                 }
 
-                for (const GameEntity* target : skillTargets)
+                for (const game_entity_id_type targetId : skillTargets)
                 {
-                    player.Notice(fmt::format("skill: {}, target: [{}, {}]", skillId, target->GetId(), ToString(target->GetType())));
+                    player.Notice(fmt::format("skill: {}, target: {}", skillId, targetId));
                 }
+
+                SceneObjectSystem& sceneObjectSystem = Get<SceneObjectSystem>();
 
                 for (const SkillEffectData& skillEffect : skill->GetData().effects)
                 {
@@ -284,9 +296,10 @@ namespace sunlight
                     {
                     case SkillEffectCategory::Damage:
                     {
-                        for (GameEntity* target : skillTargets)
+                        for (const game_entity_id_type targetId : skillTargets)
                         {
-                            if (target->GetType() != GameEntityType::Enemy)
+                            GameEntity* target = sceneObjectSystem.FindEntity(GameMonster::TYPE, targetId);
+                            if (!target || target->GetId().GetRecycleSequence() != targetId.GetRecycleSequence())
                             {
                                 continue;
                             }
@@ -334,7 +347,7 @@ namespace sunlight
         }
     }
 
-    void PlayerSkillEffectSystem::OnNormalAttackUse(GamePlayer& player, const GameEntityState& state)
+    void EntitySkillEffectSystem::OnNormalAttackUse(GamePlayer& player, const GameEntityState& state)
     {
         const int32_t weaponMotion = player.GetAppearanceComponent().GetWeaponMotionCategory();
 
@@ -353,7 +366,7 @@ namespace sunlight
                     return;
                 }
 
-                ProcessNormalAttack(player, *target->Cast<GameMonster>(), attackId , *motionData);
+                ProcessPlayerNormalAttack(player, *target->Cast<GameMonster>(), attackId , *motionData);
             };
 
         if (motionData->hitTime == 0)
@@ -367,7 +380,196 @@ namespace sunlight
         }
     }
 
-    void PlayerSkillEffectSystem::ProcessNormalAttack(GamePlayer& player, GameMonster& monster, int32_t attackId, const sox::MotionData& motionData)
+    void EntitySkillEffectSystem::ProcessMonsterNormalAttack(GameMonster& monster, GameEntity& target, int32_t attackIndex)
+    {
+        const MonsterData& data = monster.GetData();
+        const MonsterAttackData& attackData = data.GetAttack();
+
+        std::vector<game_entity_id_type> targets;
+
+        if (!_attackTargetRecycleBuffer.empty())
+        {
+            targets = std::move(_attackTargetRecycleBuffer.back());
+            targets.clear();
+
+            _attackTargetRecycleBuffer.pop_back();
+        }
+
+        const Eigen::Vector2f& targetPosition = target.GetComponent<SceneObjectComponent>().GetPosition();
+
+        if (attackData.range > 0)
+        {
+            const float range = static_cast<float>(attackData.range);
+
+            Get<EntityScanSystem>().ScanMonsterAttackTarget(targets, targetPosition, range);
+        }
+        else
+        {
+            targets.emplace_back(target.GetId());
+        }
+
+        Get<EntityMovementSystem>().Remove(monster.GetId());
+
+        SceneObjectComponent& sceneObjectComponent = monster.GetSceneObjectComponent();
+        sceneObjectComponent.SetMoving(false);
+        sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
+        sceneObjectComponent.SetYaw(CalculateYaw(sceneObjectComponent.GetPosition(), targetPosition));
+
+        EntityStateComponent& stateComponent = monster.GetStateComponent();
+        stateComponent.SetState(GameEntityState{
+                .type = GameEntityStateType::NormalAttack,
+                .skillId = attackIndex,
+            });
+
+        Get<EntityViewRangeSystem>().VisitPlayer(monster, [&monster](GamePlayer& player)
+            {
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(monster));
+                player.Defer(SceneObjectPacketCreator::CreateState(monster));
+                player.FlushDeferred();
+            });
+
+        if (targets.empty())
+        {
+            _attackTargetRecycleBuffer.emplace_back(std::move(targets));
+
+            assert(false);
+
+            return;
+        }
+
+        _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(attackData.attackBeatFrame),
+            [this, mobId = monster.GetId(), targets = std::move(targets)]() mutable
+            {
+                SceneObjectSystem& sceneObjectSystem = Get<SceneObjectSystem>();
+
+                GameEntity* entity = sceneObjectSystem.FindEntity(GameMonster::TYPE, mobId);
+                if (!entity || entity->GetId().GetRecycleSequence() != mobId.GetRecycleSequence())
+                {
+                    return;
+                }
+
+                EntityDamageSystem& entityDamageSystem = Get<EntityDamageSystem>();
+                GameMonster& monster = *entity->Cast<GameMonster>();
+
+                for (game_entity_id_type targetId : targets)
+                {
+                    GameEntity* target = sceneObjectSystem.FindEntity(targetId);
+                    if (!target || target->GetId().GetRecycleSequence() != targetId.GetRecycleSequence())
+                    {
+                        continue;
+                    }
+
+                    entityDamageSystem.ProcessMonsterNormalAttack(monster, *target);
+                }
+
+                _attackTargetRecycleBuffer.emplace_back(std::move(targets));
+            });
+    }
+
+    void EntitySkillEffectSystem::ProcessMonsterSkill(GameMonster& monster, GameEntity& target, const MonsterAttackData::Skill& attackData, int32_t attackIndex)
+    {
+        const SkillDataProvider& skillDataProvider = _serviceLocator.Get<GameDataProvideService>().GetSkillDataProvider();
+        const MonsterSkillData* skillData = skillDataProvider.FindMonsterSkill(attackData.id);
+
+        if (!skillData)
+        {
+            ProcessMonsterNormalAttack(monster, target, attackIndex);
+
+            return;
+        }
+
+        Get<EntityMovementSystem>().Remove(monster.GetId());
+
+        const Eigen::Vector2f& targetPosition = target.GetComponent<SceneObjectComponent>().GetPosition();
+
+        SceneObjectComponent& sceneObjectComponent = monster.GetSceneObjectComponent();
+        sceneObjectComponent.SetMoving(false);
+        sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
+        sceneObjectComponent.SetYaw(CalculateYaw(sceneObjectComponent.GetPosition(), targetPosition));
+
+        EntityStateComponent& stateComponent = monster.GetStateComponent();
+        stateComponent.SetState(GameEntityState{
+                .type = GameEntityStateType::PlaySkill,
+                .param2 = attackIndex,
+                .skillId = attackData.id,
+            });
+
+        Get<EntityViewRangeSystem>().VisitPlayer(monster, [&monster](GamePlayer& player)
+            {
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(monster));
+                player.Defer(SceneObjectPacketCreator::CreateState(monster));
+                player.FlushDeferred();
+            });
+
+        SkillTargetSelector::result_type skillTargets;
+        if (!_skillTargetSelector->SelectTarget(skillTargets, monster, *skillData, target))
+        {
+            return;
+        }
+
+        auto applySkillEffect = [this, skillData, skillLevel = attackData.level, skillTargets](GameMonster& monster, const AbilityValue* abilityValue) mutable
+            {
+                SceneObjectSystem& sceneObjectSystem = Get<SceneObjectSystem>();
+
+                for (const SkillEffectData& skillEffect : skillData->effects)
+                {
+                    switch (skillEffect.category)
+                    {
+                    case SkillEffectCategory::Damage:
+                    {
+                        for (const game_entity_id_type targetId : skillTargets)
+                        {
+                            GameEntity* target = sceneObjectSystem.FindEntity(targetId);
+                            if (!target || target->GetId().GetRecycleSequence() != targetId.GetRecycleSequence())
+                            {
+                                continue;
+                            }
+
+                            Get<EntityDamageSystem>().ProcessMonsterSkillEffect(monster, *target, *skillData, skillEffect, abilityValue);
+                        }
+                    }
+                    break;
+                    case SkillEffectCategory::StatusEffect:
+                    {
+                        Get<EntityStatusEffectSystem>().AddStatusEffectBySkill(skillData->index, skillLevel, skillTargets, skillEffect);
+                    }
+                    break;
+                    default:;
+                    }
+                }
+            };
+
+        if (skillData->effectAttackValues.empty())
+        {
+            applySkillEffect(monster, nullptr);
+        }
+        else
+        {
+            for (const AbilityValue& abilityValue : skillData->effectAttackValues | notnull::reference)
+            {
+                if (abilityValue.begin == 0)
+                {
+                    applySkillEffect(monster, &abilityValue);
+                }
+                else
+                {
+                    _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(abilityValue.begin),
+                        [this, applySkillEffect, &abilityValue, mobId = monster.GetId()]() mutable
+                        {
+                            GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, mobId);
+                            if (!entity || entity->GetId().GetRecycleSequence() != mobId.GetRecycleSequence())
+                            {
+                                return;
+                            }
+
+                            applySkillEffect(*entity->Cast<GameMonster>(), &abilityValue);
+                        });
+                }
+            }
+        }
+    }
+
+    void EntitySkillEffectSystem::ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& monster, int32_t attackId, const sox::MotionData& motionData)
     {
         (void)motionData;
 
@@ -393,7 +595,7 @@ namespace sunlight
             });
     }
 
-    void PlayerSkillEffectSystem::Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
+    void EntitySkillEffectSystem::Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
     {
         const PassiveEffectType type = passiveEffect.GetType();
         if (type == PassiveEffectType::Stat)
@@ -425,7 +627,7 @@ namespace sunlight
         }
     }
 
-    void PlayerSkillEffectSystem::Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
+    void EntitySkillEffectSystem::Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
     {
         (void)skillLevel;
 
@@ -447,5 +649,12 @@ namespace sunlight
                 statEffect->SetStatPercentageValue(0.0);
             }
         }
+    }
+
+    auto EntitySkillEffectSystem::CalculateYaw(const Eigen::Vector2f& src, const Eigen::Vector2f& dest) -> float
+    {
+        const Eigen::Vector2f vector = dest - src;
+
+        return static_cast<float>(std::atan2(vector.y(), vector.x()) * (180.0 / std::numbers::pi));
     }
 }

@@ -8,6 +8,7 @@ namespace sunlight
     struct AbilityValue;
     struct SkillEffectData;
     struct DamageResult;
+    struct MonsterSkillData;
 
     class ItemData;
     class PlayerSkill;
@@ -39,6 +40,8 @@ namespace sunlight
             int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue);
 
         void ProcessMonsterNormalAttack(GameMonster& monster, GameEntity& target);
+        void ProcessMonsterSkillEffect(GameMonster& monster, GameEntity& target, const MonsterSkillData& skillData,
+            const SkillEffectData& effect, const AbilityValue* abilityValue);
 
     private:
         void OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage);

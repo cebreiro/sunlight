@@ -9,7 +9,7 @@
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
-#include "sl/emulator/game/system/monster_skill_effect_system.h"
+#include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
@@ -107,7 +107,8 @@ namespace sunlight
 
                     const MonsterSkillComponent& skillComponent = monster.GetSkillComponent();
 
-                    boost::container::static_vector<int32_t, 3> candidates;
+                    boost::container::static_vector<std::pair<int32_t, int32_t>, 3> candidates;
+                    int32_t totalWeight = 0;
 
                     for (int32_t i = 0; i < 3; ++i)
                     {
@@ -116,11 +117,13 @@ namespace sunlight
                             break;
                         }
 
-                        const int32_t skillId = attackData.skills[i].id;
-
-                        if (skillComponent.CanUseSkill(skillId))
+                        const MonsterAttackData::Skill& skillData = attackData.skills[i];
+                        
+                        if (skillComponent.CanUseSkill(skillData.id))
                         {
-                            candidates.emplace_back(i + 1);
+                            totalWeight += skillData.percent;
+
+                            candidates.emplace_back(i + 1, skillData.percent);
                         }
                     }
 
@@ -138,10 +141,20 @@ namespace sunlight
 
                     if (candidateCount == 1)
                     {
-                        return candidates[0];
+                        return candidates[0].first;
                     }
 
-                    return candidates[controller.Rand(0, candidateCount - 1)];
+                    const int32_t value = controller.Rand(1, totalWeight);
+
+                    for (const auto& [id, weight] : candidates)
+                    {
+                        if (value <= weight)
+                        {
+                            return id;
+                        }
+                    }
+
+                    return 0;
                 }();
         }
 
@@ -173,9 +186,22 @@ namespace sunlight
             const int32_t attackIndex = *std::exchange(_attackIndex, std::nullopt);
             if (attackIndex == 0)
             {
-                system.Get<MonsterSkillEffectSystem>().ProcessNormalAttack(monster, *target);
+                system.Get<EntitySkillEffectSystem>().ProcessMonsterNormalAttack(monster, *target);
 
-                co_await Delay(std::chrono::milliseconds(attackData.attackEndFrame + attackData.attackDelay));
+                co_await Delay(std::chrono::milliseconds(std::max(attackData.attackEndFrame + 500, attackData.attackDelay)));
+            }
+            else
+            {
+                const int32_t index = attackIndex - 1;
+                assert(index < std::ssize(attackData.skills));
+
+                const MonsterAttackData::Skill& skillData = attackData.skills[index];
+
+                monster.GetSkillComponent().SetCoolTime(skillData.id, GameTimeService::Now() + std::chrono::milliseconds(skillData.coolTime));
+
+                system.Get<EntitySkillEffectSystem>().ProcessMonsterSkill(monster, *target, attackData.skills[index], attackIndex);
+
+                co_await Delay(std::chrono::milliseconds(std::max(skillData.skillEndFrame + 500, skillData.skillDelay)));
             }
 
             co_return;

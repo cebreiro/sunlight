@@ -33,7 +33,7 @@
 #include "sl/emulator/game/system/player_group_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
-#include "sl/emulator/game/system/player_skill_effect_system.h"
+#include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -65,7 +65,7 @@ namespace sunlight
         Add(stage.Get<PlayerGroupSystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerIndexSystem>());
-        Add(stage.Get<PlayerSkillEffectSystem>());
+        Add(stage.Get<EntitySkillEffectSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)
@@ -572,11 +572,11 @@ namespace sunlight
 
     void PlayerStateSystem::HandlePlayerSkill(GamePlayer& player, const GameEntityState& state)
     {
-        Get<PlayerSkillEffectSystem>().OnSkillUse(player, state);
+        Get<EntitySkillEffectSystem>().OnSkillUse(player, state);
     }
 
     void PlayerStateSystem::HandleNormalAttack(GamePlayer& player, const GameEntityState& state)
     {
-        Get<PlayerSkillEffectSystem>().OnNormalAttackUse(player, state);
+        Get<EntitySkillEffectSystem>().OnNormalAttackUse(player, state);
     }
 }

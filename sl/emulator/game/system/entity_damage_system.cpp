@@ -4,6 +4,7 @@
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/item_ownership_component.h"
+#include "sl/emulator/game/component/monster_aggro_component.h"
 #include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/component/player_party_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
@@ -26,7 +27,9 @@
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
+#include "sl/emulator/service/gamedata/skill/monster_skill_data.h"
 #include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
 namespace sunlight
@@ -95,8 +98,7 @@ namespace sunlight
             .skill = skill,
             .skillEffectData = effect,
             .chargingCount = chargeCount,
-            .attackSequence = 0,
-            .abilityValue = abilityValue
+            .attackSequence = 0
         };
 
         PlayerSkillDamageCalculateResult damageCalculateResult;
@@ -146,6 +148,8 @@ namespace sunlight
             return;
         }
 
+        target.GetAggroComponent().AddByDamage(player.GetId(), firstDamage);
+
         Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
             {
                 player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
@@ -182,18 +186,59 @@ namespace sunlight
             .attackerId = monster.GetId(),
             .attackerType = monster.GetType(),
             .damageType = dodged ? DamageType::DodgePlayer : DamageType::DamagePlayer,
-            .id = 0,
-            .motionId = 0,
-            .skillId = 0,
-            .damage = 1234,
+            .id = 1,
+            .damage = 1,
             .damageCount = attackData.divDamage,
             .damageInterval = attackData.divDamageDelay,
+            .blowType = DamageBlowType::BlowSmall,
+            .attackedResultType = DamageResultType::Damage_B,
+        };
+
+        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            {
+                auto movement = player.GetSceneObjectComponent().GetMovement();
+                movement.destPosition = movement.position;
+                movement.movementTypeBitMask = 0;
+
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(player, movement));
+
+                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
+                //player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+
+                player.FlushDeferred();
+            });
+    }
+
+    void EntityDamageSystem::ProcessMonsterSkillEffect(GameMonster& monster, GameEntity& target,
+        const MonsterSkillData& skillData, const SkillEffectData& effect, const AbilityValue* abilityValue)
+    {
+        (void)effect;
+
+        bool dodged = false;
+
+        const DamageResult result{
+            .attackerId = monster.GetId(),
+            .attackerType = monster.GetType(),
+            .damageType = dodged ? DamageType::DodgePlayer : DamageType::DamagePlayer,
+            .id = 0,
+            .motionId = 3,
+            .skillId = skillData.index,
+            .weaponClass = static_cast<WeaponClassType>(skillData.weaponClass),
+            .damage = 123,
+            .damageCount = abilityValue ? std::max(1, abilityValue->damageCount) : 1,
+            .damageInterval = (abilityValue && abilityValue->damageCount > 1) ? (abilityValue->end - abilityValue->begin) / abilityValue->damageCount : 0,
             .blowType = DamageBlowType::BlowSmall,
             .attackedResultType = DamageResultType::Damage_A,
         };
 
         Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
             {
+                auto movement = player.GetSceneObjectComponent().GetMovement();
+                movement.destPosition = movement.position;
+                movement.movementTypeBitMask = 0;
+
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(player, movement));
+
                 player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
                 //player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
 
@@ -240,9 +285,11 @@ namespace sunlight
         }
         else
         {
-            Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            target.GetAggroComponent().AddByDamage(player->GetId(), damage);
+
+            Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& visited)
                 {
-                    player.Send(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+                    visited.Send(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
                 });
         }
     }

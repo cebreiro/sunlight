@@ -1,6 +1,8 @@
 #pragma once
+#include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/system/game_system.h"
 #include "sl/emulator/game/zone/stage_enter_type.h"
+#include "sl/emulator/service/gamedata/monster/monster_attack_data.h"
 
 namespace sunlight::sox
 {
@@ -14,17 +16,18 @@ namespace sunlight
     class PlayerSkill;
     class SkillTargetSelector;
 
+    class GameEntity;
     class GamePlayer;
     class GameMonster;
 }
 
 namespace sunlight
 {
-    class PlayerSkillEffectSystem final : public GameSystem
+    class EntitySkillEffectSystem final : public GameSystem
     {
     public:
-        PlayerSkillEffectSystem(const ServiceLocator& serviceLocator, int32_t stageId);
-        ~PlayerSkillEffectSystem();
+        EntitySkillEffectSystem(const ServiceLocator& serviceLocator, int32_t stageId);
+        ~EntitySkillEffectSystem();
 
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
@@ -42,16 +45,25 @@ namespace sunlight
         void OnSkillUse(GamePlayer& player, const GameEntityState& state);
         void OnNormalAttackUse(GamePlayer& player, const GameEntityState& state);
 
+    public:
+        void ProcessMonsterNormalAttack(GameMonster& monster, GameEntity& target, int32_t attackIndex = 0);
+        void ProcessMonsterSkill(GameMonster& monster, GameEntity& target, const MonsterAttackData::Skill& attackData, int32_t attackIndex);
+
     private:
-        void ProcessNormalAttack(GamePlayer& player, GameMonster& monster, int32_t attackId, const sox::MotionData& motionData);
+        void ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& monster, int32_t attackId, const sox::MotionData& motionData);
 
         void Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
         void Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
+
+    private:
+        static auto CalculateYaw(const Eigen::Vector2f& src, const Eigen::Vector2f& dest) -> float;
 
     private:
         const ServiceLocator& _serviceLocator;
         int32_t _stageId = 0;
 
         UniquePtrNotNull<SkillTargetSelector> _skillTargetSelector;
+
+        std::vector<std::vector<game_entity_id_type>> _attackTargetRecycleBuffer;
     };
 }

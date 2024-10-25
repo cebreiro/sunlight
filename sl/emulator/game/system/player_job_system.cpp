@@ -10,7 +10,7 @@
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
-#include "sl/emulator/game/system/player_skill_effect_system.h"
+#include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
@@ -30,7 +30,7 @@ namespace sunlight
     {
         Add(stage.Get<GameRepositorySystem>());
         Add(stage.Get<PlayerStatSystem>());
-        Add(stage.Get<PlayerSkillEffectSystem>());
+        Add(stage.Get<EntitySkillEffectSystem>());
         Add(stage.Get<EntityViewRangeSystem>());
     }
 
@@ -171,7 +171,7 @@ namespace sunlight
         }
 
         Get<GameRepositorySystem>().SaveNewSkill(player, static_cast<int32_t>(jobId), skillData->index, 1);
-        Get<PlayerSkillEffectSystem>().OnSkillAdd(player, *skillComponent.FindSkill(skillData->index));
+        Get<EntitySkillEffectSystem>().OnSkillAdd(player, *skillComponent.FindSkill(skillData->index));
 
         player.Send(GamePlayerMessageCreator::CreateJobSkillAdd(player, jobId, skillId, 0));
 
@@ -331,7 +331,7 @@ namespace sunlight
             Get<GameRepositorySystem>().SaveSkillLevel(player,
                 static_cast<int32_t>(job->GetId()), job->GetSkillPoint(), skill->GetId(), newLevel);
 
-            Get<PlayerSkillEffectSystem>().OnSkillLevelChange(player, *skill, skillLevel, newLevel);
+            Get<EntitySkillEffectSystem>().OnSkillLevelChange(player, *skill, skillLevel, newLevel);
 
             player.Send(GamePlayerMessageCreator::CreateJobSkillPointChange(player, job->GetId(), job->GetSkillPoint(), false));
 
