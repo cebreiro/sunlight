@@ -61,7 +61,7 @@ namespace sunlight
                     return;
                 }
 
-                const auto& entity = stage->Get<SceneObjectSystem>().FindEntity(type, id);
+                GameEntity* entity = stage->Get<SceneObjectSystem>().FindEntity(type, id);
                 if (!entity)
                 {
                     return;

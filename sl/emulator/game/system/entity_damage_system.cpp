@@ -67,7 +67,7 @@ namespace sunlight
 
     void EntityDamageSystem::KillMonster(GamePlayer& player, game_entity_id_type mobId)
     {
-        const auto& entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, mobId);
+        GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, mobId);
         if (!entity)
         {
             return;
@@ -179,7 +179,7 @@ namespace sunlight
             return;
         }
 
-        const auto& targetEntity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, targetMonsterId);
+        GameEntity* targetEntity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, targetMonsterId);
         if (!targetEntity || targetEntity->GetId().GetRecycleSequence() != targetMonsterId.GetRecycleSequence())
         {
             return;

@@ -268,7 +268,7 @@ namespace sunlight
     {
         do
         {
-            const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, target);
+            GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, target);
             if (!entity)
             {
                 break;
@@ -341,7 +341,7 @@ namespace sunlight
 
     void PlayerStateSystem::HandlePlayerInteraction(GamePlayer& player, game_entity_id_type target)
     {
-        const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::Player, target);
+        GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::Player, target);
         if (!entity)
         {
             return;
@@ -375,7 +375,7 @@ namespace sunlight
 
         do
         {
-            const auto& entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, scriptComponent.GetTargetNPCId());
+            GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, scriptComponent.GetTargetNPCId());
             if (!entity)
             {
                 break;
@@ -521,7 +521,7 @@ namespace sunlight
     {
         SceneObjectSystem& sceneObjectSystem = Get<SceneObjectSystem>();
 
-        const std::shared_ptr<GameEntity>& entity = sceneObjectSystem.FindEntity(GameEntityType::Item, itemId);
+        const std::shared_ptr<GameEntity>& entity = sceneObjectSystem.FindEntityShared(GameEntityType::Item, itemId);
         if (!entity)
         {
             return;

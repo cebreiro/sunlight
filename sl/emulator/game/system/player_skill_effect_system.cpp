@@ -255,7 +255,7 @@ namespace sunlight
             }
         }
 
-        GameEntity* mainTarget = targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(targetType, targetId).get() : nullptr;
+        GameEntity* mainTarget = targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(targetType, targetId) : nullptr;
 
         PlayerSkillTargetSelector::result_type skillTargets;
         if (!_skillTargetSelector->SelectTarget(skillTargets, player, skillData, mainTarget))
@@ -349,7 +349,7 @@ namespace sunlight
 
         const auto findTargetAndProcess = [this, targetId = state.targetId, attackId = state.attackId, motionData](GamePlayer& player)
             {
-                const auto& target = Get<SceneObjectSystem>().FindEntity(GameEntityType::Enemy, targetId);
+                GameEntity* target = Get<SceneObjectSystem>().FindEntity(GameEntityType::Enemy, targetId);
                 if (!target)
                 {
                     return;

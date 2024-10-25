@@ -60,7 +60,7 @@ namespace sunlight
     {
         assert(!_monsterControllers.contains(e.entityId));
 
-        const auto& entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, e.entityId);
+        const GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, e.entityId);
         if (!entity)
         {
             assert(false);

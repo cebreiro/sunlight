@@ -28,8 +28,6 @@
 
 namespace sunlight
 {
-    const std::shared_ptr<GameEntity> SceneObjectSystem::null_shared_entity;
-
     SceneObjectSystem::SceneObjectSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
@@ -96,7 +94,10 @@ namespace sunlight
 
     void SceneObjectSystem::SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType)
     {
+        assert(!_entityIdIndex.contains(player->GetId()));
+
         _entities[player->GetType()][player->GetId()] = player;
+        _entityIdIndex[player->GetId()] = player.get();
 
         Get<PlayerStatSystem>().OnInitialize(*player);
         Get<PlayerQuestSystem>().OnInitialize(*player);
@@ -225,6 +226,7 @@ namespace sunlight
         }
 
         npcs[npc->GetId()] = npc;
+        _entityIdIndex[npc->GetId()] = npc.get();
 
         const Eigen::Vector2f& position = npc->GetComponent<SceneObjectComponent>().GetPosition();
 
@@ -244,12 +246,15 @@ namespace sunlight
 
     void SceneObjectSystem::SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos)
     {
+        assert(!_entityIdIndex.contains(item->GetId()));
+
         if (!item->HasComponent<SceneObjectComponent>())
         {
             item->AddComponent(std::make_unique<SceneObjectComponent>());
         }
 
         _entities[item->GetType()][item->GetId()] = item;
+        _entityIdIndex[item->GetId()] = item.get();
 
         SceneObjectComponent& sceneObjectComponent = item->GetComponent<SceneObjectComponent>();
         sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(item->GetType()));
@@ -271,9 +276,11 @@ namespace sunlight
 
     void SceneObjectSystem::SpawnItem(SharedPtrNotNull<GameStoredItem> item)
     {
+        assert(!_entityIdIndex.contains(item->GetId()));
         assert(item->HasComponent<SceneObjectComponent>());
 
         _entities[item->GetType()][item->GetId()] = item;
+        _entityIdIndex[item->GetId()] = item.get();
 
         SceneObjectComponent& sceneObjectComponent = item->GetComponent<SceneObjectComponent>();
         sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(item->GetType()));
@@ -293,7 +300,10 @@ namespace sunlight
 
     void SceneObjectSystem::SpawnMonster(SharedPtrNotNull<GameMonster> monster, Eigen::Vector2f pos, float yaw)
     {
+        assert(!_entityIdIndex.contains(monster->GetId()));
+
         _entities[monster->GetType()][monster->GetId()] = monster;
+        _entityIdIndex[monster->GetId()] = monster.get();
 
         SceneObjectComponent& sceneObjectComponent = monster->GetSceneObjectComponent();
         sceneObjectComponent.SetId(_serviceLocator.Get<GameEntityIdPublisher>().PublishSceneObjectId(monster->GetType()));
@@ -356,6 +366,7 @@ namespace sunlight
         Get<EntityViewRangeSystem>().Remove(player);
         Get<EntityMovementSystem>().Remove(player.GetId());
 
+        _entityIdIndex.erase(player.GetId());
         iter1->second.erase(iter2);
 
         return true;
@@ -385,6 +396,7 @@ namespace sunlight
         viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectLeave(entity), false);
         viewRangeSystem.Remove(entity);
 
+        _entityIdIndex.erase(entity.GetId());
         iter1->second.erase(iter2);
 
         Get<EventBubblingSystem>().Publish(EventBubblingMonsterAIDetach{ .entityId = id });
@@ -410,6 +422,7 @@ namespace sunlight
         viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectLeave(entity), false);
         viewRangeSystem.Remove(entity);
 
+        _entityIdIndex.erase(entity.GetId());
         iter1->second.erase(iter2);
 
         return true;
@@ -435,40 +448,90 @@ namespace sunlight
         viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectLeave(entity), false);
         viewRangeSystem.Remove(entity);
 
+        _entityIdIndex.erase(entity.GetId());
         iter1->second.erase(iter2);
 
         return true;
     }
 
-    auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&
+    auto SceneObjectSystem::FindEntity(game_entity_id_type id) -> GameEntity*
+    {
+        const auto iter = _entityIdIndex.find(id);
+
+        return iter != _entityIdIndex.end() ? iter->second : nullptr;
+    }
+
+    auto SceneObjectSystem::FindEntity(game_entity_id_type id) const -> const GameEntity*
+    {
+        const auto iter = _entityIdIndex.find(id);
+
+        return iter != _entityIdIndex.end() ? iter->second : nullptr;
+    }
+
+    auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) -> GameEntity*
     {
         const auto iter1 = _entities.find(type);
         if (iter1 == _entities.end())
         {
-            return null_shared_entity;
+            return nullptr;
         }
 
         const auto iter2 = iter1->second.find(id);
         if (iter2 == iter1->second.end())
         {
-            return null_shared_entity;
+            return nullptr;
+        }
+
+        return iter2->second.get();
+    }
+
+    auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) const -> const GameEntity*
+    {
+        const auto iter1 = _entities.find(type);
+        if (iter1 == _entities.end())
+        {
+            return nullptr;
+        }
+
+        const auto iter2 = iter1->second.find(id);
+        if (iter2 == iter1->second.end())
+        {
+            return nullptr;
+        }
+
+        return iter2->second.get();
+    }
+
+    auto SceneObjectSystem::FindEntityShared(GameEntityType type, game_entity_id_type id) -> std::shared_ptr<GameEntity>
+    {
+        const auto iter1 = _entities.find(type);
+        if (iter1 == _entities.end())
+        {
+            return nullptr;
+        }
+
+        const auto iter2 = iter1->second.find(id);
+        if (iter2 == iter1->second.end())
+        {
+            return nullptr;
         }
 
         return iter2->second;
+
     }
 
-    auto SceneObjectSystem::FindEntity(GameEntityType type, game_entity_id_type id) const -> const std::shared_ptr<GameEntity>&
+    auto SceneObjectSystem::FindEntityShared(GameEntityType type, game_entity_id_type id) const -> std::shared_ptr<const GameEntity>
     {
         const auto iter1 = _entities.find(type);
         if (iter1 == _entities.end())
         {
-            return null_shared_entity;
+            return nullptr;
         }
 
         const auto iter2 = iter1->second.find(id);
         if (iter2 == iter1->second.end())
         {
-            return null_shared_entity;
+            return nullptr;
         }
 
         return iter2->second;

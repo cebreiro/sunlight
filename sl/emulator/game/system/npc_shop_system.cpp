@@ -387,7 +387,7 @@ namespace sunlight
 
     void NPCShopSystem::OnRollTimerEnd(game_entity_id_type npcId)
     {
-        const std::shared_ptr<GameEntity>& npc = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, npcId);
+        GameEntity* npc = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, npcId);
         if (!npc)
         {
             return;

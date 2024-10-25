@@ -1,6 +1,5 @@
 #pragma once
 #include <boost/unordered/unordered_flat_map.hpp>
-
 #include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/entity/game_entity_type.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -54,8 +53,12 @@ namespace sunlight
         bool RemoveMonster(game_entity_id_type id);
 
     public:
-        auto FindEntity(GameEntityType type, game_entity_id_type id) -> const std::shared_ptr<GameEntity>&;
-        auto FindEntity(GameEntityType type, game_entity_id_type id) const -> const std::shared_ptr<GameEntity>&;
+        auto FindEntity(game_entity_id_type id) -> GameEntity*;
+        auto FindEntity(game_entity_id_type id) const -> const GameEntity*;
+        auto FindEntity(GameEntityType type, game_entity_id_type id) -> GameEntity*;
+        auto FindEntity(GameEntityType type, game_entity_id_type id) const -> const GameEntity*;
+        auto FindEntityShared(GameEntityType type, game_entity_id_type id) -> std::shared_ptr<GameEntity>;
+        auto FindEntityShared(GameEntityType type, game_entity_id_type id) const ->std::shared_ptr<const GameEntity>;
 
         auto GetDebugStatus() const -> std::string;
 
@@ -71,7 +74,6 @@ namespace sunlight
 
         std::unordered_map<GameEntityType,
             boost::unordered::unordered_flat_map<game_entity_id_type, SharedPtrNotNull<GameEntity>>> _entities;
-
-        static const std::shared_ptr<GameEntity> null_shared_entity;
+        boost::unordered::unordered_flat_map<game_entity_id_type, PtrNotNull<GameEntity>> _entityIdIndex;
     };
 }

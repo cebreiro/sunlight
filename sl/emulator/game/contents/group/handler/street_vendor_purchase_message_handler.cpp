@@ -70,7 +70,7 @@ namespace sunlight
             {
                 // accessed by clicking field displayed 'stored item'
 
-                const auto& storedItem = system.Get<SceneObjectSystem>().FindEntity(GameStoredItem::TYPE, *storedItemId);
+                const GameEntity* storedItem = system.Get<SceneObjectSystem>().FindEntity(GameStoredItem::TYPE, *storedItemId);
                 if (!storedItem)
                 {
                     assert(false);
