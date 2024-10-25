@@ -421,6 +421,7 @@ namespace sunlight
 
         viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectLeave(entity), false);
         viewRangeSystem.Remove(entity);
+        Get<EntityMovementSystem>().Remove(id);
 
         _entityIdIndex.erase(entity.GetId());
         iter1->second.erase(iter2);
