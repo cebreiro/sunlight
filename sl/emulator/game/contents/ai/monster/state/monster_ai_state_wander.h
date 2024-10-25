@@ -15,6 +15,6 @@ namespace sunlight
     private:
 		game_time_point_type _nextMoveTimePoint = {};
         game_time_point_type _lastScanTime = {};
-        std::vector<std::pair<game_entity_id_type, float>> _playerScanResult;
+        std::vector<std::pair<game_entity_id_type, float>> _scanResult;
     };
 }

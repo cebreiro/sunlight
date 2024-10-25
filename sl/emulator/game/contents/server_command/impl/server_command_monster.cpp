@@ -36,8 +36,6 @@ namespace sunlight
             return false;
         }
 
-        auto mob = std::make_shared<GameMonster>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *data, std::nullopt);
-
         std::mt19937& randomEngine = _system.GetRandomEngine();
         std::uniform_real_distribution<float> distPos(10.f, 30.f);
         std::uniform_real_distribution<float> distYaw(0.f, 360.f);
@@ -45,6 +43,8 @@ namespace sunlight
         Eigen::Vector2f spawnPos = player.GetSceneObjectComponent().GetPosition();
         spawnPos.x() += distPos(randomEngine);
         spawnPos.y() += distPos(randomEngine);
+
+        auto mob = std::make_shared<GameMonster>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *data, spawnPos, std::nullopt);
 
         _system.Get<SceneObjectSystem>().SpawnMonster(std::move(mob), spawnPos, distYaw(randomEngine));
 

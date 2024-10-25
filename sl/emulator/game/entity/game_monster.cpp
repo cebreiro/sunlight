@@ -4,6 +4,7 @@
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/entity_status_effect_component.h"
 #include "sl/emulator/game/component/monster_aggro_component.h"
+#include "sl/emulator/game/component/monster_skill_component.h"
 #include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/data/sox/monster_action.h"
@@ -11,9 +12,10 @@
 
 namespace sunlight
 {
-    GameMonster::GameMonster(GameEntityIdPublisher& idPublisher, const MonsterData& data, std::optional<game_entity_id_type> spawnerId)
+    GameMonster::GameMonster(GameEntityIdPublisher& idPublisher, const MonsterData& data, Eigen::Vector2f spawnPosition, std::optional<game_entity_id_type> spawnerId)
         : GameEntity(idPublisher, TYPE)
         , _data(data)
+        , _spawnPosition(std::move(spawnPosition))
         , _spawnerId(spawnerId)
     {
         AddComponent(std::make_unique<SceneObjectComponent>());
@@ -22,6 +24,7 @@ namespace sunlight
         AddComponent(std::make_unique<MonsterStatComponent>(_data.GetBase()));
         AddComponent(std::make_unique<EntityMovementComponent>());
         AddComponent(std::make_unique<MonsterAggroComponent>(_data.GetAction()));
+        AddComponent(std::make_unique<MonsterSkillComponent>());
 
         GetSceneObjectComponent().SetBodySize(data.GetAction().bodySize);
     }
@@ -39,6 +42,11 @@ namespace sunlight
     auto GameMonster::GetData() const -> const MonsterData&
     {
         return _data;
+    }
+
+    auto GameMonster::GetSpawnPosition() const -> Eigen::Vector2f
+    {
+        return _spawnPosition;
     }
 
     auto GameMonster::GetSpawnerId() const -> std::optional<game_entity_id_type>
@@ -94,5 +102,15 @@ namespace sunlight
     auto GameMonster::GetAggroComponent() const -> const MonsterAggroComponent&
     {
         return GetComponent<MonsterAggroComponent>();
+    }
+
+    auto GameMonster::GetSkillComponent() -> MonsterSkillComponent&
+    {
+        return GetComponent<MonsterSkillComponent>();
+    }
+
+    auto GameMonster::GetSkillComponent() const -> const MonsterSkillComponent&
+    {
+        return GetComponent<MonsterSkillComponent>();
     }
 }

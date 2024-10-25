@@ -15,6 +15,9 @@ namespace sunlight
     public:
         explicit MonsterAggroComponent(const sox::MonsterAction& data);
 
+        bool Empty() const;
+
+        bool Remove(game_entity_id_type targetId);
         void RemovePrimary();
         void RemoveGarbage();
 

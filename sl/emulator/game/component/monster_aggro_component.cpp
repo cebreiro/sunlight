@@ -10,6 +10,27 @@ namespace sunlight
     {
     }
 
+    bool MonsterAggroComponent::Empty() const
+    {
+        return _descSortedArray.empty();
+    }
+
+    bool MonsterAggroComponent::Remove(game_entity_id_type targetId)
+    {
+        auto iter = std::ranges::find_if(_descSortedArray, [targetId](const Aggro& aggro)
+            {
+                return targetId == aggro.targetId;
+            });;
+        if (iter == _descSortedArray.end())
+        {
+            return false;
+        }
+
+        _descSortedArray.erase(iter);
+
+        return true;
+    }
+
     void MonsterAggroComponent::RemovePrimary()
     {
         _descSortedArray.erase(_descSortedArray.begin());

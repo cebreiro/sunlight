@@ -88,7 +88,7 @@ namespace sunlight
 
     bool MonsterController::ShouldStopCoroutine() const
     {
-        const auto& entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
+        const GameEntity* entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
         if (!entity)
         {
             return true;
@@ -106,6 +106,26 @@ namespace sunlight
     {
         const auto now = game_clock_type::now();
         GameTimeService::SetNow(now);
+    }
+
+    auto MonsterController::Rand(int32_t min, int32_t max) -> int32_t
+    {
+        if (min > max)
+        {
+            assert(false);
+
+            std::swap(min, max);
+        }
+        else if (min == max)
+        {
+            assert(false);
+
+            return min;
+        }
+
+        std::uniform_int_distribution dist(min, max);
+
+        return dist(_mt);
     }
 
     auto MonsterController::GetData() const -> const MonsterData&
@@ -147,7 +167,7 @@ namespace sunlight
                 }
             }
 
-            const auto& entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
+            GameEntity* entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
             if (!entity)
             {
                 co_return;

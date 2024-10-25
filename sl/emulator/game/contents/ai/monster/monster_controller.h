@@ -27,6 +27,8 @@ namespace sunlight
         bool ShouldStopCoroutine() const;
         void ConfigureCoroutineExecutionContext();
 
+        auto Rand(int32_t min, int32_t max) -> int32_t;
+
         auto GetData() const -> const MonsterData&;
         auto GetRandomEngine() -> std::mt19937&;
 

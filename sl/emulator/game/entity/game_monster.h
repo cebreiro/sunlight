@@ -10,6 +10,7 @@ namespace sunlight
     class EntityMovementComponent;
     class MonsterStatComponent;
     class MonsterAggroComponent;
+    class MonsterSkillComponent;
 }
 
 namespace sunlight
@@ -20,12 +21,14 @@ namespace sunlight
         static constexpr GameEntityType TYPE = GameEntityType::Enemy;
 
     public:
-        GameMonster(GameEntityIdPublisher& idPublisher, const MonsterData& data, std::optional<game_entity_id_type> spawnerId);
+        GameMonster(GameEntityIdPublisher& idPublisher, const MonsterData& data,
+                    Eigen::Vector2f spawnPosition, std::optional<game_entity_id_type> spawnerId);
 
         bool IsInvisible() const;
 
         auto GetDataId() const -> int32_t;
         auto GetData() const -> const MonsterData&;
+        auto GetSpawnPosition() const -> Eigen::Vector2f;
         auto GetSpawnerId() const -> std::optional<game_entity_id_type>;
 
     public:
@@ -39,10 +42,12 @@ namespace sunlight
         auto GetStatComponent() const -> const MonsterStatComponent&;
         auto GetAggroComponent() -> MonsterAggroComponent&;
         auto GetAggroComponent() const -> const MonsterAggroComponent&;
+        auto GetSkillComponent() -> MonsterSkillComponent&;
+        auto GetSkillComponent() const -> const MonsterSkillComponent&;
 
     private:
         const MonsterData& _data;
-
+        Eigen::Vector2f _spawnPosition;
         std::optional<game_entity_id_type> _spawnerId = std::nullopt;
     };
 }

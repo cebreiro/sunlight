@@ -1,6 +1,7 @@
 #include "monster_ai_state_wander.h"
 
 #include "sl/emulator/game/component/monster_aggro_component.h"
+#include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/ai/monster/monster_controller.h"
 #include "sl/emulator/game/data/sox/monster_action.h"
@@ -36,8 +37,8 @@ namespace sunlight
             const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(GameTimeService::Now() - _lastScanTime);
             if (duration >= std::chrono::milliseconds(actionData.scanTime))
             {
-                _playerScanResult.clear();
-                co_await system.Get<EntityScanSystem>().ScanPlayerAsync(_playerScanResult, monster, static_cast<float>(actionData.sightRange));
+                _scanResult.clear();
+                co_await system.Get<EntityScanSystem>().ScanPlayerAsync(_scanResult, monster, static_cast<float>(actionData.sightRange));
 
                 if (controller.ShouldStopCoroutine())
                 {
@@ -48,28 +49,52 @@ namespace sunlight
 
                 _lastScanTime = GameTimeService::Now();
 
-                if (!_playerScanResult.empty())
+                if (!_scanResult.empty())
                 {
                     std::optional<game_entity_id_type> combatTargetId = std::nullopt;
 
-                    while (!_playerScanResult.empty())
+                    while (!_scanResult.empty())
                     {
-                        const auto iter = std::ranges::min_element(_playerScanResult,
+                        const auto iter = std::ranges::min_element(_scanResult,
                             [](const std::pair<game_entity_id_type, float>& lhs, const std::pair<game_entity_id_type, float>& rhs) -> bool
                             {
                                 return lhs.first < rhs.first;
                             });
-                        assert(iter != _playerScanResult.end());
+                        assert(iter != _scanResult.end());
 
-                        if (const auto& entity = system.Get<SceneObjectSystem>().FindEntity(GamePlayer::TYPE, iter->first);
-                            entity)
+                        bool done = false;
+
+                        do
                         {
-                            combatTargetId = entity->GetId();
+                            const GameEntity* entity = system.Get<SceneObjectSystem>().FindEntity(GamePlayer::TYPE, iter->first);
+                            if (!entity)
+                            {
+                                break;
+                            }
 
+                            if (entity->GetType() == GamePlayer::TYPE)
+                            {
+                                const GamePlayer* player = entity->Cast<GamePlayer>();
+                                assert(player);
+
+                                if (const int32_t levelDiff = player->GetStatComponent().GetLevel() - monster.GetData().GetBase().level;
+                                    levelDiff > actionData.levelDiffMax)
+                                {
+                                    break;
+                                }
+                            }
+
+                            done = true;
+                            combatTargetId = entity->GetId();
+                            
+                        } while (false);
+
+                        if (done)
+                        {
                             break;
                         }
 
-                        _playerScanResult.erase(iter);
+                        _scanResult.erase(iter);
                     }
 
                     if (combatTargetId.has_value())
