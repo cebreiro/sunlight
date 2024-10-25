@@ -6,6 +6,7 @@
 #include "sl/emulator/game/data/sox/monster_attack.h"
 #include "sl/emulator/game/data/sox/monster_base.h"
 #include "sl/emulator/game/data/sox/monster_item.h"
+#include "sl/emulator/service/gamedata/abf/abf_data_provider.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
 namespace sunlight

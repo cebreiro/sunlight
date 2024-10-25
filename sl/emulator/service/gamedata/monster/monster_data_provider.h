@@ -7,6 +7,7 @@ namespace sunlight
     class SoxTableSet;
 
     class ItemDataProvider;
+    class AbilityFileDataProvider;
 }
 
 namespace sunlight

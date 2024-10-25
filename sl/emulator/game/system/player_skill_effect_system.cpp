@@ -7,13 +7,11 @@
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/contents/damage/damage_result.h"
-#include "sl/emulator/game/contents/damage/player_attack_damage_calculator.h"
-#include "sl/emulator/game/contents/damage/player_attack_damage_calculator_interface.h"
 #include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_factory.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_interface.h"
 #include "sl/emulator/game/contents/passive/effect/impl/passive_effect_stat.h"
-#include "sl/emulator/game/contents/skill/player_skill_target_selector.h"
+#include "sl/emulator/game/contents/skill/skill_target_selector.h"
 #include "sl/emulator/game/contents/stat/player_stat_type.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/item_weapon.h"
@@ -40,7 +38,7 @@ namespace sunlight
     PlayerSkillEffectSystem::PlayerSkillEffectSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
-        , _skillTargetSelector(std::make_unique<PlayerSkillTargetSelector>(*this))
+        , _skillTargetSelector(std::make_unique<SkillTargetSelector>(*this))
     {
     }
 
@@ -257,7 +255,7 @@ namespace sunlight
 
         GameEntity* mainTarget = targetType != GameEntityType::None ? Get<SceneObjectSystem>().FindEntity(targetType, targetId) : nullptr;
 
-        PlayerSkillTargetSelector::result_type skillTargets;
+        SkillTargetSelector::result_type skillTargets;
         if (!_skillTargetSelector->SelectTarget(skillTargets, player, skillData, mainTarget))
         {
             player.Notice(fmt::format("fail to select skill target. skill: {}", skillId));

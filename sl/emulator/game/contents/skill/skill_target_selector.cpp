@@ -1,4 +1,4 @@
-#include "player_skill_target_selector.h"
+#include "skill_target_selector.h"
 
 #include "shared/collision/intersect.h"
 #include "shared/collision/shape/circle.h"
@@ -10,21 +10,20 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
-#include "sl/emulator/game/system/player_skill_effect_system.h"
 #include "sl/emulator/service/gamedata/skill/player_skill_data.h"
 
 namespace sunlight
 {
-    PlayerSkillTargetSelector::PlayerSkillTargetSelector(PlayerSkillEffectSystem& system)
+    SkillTargetSelector::SkillTargetSelector(GameSystem& system)
         : _system(system)
     {
     }
 
-    bool PlayerSkillTargetSelector::SelectTarget(result_type& result, const GamePlayer& caster, const PlayerSkillData& skillData, GameEntity* optMainTarget) const
+    bool SkillTargetSelector::SelectTarget(result_type& result, const GamePlayer& caster, const PlayerSkillData& skillData, GameEntity* optMainTarget) const
     {
         switch (skillData.applyDamageType)
         {
-        case PlayerSkillTargetingAreaType::OneUnit:
+        case SkillTargetingAreaType::OneUnit:
         {
             if (optMainTarget)
             {
@@ -34,8 +33,8 @@ namespace sunlight
             }
         }
         break;
-        case PlayerSkillTargetingAreaType::Sphere:
-        case PlayerSkillTargetingAreaType::OBB:
+        case SkillTargetingAreaType::Sphere:
+        case SkillTargetingAreaType::OBB:
         {
             if (!optMainTarget)
             {
@@ -44,13 +43,13 @@ namespace sunlight
 
             const auto shape = [&]() -> std::variant<collision::Circle, collision::OBB>
                 {
-                    if (skillData.applyDamageType == PlayerSkillTargetingAreaType::Sphere)
+                    if (skillData.applyDamageType == SkillTargetingAreaType::Sphere)
                     {
                         const Eigen::Vector2f& center = optMainTarget->GetComponent<SceneObjectComponent>().GetPosition();
 
                         return collision::Circle(center, static_cast<float>(skillData.damageLength));
                     }
-                    else if (skillData.applyDamageType == PlayerSkillTargetingAreaType::OBB)
+                    else if (skillData.applyDamageType == SkillTargetingAreaType::OBB)
                     {
                         const SceneObjectComponent& sceneObjectComponent = caster.GetSceneObjectComponent();
                         const Eigen::Vector2f& position = sceneObjectComponent.GetPosition();
@@ -96,10 +95,10 @@ namespace sunlight
 
             switch (skillData.applyTargetType)
             {
-            case PlayerSkillTargetSelectType::Enemy:
-            case PlayerSkillTargetSelectType::Ally:
+            case SkillTargetSelectType::Monster:
+            case SkillTargetSelectType::PlayerAlly:
             {
-                const auto targetType = skillData.applyTargetType == PlayerSkillTargetSelectType::Ally ? GameEntityType::Player : GameEntityType::Enemy;
+                const auto targetType = skillData.applyTargetType == SkillTargetSelectType::PlayerAlly ? GameEntityType::Player : GameEntityType::Enemy;
 
                 for (GameEntity& target : _system.Get<EntityViewRangeSystem>().GetSector(caster).GetEntities(targetType))
                 {
@@ -117,7 +116,7 @@ namespace sunlight
 
                 return true;
             }
-            case PlayerSkillTargetSelectType::Party:
+            case SkillTargetSelectType::Party:
             {
                 PlayerIndexSystem& playerIndexSystem = _system.Get<PlayerIndexSystem>();
 
@@ -153,12 +152,13 @@ namespace sunlight
 
                 return true;
             }
-            case PlayerSkillTargetSelectType::MaybeGroundPoint:
-            case PlayerSkillTargetSelectType::Self:
+            case SkillTargetSelectType::MaybeGroundPoint:
+            case SkillTargetSelectType::PlayerSelf:
                 return false;
             }
         }
         break;
+        default: ;
         }
 
         return false;

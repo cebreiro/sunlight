@@ -37,7 +37,9 @@ namespace sunlight
         _mapDataProvider = std::make_shared<MapDataProvider>(assetPath / "Zone");
         _soxTableSet = std::make_shared<SoxTableSet>(assetPath / "Misc");
         _abilityFileDataProvider = std::make_shared<AbilityFileDataProvider>(
-            assetPath / "Misc/Ability", *_assetDataProvider, *_soxTableSet);
+            assetPath / "Misc/Ability",
+            assetPath / "Misc/AbilityMonster",
+            *_assetDataProvider, *_soxTableSet);
 
         _itemDataProvider = std::make_shared<ItemDataProvider>(_serviceLocator, *_soxTableSet);
         _itemMixDataProvider = std::make_shared<ItemMixDataProvider>(_serviceLocator, *_soxTableSet, *_itemDataProvider);

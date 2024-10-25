@@ -4,26 +4,29 @@
 namespace sunlight
 {
     struct PlayerSkillData;
+    struct MonsterSkillData;
+
+    class GameSystem;
 
     class GameEntity;
     class GamePlayer;
-    class PlayerSkillEffectSystem;
+    class GameMonster;
 }
 
 namespace sunlight
 {
-    class PlayerSkillTargetSelector
+    class SkillTargetSelector
     {
     public:
         // skill_basic.sox -> DAMAGE_MAXCOUNT <= 8
         using result_type = boost::container::small_vector<PtrNotNull<GameEntity>, 8>;
 
     public:
-        explicit PlayerSkillTargetSelector(PlayerSkillEffectSystem& system);
+        explicit SkillTargetSelector(GameSystem& system);
 
         bool SelectTarget(result_type& result, const GamePlayer& caster, const PlayerSkillData& skillData, GameEntity* optMainTarget) const;
 
     private:
-        PlayerSkillEffectSystem& _system;
+        GameSystem& _system;
     };
 }

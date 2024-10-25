@@ -1,68 +1,23 @@
-#include "player_skill_data.h"
+#include "monster_skill_data.h"
 
-#include "sl/emulator/game/data/sox/skill_basic.h"
+#include "sl/emulator/game/data/sox/monster_skill.h"
 
 namespace sunlight
 {
-    auto PlayerSkillData::CreateFrom(const sox::SkillBasic& data) -> PlayerSkillData
+    auto MonsterSkillData::CreateFrom(const sox::MonsterSkill& data) -> MonsterSkillData
     {
-        PlayerSkillData result;
+        MonsterSkillData result;
         result.index = data.index;
         result.routineId = data.routineId;
         result.abilityType = data.abilityType;
 
-        {
-            for (int32_t job : std::initializer_list<int32_t>{ data.job1, data.job2, data.job3 })
-            {
-                if (job != 0)
-                {
-                    result.jobs.push_back(job);
-                }
-            }
-        }
-        result.degree = data.degree;
-        result.maxLevel = data.maxLevel;
-        result.delayId = data.delayId;
-        result.canSubJob = data.canSubjob;
-        result.levelQualification = data.levelQualification;
-
-        {
-            for (const PrevSkill& skill : std::initializer_list<PrevSkill>{
-                { data.ability1Qualification, data.ability1Level },
-                { data.ability2Qualification, data.ability2Level }
-                })
-            {
-                if (skill.id != 0 && skill.level != 0)
-                {
-                    result.prevSkills.push_back(skill);
-                }
-            }
-        }
-
         result.passive = data.passive == 0;
-        result.spConsumption = data.spConsumption;
-        result.spConsumptionDelay = data.spConsumptionDelay;
-        result.furyOnly = data.furyOnly;
-        result.requireItem = data.requireItem;
-        result.requireItemCount = data.requireItemCount;
-        result.motionSpeed = data.motionSpeed;
-        result.needWeapon = data.needWeapon;
-        result.delayType = data.delayType;
-        result.delayTime = data.delayTime;
-        result.useType = data.useType;
         result.applyTargetType = static_cast<SkillTargetSelectType>(data.applyTargetType);
         result.applyDamageType = static_cast<SkillTargetingAreaType>(data.applyDamageType);
         result.damageLength = data.damageLength;
         result.damageLength2 = data.damageLength2;
         result.damageMaxCount = data.damageMaxcount;
-        result.cancelable = data.cancelable;
-        result.useRange = data.useRange;
-        result.addWeaponRange = data.addWeaponRange;
-        result.applyCasting = data.applyCasting;
-        result.castingDelay = data.castingDelay;
-        result.applyCharging = data.applyCharging;
-        result.chargingDelay = data.chargingDelay;
-        result.damageMotionType = data.damageMotionType;
+
         {
             const std::initializer_list<SkillEffectData> list{
                 {
@@ -106,25 +61,7 @@ namespace sunlight
                     continue;
                 }
 
-                if (skillEffectData.category == SkillEffectCategory::WeaponCondition)
-                {
-                    if (skillEffectData.type == 1)
-                    {
-                        result.effectRangeWeaponCondition.emplace();
-                    }
-                    else if (skillEffectData.type == 2)
-                    {
-                        result.effectAttackProbabilityCondition.emplace(skillEffectData.value2, skillEffectData.value3);
-                    }
-                    else
-                    {
-                        result.effectWeaponClassCondition.emplace(static_cast<WeaponClassType>(skillEffectData.type));
-                    }
-                }
-                else
-                {
-                    result.effects.emplace_back(skillEffectData);
-                }
+                result.effects.emplace_back(skillEffectData);
             }
         }
 

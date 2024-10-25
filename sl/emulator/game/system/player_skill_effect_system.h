@@ -12,7 +12,7 @@ namespace sunlight
     struct GameEntityState;
     class IPassiveEffect;
     class PlayerSkill;
-    class PlayerSkillTargetSelector;
+    class SkillTargetSelector;
 
     class GamePlayer;
     class GameMonster;
@@ -52,6 +52,6 @@ namespace sunlight
         const ServiceLocator& _serviceLocator;
         int32_t _stageId = 0;
 
-        UniquePtrNotNull<PlayerSkillTargetSelector> _skillTargetSelector;
+        UniquePtrNotNull<SkillTargetSelector> _skillTargetSelector;
     };
 }

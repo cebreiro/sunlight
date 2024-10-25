@@ -1,6 +1,7 @@
 #include "skill_data_provider.h"
 
 #include "sl/emulator/game/data/sox_table_set.h"
+#include "sl/emulator/game/data/sox/monster_skill.h"
 #include "sl/emulator/game/data/sox/skill_basic.h"
 #include "sl/emulator/service/gamedata/abf/abf_data_provider.h"
 
@@ -39,6 +40,38 @@ namespace sunlight
                 _jobIndex[job][data.levelQualification].push_back(&data);
             }
         }
+
+        for (const sox::MonsterSkill& soxMonsterSkill : tableSet.Get<sox::MonsterSkillTable>().Get())
+        {
+            MonsterSkillData monsterSkill = MonsterSkillData::CreateFrom(soxMonsterSkill);
+
+            const auto [iter, inserted] = _monsterSkillData.try_emplace(soxMonsterSkill.index, MonsterSkillData::CreateFrom(soxMonsterSkill));
+            if (!inserted)
+            {
+                continue;
+            }
+
+            MonsterSkillData& monsterSkillData = iter->second;
+
+            const std::vector<AbilityRoutine>& monsterAbilityFileDataList = abilityFileDataProvider.GetAbilityMonster(monsterSkillData.routineId);
+            assert(std::ssize(monsterAbilityFileDataList) <= 1);
+
+            for (const AbilityRoutine& routine : monsterAbilityFileDataList)
+            {
+                monsterSkillData.weaponClass = routine.weaponClass;
+
+                for (const AbilityProperty& property : routine.properties)
+                {
+                    for (const AbilityValue& value : property.values)
+                    {
+                        if (value.type == 2)
+                        {
+                            monsterSkillData.effectAttackValues.push_back(&value);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     auto SkillDataProvider::FindPlayerSkill(int32_t skillId) const -> const PlayerSkillData*
@@ -65,5 +98,12 @@ namespace sunlight
         }
 
         return iter2->second;
+    }
+
+    auto SkillDataProvider::FindMonsterSkill(int32_t skillId) const -> const MonsterSkillData*
+    {
+        const auto iter = _monsterSkillData.find(skillId);
+
+        return iter != _monsterSkillData.end() ? &iter->second : nullptr;
     }
 }

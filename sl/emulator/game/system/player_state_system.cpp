@@ -14,7 +14,7 @@
 #include "sl/emulator/game/contents/event_script/event_script.h"
 #include "sl/emulator/game/contents/group/item_mix_prop_item_mapping.h"
 #include "sl/emulator/game/contents/npc/npc_talk_box.h"
-#include "sl/emulator/game/contents/skill/player_skill_target_selector.h"
+#include "sl/emulator/game/contents/skill/skill_target_selector.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
