@@ -9,6 +9,7 @@
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
+#include "sl/emulator/game/system/monster_skill_effect_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
@@ -167,7 +168,15 @@ namespace sunlight
 
         if (distance <= range)
         {
-            // TODO: do attack
+            const MonsterAttackData& attackData = monster.GetData().GetAttack();
+
+            const int32_t attackIndex = *std::exchange(_attackIndex, std::nullopt);
+            if (attackIndex == 0)
+            {
+                system.Get<MonsterSkillEffectSystem>().ProcessNormalAttack(monster, *target);
+
+                co_await Delay(std::chrono::milliseconds(attackData.attackEndFrame + attackData.attackDelay));
+            }
 
             co_return;
         }

@@ -12,6 +12,7 @@ namespace sunlight
     class ItemData;
     class PlayerSkill;
 
+    class GameEntity;
     class GamePlayer;
     class GameMonster;
 
@@ -36,6 +37,8 @@ namespace sunlight
 
         void ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill, const SkillEffectData& effect,
             int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue);
+
+        void ProcessMonsterNormalAttack(GameMonster& monster, GameEntity& target);
 
     private:
         void OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage);

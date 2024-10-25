@@ -57,6 +57,40 @@ namespace sunlight
         return future;
     }
 
+    void EntityScanSystem::ScanMonsterAttackTarget(std::vector<game_entity_id_type>& result, const Eigen::Vector2f& position, float range)
+    {
+        GameSpatialSector& sector = Get<EntityViewRangeSystem>().GetSector(position);
+        const auto sectorId = sector.GetId();
+
+        const collision::Circle circle(position, range);
+
+        for (const GameSpatialCell& cell : sector.GetCells())
+        {
+            // TODO: pet
+            
+            if (cell.Empty(GameEntityType::Player))
+            {
+                continue;
+            }
+
+            if (sectorId != cell.GetId())
+            {
+                if (CalculateCellMinDistanceSq(sector, cell, position) >  (range * range))
+                {
+                    continue;
+                }
+            }
+
+            for (const GameEntity& target : cell.GetEntities(GameEntityType::Player))
+            {
+                if (IsIntersection(target, circle))
+                {
+                    result.emplace_back(target.GetId());
+                }
+            }
+        }
+    }
+
     void EntityScanSystem::ProcessScan()
     {
         if (_scanRequests.empty())
@@ -105,28 +139,7 @@ namespace sunlight
                     if (const auto cellId = cell.GetId();
                         cellId != sectorId)
                     {
-                        const GameSpatialMBR& mbr = cell.GetMBR();
-
-                        float diffX = 0.f;
-                        float diffY = 0.f;
-
-                        if (cellId.GetX() != sectorId.GetX())
-                        {
-                            diffX = sectorId.GetX() < cellId.GetX()
-                                ? mbr.GetMin().x() - scanRequest.center.x()
-                                : scanRequest.center.x() - mbr.GetMax().x();
-                            assert(diffX >= 0.f);
-                        }
-
-                        if (cellId.GetY() != sectorId.GetY())
-                        {
-                            diffY = sectorId.GetY() < cellId.GetY()
-                                ? mbr.GetMin().y() - scanRequest.center.y()
-                                : scanRequest.center.y() - mbr.GetMax().y();
-                            assert(diffY >= 0.f);
-                        }
-
-                        const float distanceSq = (diffX * diffX) + (diffY * diffY);
+                        const float distanceSq = CalculateCellMinDistanceSq(*sector, cell, scanRequest.center);
                         if (distanceSq > scanRequest.range * scanRequest.range)
                         {
                             continue;
@@ -137,14 +150,9 @@ namespace sunlight
 
                     for (const GameEntity& target : cell.GetEntities(scanRequest.type))
                     {
-                        const SceneObjectComponent& targetSceneObjectComponent = target.GetComponent<SceneObjectComponent>();
-                        const Eigen::Vector2f& targetPosition = targetSceneObjectComponent.GetPosition();
-
-                        const collision::Circle targetCollision(targetPosition, static_cast<float>(targetSceneObjectComponent.GetBodySize()));
-
-                        if (Intersect(scanCollision, targetCollision))
+                        if (IsIntersection(target, scanCollision))
                         {
-                            scanRequest.result->emplace_back(target.GetId(), (targetPosition - scanRequest.center).norm());
+                            scanRequest.result->emplace_back(target.GetId(), (target.GetComponent<SceneObjectComponent>().GetPosition() - scanRequest.center).norm());
                         }
                     }
                 }
@@ -160,5 +168,44 @@ namespace sunlight
         }
 
         _scanRequests.clear();
+    }
+
+    auto EntityScanSystem::CalculateCellMinDistanceSq(const GameSpatialSector& sector, const GameSpatialCell& cellInSector, const Eigen::Vector2f& posInSector) -> float
+    {
+        const auto sectorId = sector.GetId();
+        const auto cellId = cellInSector.GetId();
+        assert(cellId != sectorId);
+
+        const GameSpatialMBR& mbr = cellInSector.GetMBR();
+
+        float diffX = 0.f;
+        float diffY = 0.f;
+
+        if (cellId.GetX() != sectorId.GetX())
+        {
+            diffX = sectorId.GetX() < cellId.GetX()
+                ? mbr.GetMin().x() - posInSector.x()
+                : posInSector.x() - mbr.GetMax().x();
+            assert(diffX >= 0.f);
+        }
+
+        if (cellId.GetY() != sectorId.GetY())
+        {
+            diffY = sectorId.GetY() < cellId.GetY()
+                ? mbr.GetMin().y() - posInSector.y()
+                : posInSector.y() - mbr.GetMax().y();
+            assert(diffY >= 0.f);
+        }
+
+        return (diffX * diffX) + (diffY * diffY);
+    }
+
+    bool EntityScanSystem::IsIntersection(const GameEntity& target, const collision::Circle& circle)
+    {
+        const SceneObjectComponent& sceneObjectComponent = target.GetComponent<SceneObjectComponent>();
+        const Eigen::Vector2f& position = sceneObjectComponent.GetPosition();
+        const collision::Circle targetCollision(position, static_cast<float>(sceneObjectComponent.GetBodySize()));
+
+        return Intersect(circle, targetCollision);
     }
 }

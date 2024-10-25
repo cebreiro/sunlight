@@ -2,6 +2,7 @@
 
 #include "sl/emulator/game/contents/ai/monster/state/monster_ai_state_machine.h"
 #include "sl/emulator/game/contents/ai/monster/state/monster_ai_state_factory.h"
+#include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -166,6 +167,13 @@ namespace sunlight
                     co_return;
                 }
             }
+
+            if (GameDebugger* debugger = _system.GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
+            {
+                GameDebugger::SetInstance(debugger);
+            }
+
+            GameTimeService::SetNow(game_clock_type::now());
 
             GameEntity* entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
             if (!entity)

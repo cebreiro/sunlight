@@ -26,6 +26,7 @@
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/service/gamedata/monster/monster_data.h"
 #include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
 namespace sunlight
@@ -169,6 +170,35 @@ namespace sunlight
 					});
 			}
 		}
+    }
+
+    void EntityDamageSystem::ProcessMonsterNormalAttack(GameMonster& monster, GameEntity& target)
+    {
+        const MonsterAttackData& attackData = monster.GetData().GetAttack();
+
+        bool dodged = false;
+
+        const DamageResult result{
+            .attackerId = monster.GetId(),
+            .attackerType = monster.GetType(),
+            .damageType = dodged ? DamageType::DodgePlayer : DamageType::DamagePlayer,
+            .id = 0,
+            .motionId = 0,
+            .skillId = 0,
+            .damage = 1234,
+            .damageCount = attackData.divDamage,
+            .damageInterval = attackData.divDamageDelay,
+            .blowType = DamageBlowType::BlowSmall,
+            .attackedResultType = DamageResultType::Damage_A,
+        };
+
+        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            {
+                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
+                //player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+
+                player.FlushDeferred();
+            });
     }
 
     void EntityDamageSystem::OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage)

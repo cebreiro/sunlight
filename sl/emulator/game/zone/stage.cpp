@@ -26,6 +26,7 @@
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/item_trade_system.h"
 #include "sl/emulator/game/system/monster_drop_item_table_system.h"
+#include "sl/emulator/game/system/monster_skill_effect_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_channel_system.h"
@@ -373,6 +374,7 @@ namespace sunlight
         Add(std::make_shared<EventBubblingSystem>());
         Add(std::make_shared<EntityAIControlSystem>(_serviceLocator));
         Add(std::make_shared<EntityScanSystem>());
+        Add(std::make_shared<MonsterSkillEffectSystem>(_serviceLocator, _stageData.id));
 
         const auto range = _systems | std::views::values;
 

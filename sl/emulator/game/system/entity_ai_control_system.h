@@ -23,6 +23,7 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
         auto GetClassId() const -> game_system_id_type override;
 
+        auto GetServiceLocator() const -> const ServiceLocator&;
 
     private:
         void HandleEvent(const EventBubblingMonsterAIAttach& e);

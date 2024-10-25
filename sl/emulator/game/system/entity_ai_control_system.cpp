@@ -5,6 +5,7 @@
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_scan_system.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
+#include "sl/emulator/game/system/monster_skill_effect_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/event_bubbling/ai_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -25,6 +26,7 @@ namespace sunlight
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<EntityMovementSystem>());
         Add(stage.Get<EntityScanSystem>());
+        Add(stage.Get<MonsterSkillEffectSystem>());
     }
 
     bool EntityAIControlSystem::Subscribe(Stage& stage)
@@ -54,6 +56,11 @@ namespace sunlight
     auto EntityAIControlSystem::GetClassId() const -> game_system_id_type
     {
         return GameSystem::GetClassId<EntityAIControlSystem>();
+    }
+
+    auto EntityAIControlSystem::GetServiceLocator() const -> const ServiceLocator&
+    {
+        return _serviceLocator;
     }
 
     void EntityAIControlSystem::HandleEvent(const EventBubblingMonsterAIAttach& e)

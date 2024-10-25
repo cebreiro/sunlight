@@ -3,9 +3,15 @@
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/system/game_system.h"
 
+namespace sunlight::collision
+{
+    class Circle;
+}
+
 namespace sunlight
 {
     class GameSpatialSector;
+    class GameSpatialCell;
 }
 
 namespace sunlight
@@ -23,8 +29,14 @@ namespace sunlight
     public:
         auto ScanPlayerAsync(std::vector<std::pair<game_entity_id_type, float>>& result, const GameMonster& monster, float range) -> Future<void>;
 
+        void ScanMonsterAttackTarget(std::vector<game_entity_id_type>& result, const Eigen::Vector2f& position, float range);
+
     private:
         void ProcessScan();
+
+    private:
+        static auto CalculateCellMinDistanceSq(const GameSpatialSector& sector, const GameSpatialCell& cellInSector, const Eigen::Vector2f& posInSector) -> float;
+        static bool IsIntersection(const GameEntity& target, const collision::Circle& circle);
 
     private:
         struct ScanRequest
