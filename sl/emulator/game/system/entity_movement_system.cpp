@@ -52,15 +52,15 @@ namespace sunlight
             EntityMovementComponent& movementComponent = entity.GetComponent<EntityMovementComponent>();
             if (movementComponent.IsMoving())
             {
-                if (ClientMovement* forwardMovement = movementComponent.GetForwardMovement(); forwardMovement)
+                if (ClientMovement* clientMovement = movementComponent.GetForwardMovement(); clientMovement)
                 {
                     std::chrono::duration<float> duration = (now - movementComponent.GetStartTimePoint());
-                    const float totalDistance = (forwardMovement->destPosition - forwardMovement->position).norm();
-                    const float totalTime = totalDistance / forwardMovement->speed / 100;
+                    const float totalDistance = (clientMovement->destPosition - clientMovement->position).norm();
+                    const float totalTime = totalDistance / clientMovement->speed / 100;
 
                     const float t = std::min(duration.count() / totalTime, 1.f);
 
-                    const Eigen::Vector2f newPosition = ((1.f - t) * forwardMovement->position) + (t * forwardMovement->destPosition);
+                    const Eigen::Vector2f newPosition = ((1.f - t) * clientMovement->position) + (t * clientMovement->destPosition);
 
                     SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
                     sceneObjectComponent.SetPosition(newPosition);
