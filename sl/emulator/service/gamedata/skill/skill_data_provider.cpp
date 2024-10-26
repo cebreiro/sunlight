@@ -58,8 +58,6 @@ namespace sunlight
 
             for (const AbilityRoutine& routine : monsterAbilityFileDataList)
             {
-                monsterSkillData.weaponClass = routine.weaponClass;
-
                 for (const AbilityProperty& property : routine.properties)
                 {
                     for (const AbilityValue& value : property.values)

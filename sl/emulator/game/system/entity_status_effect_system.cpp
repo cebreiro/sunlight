@@ -4,10 +4,14 @@
 #include "sl/emulator/game/contents/status_effect/status_effect.h"
 #include "sl/emulator/game/contents/status_effect/status_effect_handler_register.h"
 #include "sl/emulator/game/entity/game_entity.h"
+#include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/status_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/event_bubbling_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
@@ -26,11 +30,18 @@ namespace sunlight
     {
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<PlayerStatSystem>());
+        Add(stage.Get<SceneObjectSystem>());
     }
 
     bool EntityStatusEffectSystem::Subscribe(Stage& stage)
     {
-        return GameSystem::Subscribe(stage);
+        stage.Get<EventBubblingSystem>().AddSubscriber<EventBubblingMonsterDespawn>(
+            [this](const EventBubblingMonsterDespawn& event)
+            {
+                _tickStatusEffects.erase(event.monster);
+            });
+
+        return true;
     }
 
     bool EntityStatusEffectSystem::ShouldUpdate() const
@@ -121,8 +132,13 @@ namespace sunlight
         _tickStatusEffects.erase(&player);
     }
 
+    void EntityStatusEffectSystem::OnStageExit(GameMonster& monster)
+    {
+        _tickStatusEffects.erase(&monster);
+    }
+
     void EntityStatusEffectSystem::AddStatusEffectBySkill(int32_t skillId, int32_t skillLevel,
-        std::span<PtrNotNull<GameEntity>> targets, const SkillEffectData& skillEffectData)
+        std::span<game_entity_id_type> targets, const SkillEffectData& skillEffectData)
     {
         if (skillEffectData.category != SkillEffectCategory::StatusEffect)
         {
@@ -141,32 +157,40 @@ namespace sunlight
         const IStatusEffectApplyHandler* applyHandler = GetApplyHandler(statusEffect.GetType());
         const IStatusEffectTickHandler* tickHandler = GetTickHandler(statusEffect.GetType());
 
-        for (GameEntity& entity : targets | notnull::reference)
+        SceneObjectSystem& sceneObjectSystem = Get<SceneObjectSystem>();
+
+        for (const game_entity_id_type targetId : targets)
         {
-            EntityStatusEffectComponent& statusEffectComponent = entity.GetComponent<EntityStatusEffectComponent>();
+            GameEntity* entity = sceneObjectSystem.FindEntity(targetId);
+            if (!entity)
+            {
+                continue;
+            }
+
+            EntityStatusEffectComponent& statusEffectComponent = entity->GetComponent<EntityStatusEffectComponent>();
             std::optional<StatusEffect> prevStatusEffect = std::nullopt;
 
             if (StatusEffect* prevStatusEffectPtr = statusEffectComponent.Find(statusEffect.GetId());
                 prevStatusEffectPtr)
             {
-                ClearStatusEffect(entity, *prevStatusEffectPtr);
+                ClearStatusEffect(*entity, *prevStatusEffectPtr);
 
                 prevStatusEffect = statusEffectComponent.Release(statusEffect.GetId());
             }
 
             if (applyHandler)
             {
-                applyHandler->Apply(*this, entity, statusEffect);
+                applyHandler->Apply(*this, *entity, statusEffect);
             }
 
-            viewRangeSystem.VisitPlayer(entity, [&](GamePlayer& player)
+            viewRangeSystem.VisitPlayer(*entity, [&](GamePlayer& player)
             {
                 if (prevStatusEffect.has_value())
                 {
-                    player.Defer(StatusMessageCreator::CreateStatusEffectRemove(entity, *prevStatusEffect));
+                    player.Defer(StatusMessageCreator::CreateStatusEffectRemove(*entity, *prevStatusEffect));
                 }
 
-                player.Defer(StatusMessageCreator::CreateStatusEffectAdd(entity, statusEffect));
+                player.Defer(StatusMessageCreator::CreateStatusEffectAdd(*entity, statusEffect));
                 player.FlushDeferred();
             });
 
@@ -177,10 +201,10 @@ namespace sunlight
 
                 if (tickHandler)
                 {
-                    _tickStatusEffects[&entity].push_back(addStatusEffectPtr);
+                    _tickStatusEffects[entity].push_back(addStatusEffectPtr);
                 }
 
-                AddStatusEffectRemoveTimer(entity, *addStatusEffectPtr);
+                AddStatusEffectRemoveTimer(*entity, *addStatusEffectPtr);
             }
         }
     }

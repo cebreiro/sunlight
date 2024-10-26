@@ -9,6 +9,8 @@ namespace sunlight
     {
         const GamePlayer& player = param.player;
 
+        result.damageType = DamageType::DamageMonster;
+
         if (const PlayerGameMasterComponent* gameMasterComponent = player.FindComponent<PlayerGameMasterComponent>();
             gameMasterComponent)
         {
@@ -27,6 +29,8 @@ namespace sunlight
     void PlayerAttackDamageCalculator::Calculate(PlayerSkillDamageCalculateResult& result, const PlayerSkillDamageCalculateParam& param)
     {
         const GamePlayer& player = param.player;
+
+        result.damageType = DamageType::DamageMonster;
 
         if (const PlayerGameMasterComponent* gameMasterComponent = player.FindComponent<PlayerGameMasterComponent>();
             gameMasterComponent)

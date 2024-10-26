@@ -4,8 +4,8 @@
 
 namespace sunlight
 {
-    struct EventBubblingMonsterAIAttach;
-    struct EventBubblingMonsterAIDetach;
+    struct EventBubblingMonsterSpawn;
+    struct EventBubblingMonsterDespawn;
 
     class MonsterController;
 }
@@ -26,8 +26,8 @@ namespace sunlight
         auto GetServiceLocator() const -> const ServiceLocator&;
 
     private:
-        void HandleEvent(const EventBubblingMonsterAIAttach& e);
-        void HandleEvent(const EventBubblingMonsterAIDetach& e);
+        void HandleEvent(const EventBubblingMonsterSpawn& e);
+        void HandleEvent(const EventBubblingMonsterDespawn& e);
 
     private:
         const ServiceLocator& _serviceLocator;

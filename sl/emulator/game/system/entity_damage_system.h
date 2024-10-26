@@ -3,6 +3,11 @@
 #include "sl/emulator/game/system/game_system.h"
 #include "sl/emulator/service/gamedata/item/weapon_class_type.h"
 
+namespace sunlight::sox
+{
+    struct MotionData;
+}
+
 namespace sunlight
 {
     struct AbilityValue;
@@ -18,6 +23,7 @@ namespace sunlight
     class GameMonster;
 
     class IPlayerAttackDamageCalculator;
+    class IMonsterAttackDamageCalculator;
 }
 
 namespace sunlight
@@ -36,6 +42,7 @@ namespace sunlight
     public:
         void KillMonster(GamePlayer& player, game_entity_id_type mobId);
 
+        void ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& target, int32_t attackId, WeaponClassType weaponClass, const sox::MotionData& motionData);
         void ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill, const SkillEffectData& effect,
             int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue);
 
@@ -45,6 +52,7 @@ namespace sunlight
 
     private:
         void OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage);
+        void ApplyDamage(int32_t& newHP, GameMonster& target, int32_t damage, game_entity_id_type attackerId);
 
         void ProcessMonsterDead(const GamePlayer& player, GameMonster& monster, const DamageResult* damageResult);
         void DropMonsterItem(const GameMonster& monster, const GamePlayer* player);
@@ -53,7 +61,8 @@ namespace sunlight
         const ServiceLocator& _serviceLocator;
         int32_t _stageId = 0;
 
-        UniquePtrNotNull<IPlayerAttackDamageCalculator> _damageCalculator;
+        UniquePtrNotNull<IPlayerAttackDamageCalculator> _playerAttackDamageCalculator;
+        UniquePtrNotNull<IMonsterAttackDamageCalculator> _monsterAttackDamageCalculator;
 
         std::vector<std::pair<PtrNotNull<const ItemData>, int32_t>> _dropItemQueryResult;
         std::mt19937 _mt;

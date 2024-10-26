@@ -4,10 +4,10 @@
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_scan_system.h"
+#include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
-#include "sl/emulator/game/system/monster_skill_effect_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
-#include "sl/emulator/game/system/event_bubbling/ai_event_bubbling.h"
+#include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
 
 namespace sunlight
@@ -26,21 +26,21 @@ namespace sunlight
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<EntityMovementSystem>());
         Add(stage.Get<EntityScanSystem>());
-        Add(stage.Get<MonsterSkillEffectSystem>());
+        Add(stage.Get<EntitySkillEffectSystem>());
     }
 
     bool EntityAIControlSystem::Subscribe(Stage& stage)
     {
         EventBubblingSystem& eventBubblingSystem = stage.Get<EventBubblingSystem>();
 
-        eventBubblingSystem.AddSubscriber<EventBubblingMonsterAIAttach>(
-            [this](const EventBubblingMonsterAIAttach& e)
+        eventBubblingSystem.AddSubscriber<EventBubblingMonsterSpawn>(
+            [this](const EventBubblingMonsterSpawn& e)
             {
                 HandleEvent(e);
             });
 
-        eventBubblingSystem.AddSubscriber<EventBubblingMonsterAIDetach>(
-            [this](const EventBubblingMonsterAIDetach& e)
+        eventBubblingSystem.AddSubscriber<EventBubblingMonsterDespawn>(
+            [this](const EventBubblingMonsterDespawn& e)
             {
                 HandleEvent(e);
             });
@@ -63,7 +63,7 @@ namespace sunlight
         return _serviceLocator;
     }
 
-    void EntityAIControlSystem::HandleEvent(const EventBubblingMonsterAIAttach& e)
+    void EntityAIControlSystem::HandleEvent(const EventBubblingMonsterSpawn& e)
     {
         assert(!_monsterControllers.contains(e.entityId));
 
@@ -81,9 +81,9 @@ namespace sunlight
         _monsterControllers[e.entityId] = std::move(controller);
     }
 
-    void EntityAIControlSystem::HandleEvent(const EventBubblingMonsterAIDetach& e)
+    void EntityAIControlSystem::HandleEvent(const EventBubblingMonsterDespawn& e)
     {
-        const auto iter = _monsterControllers.find(e.entityId);
+        const auto iter = _monsterControllers.find(e.monster->GetId());
         if (iter == _monsterControllers.end())
         {
             return;

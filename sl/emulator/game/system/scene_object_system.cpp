@@ -21,7 +21,7 @@
 #include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
-#include "sl/emulator/game/system/event_bubbling/ai_event_bubbling.h"
+#include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
@@ -322,7 +322,7 @@ namespace sunlight
             });
         viewRangeSystem.Add(*monster);
 
-        Get<EventBubblingSystem>().Publish(EventBubblingMonsterAIAttach{ .entityId = monster->GetId() });
+        Get<EventBubblingSystem>().Publish(EventBubblingMonsterSpawn{ .entityId = monster->GetId() });
     }
 
     bool SceneObjectSystem::DespawnPlayer(game_entity_id_type id, StageExitType exitType)
@@ -398,8 +398,6 @@ namespace sunlight
 
         _entityIdIndex.erase(entity.GetId());
         iter1->second.erase(iter2);
-
-        Get<EventBubblingSystem>().Publish(EventBubblingMonsterAIDetach{ .entityId = id });
     }
 
     bool SceneObjectSystem::RemoveStoredItem(game_entity_id_type id)
@@ -421,7 +419,6 @@ namespace sunlight
 
         viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectLeave(entity), false);
         viewRangeSystem.Remove(entity);
-        Get<EntityMovementSystem>().Remove(id);
 
         _entityIdIndex.erase(entity.GetId());
         iter1->second.erase(iter2);
@@ -448,6 +445,9 @@ namespace sunlight
 
         viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectLeave(entity), false);
         viewRangeSystem.Remove(entity);
+        Get<EntityMovementSystem>().Remove(id);
+
+        Get<EventBubblingSystem>().Publish(EventBubblingMonsterDespawn{ .monster = &entity });
 
         _entityIdIndex.erase(entity.GetId());
         iter1->second.erase(iter2);

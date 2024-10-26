@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/unordered/unordered_flat_map.hpp>
 #include "sl/emulator/game/contents/status_effect/status_effect_handler_interface.h"
+#include "sl/emulator/game/entity/game_entity_id_type.h"
 #include "sl/emulator/game/system/game_system.h"
 #include "sl/emulator/game/zone/stage_enter_type.h"
 #include "sl/emulator/game/zone/stage_exit_type.h"
@@ -11,6 +12,7 @@ namespace sunlight
 
     class GameEntity;
     class GamePlayer;
+    class GameMonster;
 }
 
 namespace sunlight
@@ -31,9 +33,11 @@ namespace sunlight
         void OnStageEnter(GamePlayer& player, StageEnterType enterType);
         void OnStageExit(GamePlayer& player, StageExitType exitType);
 
+        void OnStageExit(GameMonster& monster);
+
     public:
         void AddStatusEffectBySkill(int32_t skillId, int32_t skillLevel,
-            std::span<PtrNotNull<GameEntity>> targets, const SkillEffectData& skillEffectData);
+            std::span<game_entity_id_type> targets, const SkillEffectData& skillEffectData);
 
         bool RemoveStatusEffect(GameEntity& entity, int32_t statusEffectId);
 

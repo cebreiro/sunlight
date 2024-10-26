@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/emulator/game/contents/damage/damage_result_type.h"
 
 namespace sunlight::sox
 {
@@ -9,7 +10,6 @@ namespace sunlight
 {
     class PlayerSkill;
     struct SkillEffectData;
-    struct AbilityValue;
 
     class GamePlayer;
     class GameMonster;
@@ -27,6 +27,7 @@ namespace sunlight
 
     struct PlayerNormalAttackDamageCalculateResult
     {
+        DamageType damageType = {};
         int32_t damage = 0;
     };
 
@@ -41,12 +42,11 @@ namespace sunlight
         int32_t chargingCount = 0;
 
         int32_t attackSequence = 0;
-        const AbilityValue* abilityValue = nullptr;
     };
 
     struct PlayerSkillDamageCalculateResult
     {
-        bool isDodged = false;
+        DamageType damageType = {};
         int32_t damage = 0;
     };
 

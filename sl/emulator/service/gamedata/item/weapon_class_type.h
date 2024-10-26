@@ -3,6 +3,7 @@
 namespace sunlight
 {
     ENUM_CLASS(WeaponClassType, int32_t,
+		(Monster, -1) // client 0x4788C3
 		(None, 0)
 		(OneHandedSword, 100)
 		(TwoHandedSword, 200)

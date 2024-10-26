@@ -9,6 +9,7 @@
 #include "sl/emulator/game/component/player_party_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/damage/damage_result.h"
+#include "sl/emulator/game/contents/damage/monster_attack_damage_calculator.h"
 #include "sl/emulator/game/contents/damage/player_attack_damage_calculator.h"
 #include "sl/emulator/game/contents/skill/player_skill.h"
 #include "sl/emulator/game/contents/stat/stat_value.h"
@@ -37,7 +38,8 @@ namespace sunlight
     EntityDamageSystem::EntityDamageSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
-        , _damageCalculator(std::make_unique<PlayerAttackDamageCalculator>())
+        , _playerAttackDamageCalculator(std::make_unique<PlayerAttackDamageCalculator>())
+        , _monsterAttackDamageCalculator(std::make_unique<MonsterAttackDamageCalculator>())
         , _mt(std::random_device{}())
     {
     }
@@ -83,6 +85,64 @@ namespace sunlight
         ProcessMonsterDead(player, monster, nullptr);
     }
 
+    void EntityDamageSystem::ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& target, int32_t attackId, WeaponClassType weaponClass, const sox::MotionData& motionData)
+    {
+        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
+        if (monsterStatComponent.IsDead())
+        {
+            return;
+        }
+
+        const PlayerNormalAttackDamageCalculateParam damageCalculateParam{
+            .player = player,
+            .target = target,
+            .motionData = motionData,
+        };
+        PlayerNormalAttackDamageCalculateResult damageCalculateResult;
+        _playerAttackDamageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
+
+        const DamageResult result{
+            .attackerId = player.GetId(),
+            .attackerType = player.GetType(),
+            .damageType = damageCalculateResult.damageType,
+            .id = attackId,
+            .weaponClass = weaponClass,
+            .damage = damageCalculateResult.damage,
+            .blowType = DamageBlowType::BlowSmall,
+            .attackedResultType = DamageResultType::Damage_A,
+        };
+
+        if (damageCalculateResult.damageType == DamageType::DodgeMonster)
+        {
+            Get<EntityViewRangeSystem>().VisitPlayer(target, [&target, &result](GamePlayer& player)
+                {
+                    player.Send(StatusMessageCreator::CreateDamageResult(target, result));
+                });
+
+            return;
+        }
+
+        int32_t newHP = 0;
+        ApplyDamage(newHP, target, result.damage, player.GetId());
+
+        if (newHP <= 0)
+        {
+            ProcessMonsterDead(player, target, &result);
+
+            return;
+        }
+
+        const int32_t maxHP = monsterStatComponent.GetData().hp;
+
+        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            {
+                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
+                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+
+                player.FlushDeferred();
+            });
+    }
+
     void EntityDamageSystem::ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill,
         const SkillEffectData& effect, int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue)
     {
@@ -102,12 +162,12 @@ namespace sunlight
         };
 
         PlayerSkillDamageCalculateResult damageCalculateResult;
-        _damageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
+        _playerAttackDamageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
 
         const DamageResult result{
             .attackerId = player.GetId(),
             .attackerType = player.GetType(),
-            .damageType = damageCalculateResult.isDodged ? DamageType::DodgeMonster : DamageType::DamageMonster,
+            .damageType = damageCalculateResult.damageType,
             .id = attackId,
             .motionId = 3,
             .skillId = skill.GetId(),
@@ -119,7 +179,7 @@ namespace sunlight
             .attackedResultType = DamageResultType::Damage_A,
         };
 
-        if (damageCalculateResult.isDodged)
+        if (damageCalculateResult.damageType == DamageType::DodgeMonster)
         {
             Get<EntityViewRangeSystem>().VisitPlayer(target, [&target, &result](GamePlayer& player)
                 {
@@ -133,22 +193,17 @@ namespace sunlight
             ? result.damage / result.damageCount + result.damage % result.damageCount
             : result.damage;
 
-        const StatValue currentHP(monsterStatComponent.GetHP());
+        int32_t newHP = 0;
+        ApplyDamage(newHP, target, firstDamage, player.GetId());
 
-        const int32_t newHP = std::max(0, currentHP.As<int32_t>() - firstDamage);
-        const int32_t maxHP = monsterStatComponent.GetData().hp;
-
-        monsterStatComponent.SetHP(newHP);
-		const bool dead = newHP <= 0;
-
-        if (dead)
+        if (newHP <= 0)
         {
             ProcessMonsterDead(player, target, &result);
 
             return;
         }
 
-        target.GetAggroComponent().AddByDamage(player.GetId(), firstDamage);
+        const int32_t maxHP = monsterStatComponent.GetData().hp;
 
         Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
             {
@@ -180,14 +235,19 @@ namespace sunlight
     {
         const MonsterAttackData& attackData = monster.GetData().GetAttack();
 
-        bool dodged = false;
+        const MonsterNormalAttackDamageCalculateParam damageCalculateParam{
+            .monster = monster,
+            .target = target,
+            .attackData = attackData,
+        };
+        MonsterNormalAttackDamageCalculateResult damageCalculateResult;
+        _monsterAttackDamageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
 
         const DamageResult result{
             .attackerId = monster.GetId(),
             .attackerType = monster.GetType(),
-            .damageType = dodged ? DamageType::DodgePlayer : DamageType::DamagePlayer,
-            .id = 1,
-            .damage = 1,
+            .damageType = damageCalculateResult.damageType,
+            .damage = damageCalculateResult.damage,
             .damageCount = attackData.divDamage,
             .damageInterval = attackData.divDamageDelay,
             .blowType = DamageBlowType::BlowSmall,
@@ -212,19 +272,23 @@ namespace sunlight
     void EntityDamageSystem::ProcessMonsterSkillEffect(GameMonster& monster, GameEntity& target,
         const MonsterSkillData& skillData, const SkillEffectData& effect, const AbilityValue* abilityValue)
     {
-        (void)effect;
-
-        bool dodged = false;
+        const MonsterSkillDamageCalculateParam damageCalculateParam{
+            .monster = monster,
+            .target = target,
+            .skillData = skillData,
+            .skillEffectData = effect,
+        };
+        MonsterSkillDamageCalculateResult damageCalculateResult;
+        _monsterAttackDamageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
 
         const DamageResult result{
             .attackerId = monster.GetId(),
             .attackerType = monster.GetType(),
-            .damageType = dodged ? DamageType::DodgePlayer : DamageType::DamagePlayer,
-            .id = 0,
+            .damageType = damageCalculateResult.damageType,
             .motionId = 3,
             .skillId = skillData.index,
-            .weaponClass = static_cast<WeaponClassType>(skillData.weaponClass),
-            .damage = 123,
+            .weaponClass = WeaponClassType::Monster,
+            .damage = damageCalculateResult.damage,
             .damageCount = abilityValue ? std::max(1, abilityValue->damageCount) : 1,
             .damageInterval = (abilityValue && abilityValue->damageCount > 1) ? (abilityValue->end - abilityValue->begin) / abilityValue->damageCount : 0,
             .blowType = DamageBlowType::BlowSmall,
@@ -273,11 +337,8 @@ namespace sunlight
             return;
         }
 
-		const int32_t maxHP = monsterStatComponent.GetData().hp;
-        const StatValue currentHP(monsterStatComponent.GetHP());
-
-        const int32_t newHP = std::max(0, currentHP.As<int32_t>() - damage);
-		monsterStatComponent.SetHP(newHP);
+        int32_t newHP = 0;
+        ApplyDamage(newHP, target, damage, player->GetId());
 
         if (newHP <= 0)
         {
@@ -285,13 +346,29 @@ namespace sunlight
         }
         else
         {
-            target.GetAggroComponent().AddByDamage(player->GetId(), damage);
+            const int32_t maxHP = monsterStatComponent.GetData().hp;
 
             Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& visited)
                 {
                     visited.Send(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
                 });
         }
+    }
+
+    void EntityDamageSystem::ApplyDamage(int32_t& newHP, GameMonster& target, int32_t damage, game_entity_id_type attackerId)
+    {
+        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
+        if (monsterStatComponent.IsDead())
+        {
+            return;
+        }
+
+        const StatValue currentHP(monsterStatComponent.GetHP());
+
+        newHP = std::max(0, currentHP.As<int32_t>() - damage);
+        monsterStatComponent.SetHP(newHP);
+
+        target.GetAggroComponent().AddByDamage(attackerId, damage);
     }
 
     void EntityDamageSystem::ProcessMonsterDead(const GamePlayer& player, GameMonster& monster, const DamageResult* damageResult)

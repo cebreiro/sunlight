@@ -50,8 +50,6 @@ namespace sunlight
         void ProcessMonsterSkill(GameMonster& monster, GameEntity& target, const MonsterAttackData::Skill& attackData, int32_t attackIndex);
 
     private:
-        void ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& monster, int32_t attackId, const sox::MotionData& motionData);
-
         void Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
         void Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
 

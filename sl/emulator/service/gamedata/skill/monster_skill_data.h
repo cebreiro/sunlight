@@ -29,8 +29,6 @@ namespace sunlight
         int32_t damageMaxCount = 0;
 
         boost::container::static_vector<SkillEffectData, 4> effects;
-
-        int32_t weaponClass = 1;
         boost::container::static_vector<PtrNotNull<const AbilityValue>, 4> effectAttackValues;
 
         static auto CreateFrom(const sox::MonsterSkill& data) -> MonsterSkillData;

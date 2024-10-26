@@ -3,6 +3,7 @@
 #include "sl/data/abf/ability_value.h"
 #include "sl/emulator/game/component/entity_passive_effect_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
+#include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
@@ -358,7 +359,19 @@ namespace sunlight
             return;
         }
 
-        const auto findTargetAndProcess = [this, targetId = state.targetId, attackId = state.attackId, motionData](GamePlayer& player)
+        GameEntity* target = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, state.targetId);
+        if (!target)
+        {
+            return;
+        }
+
+        if (const auto* statComponent = target->FindComponent<MonsterStatComponent>();
+            !statComponent || statComponent->IsDead())
+        {
+            return;
+        }
+
+        const auto processNormalAttack = [this, targetId = target->GetId(), attackId = state.attackId, motionData](GamePlayer& player)
             {
                 GameEntity* target = Get<SceneObjectSystem>().FindEntity(GameEntityType::Enemy, targetId);
                 if (!target)
@@ -366,22 +379,27 @@ namespace sunlight
                     return;
                 }
 
-                ProcessPlayerNormalAttack(player, *target->Cast<GameMonster>(), attackId , *motionData);
+                Get<EntityDamageSystem>().ProcessPlayerNormalAttack(player, *target->Cast<GameMonster>(), attackId, player.GetItemComponent().GetWeaponClass(), *motionData);
             };
 
         if (motionData->hitTime == 0)
         {
-            findTargetAndProcess(player);
+            processNormalAttack(player);
         }
         else
         {
             _serviceLocator.Get<ZoneTimerService>().AddTimer(
-                std::chrono::milliseconds(motionData->hitTime), player.GetCId(), _stageId, findTargetAndProcess);
+                std::chrono::milliseconds(motionData->hitTime), player.GetCId(), _stageId, processNormalAttack);
         }
     }
 
     void EntitySkillEffectSystem::ProcessMonsterNormalAttack(GameMonster& monster, GameEntity& target, int32_t attackIndex)
     {
+        if (monster.GetStatComponent().IsDead())
+        {
+            return;
+        }
+
         const MonsterData& data = monster.GetData();
         const MonsterAttackData& attackData = data.GetAttack();
 
@@ -451,6 +469,11 @@ namespace sunlight
                 EntityDamageSystem& entityDamageSystem = Get<EntityDamageSystem>();
                 GameMonster& monster = *entity->Cast<GameMonster>();
 
+                if (monster.GetStatComponent().IsDead())
+                {
+                    return;
+                }
+
                 for (game_entity_id_type targetId : targets)
                 {
                     GameEntity* target = sceneObjectSystem.FindEntity(targetId);
@@ -468,6 +491,11 @@ namespace sunlight
 
     void EntitySkillEffectSystem::ProcessMonsterSkill(GameMonster& monster, GameEntity& target, const MonsterAttackData::Skill& attackData, int32_t attackIndex)
     {
+        if (monster.GetStatComponent().IsDead())
+        {
+            return;
+        }
+
         const SkillDataProvider& skillDataProvider = _serviceLocator.Get<GameDataProvideService>().GetSkillDataProvider();
         const MonsterSkillData* skillData = skillDataProvider.FindMonsterSkill(attackData.id);
 
@@ -509,6 +537,11 @@ namespace sunlight
 
         auto applySkillEffect = [this, skillData, skillLevel = attackData.level, skillTargets](GameMonster& monster, const AbilityValue* abilityValue) mutable
             {
+                if (monster.GetStatComponent().IsDead())
+                {
+                    return;
+                }
+
                 SceneObjectSystem& sceneObjectSystem = Get<SceneObjectSystem>();
 
                 for (const SkillEffectData& skillEffect : skillData->effects)
@@ -547,13 +580,14 @@ namespace sunlight
         {
             for (const AbilityValue& abilityValue : skillData->effectAttackValues | notnull::reference)
             {
-                if (abilityValue.begin == 0)
+                const int32_t beatFrame = std::max(abilityValue.begin, abilityValue.begin);
+                if (beatFrame == 0)
                 {
                     applySkillEffect(monster, &abilityValue);
                 }
                 else
                 {
-                    _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(abilityValue.begin),
+                    _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(beatFrame),
                         [this, applySkillEffect, &abilityValue, mobId = monster.GetId()]() mutable
                         {
                             GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, mobId);
@@ -567,32 +601,6 @@ namespace sunlight
                 }
             }
         }
-    }
-
-    void EntitySkillEffectSystem::ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& monster, int32_t attackId, const sox::MotionData& motionData)
-    {
-        (void)motionData;
-
-        const DamageResult result{
-            .attackerId = player.GetId(),
-            .attackerType = player.GetType(),
-            .damageType = DamageType::DamageMonster,
-            .id = attackId,
-            .motionId = 3,
-            .skillId = 0,
-            .weaponClass = player.GetItemComponent().GetWeaponClass(),
-            .damage = 1234,
-            .damageCount = 1,
-            .damageInterval = 0,
-            .blowGroup = 0,
-            .blowType = DamageBlowType::BlowSmall,
-            .attackedResultType = DamageResultType::Damage_A,
-        };
-
-        Get<EntityViewRangeSystem>().VisitPlayer(monster, [&monster, &result](GamePlayer& player)
-            {
-                player.Send(StatusMessageCreator::CreateDamageResult(monster, result));
-            });
     }
 
     void EntitySkillEffectSystem::Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
