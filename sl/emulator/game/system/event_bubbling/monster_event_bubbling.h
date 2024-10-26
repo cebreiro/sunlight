@@ -1,20 +1,19 @@
 #pragma once
-#include "sl/emulator/game/entity/game_entity_id_type.h"
 
 namespace sunlight
 {
-    class GameEntity;
+    class GameMonster;
 }
 
 namespace sunlight
 {
     struct EventBubblingMonsterSpawn
     {
-        game_entity_id_type entityId;
+        PtrNotNull<GameMonster> monster = nullptr;
     };
 
     struct EventBubblingMonsterDespawn
     {
-        PtrNotNull<GameEntity> monster = nullptr;
+        PtrNotNull<GameMonster> monster = nullptr;
     };
 }

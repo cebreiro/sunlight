@@ -38,7 +38,7 @@ namespace sunlight
         stage.Get<EventBubblingSystem>().AddSubscriber<EventBubblingMonsterDespawn>(
             [this](const EventBubblingMonsterDespawn& event)
             {
-                _tickStatusEffects.erase(event.monster);
+                OnStageExit(*event.monster);
             });
 
         return true;
@@ -152,7 +152,7 @@ namespace sunlight
         EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
 
         const int32_t durationMilli = skillEffectData.value4 + skillEffectData.value3 * skillLevel;
-        StatusEffect statusEffect(skillId, skillLevel, skillEffectData, now, std::chrono::milliseconds(durationMilli));
+        StatusEffect statusEffect(skillId, skillLevel, skillEffectData, now, now + std::chrono::milliseconds(durationMilli));
 
         const IStatusEffectApplyHandler* applyHandler = GetApplyHandler(statusEffect.GetType());
         const IStatusEffectTickHandler* tickHandler = GetTickHandler(statusEffect.GetType());
@@ -207,6 +207,49 @@ namespace sunlight
                 AddStatusEffectRemoveTimer(*entity, *addStatusEffectPtr);
             }
         }
+    }
+
+    void EntityStatusEffectSystem::AddStatusEffectByPassive(int32_t skillId, int32_t skillLevel, GameEntity& target, const SkillEffectData& skillEffectData)
+    {
+        const game_time_point_type now = GameTimeService::Now();
+        StatusEffect statusEffect(skillId, skillLevel, skillEffectData, now, game_time_point_type::max());
+
+        EntityStatusEffectComponent& statusEffectComponent = target.GetComponent<EntityStatusEffectComponent>();
+        std::optional<StatusEffect> prevStatusEffect = std::nullopt;
+
+        if (StatusEffect* prevStatusEffectPtr = statusEffectComponent.Find(statusEffect.GetId());
+            prevStatusEffectPtr)
+        {
+            ClearStatusEffect(target, *prevStatusEffectPtr);
+
+            prevStatusEffect = statusEffectComponent.Release(statusEffect.GetId());
+        }
+
+        StatusEffect* addStatusEffectPtr = statusEffectComponent.Add(statusEffect);
+        assert(addStatusEffectPtr);
+
+        if (const IStatusEffectApplyHandler* applyHandler = GetApplyHandler(statusEffect.GetType());
+            applyHandler)
+        {
+            applyHandler->Apply(*this, target, statusEffect);
+        }
+
+        if (const IStatusEffectTickHandler* tickHandler = GetTickHandler(statusEffect.GetType());
+            tickHandler)
+        {
+            _tickStatusEffects[&target].push_back(addStatusEffectPtr);
+        }
+
+        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            {
+                if (prevStatusEffect.has_value())
+                {
+                    player.Defer(StatusMessageCreator::CreateStatusEffectRemove(target, *prevStatusEffect));
+                }
+
+                player.Defer(StatusMessageCreator::CreateStatusEffectAdd(target, statusEffect));
+                player.FlushDeferred();
+            });
     }
 
     bool EntityStatusEffectSystem::RemoveStatusEffect(GameEntity& entity, int32_t statusEffectId)

@@ -8,18 +8,17 @@ namespace sunlight
 
 namespace sunlight
 {
-    class PassiveEffectNormalAttackEnforce final : public IPassiveEffect
+    class PassiveEffectStatusEffect final : public IPassiveEffect
     {
     public:
-        static constexpr auto TYPE = PassiveEffectType::NormalAttack;
+        static constexpr auto TYPE = PassiveEffectType::StatusEffect;
 
-    public:
-        explicit PassiveEffectNormalAttackEnforce(const SkillEffectData& data);
+        explicit PassiveEffectStatusEffect(const SkillEffectData& data);
 
         auto GetType() const -> PassiveEffectType override;
+
+    public:
         auto GetData() const -> const SkillEffectData&;
-        auto GetDamage(int32_t skillLevel) const -> int32_t;
-        auto GetHitBonusRate() const -> float;
 
     private:
         const SkillEffectData& _data;

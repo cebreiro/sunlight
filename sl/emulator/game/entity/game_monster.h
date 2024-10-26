@@ -11,6 +11,7 @@ namespace sunlight
     class MonsterStatComponent;
     class MonsterAggroComponent;
     class MonsterSkillComponent;
+    class EntityImmuneComponent;
 }
 
 namespace sunlight
@@ -44,6 +45,8 @@ namespace sunlight
         auto GetAggroComponent() const -> const MonsterAggroComponent&;
         auto GetSkillComponent() -> MonsterSkillComponent&;
         auto GetSkillComponent() const -> const MonsterSkillComponent&;
+        auto GetImmuneComponent() -> EntityImmuneComponent&;
+        auto GetImmuneComponent() const -> const EntityImmuneComponent&;
 
     private:
         const MonsterData& _data;

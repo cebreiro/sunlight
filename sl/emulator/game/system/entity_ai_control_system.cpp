@@ -65,20 +65,14 @@ namespace sunlight
 
     void EntityAIControlSystem::HandleEvent(const EventBubblingMonsterSpawn& e)
     {
-        assert(!_monsterControllers.contains(e.entityId));
+        assert(!_monsterControllers.contains(e.monster->GetId()));
 
-        const GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, e.entityId);
-        if (!entity)
-        {
-            assert(false);
+        GameMonster& monster = *e.monster;
 
-            return;
-        }
-
-        auto controller = std::make_shared<MonsterController>(*this, e.entityId, entity->Cast<GameMonster>()->GetData());
+        auto controller = std::make_shared<MonsterController>(*this, monster.GetId(), monster.GetData());
         controller->Start();
 
-        _monsterControllers[e.entityId] = std::move(controller);
+        _monsterControllers[monster.GetId()] = std::move(controller);
     }
 
     void EntityAIControlSystem::HandleEvent(const EventBubblingMonsterDespawn& e)

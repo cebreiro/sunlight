@@ -1,6 +1,7 @@
 #include "entity_skill_effect_system.h"
 
 #include "sl/data/abf/ability_value.h"
+#include "sl/emulator/game/component/entity_immune_component.h"
 #include "sl/emulator/game/component/entity_passive_effect_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/monster_stat_component.h"
@@ -14,9 +15,11 @@
 #include "sl/emulator/game/contents/passive/effect/passive_effect_factory.h"
 #include "sl/emulator/game/contents/passive/effect/passive_effect_interface.h"
 #include "sl/emulator/game/contents/passive/effect/impl/passive_effect_stat.h"
+#include "sl/emulator/game/contents/passive/effect/impl/passive_effect_status_effect.h"
 #include "sl/emulator/game/contents/skill/skill_target_selector.h"
 #include "sl/emulator/game/contents/stat/player_stat_type.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
+#include "sl/emulator/game/contents/status_effect/status_effect.h"
 #include "sl/emulator/game/data/sox/item_weapon.h"
 #include "sl/emulator/game/data/sox/motion_data.h"
 #include "sl/emulator/game/entity/game_item.h"
@@ -29,9 +32,11 @@
 #include "sl/emulator/game/system/entity_scan_system.h"
 #include "sl/emulator/game/system/entity_status_effect_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/event_bubbling_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_timer_service.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
@@ -70,7 +75,12 @@ namespace sunlight
 
     bool EntitySkillEffectSystem::Subscribe(Stage& stage)
     {
-        (void)stage;
+        stage.Get<EventBubblingSystem>().AddSubscriber<EventBubblingMonsterSpawn>(
+            [this](const EventBubblingMonsterSpawn& e)
+            {
+                // TODO: post
+                OnStageEnter(*e.monster);
+            });
 
         return true;
     }
@@ -98,6 +108,35 @@ namespace sunlight
         }
 
         Get<PlayerStatSystem>().UpdateRegenStat(player);
+    }
+
+    void EntitySkillEffectSystem::OnStageEnter(GameMonster& monster)
+    {
+        if (std::span passives = monster.GetData().GetAttack().passives;
+            !passives.empty())
+        {
+            const SkillDataProvider& skillDataProvider = _serviceLocator.Get<GameDataProvideService>().GetSkillDataProvider();
+
+            for (const MonsterAttackData::Passive& passiveData : passives)
+            {
+                if (const MonsterSkillData* data = skillDataProvider.FindMonsterSkill(passiveData.id);
+                    data && data->passive)
+                {
+                    auto passive = std::make_unique<Passive>(passiveData.id, passiveData.level);
+
+                    for (const SkillEffectData& skillEffectData : data->effects)
+                    {
+                        if (std::unique_ptr<IPassiveEffect> effect = PassiveEffectFactory::CreateEffect(skillEffectData);
+                            effect)
+                        {
+                            Apply(monster, *effect, passiveData.id, passiveData.level);
+
+                            passive->AddEffect(std::move(effect));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void EntitySkillEffectSystem::OnSkillAdd(GamePlayer& player, PlayerSkill& skill)
@@ -152,7 +191,7 @@ namespace sunlight
 
             for (IPassiveEffect& effect : passive->GetEffectRange())
             {
-                Apply(player, effect, skill.GetLevel());
+                Apply(player, effect, skill.GetId(), skill.GetLevel());
 
                 passiveEffectComponent.AddEffect(skill.GetId(), &effect);
             }
@@ -177,8 +216,8 @@ namespace sunlight
 
         for (IPassiveEffect& effect : passive.GetEffectRange())
         {
-            Revert(player, effect, oldLevel);
-            Apply(player, effect, newLevel);
+            Revert(player, effect, skill.GetId(), oldLevel);
+            Apply(player, effect, skill.GetId(), newLevel);
         }
 
         Get<PlayerStatSystem>().UpdateRegenStat(player);
@@ -214,7 +253,7 @@ namespace sunlight
             {
                 for (IPassiveEffect& effect : passive.GetEffectRange())
                 {
-                    Revert(player, effect, skill.GetLevel());
+                    Revert(player, effect, skill.GetId(), skill.GetLevel());
                 }
 
                 passiveEffectComponent.RemoveEffects(skill.GetId());
@@ -223,7 +262,7 @@ namespace sunlight
             {
                 for (IPassiveEffect& effect : passive.GetEffectRange())
                 {
-                    Apply(player, effect, skill.GetLevel());
+                    Apply(player, effect, skill.GetId(), skill.GetLevel());
 
                     passiveEffectComponent.AddEffect(skill.GetId(), &effect);
                 }
@@ -603,59 +642,147 @@ namespace sunlight
         }
     }
 
-    void EntitySkillEffectSystem::Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
+    void EntitySkillEffectSystem::Apply(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel)
     {
         const PassiveEffectType type = passiveEffect.GetType();
-        if (type == PassiveEffectType::Stat)
+
+        switch (type)
         {
-            PassiveEffectStat* statEffect = Cast<PassiveEffectStat>(passiveEffect);
-            assert(statEffect);
+        case PassiveEffectType::Stat:
+        {
+            PassiveEffectStat* effect = Cast<PassiveEffectStat>(passiveEffect);
+            assert(effect);
 
-            if (const auto statType = static_cast<PlayerStatType>(statEffect->GetStatType());
-                IsValid(statType))
+            switch (entity.GetType())
             {
-                const SkillEffectData& data = statEffect->GetData();
+            case GameEntityType::Player:
+            {
+                if (const auto statType = static_cast<PlayerStatType>(effect->GetStatType());
+                    IsValid(statType))
+                {
+                    const SkillEffectData& data = effect->GetData();
 
-                // client 0x4B02BB
-                // v5[319] -> value1
-                // v5[320] -> value2
-                // ...
+                    // client 0x4B02BB
+                    // v5[319] -> value1
+                    // v5[320] -> value2
+                    // ...
 
-                const int32_t fixedValue = data.value2 + skillLevel * data.value1;
-                double percentageValue = (data.value4 + skillLevel * data.value3) / 100.0;
+                    const int32_t fixedValue = data.value2 + skillLevel * data.value1;
+                    double percentageValue = (data.value4 + skillLevel * data.value3) / 100.0;
 
-                PlayerStatComponent& statComponent = player.GetStatComponent();
+                    PlayerStatComponent& statComponent = entity.GetComponent<PlayerStatComponent>();
 
-                statComponent.AddStat(statType, StatOriginType::SkillPassive, fixedValue);
-                statComponent.AddStat(statType, StatOriginType::SkillPassivePercentage, percentageValue);
+                    statComponent.AddStat(statType, StatOriginType::SkillPassive, fixedValue);
+                    statComponent.AddStat(statType, StatOriginType::SkillPassivePercentage, percentageValue);
 
-                statEffect->SetStatValue(fixedValue);
-                statEffect->SetStatPercentageValue(percentageValue);
+                    effect->SetStatValue(fixedValue);
+                    effect->SetStatPercentageValue(percentageValue);
+                }
             }
+            break;
+            case GameEntityType::Enemy:
+            {
+                const int32_t statType = effect->GetStatType();
+                if (statType == 7)
+                {
+                    const ImmuneOrigin origin(ImmuneType::PhysicalAttack, ImmuneOriginSkill{ .skillId = skillId });
+
+                    entity.GetComponent<EntityImmuneComponent>().Add(origin);
+                }
+                else if (statType == 100)
+                {
+                    const ImmuneOrigin origin(ImmuneType::MagicAttack, ImmuneOriginSkill{ .skillId = skillId });
+
+                    entity.GetComponent<EntityImmuneComponent>().Add(origin);
+                }
+            }
+            break;
+            }
+        }
+        break;
+        case PassiveEffectType::StatusEffect:
+        {
+            PassiveEffectStatusEffect* effect = Cast<PassiveEffectStatusEffect>(passiveEffect);
+            assert(effect);
+
+            Get<EntityStatusEffectSystem>().AddStatusEffectByPassive(skillId, skillLevel, entity, effect->GetData());
+        }
+        break;
+        case PassiveEffectType::NormalAttack:
+        case PassiveEffectType::PoisonEnchant:
+        case PassiveEffectType::Count:
+        default:;
         }
     }
 
-    void EntitySkillEffectSystem::Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const
+    void EntitySkillEffectSystem::Revert(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel)
     {
         (void)skillLevel;
 
         const PassiveEffectType type = passiveEffect.GetType();
-        if (type == PassiveEffectType::Stat)
+
+        switch (type)
+        {
+        case PassiveEffectType::Stat:
         {
             PassiveEffectStat* statEffect = Cast<PassiveEffectStat>(passiveEffect);
             assert(statEffect);
 
-            if (const auto statType = static_cast<PlayerStatType>(statEffect->GetStatType());
-                IsValid(statType))
+            switch (entity.GetType())
             {
-                PlayerStatComponent& statComponent = player.GetStatComponent();
+            case GameEntityType::Player:
+            {
+                if (const auto statType = static_cast<PlayerStatType>(statEffect->GetStatType());
+                    IsValid(statType))
+                {
+                    PlayerStatComponent& statComponent = entity.GetComponent<PlayerStatComponent>();
 
-                statComponent.AddStat(statType, StatOriginType::SkillPassive, -statEffect->GetStatValue());
-                statComponent.AddStat(statType, StatOriginType::SkillPassivePercentage, -statEffect->GetStatPercentageValue());
+                    statComponent.AddStat(statType, StatOriginType::SkillPassive, -statEffect->GetStatValue());
+                    statComponent.AddStat(statType, StatOriginType::SkillPassivePercentage, -statEffect->GetStatPercentageValue());
 
-                statEffect->SetStatValue(0);
-                statEffect->SetStatPercentageValue(0.0);
+                    statEffect->SetStatValue(0);
+                    statEffect->SetStatPercentageValue(0.0);
+                }
             }
+            break;
+            case GameEntityType::Enemy:
+            {
+                const int32_t statType = statEffect->GetStatType();
+                if (statType == 7)
+                {
+                    const ImmuneOrigin origin(ImmuneType::PhysicalAttack, ImmuneOriginSkill{ .skillId = skillId });
+
+                    [[maybe_unused]]
+                    const bool removed = entity.GetComponent<EntityImmuneComponent>().Remove(origin);
+                    assert(removed);
+                }
+                else if (statType == 100)
+                {
+                    const ImmuneOrigin origin(ImmuneType::MagicAttack, ImmuneOriginSkill{ .skillId = skillId });
+
+                    [[maybe_unused]]
+                    const bool removed = entity.GetComponent<EntityImmuneComponent>().Remove(origin);
+                    assert(removed);
+                }
+            }
+            break;
+            }
+        }
+        break;
+        case PassiveEffectType::StatusEffect:
+        {
+            PassiveEffectStatusEffect* effect = Cast<PassiveEffectStatusEffect>(passiveEffect);
+            assert(effect);
+
+            [[maybe_unused]]
+            const bool removed = Get<EntityStatusEffectSystem>().RemoveStatusEffect(entity, StatusEffect::GetStatusEffectIdFrom(effect->GetData()));
+            assert(removed);
+        }
+        break;
+        case PassiveEffectType::NormalAttack:
+        case PassiveEffectType::PoisonEnchant:
+        case PassiveEffectType::Count:
+        default:;
         }
     }
 

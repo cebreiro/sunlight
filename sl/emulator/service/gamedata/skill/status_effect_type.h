@@ -10,9 +10,9 @@ namespace sunlight
         (DyingResistance, 3)
         (StatIncrease, 4)
         (StatDecrease, 5)
-        (ShieldFire, 6)
-        (ShieldLighting, 7)
-        (ShieldIce, 8)
+        (ShieldFire, 6) // damage reflect   -> player_skill 33, monster skill 200009
+        (ShieldLighting, 7) // stun reflect -> monster skill 200011
+        (ShieldIce, 8) // unk
         (ImmunePhysicalAttack, 10)
         (GuaranteedHitNeighbor, 12)
         (GuaranteedDodge, 13)

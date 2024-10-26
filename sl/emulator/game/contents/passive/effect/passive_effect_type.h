@@ -3,9 +3,10 @@
 namespace sunlight
 {
     ENUM_CLASS(PassiveEffectType, int32_t,
-        (NormalAttackEnforce)
+        (NormalAttack)
         (PoisonEnchant)
         (Stat)
+        (StatusEffect)
 
         (Count)
     );

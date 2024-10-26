@@ -38,6 +38,7 @@ namespace sunlight
     public:
         void AddStatusEffectBySkill(int32_t skillId, int32_t skillLevel,
             std::span<game_entity_id_type> targets, const SkillEffectData& skillEffectData);
+        void AddStatusEffectByPassive(int32_t skillId, int32_t skillLevel, GameEntity& target, const SkillEffectData& skillEffectData);
 
         bool RemoveStatusEffect(GameEntity& entity, int32_t statusEffectId);
 

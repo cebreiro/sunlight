@@ -322,7 +322,7 @@ namespace sunlight
             });
         viewRangeSystem.Add(*monster);
 
-        Get<EventBubblingSystem>().Publish(EventBubblingMonsterSpawn{ .entityId = monster->GetId() });
+        Get<EventBubblingSystem>().Publish(EventBubblingMonsterSpawn{ .monster = monster.get() });
     }
 
     bool SceneObjectSystem::DespawnPlayer(game_entity_id_type id, StageExitType exitType)
@@ -447,7 +447,7 @@ namespace sunlight
         viewRangeSystem.Remove(entity);
         Get<EntityMovementSystem>().Remove(id);
 
-        Get<EventBubblingSystem>().Publish(EventBubblingMonsterDespawn{ .monster = &entity });
+        Get<EventBubblingSystem>().Publish(EventBubblingMonsterDespawn{ .monster = entity.Cast<GameMonster>() });
 
         _entityIdIndex.erase(entity.GetId());
         iter1->second.erase(iter2);

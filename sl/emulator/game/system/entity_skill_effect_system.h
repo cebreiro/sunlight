@@ -36,6 +36,7 @@ namespace sunlight
 
     public:
         void OnStageEnter(GamePlayer& player, StageEnterType type);
+        void OnStageEnter(GameMonster& monster);
 
     public:
         void OnSkillAdd(GamePlayer& player, PlayerSkill& skill);
@@ -50,8 +51,8 @@ namespace sunlight
         void ProcessMonsterSkill(GameMonster& monster, GameEntity& target, const MonsterAttackData::Skill& attackData, int32_t attackIndex);
 
     private:
-        void Apply(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
-        void Revert(GamePlayer& player, IPassiveEffect& passiveEffect, int32_t skillLevel) const;
+        void Apply(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel);
+        void Revert(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel);
 
     private:
         static auto CalculateYaw(const Eigen::Vector2f& src, const Eigen::Vector2f& dest) -> float;

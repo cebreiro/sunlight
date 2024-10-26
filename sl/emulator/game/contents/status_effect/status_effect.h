@@ -14,7 +14,7 @@ namespace sunlight
     public:
         StatusEffect() = default;
         StatusEffect(int32_t skillId, int32_t skillLevel, const SkillEffectData& skillEffectData,
-            game_time_point_type now, std::chrono::milliseconds duration);
+            game_time_point_type now, game_time_point_type endTimePoint);
 
         bool IsHidden() const;
 
@@ -34,6 +34,9 @@ namespace sunlight
         void SetHidden(bool value);
         void SetLastTickTimePoint(game_time_point_type timePoint);
         void SetNextTickTimePoint(game_time_point_type timePoint);
+
+    public:
+        static auto GetStatusEffectIdFrom(const SkillEffectData& data) -> int32_t;
 
     private:
         bool _hidden = false;

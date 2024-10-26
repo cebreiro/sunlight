@@ -30,6 +30,7 @@ namespace sunlight
     class EntityStateComponent;
     class EntityStatusEffectComponent;
     class EntityPassiveEffectComponent;
+    class EntityImmuneComponent;
 }
 
 namespace sunlight
@@ -103,6 +104,8 @@ namespace sunlight
         auto GetDebugComponent() const -> const PlayerDebugComponent&;
         auto GetPassiveEffectComponent() -> EntityPassiveEffectComponent&;
         auto GetPassiveEffectComponent() const -> const EntityPassiveEffectComponent&;
+        auto GetImmuneComponent() -> EntityImmuneComponent&;
+        auto GetImmuneComponent() const -> const EntityImmuneComponent&;
 
     private:
         int64_t _cid = 0;

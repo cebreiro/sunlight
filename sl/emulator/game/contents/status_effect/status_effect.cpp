@@ -6,12 +6,12 @@
 namespace sunlight
 {
     StatusEffect::StatusEffect(int32_t skillId, int32_t skillLevel, const SkillEffectData& skillEffectData,
-        game_time_point_type now, std::chrono::milliseconds duration)
+        game_time_point_type now, game_time_point_type endTimePoint)
         : _skillId(skillId)
         , _skillLevel(skillLevel)
         , _type(static_cast<StatusEffectType>(skillEffectData.type))
-        , _id(skillEffectData.value5)
-        , _endTimePoint(now + duration)
+        , _id(GetStatusEffectIdFrom(skillEffectData))
+        , _endTimePoint(endTimePoint)
         , _lastTickTimePoint(now)
         , _skillEffectData(&skillEffectData)
     {
@@ -109,5 +109,10 @@ namespace sunlight
     void StatusEffect::SetNextTickTimePoint(game_time_point_type timePoint)
     {
         _nextTickTimePoint = timePoint;
+    }
+
+    auto StatusEffect::GetStatusEffectIdFrom(const SkillEffectData& data) -> int32_t
+    {
+        return data.value5;
     }
 }

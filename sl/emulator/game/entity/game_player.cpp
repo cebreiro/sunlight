@@ -1,5 +1,6 @@
 #include "game_player.h"
 
+#include "sl/emulator/game/component/entity_immune_component.h"
 #include "sl/emulator/game/component/entity_movement_component.h"
 #include "sl/emulator/game/component/entity_passive_effect_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
@@ -211,6 +212,7 @@ namespace sunlight
         (void)AddComponent(std::make_unique<EntityStatusEffectComponent>());
         (void)AddComponent(std::make_unique<PlayerDebugComponent>());
         (void)AddComponent(std::make_unique<EntityPassiveEffectComponent>());
+        (void)AddComponent(std::make_unique<EntityImmuneComponent>());
 
         GetSceneObjectComponent().SetBodySize(GameConstant::PLAYER_BODY_SIZE);
     }
@@ -474,5 +476,15 @@ namespace sunlight
     auto GamePlayer::GetPassiveEffectComponent() const -> const EntityPassiveEffectComponent&
     {
         return GetComponent<EntityPassiveEffectComponent>();
+    }
+
+    auto GamePlayer::GetImmuneComponent() -> EntityImmuneComponent&
+    {
+        return GetComponent<EntityImmuneComponent>();
+    }
+
+    auto GamePlayer::GetImmuneComponent() const -> const EntityImmuneComponent&
+    {
+        return GetComponent<EntityImmuneComponent>();
     }
 }

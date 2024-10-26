@@ -1,6 +1,7 @@
 #include "passive_effect_factory.h"
 
 #include "sl/emulator/game/contents/passive/effect/passive_effect.hpp"
+#include "sl/emulator/game/contents/passive/effect/impl/passive_effect_status_effect.h"
 #include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
 namespace sunlight
@@ -19,7 +20,7 @@ namespace sunlight
         break;
         case SkillEffectCategory::StatusEffect:
         {
-
+            return std::make_unique<PassiveEffectStatusEffect>(data);
         }
         break;
         case SkillEffectCategory::Stat:

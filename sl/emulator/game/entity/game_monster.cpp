@@ -1,5 +1,6 @@
 #include "game_monster.h"
 
+#include "sl/emulator/game/component/entity_immune_component.h"
 #include "sl/emulator/game/component/entity_movement_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/entity_status_effect_component.h"
@@ -25,6 +26,7 @@ namespace sunlight
         AddComponent(std::make_unique<EntityMovementComponent>());
         AddComponent(std::make_unique<MonsterAggroComponent>(_data.GetAction()));
         AddComponent(std::make_unique<MonsterSkillComponent>());
+        AddComponent(std::make_unique<EntityImmuneComponent>());
 
         GetSceneObjectComponent().SetBodySize(data.GetAction().bodySize);
     }
@@ -112,5 +114,15 @@ namespace sunlight
     auto GameMonster::GetSkillComponent() const -> const MonsterSkillComponent&
     {
         return GetComponent<MonsterSkillComponent>();
+    }
+
+    auto GameMonster::GetImmuneComponent() -> EntityImmuneComponent&
+    {
+        return GetComponent<EntityImmuneComponent>();
+    }
+
+    auto GameMonster::GetImmuneComponent() const -> const EntityImmuneComponent&
+    {
+        return GetComponent<EntityImmuneComponent>();
     }
 }
