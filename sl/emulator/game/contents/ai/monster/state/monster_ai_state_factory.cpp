@@ -1,8 +1,10 @@
 #include "monster_ai_state_factory.h"
 
 #include "sl/emulator/game/contents/ai/monster/state/monster_ai_state_combat.h"
+#include "sl/emulator/game/contents/ai/monster/state/monster_ai_state_combat_flee.h"
 #include "sl/emulator/game/contents/ai/monster/state/monster_ai_state_spawn.h"
 #include "sl/emulator/game/contents/ai/monster/state/monster_ai_state_wander.h"
+#include "sl/emulator/service/gamedata/monster/monster_data.h"
 
 namespace sunlight
 {
@@ -21,9 +23,14 @@ namespace sunlight
             return std::make_shared<MonsterAIStateWander>();
         }
         case MonsterAIStateType::Combat:
+        {
+            if (data.GetAttack().type == 0)
             {
-            return std::make_shared<MonsterAIStateCombat>();
+                return std::make_shared<MonsterAIStateCombatFlee>();
             }
+
+            return std::make_shared<MonsterAIStateCombat>();
+        }
         case MonsterAIStateType::Return:
             break;
         }

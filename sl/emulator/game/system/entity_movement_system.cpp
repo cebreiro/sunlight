@@ -200,6 +200,6 @@ namespace sunlight
     {
         const Eigen::Vector2f vector = (to - from);
 
-        return std::atan2f(vector.y(), vector.x())* (180.f / static_cast<float>(std::numbers::pi));
+        return std::atan2f(vector.y(), vector.x()) * (180.f / static_cast<float>(std::numbers::pi));
     }
 }
