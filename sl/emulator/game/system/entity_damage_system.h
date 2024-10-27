@@ -51,10 +51,9 @@ namespace sunlight
             const SkillEffectData& effect, const AbilityValue* abilityValue);
 
     private:
-        void OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage);
-        void ApplyDamage(int32_t& newHP, GameMonster& target, int32_t damage, game_entity_id_type attackerId);
-
+        void ProcessPlayerDamageResult(const GamePlayer& player, GameMonster& target, int32_t damage, const DamageResult* result);
         void ProcessMonsterDamageResult(GameEntity& target, int32_t damage, const DamageResult* result);
+
         void ProcessMonsterDead(const GamePlayer& player, GameMonster& monster, const DamageResult* damageResult);
         void DropMonsterItem(const GameMonster& monster, const GamePlayer* player);
 

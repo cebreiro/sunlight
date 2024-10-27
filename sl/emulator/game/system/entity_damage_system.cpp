@@ -34,7 +34,6 @@
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
 #include "sl/emulator/service/gamedata/skill/monster_skill_data.h"
-#include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
 namespace sunlight
 {
@@ -117,35 +116,7 @@ namespace sunlight
             .attackedResultType = DamageResultType::Damage_A,
         };
 
-        if (damageCalculateResult.damageType == DamageType::DodgeMonster)
-        {
-            Get<EntityViewRangeSystem>().VisitPlayer(target, [&target, &result](GamePlayer& player)
-                {
-                    player.Send(StatusMessageCreator::CreateDamageResult(target, result));
-                });
-
-            return;
-        }
-
-        int32_t newHP = 0;
-        ApplyDamage(newHP, target, result.damage, player.GetId());
-
-        if (newHP <= 0)
-        {
-            ProcessMonsterDead(player, target, &result);
-
-            return;
-        }
-
-        const int32_t maxHP = monsterStatComponent.GetData().hp;
-
-        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
-            {
-                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
-                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
-
-                player.FlushDeferred();
-            });
+        ProcessPlayerDamageResult(player, target, result.damage, &result);
     }
 
     void EntityDamageSystem::ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill,
@@ -184,53 +155,31 @@ namespace sunlight
             .attackedResultType = DamageResultType::Damage_A,
         };
 
-        if (damageCalculateResult.damageType == DamageType::DodgeMonster)
-        {
-            Get<EntityViewRangeSystem>().VisitPlayer(target, [&target, &result](GamePlayer& player)
-                {
-                    player.Send(StatusMessageCreator::CreateDamageResult(target, result));
-                });
-
-            return;
-        }
-
         const int32_t firstDamage = result.damageCount > 1
             ? result.damage / result.damageCount + result.damage % result.damageCount
             : result.damage;
 
-        int32_t newHP = 0;
-        ApplyDamage(newHP, target, firstDamage, player.GetId());
-
-        if (newHP <= 0)
-        {
-            ProcessMonsterDead(player, target, &result);
-
-            return;
-        }
-
-        const int32_t maxHP = monsterStatComponent.GetData().hp;
-
-        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
-            {
-                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
-                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
-
-                player.FlushDeferred();
-            });
+        ProcessPlayerDamageResult(player, target, firstDamage, &result);
 
 		if (result.damageCount > 1)
 		{
-			const int32_t tickDamage = result.damage / result.damageCount;
+			const int32_t tickDamage = std::max(1, result.damage / result.damageCount);
 			const int32_t tickCount = result.damageCount - 1;
 
             ZoneTimerService& timerService = _serviceLocator.Get<ZoneTimerService>();
 
 			for (int32_t i = 0; i < tickCount; ++i)
 			{
-                timerService.AddTimer(std::chrono::milliseconds((1 + i) * result.damageInterval),
-					[this, tickDamage, playerId = player.GetCId(), targetId = target.GetId()]()
+                timerService.AddTimer(std::chrono::milliseconds((1 + i) * result.damageInterval), player.GetCId(), _stageId,
+					[this, tickDamage, targetId = target.GetId()](const GamePlayer& player)
 					{
-						this->OnDelayDamage(playerId, targetId, tickDamage);
+                        GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, targetId);
+                        if (!entity || entity->GetId().GetRecycleSequence() != targetId.GetRecycleSequence())
+                        {
+                            return;
+                        }
+
+                        ProcessPlayerDamageResult(player, *entity->Cast<GameMonster>(), tickDamage, nullptr);
 					});
 			}
 		}
@@ -300,7 +249,7 @@ namespace sunlight
 
         if (result.damageCount > 1)
         {
-            const int32_t tickDamage = result.damage / result.damageCount;
+            const int32_t tickDamage = std::max(1, result.damage / result.damageCount);
             const int32_t tickCount = result.damageCount - 1;
 
             ZoneTimerService& timerService = _serviceLocator.Get<ZoneTimerService>();
@@ -322,65 +271,50 @@ namespace sunlight
         }
     }
 
-    void EntityDamageSystem::OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage)
+    void EntityDamageSystem::ProcessPlayerDamageResult(const GamePlayer& player, GameMonster& target, int32_t damage, const DamageResult* result)
     {
-        const GamePlayer* player = Get<PlayerIndexSystem>().FindByCId(playerId);
-        if (!player)
-        {
-            return;
-        }
-
-        GameEntity* targetEntity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, targetMonsterId);
-        if (!targetEntity || targetEntity->GetId().GetRecycleSequence() != targetMonsterId.GetRecycleSequence())
-        {
-            return;
-        }
-
-        if (damage <= 0)
-        {
-            return;
-        }
-
-        GameMonster& target = *targetEntity->Cast<GameMonster>();
-
         MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
         if (monsterStatComponent.IsDead())
         {
             return;
         }
 
-        int32_t newHP = 0;
-        ApplyDamage(newHP, target, damage, player->GetId());
+        if (result)
+        {
+            if (result->damageType == DamageType::DodgeMonster || result->damage <= 0)
+            {
+                Get<EntityViewRangeSystem>().Broadcast(target, StatusMessageCreator::CreateDamageResult(target, *result), false);
+
+                return;
+            }
+        }
+
+        const int32_t currentHP = monsterStatComponent.GetHP().As<int32_t>();
+        const int32_t newHP = std::max(0, currentHP - damage);
+
+        monsterStatComponent.SetHP(newHP);
+        target.GetAggroComponent().AddByDamage(player.GetId(), damage);
 
         if (newHP <= 0)
         {
-            ProcessMonsterDead(*player, target, nullptr);
+            ProcessMonsterDead(player, target, result);
         }
         else
         {
-            const int32_t maxHP = monsterStatComponent.GetData().hp;
+            const int32_t maxHP = target.GetData().GetBase().hp;
 
-            Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& visited)
+            Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
                 {
-                    visited.Send(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+                    if (result)
+                    {
+                        player.Defer(StatusMessageCreator::CreateDamageResult(target, *result));
+                    }
+
+                    player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
+
+                    player.FlushDeferred();
                 });
         }
-    }
-
-    void EntityDamageSystem::ApplyDamage(int32_t& newHP, GameMonster& target, int32_t damage, game_entity_id_type attackerId)
-    {
-        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
-        if (monsterStatComponent.IsDead())
-        {
-            return;
-        }
-
-        const StatValue currentHP(monsterStatComponent.GetHP());
-
-        newHP = std::max(0, currentHP.As<int32_t>() - damage);
-        monsterStatComponent.SetHP(newHP);
-
-        target.GetAggroComponent().AddByDamage(attackerId, damage);
     }
 
     void EntityDamageSystem::ProcessMonsterDamageResult(GameEntity& target, int32_t damage, const DamageResult* result)
@@ -390,11 +324,14 @@ namespace sunlight
         int32_t maxHP = 0;
         int32_t hp = 0;
 
-        if (result && result->damageType == DamageType::DodgePlayer || result->damage == 0)
+        if (result)
         {
-            Get<EntityViewRangeSystem>().Broadcast(target, StatusMessageCreator::CreateDamageResult(target, *result), true);
+            if (result->damageType == DamageType::DodgePlayer || result->damage <= 0)
+            {
+                Get<EntityViewRangeSystem>().Broadcast(target, StatusMessageCreator::CreateDamageResult(target, *result), true);
 
-            return;
+                return;
+            }
         }
 
         if (target.GetType() == GamePlayer::TYPE)
