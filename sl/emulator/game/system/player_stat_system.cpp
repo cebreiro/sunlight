@@ -135,6 +135,27 @@ namespace sunlight
             StatusMessageCreator::CreateSPChange(player, maxSP, sp, floater), true);
     }
 
+    void PlayerStatSystem::ApplyDamage(GamePlayer& player, int32_t damage, int32_t& outMaxHP, int32_t& outNewHP)
+    {
+        PlayerStatComponent& statComponent = player.GetStatComponent();
+
+        const int32_t maxHP = statComponent.GetFinalStat(PlayerStatType::MaxHP).As<int32_t>();
+        const int32_t current = statComponent.GetFinalStat(RecoveryStatType::HP).As<int32_t>();
+
+        const int32_t newHP = std::max(0, current - damage);
+        statComponent.SetRecoveryStat(RecoveryStatType::HP, newHP);
+
+        if (newHP <= 0)
+        {
+            statComponent.SetDead(true);
+            statComponent.Suspend(RecoveryStatType::HP);
+            statComponent.Suspend(RecoveryStatType::SP);
+        }
+
+        outMaxHP = maxHP;
+        outNewHP = newHP;
+    }
+
     void PlayerStatSystem::UpdateJobStat(GamePlayer& player)
     {
         PlayerStatComponent& statComponent = player.GetComponent<PlayerStatComponent>();

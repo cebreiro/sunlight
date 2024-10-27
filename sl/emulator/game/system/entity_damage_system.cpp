@@ -7,6 +7,7 @@
 #include "sl/emulator/game/component/monster_aggro_component.h"
 #include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/component/player_party_component.h"
+#include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/damage/damage_result.h"
 #include "sl/emulator/game/contents/damage/monster_attack_damage_calculator.h"
@@ -20,9 +21,11 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/message/creator/status_message_creator.h"
+#include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/monster_drop_item_table_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
+#include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -54,6 +57,8 @@ namespace sunlight
         Add(stage.Get<PlayerIndexSystem>());
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<MonsterDropItemTableSystem>());
+        Add(stage.Get<PlayerStatSystem>());
+        Add(stage.Get<EntityMovementSystem>());
     }
 
     bool EntityDamageSystem::Subscribe(Stage& stage)
@@ -243,6 +248,8 @@ namespace sunlight
         MonsterNormalAttackDamageCalculateResult damageCalculateResult;
         _monsterAttackDamageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
 
+        bool blow = false;
+
         const DamageResult result{
             .attackerId = monster.GetId(),
             .attackerType = monster.GetType(),
@@ -251,22 +258,10 @@ namespace sunlight
             .damageCount = attackData.divDamage,
             .damageInterval = attackData.divDamageDelay,
             .blowType = DamageBlowType::BlowSmall,
-            .attackedResultType = DamageResultType::Damage_B,
+            .attackedResultType = blow ? DamageResultType::Damage_B : DamageResultType::Damage_A,
         };
 
-        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
-            {
-                auto movement = player.GetSceneObjectComponent().GetMovement();
-                movement.destPosition = movement.position;
-                movement.movementTypeBitMask = 0;
-
-                player.Defer(ZonePacketS2CCreator::CreateObjectMove(player, movement));
-
-                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
-                //player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
-
-                player.FlushDeferred();
-            });
+        ProcessMonsterDamageResult(target, result.damage, &result);
     }
 
     void EntityDamageSystem::ProcessMonsterSkillEffect(GameMonster& monster, GameEntity& target,
@@ -281,6 +276,8 @@ namespace sunlight
         MonsterSkillDamageCalculateResult damageCalculateResult;
         _monsterAttackDamageCalculator->Calculate(damageCalculateResult, damageCalculateParam);
 
+        bool blow = false;
+
         const DamageResult result{
             .attackerId = monster.GetId(),
             .attackerType = monster.GetType(),
@@ -292,22 +289,37 @@ namespace sunlight
             .damageCount = abilityValue ? std::max(1, abilityValue->damageCount) : 1,
             .damageInterval = (abilityValue && abilityValue->damageCount > 1) ? (abilityValue->end - abilityValue->begin) / abilityValue->damageCount : 0,
             .blowType = DamageBlowType::BlowSmall,
-            .attackedResultType = DamageResultType::Damage_A,
+            .attackedResultType = blow ? DamageResultType::Damage_B : DamageResultType::Damage_A,
         };
 
-        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+        const int32_t firstDamage = result.damageCount > 1
+            ? result.damage / result.damageCount + result.damage % result.damageCount
+            : result.damage;
+
+        ProcessMonsterDamageResult(target, firstDamage, &result);
+
+        if (result.damageCount > 1)
+        {
+            const int32_t tickDamage = result.damage / result.damageCount;
+            const int32_t tickCount = result.damageCount - 1;
+
+            ZoneTimerService& timerService = _serviceLocator.Get<ZoneTimerService>();
+
+            for (int32_t i = 0; i < tickCount; ++i)
             {
-                auto movement = player.GetSceneObjectComponent().GetMovement();
-                movement.destPosition = movement.position;
-                movement.movementTypeBitMask = 0;
+                timerService.AddTimer(std::chrono::milliseconds((1 + i) * result.damageInterval),
+                    [this, tickDamage, targetId = target.GetId()]()
+                    {
+                        GameEntity* entity = Get<SceneObjectSystem>().FindEntity(targetId);
+                        if (!entity || entity->GetId().GetRecycleSequence() != targetId.GetRecycleSequence())
+                        {
+                            return;
+                        }
 
-                player.Defer(ZonePacketS2CCreator::CreateObjectMove(player, movement));
-
-                player.Defer(StatusMessageCreator::CreateDamageResult(target, result));
-                //player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, newHP, HPChangeFloaterType::None));
-
-                player.FlushDeferred();
-            });
+                        this->ProcessMonsterDamageResult(*entity, tickDamage, nullptr);
+                    });
+            }
+        }
     }
 
     void EntityDamageSystem::OnDelayDamage(int64_t playerId, game_entity_id_type targetMonsterId, int32_t damage)
@@ -369,6 +381,78 @@ namespace sunlight
         monsterStatComponent.SetHP(newHP);
 
         target.GetAggroComponent().AddByDamage(attackerId, damage);
+    }
+
+    void EntityDamageSystem::ProcessMonsterDamageResult(GameEntity& target, int32_t damage, const DamageResult* result)
+    {
+        const bool blow = result ? result->attackedResultType == DamageResultType::Damage_B : false;
+
+        int32_t maxHP = 0;
+        int32_t hp = 0;
+
+        if (result && result->damageType == DamageType::DodgePlayer || result->damage == 0)
+        {
+            Get<EntityViewRangeSystem>().Broadcast(target, StatusMessageCreator::CreateDamageResult(target, *result), true);
+
+            return;
+        }
+
+        if (target.GetType() == GamePlayer::TYPE)
+        {
+            GamePlayer& player = *target.Cast<GamePlayer>();
+            if (player.GetStatComponent().IsDead())
+            {
+                return;
+            }
+
+            Get<PlayerStatSystem>().ApplyDamage(player, damage, maxHP, hp);
+        }
+        else
+        {
+            // TODO: pet
+
+            assert(false);
+        }
+
+        if (hp <= 0)
+        {
+            target.GetComponent<EntityStateComponent>().SetState(GameEntityState{
+                .type = GameEntityStateType::Dying
+                });
+        }
+
+        if (blow || hp <= 0)
+        {
+            Get<EntityMovementSystem>().Remove(target.GetId());
+
+            SceneObjectComponent& sceneObjectComponent = target.GetComponent<SceneObjectComponent>();
+            sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
+            sceneObjectComponent.SetMoving(false);
+        }
+
+        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            {
+                if (blow || hp <= 0)
+                {
+                    player.Defer(ZonePacketS2CCreator::CreateObjectMove(target));
+                }
+
+                if (result)
+                {
+                    player.Defer(StatusMessageCreator::CreateDamageResult(target, *result));
+                }
+
+                if (hp <= 0)
+                {
+                    player.Defer(SceneObjectPacketCreator::CreateState(target));
+                }
+                else
+                {
+                    player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, hp, HPChangeFloaterType::None));
+                }
+
+                player.FlushDeferred();
+            });
     }
 
     void EntityDamageSystem::ProcessMonsterDead(const GamePlayer& player, GameMonster& monster, const DamageResult* damageResult)

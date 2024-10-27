@@ -42,6 +42,8 @@ namespace sunlight
         void SetHP(GamePlayer& player, int32_t value, HPChangeFloaterType floater);
         void SetSP(GamePlayer& player, int32_t value, SPChangeFloaterType floater);
 
+        void ApplyDamage(GamePlayer& player, int32_t damage, int32_t& outMaxHP, int32_t& outNewHP);
+
     public:
         void UpdateJobStat(GamePlayer& player);
         void UpdateRegenStat(GamePlayer& player);
