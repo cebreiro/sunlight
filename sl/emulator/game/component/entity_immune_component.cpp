@@ -4,30 +4,65 @@ namespace sunlight
 {
     bool EntityImmuneComponent::Contains(ImmuneType immuneType) const
     {
-        const auto iter = _immuneTypes.find(immuneType);
-
-        return iter != _immuneTypes.end();
+        return !GetList(immuneType).empty();
     }
 
-    void EntityImmuneComponent::Add(const ImmuneOrigin& origin)
+    bool EntityImmuneComponent::Rand(ImmuneType immuneType, std::mt19937& mt) const
     {
-        _immuneTypes.emplace(origin.GetImmuneType(), origin);
-    }
+        std::uniform_int_distribution dist(0, 100);
 
-    bool EntityImmuneComponent::Remove(const ImmuneOrigin& origin)
-    {
-        const auto [begin, end] = _immuneTypes.equal_range(origin.GetImmuneType());
-
-        for (auto iter = begin; iter != end; ++iter)
+        for (const int32_t percentage : GetList(immuneType) | std::views::elements<1>)
         {
-            if (iter->second == origin)
+            if (percentage >= 100)
             {
-                _immuneTypes.erase(iter);
+                return true;
+            }
 
+            if (dist(mt) <= percentage)
+            {
                 return true;
             }
         }
 
         return false;
+    }
+
+    void EntityImmuneComponent::Add(const ImmuneOrigin& origin, int32_t percentage)
+    {
+        MutableList(origin.GetImmuneType()).emplace_back(origin, percentage);
+    }
+
+    bool EntityImmuneComponent::Remove(const ImmuneOrigin& origin)
+    {
+        std::vector<std::pair<ImmuneOrigin, int32_t>>& immuneOrigins = MutableList(origin.GetImmuneType());
+
+        const auto iter = std::ranges::find_if(immuneOrigins, [&origin](const auto& pair)
+            {
+                return pair.first == origin;
+            });
+        if (iter == immuneOrigins.end())
+        {
+            return false;
+        }
+
+        immuneOrigins.erase(iter);
+
+        return true;
+    }
+
+    auto EntityImmuneComponent::MutableList(ImmuneType type) -> std::vector<std::pair<ImmuneOrigin, int32_t>>&
+    {
+        const int32_t index = static_cast<int32_t>(type);
+        assert(index >= 0 && index < static_cast<int32_t>(std::ssize(_immuneOrigins)));
+
+        return _immuneOrigins[index];
+    }
+
+    auto EntityImmuneComponent::GetList(ImmuneType type) const -> const std::vector<std::pair<ImmuneOrigin, int32_t>>&
+    {
+        const int32_t index = static_cast<int32_t>(type);
+        assert(index >= 0 && index < static_cast<int32_t>(std::ssize(_immuneOrigins)));
+
+        return _immuneOrigins[index];
     }
 }

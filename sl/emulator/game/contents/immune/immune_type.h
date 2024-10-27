@@ -3,7 +3,9 @@
 namespace sunlight
 {
     ENUM_CLASS(ImmuneType, int32_t,
-        (PhysicalAttack)
+        (PhysicalAttack, 0)
         (MagicAttack)
+
+        (Count)
     )
 }

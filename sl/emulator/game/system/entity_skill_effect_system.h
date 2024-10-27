@@ -51,7 +51,7 @@ namespace sunlight
         void ProcessMonsterSkill(GameMonster& monster, GameEntity& target, const MonsterAttackData::Skill& attackData, int32_t attackIndex);
 
     private:
-        void Apply(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel);
+        void Apply(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel, int32_t monsterPassivePercentage = -1);
         void Revert(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel);
 
     private:

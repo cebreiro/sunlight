@@ -129,7 +129,7 @@ namespace sunlight
                         if (std::unique_ptr<IPassiveEffect> effect = PassiveEffectFactory::CreateEffect(skillEffectData);
                             effect)
                         {
-                            Apply(monster, *effect, passiveData.id, passiveData.level);
+                            Apply(monster, *effect, passiveData.id, passiveData.level, passiveData.percent);
 
                             passive->AddEffect(std::move(effect));
                         }
@@ -642,7 +642,7 @@ namespace sunlight
         }
     }
 
-    void EntitySkillEffectSystem::Apply(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel)
+    void EntitySkillEffectSystem::Apply(GameEntity& entity, IPassiveEffect& passiveEffect, int32_t skillId, int32_t skillLevel, int32_t monsterPassivePercentage)
     {
         const PassiveEffectType type = passiveEffect.GetType();
 
@@ -687,13 +687,13 @@ namespace sunlight
                 {
                     const ImmuneOrigin origin(ImmuneType::PhysicalAttack, ImmuneOriginSkill{ .skillId = skillId });
 
-                    entity.GetComponent<EntityImmuneComponent>().Add(origin);
+                    entity.GetComponent<EntityImmuneComponent>().Add(origin, monsterPassivePercentage);
                 }
                 else if (statType == 100)
                 {
                     const ImmuneOrigin origin(ImmuneType::MagicAttack, ImmuneOriginSkill{ .skillId = skillId });
 
-                    entity.GetComponent<EntityImmuneComponent>().Add(origin);
+                    entity.GetComponent<EntityImmuneComponent>().Add(origin, monsterPassivePercentage);
                 }
             }
             break;

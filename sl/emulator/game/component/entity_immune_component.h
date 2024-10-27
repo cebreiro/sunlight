@@ -8,11 +8,16 @@ namespace sunlight
     {
     public:
         bool Contains(ImmuneType immuneType) const;
+        bool Rand(ImmuneType immuneType, std::mt19937& mt) const;
 
-        void Add(const ImmuneOrigin& origin);
+        void Add(const ImmuneOrigin& origin, int32_t percentage);
         bool Remove(const ImmuneOrigin& origin);
 
     private:
-        std::unordered_multimap<ImmuneType, ImmuneOrigin> _immuneTypes;
+        auto MutableList(ImmuneType type) -> std::vector<std::pair<ImmuneOrigin, int32_t>>&;
+        auto GetList(ImmuneType type) const -> const std::vector<std::pair<ImmuneOrigin, int32_t>>&;
+
+    private:
+        std::array<std::vector<std::pair<ImmuneOrigin, int32_t>>, static_cast<int32_t>(ImmuneType::Count)> _immuneOrigins;
     };
 }

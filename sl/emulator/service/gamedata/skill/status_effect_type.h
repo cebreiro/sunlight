@@ -19,7 +19,7 @@ namespace sunlight
         (GuaranteedCritical, 14)
         (ReduceCastingTimeAndSP, 15)
         (Poison, 16)
-        (Taunt, 18)
+        (CrowdControlParalysis, 18)
         (CrowdControlSleep, 20)
         (CrowdControlBinding, 21)
         (ReduceAggro, 22)
