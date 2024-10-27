@@ -21,7 +21,7 @@ namespace sunlight
     class PlayerStateSystem final : public GameSystem
     {
     public:
-        PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData);
+        PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData, int32_t zoneId);
         ~PlayerStateSystem();
 
         void InitializeSubSystem(Stage& stage) override;
@@ -55,7 +55,11 @@ namespace sunlight
         void HandleNormalAttack(GamePlayer& player, const GameEntityState& state);
 
     private:
+        static bool GetRevivalPoint(int32_t zoneId, int32_t& destZone, Eigen::Vector2f& destPos);
+
+    private:
         const ServiceLocator& _serviceLocator;
         const MapStage& _stageData;
+        int32_t _zoneId = 0;
     };
 }

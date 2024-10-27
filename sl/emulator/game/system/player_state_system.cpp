@@ -10,17 +10,16 @@
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
+#include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/event_script/event_script.h"
 #include "sl/emulator/game/contents/group/item_mix_prop_item_mapping.h"
 #include "sl/emulator/game/contents/npc/npc_talk_box.h"
-#include "sl/emulator/game/contents/skill/skill_target_selector.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
-#include "sl/emulator/game/message/creator/chat_message_creator.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/item_mix_message_creator.h"
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
@@ -36,7 +35,6 @@
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
-#include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
@@ -45,9 +43,10 @@
 
 namespace sunlight
 {
-    PlayerStateSystem::PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData)
+    PlayerStateSystem::PlayerStateSystem(const ServiceLocator& serviceLocator, const MapStage& stageData, int32_t zoneId)
         : _serviceLocator(serviceLocator)
         , _stageData(stageData)
+        , _zoneId(zoneId)
     {
     }
 
@@ -485,12 +484,32 @@ namespace sunlight
             HandleNormalAttack(player, state);
         }
         break;
+        case GameEntityStateType::Leaving:
+        {
+            // request revival
+            if (state.motionId == -666)
+            {
+                int32_t destZoneId = 0;
+                Eigen::Vector2f position;
+
+                if (!GetRevivalPoint(_zoneId, destZoneId, position))
+                {
+                    destZoneId = _zoneId;
+                    position = player.GetSceneObjectComponent().GetPosition();
+                }
+
+                player.GetStatComponent().SetRecoveryStat(RecoveryStatType::HP, 1);
+
+                _serviceLocator.Get<ZoneChangeService>().StartZoneChange(
+                    player.GetClientId(), destZoneId, static_cast<int32_t>(position.x()), static_cast<int32_t>(position.y()));
+            }
+        }
+        break;
         case GameEntityStateType::None:
         case GameEntityStateType::DamagedMotion:
         case GameEntityStateType::Dying:
         case GameEntityStateType::Dead:
         case GameEntityStateType::Entering:
-        case GameEntityStateType::Leaving:
         case GameEntityStateType::DamageCancel:
         case GameEntityStateType::Greet:
         case GameEntityStateType::Resurrection:
@@ -578,5 +597,93 @@ namespace sunlight
     void PlayerStateSystem::HandleNormalAttack(GamePlayer& player, const GameEntityState& state)
     {
         Get<EntitySkillEffectSystem>().OnNormalAttackUse(player, state);
+    }
+
+    bool PlayerStateSystem::GetRevivalPoint(int32_t zoneId, int32_t& destZone, Eigen::Vector2f& destPos)
+    {
+        if (zoneId % 100 == 4)
+        {
+            destZone = 401;
+            destPos = { 9650.f, 8850.f };
+
+            return true;
+        }
+
+        switch (zoneId)
+        {
+        case 101:
+        case 102:
+        case 103:
+        case 104:
+        case 105:
+        case 107:
+        case 108:
+        case 109:
+        case 110:
+        case 111:
+        case 112:
+        case 113:
+        case 114:
+        case 305:
+        case 311:
+        case 303:
+        case 306:
+        {
+            destZone = 201;
+            destPos = { 9400.f, 8300.f };
+
+            return true;
+        }
+        case 106:
+        case 115:
+        case 116:
+        case 117:
+        case 129:
+        case 130:
+        case 131:
+        case 302:
+        {
+            destZone = 204;
+            destPos = { 4500.f, 3100.f };
+
+            return true;
+        }
+        case 118:
+        case 119:
+        case 120:
+        case 308:
+        case 304:
+        {
+            destZone = 202;
+            destPos = { 10300.f, 3000.f };
+
+            return true;
+        }
+        case 121:
+        case 122:
+        case 123:
+        case 124:
+        case 125:
+        case 301:
+        case 312:
+        {
+            destZone = 203;
+            destPos = { 3500.f, 3500.f };
+
+            return true;
+        }
+
+        case 126:
+        case 127:
+        case 128:
+        {
+            destZone = 205;
+            destPos = { 1700.f, 3000.f };
+
+            return true;
+        }
+        }
+
+        return false;
     }
 }
