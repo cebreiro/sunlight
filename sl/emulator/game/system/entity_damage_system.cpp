@@ -25,6 +25,7 @@
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/monster_drop_item_table_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
+#include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -171,7 +172,7 @@ namespace sunlight
 			for (int32_t i = 0; i < tickCount; ++i)
 			{
                 timerService.AddTimer(std::chrono::milliseconds((1 + i) * result.damageInterval), player.GetCId(), _stageId,
-					[this, tickDamage, targetId = target.GetId()](const GamePlayer& player)
+					[this, tickDamage, targetId = target.GetId()](GamePlayer& player)
 					{
                         GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, targetId);
                         if (!entity || entity->GetId().GetRecycleSequence() != targetId.GetRecycleSequence())
@@ -271,7 +272,7 @@ namespace sunlight
         }
     }
 
-    void EntityDamageSystem::ProcessPlayerDamageResult(const GamePlayer& player, GameMonster& target, int32_t damage, const DamageResult* result)
+    void EntityDamageSystem::ProcessPlayerDamageResult(GamePlayer& player, GameMonster& target, int32_t damage, const DamageResult* result)
     {
         MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
         if (monsterStatComponent.IsDead())
@@ -392,7 +393,7 @@ namespace sunlight
             });
     }
 
-    void EntityDamageSystem::ProcessMonsterDead(const GamePlayer& player, GameMonster& monster, const DamageResult* damageResult)
+    void EntityDamageSystem::ProcessMonsterDead(GamePlayer& player, GameMonster& monster, const DamageResult* damageResult)
     {
         const auto newState = GameEntityState{
             .type = GameEntityStateType::Dead,
@@ -421,6 +422,14 @@ namespace sunlight
 
                 Get<SceneObjectSystem>().RemoveMonster(target.GetId());
             });
+
+        const int32_t exp = monster.GetData().GetBase().exp;
+
+        if (exp > 0)
+        {
+            Get<PlayerStatSystem>().GainCharacterExp(player, exp);
+            Get<PlayerJobSystem>().GainJobExp(player, exp);
+        }
     }
 
     void EntityDamageSystem::DropMonsterItem(const GameMonster& monster, const GamePlayer* player)

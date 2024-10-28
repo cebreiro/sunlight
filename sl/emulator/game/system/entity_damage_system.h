@@ -51,10 +51,10 @@ namespace sunlight
             const SkillEffectData& effect, const AbilityValue* abilityValue);
 
     private:
-        void ProcessPlayerDamageResult(const GamePlayer& player, GameMonster& target, int32_t damage, const DamageResult* result);
+        void ProcessPlayerDamageResult(GamePlayer& player, GameMonster& target, int32_t damage, const DamageResult* result);
         void ProcessMonsterDamageResult(GameEntity& target, int32_t damage, const DamageResult* result);
 
-        void ProcessMonsterDead(const GamePlayer& player, GameMonster& monster, const DamageResult* damageResult);
+        void ProcessMonsterDead(GamePlayer& player, GameMonster& monster, const DamageResult* damageResult);
         void DropMonsterItem(const GameMonster& monster, const GamePlayer* player);
 
     private:
