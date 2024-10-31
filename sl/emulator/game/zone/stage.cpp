@@ -406,7 +406,7 @@ namespace sunlight
         {
             if (prop.type == static_cast<int32_t>(GameEntityType::NPC))
             {
-                const auto [pos, yaw] = ExtractPositionAndYaw(prop.position);
+                const auto [pos, yaw] = ExtractPositionAndYaw(prop.transform);
 
                 auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
                 sceneObjectComponent->SetId(entityIdPublisher.PublishSceneObjectId(GameEntityType::NPC));
@@ -446,7 +446,7 @@ namespace sunlight
         {
             if (prop.type == static_cast<int32_t>(GameEntityType::NPC))
             {
-                const auto [pos, yaw] = ExtractPositionAndYaw(prop.position);
+                const auto [pos, yaw] = ExtractPositionAndYaw(prop.transform);
 
                 auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
                 sceneObjectComponent->SetId(entityIdPublisher.PublishSceneObjectId(GameEntityType::NPC));

@@ -8,7 +8,7 @@ namespace sunlight
     {
         id = reader.Read<int32_t>();
         type = reader.Read<int32_t>();
-        position = ReadMatrix4x4(reader);
+        transform = ReadMatrix4x4(reader);
         vector = ReadVector3(reader);
         style = reader.Read<int32_t>();
     }
@@ -17,7 +17,7 @@ namespace sunlight
     {
         id = reader.Read<int32_t>();
         type = reader.Read<int32_t>();
-        position = ReadMatrix4x4(reader);
+        transform = ReadMatrix4x4(reader);
         vector = ReadVector3(reader);
         style = reader.Read<int32_t>();
 

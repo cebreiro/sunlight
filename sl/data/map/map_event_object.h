@@ -9,7 +9,7 @@ namespace sunlight
 
         int32_t id = 0;
         int32_t type = 0;
-        Eigen::Matrix4f position;
+        Eigen::Matrix4f transform;
         Eigen::Vector3f vector;
         int32_t style = 0;
     };
@@ -21,7 +21,7 @@ namespace sunlight
 
         int32_t id = 0;
         int32_t type = 0;
-        Eigen::Matrix4f position;
+        Eigen::Matrix4f transform;
         Eigen::Vector3f vector;
         int32_t style = 0;
 
