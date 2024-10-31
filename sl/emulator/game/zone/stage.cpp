@@ -4,9 +4,13 @@
 #include "sl/data/map/map_stage.h"
 #include "sl/data/map/map_stage_room.h"
 #include "sl/data/map/map_stage_terrain.h"
+#include "sl/emulator/game/component/event_object_stage_entrance_portal_component.h"
+#include "sl/emulator/game/component/event_object_stage_exit_portal_component.h"
+#include "sl/emulator/game/component/event_object_zone_portal_component.h"
 #include "sl/emulator/game/component/npc_item_shop_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
+#include "sl/emulator/game/entity/game_event_object.h"
 #include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/character_message.h"
@@ -35,13 +39,16 @@
 #include "sl/emulator/game/system/player_profile_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
+#include "sl/emulator/game/system/event_object_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
+#include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/map/map_data_provider.h"
 #include "sl/emulator/service/gamedata/shop/npc_shop_data_provider.h"
 
 namespace sunlight
@@ -58,10 +65,13 @@ namespace sunlight
         if (stageData.terrain)
         {
             InitializeNPC(stageData.terrain->props);
+            InitializeEventObject(stageData.terrain->eventsV3);
+            InitializeEventObject(stageData.terrain->eventsV5);
         }
         else if (stageData.room)
         {
             InitializeNPC(stageData.room->props);
+            InitializeEventObject(stageData.room->events);
         }
         else
         {
@@ -373,6 +383,7 @@ namespace sunlight
         Add(std::make_shared<EventBubblingSystem>());
         Add(std::make_shared<EntityAIControlSystem>(_serviceLocator));
         Add(std::make_shared<EntityScanSystem>());
+        Add(std::make_shared<EventObjectSystem>(_serviceLocator, _stageData.id));
 
         const auto range = _systems | std::views::values;
 
@@ -406,7 +417,7 @@ namespace sunlight
         {
             if (prop.type == static_cast<int32_t>(GameEntityType::NPC))
             {
-                const auto [pos, yaw] = ExtractPositionAndYaw(prop.transform);
+                const auto [pos, yaw] = MapDataProvider::ExtractPositionAndYaw(prop.transform);
 
                 auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
                 sceneObjectComponent->SetId(entityIdPublisher.PublishSceneObjectId(GameEntityType::NPC));
@@ -446,7 +457,7 @@ namespace sunlight
         {
             if (prop.type == static_cast<int32_t>(GameEntityType::NPC))
             {
-                const auto [pos, yaw] = ExtractPositionAndYaw(prop.transform);
+                const auto [pos, yaw] = MapDataProvider::ExtractPositionAndYaw(prop.transform);
 
                 auto sceneObjectComponent = std::make_unique<SceneObjectComponent>();
                 sceneObjectComponent->SetId(entityIdPublisher.PublishSceneObjectId(GameEntityType::NPC));
@@ -476,6 +487,61 @@ namespace sunlight
 
                 Get<SceneObjectSystem>().SpawnNPC(std::move(npc));
             }
+        }
+    }
+
+    void Stage::InitializeEventObject(const std::vector<MapEventObjectV3>& events)
+    {
+        for (const MapEventObjectV3& event : events)
+        {
+            (void)event;
+        }
+    }
+
+    void Stage::InitializeEventObject(const std::vector<MapEventObjectV5>& events)
+    {
+        for (const MapEventObjectV5& event : events)
+        {
+            const auto& [position, yaw] = MapDataProvider::ExtractPositionAndYaw(event.transform);
+
+            const float x = event.vector.x() / 2.f;
+            const float y = event.vector.y() / 2.f;
+
+            const Eigen::Vector2f center(position.x(), position.y());
+            const Eigen::Vector2f min(position.x() - x, position.y() - y);
+            const Eigen::Vector2f max(position.x() + y, position.y() + y);
+
+            auto eventObject = std::make_shared<GameEventObject>(game_entity_id_type(event.id), center, yaw, Eigen::AlignedBox2f(min, max));
+
+            switch (event.style)
+            {
+            case 2000:
+            case 5000:
+            {
+                eventObject->AddComponent(std::make_unique<EventObjectZonePortalComponent>(event.reserved2, event.reserved1));
+            }
+            break;
+            case 3000:
+            case 4000:
+            {
+                eventObject->AddComponent(std::make_unique<EventObjectStageEntrancePortalComponent>(event.reserved1));
+            }
+            break;
+            case 3001:
+            case 4001:
+            {
+                const int32_t linkId = event.reserved1;
+
+                eventObject->AddComponent(std::make_unique<EventObjectStageExitPortalComponent>(linkId));
+
+                _serviceLocator.Get<ZoneChangeService>().RegisterStageExitPortal(linkId, _stageData.id, eventObject->GetId());
+            }
+            break;
+            }
+
+            [[maybe_unused]]
+            const bool added = Get<EventObjectSystem>().AddEventObject(std::move(eventObject));
+            assert(added);
         }
     }
 
@@ -534,14 +600,5 @@ namespace sunlight
         iter->second(message);
 
         return true;
-    }
-
-    auto Stage::ExtractPositionAndYaw(const Eigen::Matrix4f& matrix) -> std::pair<Eigen::Vector3f, float>
-    {
-        std::pair<Eigen::Vector3f, float> result;
-        result.first = matrix.block<1, 3>(3, 0).transpose();
-        result.second = std::atan2f(matrix(1, 0), matrix(0, 0)) * 180.0f / static_cast<float>(std::numbers::pi);
-
-        return result;
     }
 }

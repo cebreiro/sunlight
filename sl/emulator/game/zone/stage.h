@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/data/map/map_event_object.h"
 #include "sl/emulator/game/message/character_message_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/zone/stage_enter_type.h"
@@ -65,14 +66,13 @@ namespace sunlight
         void InitializeSystem();
         void InitializeNPC(const std::vector<MapProp>& props);
         void InitializeNPC(const std::vector<MapTerrainProp>& props);
+        void InitializeEventObject(const std::vector<MapEventObjectV3>& events);
+        void InitializeEventObject(const std::vector<MapEventObjectV5>& events);
 
         bool Publish(const ZoneRequest& request);
         bool Publish(const ZoneMessage& message);
         bool Publish(const ZoneCommunityMessage& message);
         bool Publish(const CharacterMessage& message);
-
-    private:
-        static auto ExtractPositionAndYaw(const Eigen::Matrix4f& matrix) -> std::pair<Eigen::Vector3f, float>;
 
     private:
         const ServiceLocator& _serviceLocator;

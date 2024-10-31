@@ -1,6 +1,10 @@
 #include "zone_change_service.h"
 
+#include "sl/emulator/game/component/event_object_stage_exit_portal_component.h"
+#include "sl/emulator/game/entity/game_event_object.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/system/event_object_system.h"
+#include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/zone.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
@@ -19,7 +23,54 @@ namespace sunlight
         return "zone_change_service";
     }
 
-    bool ZoneChangeService::StartStageChange(GamePlayer& player, int32_t destStageId, int32_t destX, int32_t destY)
+    void ZoneChangeService::RegisterStageExitPortal(int32_t linkId, int32_t stageId, game_entity_id_type entityId)
+    {
+        _stageExitPortalLinks.emplace(linkId, std::make_pair(stageId, entityId));
+    }
+
+    bool ZoneChangeService::StartStageChange(GamePlayer& player, int32_t currentStageId, int32_t linkId)
+    {
+        const auto [begin, end] = _stageExitPortalLinks.equal_range(linkId);
+        if (begin == end)
+        {
+            return false;
+        }
+
+        const auto iter = std::ranges::find_if(begin, end, [currentStageId](const auto& pair) -> bool
+            {
+                return pair.first != currentStageId;
+            });
+        if (iter == end)
+        {
+            return false;
+        }
+
+        const auto& [stageId, eventObjectId] = iter->second;
+
+        Stage* stage = _zone.FindStage(stageId);
+        if (!stage)
+        {
+            return false;
+        }
+
+        const GameEventObject* eventObject = stage->Get<EventObjectSystem>().FindEventObject(eventObjectId);
+        if (!eventObject)
+        {
+            return false;
+        }
+
+        const EventObjectStageExitPortalComponent* stageExitComponent = eventObject->FindComponent<EventObjectStageExitPortalComponent>();
+        if (!stageExitComponent)
+        {
+            return false;
+        }
+
+        const Eigen::Vector2f& center = eventObject->GetCenterPosition();
+
+        return StartStageChange(player, stageId, static_cast<int32_t>(center.x()), static_cast<int32_t>(center.y()), eventObject->GetYaw());
+    }
+
+    bool ZoneChangeService::StartStageChange(GamePlayer& player, int32_t destStageId, int32_t destX, int32_t destY, std::optional<float> yaw)
     {
         if (!_zone.FindStage(destStageId))
         {
@@ -30,9 +81,9 @@ namespace sunlight
         const int64_t cid = player.GetCId();
 
         Post(_zone.GetStrand(),
-            [zone = _zone.shared_from_this(), clientId, cid, destStageId, destX, destY]()
+            [zone = _zone.shared_from_this(), clientId, cid, destStageId, destX, destY, yaw]()
             {
-                zone->ChangePlayerStage(clientId, destStageId, destX, destY)
+                zone->ChangePlayerStage(clientId, destStageId, destX, destY, yaw)
                     .Then(*ExecutionContext::GetExecutor(), [zone, cid, destStageId](bool success)
                         {
                             if (!success)
@@ -47,7 +98,7 @@ namespace sunlight
         return true;
     }
 
-    auto ZoneChangeService::StartZoneChange(game_client_id_type clientId, int32_t destZoneId, int32_t destX, int32_t destY) -> Future<void>
+    auto ZoneChangeService::StartZoneChange(game_client_id_type clientId, int32_t destZoneId, int32_t destX, int32_t destY, std::optional<float> yaw) -> Future<void>
     {
         [[maybe_unused]]
         const auto holder = _zone.shared_from_this();
@@ -68,7 +119,7 @@ namespace sunlight
 
         SharedPtrNotNull<GameClient> client = clientPtr->shared_from_this();
 
-        const bool removed = co_await _zone.RemovePlayerByZoneChange(clientId, destZoneId, (float)destX, (float)destY, 0.0);
+        const bool removed = co_await _zone.RemovePlayerByZoneChange(clientId, destZoneId, (float)destX, (float)destY, yaw.value_or(0.f));
         if (!removed)
         {
             co_return;

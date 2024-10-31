@@ -1,0 +1,18 @@
+#pragma once
+#include "sl/emulator/game/component/game_component.h"
+
+namespace sunlight
+{
+    class EventObjectStageExitPortalComponent final : public GameComponent
+    {
+    public:
+        explicit EventObjectStageExitPortalComponent(int32_t linkId);
+
+        auto GetLinkId() const -> int32_t;
+
+    private:
+        int32_t _linkId = 0;
+        Eigen::Vector2f _position = {};
+        float _yaw = 0.f;
+    };
+}

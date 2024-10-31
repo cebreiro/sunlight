@@ -49,6 +49,7 @@ namespace sunlight
         // item_etc.sox
         static constexpr int32_t QUICK_SLOT_DUMMY_ITEM_ID = 2;
 
+        static constexpr float AABB_COLLISION_NETWORK_DELAY_MARGIN = 30.f;
         static constexpr float OBB_COLLISION_NETWORK_DELAY_MARGIN = 10.f;
 
         static constexpr int32_t ITEM_ID_GOLD = 1;

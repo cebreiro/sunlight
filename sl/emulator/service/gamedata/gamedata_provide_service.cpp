@@ -34,7 +34,7 @@ namespace sunlight
         _scriptPath = assetPath / "Script";
 
         _assetDataProvider = std::make_shared<AssetDataProvider>(assetPath / "Soda.dat");
-        _mapDataProvider = std::make_shared<MapDataProvider>(assetPath / "Zone");
+        _mapDataProvider = std::make_shared<MapDataProvider>(_serviceLocator, assetPath / "Zone");
         _soxTableSet = std::make_shared<SoxTableSet>(assetPath / "Misc");
         _abilityFileDataProvider = std::make_shared<AbilityFileDataProvider>(
             assetPath / "Misc/Ability",

@@ -221,7 +221,7 @@ namespace sunlight
         co_return true;
     }
 
-    auto Zone::ChangePlayerStage(game_client_id_type id, int32_t destStageId, int32_t destX, int32_t destY) -> Future<bool>
+    auto Zone::ChangePlayerStage(game_client_id_type id, int32_t destStageId, int32_t destX, int32_t destY, std::optional<float> yaw) -> Future<bool>
     {
         assert(ExecutionContext::IsEqualTo(*_strand));
 
@@ -259,6 +259,11 @@ namespace sunlight
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
         sceneObjectComponent.SetPosition(Eigen::Vector2f(static_cast<float>(destX), static_cast<float>(destY)));
         sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
+
+        if (yaw.has_value())
+        {
+            sceneObjectComponent.SetYaw(*yaw);
+        }
 
         destStage->SpawnPlayer(std::move(player), StageEnterType::StageChange);
 
