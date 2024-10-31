@@ -51,21 +51,24 @@ namespace sunlight
         _gameCommunityService->Start();
 
         _serviceLocator.Add<GameCommunityService>(_gameCommunityService);
+    }
 
+    Zone::~Zone()
+    {
+    }
+
+    void Zone::Initialize()
+    {
         const MapDataProvider& mapDataProvider = _serviceLocator.Get<GameDataProvideService>().GetMapDataProvider();
-        if (_mapData = mapDataProvider.FindMap(id); !_mapData)
+        if (_mapData = mapDataProvider.FindMap(_id); !_mapData)
         {
             throw std::runtime_error(fmt::format("fail to find map data. zone: {}", _id));
         }
 
         for (const MapStage& stageData : _mapData->stages | notnull::reference)
         {
-            _stages.emplace_back(std::make_unique<Stage>(_serviceLocator, id, stageData));
+            _stages.emplace_back(std::make_unique<Stage>(_serviceLocator, _id, stageData));
         }
-    }
-
-    Zone::~Zone()
-    {
     }
 
     void Zone::Start()

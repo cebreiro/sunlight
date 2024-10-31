@@ -5,12 +5,20 @@
 #include "sl/emulator/game/component/event_object_zone_portal_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_event_object.h"
+#include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
+#include "sl/emulator/game/system/event_bubbling_system.h"
+#include "sl/emulator/game/system/event_object_spawner_component.h"
+#include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
+#include "sl/emulator/game/zone/service/zone_timer_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/map/map_data_provider.h"
+#include "sl/emulator/service/gamedata/monster/monster_data.h"
 
 namespace sunlight
 {
@@ -22,7 +30,7 @@ namespace sunlight
 
     void EventObjectSystem::InitializeSubSystem(Stage& stage)
     {
-        (void)stage;
+        Add(stage.Get<SceneObjectSystem>());
     }
 
     bool EventObjectSystem::Subscribe(Stage& stage)
@@ -32,6 +40,13 @@ namespace sunlight
         {
             return false;
         }
+
+        stage.Get<EventBubblingSystem>().AddSubscriber<EventBubblingMonsterDespawn>(
+            [this](const EventBubblingMonsterDespawn& event)
+            {
+                this->HandleMonsterDespawn(event);
+            });
+
 
         return true;
     }
@@ -50,6 +65,23 @@ namespace sunlight
     {
         const game_entity_id_type id = eventObject->GetId();
 
+        if (EventObjectSpawnerComponent* spawnerComponent = eventObject->FindComponent<EventObjectSpawnerComponent>();
+            spawnerComponent)
+        {
+            ZoneTimerService& zoneTimerService = _serviceLocator.Get<ZoneTimerService>();
+
+            for (SpawnerContext& context : spawnerComponent->GetSpawnDataRange())
+            {
+                context.timerRunning = true;
+
+                zoneTimerService.AddTimer(std::chrono::milliseconds(context.firstDelay),
+                    [this, id = id, mobId = context.data->GetId()]()
+                    {
+                        this->OnExpireSpawnerTimer(id, mobId);
+                    });
+            }
+        }
+
         return _eventObjects.try_emplace(id, std::move(eventObject)).second;
     }
 
@@ -65,6 +97,98 @@ namespace sunlight
         const auto iter = _eventObjects.find(id);
 
         return iter != _eventObjects.end() ? iter->second.get() : nullptr;
+    }
+
+    void EventObjectSystem::OnExpireSpawnerTimer(game_entity_id_type id, int32_t mobId)
+    {
+        GameEventObject* eventObject = FindEventObject(id);
+        assert(eventObject);
+
+        EventObjectSpawnerComponent& spawnerComponent = eventObject->GetComponent<EventObjectSpawnerComponent>();
+        SpawnerContext* spawnContext = spawnerComponent.FindContext(mobId);
+        assert(spawnContext);
+
+        ++spawnContext->spawnCount;
+
+        const Eigen::Vector2f spawnPos = [&]() -> Eigen::Vector2f
+            {
+                // TODO: select position on movable area
+
+                return eventObject->GetCenterPosition();
+            }();
+
+        GameMonsterSpawnerContext spawnerContext{
+            .spawnerId = eventObject->GetId(),
+            .spawnerCenter = eventObject->GetCenterPosition(),
+            .spawnerArea = eventObject->GetArea(),
+        };
+
+        auto monster = std::make_shared<GameMonster>(_serviceLocator.Get<GameEntityIdPublisher>(), *spawnContext->data, spawnPos, spawnerContext);
+
+        Get<SceneObjectSystem>().SpawnMonster(std::move(monster), spawnPos, 0.f);
+
+        if (spawnContext->spawnCount < spawnContext->maxCount)
+        {
+            _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(spawnContext->delay),
+                [this, id, mobId]()
+                {
+                    OnExpireSpawnerTimer(id, mobId);
+                });
+        }
+        else
+        {
+            spawnContext->timerRunning = false;
+        }
+    }
+
+    void EventObjectSystem::HandleMonsterDespawn(const EventBubblingMonsterDespawn& event)
+    {
+        const GameMonster& monster = *event.monster;
+
+        if (const std::optional<GameMonsterSpawnerContext>& spawnerContext = event.monster->GetSpawnerContext();
+            spawnerContext.has_value())
+        {
+            bool success = false;
+
+            do
+            {
+                GameEventObject* eventObject = FindEventObject(spawnerContext->spawnerId);
+                if (!eventObject)
+                {
+                    break;
+                }
+
+                EventObjectSpawnerComponent* spawnerComponent = eventObject->FindComponent<EventObjectSpawnerComponent>();
+                if (!spawnerComponent)
+                {
+                    break;
+                }
+
+                SpawnerContext* spawnContext = spawnerComponent->FindContext(monster.GetDataId());
+                if (!spawnContext)
+                {
+                    break;
+                }
+
+                --spawnContext->spawnCount;
+
+                if (!spawnContext->timerRunning)
+                {
+                    spawnContext->timerRunning = true;
+
+                    _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(spawnContext->delay),
+                        [this, id = eventObject->GetId(), mobId = monster.GetDataId()]()
+                        {
+                            OnExpireSpawnerTimer(id, mobId);
+                        });
+                }
+
+                success = true;
+                
+            } while (false);
+
+            assert(success);
+        }
     }
 
     void EventObjectSystem::HandleTrigger(const ZoneMessage& message)

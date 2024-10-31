@@ -24,6 +24,8 @@ namespace sunlight
         Zone(const ServiceLocator& serviceLocator, execution::IExecutor& executor, int8_t worldId, int32_t id);
         ~Zone();
 
+        void Initialize();
+
         void Start();
         void Shutdown();
         auto Join() -> Future<void>;

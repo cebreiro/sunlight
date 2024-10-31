@@ -33,6 +33,7 @@ namespace sunlight
         _serviceLocator = serviceLocator;
         _handler = std::make_shared<ZonePacketC2SHandler>(serviceLocator, *this);
         _zone = (std::make_shared<Zone>(serviceLocator, *_gameExecutor, _worldId, _zoneId));
+        _zone->Initialize();
     }
 
     void ZoneServer::StartUp(uint16_t listenPort)

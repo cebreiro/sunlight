@@ -573,7 +573,7 @@ namespace sunlight
     auto EntityViewRangeSystem::CalculateXIndex(float x) const -> int32_t
     {
         const int32_t intValue = static_cast<int32_t>(x);
-        const int32_t clamped = std::clamp(intValue, 0, _width);
+        const int32_t clamped = std::clamp(intValue, 0, _width - 1);
 
         return clamped / cell_size;
     }
@@ -581,7 +581,7 @@ namespace sunlight
     auto EntityViewRangeSystem::CalculateYIndex(float y) const -> int32_t
     {
         const int32_t intValue = static_cast<int32_t>(y);
-        const int32_t clamped = std::clamp(intValue, 0, _height);
+        const int32_t clamped = std::clamp(intValue, 0, _height - 1);
 
         return clamped / cell_size;
     }

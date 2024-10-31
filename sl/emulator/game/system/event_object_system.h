@@ -5,6 +5,7 @@
 namespace sunlight
 {
     struct ZoneMessage;
+    struct EventBubblingMonsterDespawn;
 
     class GameEventObject;
 }
@@ -28,6 +29,9 @@ namespace sunlight
         auto FindEventObject(game_entity_id_type id) const -> const GameEventObject*;
 
     private:
+        void OnExpireSpawnerTimer(game_entity_id_type id, int32_t mobId);
+        void HandleMonsterDespawn(const EventBubblingMonsterDespawn& event);
+
         void HandleTrigger(const ZoneMessage& message);
 
     private:

@@ -13,11 +13,12 @@
 
 namespace sunlight
 {
-    GameMonster::GameMonster(GameEntityIdPublisher& idPublisher, const MonsterData& data, Eigen::Vector2f spawnPosition, std::optional<game_entity_id_type> spawnerId)
+    GameMonster::GameMonster(GameEntityIdPublisher& idPublisher, const MonsterData& data, Eigen::Vector2f spawnPosition,
+        const std::optional<GameMonsterSpawnerContext>& spawnContext)
         : GameEntity(idPublisher, TYPE)
         , _data(data)
         , _spawnPosition(std::move(spawnPosition))
-        , _spawnerId(spawnerId)
+        , _spawnerContext(spawnContext)
     {
         AddComponent(std::make_unique<SceneObjectComponent>());
         AddComponent(std::make_unique<EntityStateComponent>());
@@ -51,9 +52,9 @@ namespace sunlight
         return _spawnPosition;
     }
 
-    auto GameMonster::GetSpawnerId() const -> std::optional<game_entity_id_type>
+    auto GameMonster::GetSpawnerContext() const -> const std::optional<GameMonsterSpawnerContext>&
     {
-        return _spawnerId;
+        return _spawnerContext;
     }
 
     auto GameMonster::GetSceneObjectComponent() -> SceneObjectComponent&

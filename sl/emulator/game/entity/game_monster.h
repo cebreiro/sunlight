@@ -16,6 +16,13 @@ namespace sunlight
 
 namespace sunlight
 {
+    struct GameMonsterSpawnerContext
+    {
+        game_entity_id_type spawnerId = {};
+        Eigen::Vector2f spawnerCenter = {};
+        Eigen::AlignedBox2f spawnerArea = {};
+    };
+
     class GameMonster final : public GameEntity
     {
     public:
@@ -23,14 +30,14 @@ namespace sunlight
 
     public:
         GameMonster(GameEntityIdPublisher& idPublisher, const MonsterData& data,
-                    Eigen::Vector2f spawnPosition, std::optional<game_entity_id_type> spawnerId);
+            Eigen::Vector2f spawnPosition, const std::optional<GameMonsterSpawnerContext>& spawnContext);
 
         bool IsInvisible() const;
 
         auto GetDataId() const -> int32_t;
         auto GetData() const -> const MonsterData&;
         auto GetSpawnPosition() const -> Eigen::Vector2f;
-        auto GetSpawnerId() const -> std::optional<game_entity_id_type>;
+        auto GetSpawnerContext() const -> const std::optional<GameMonsterSpawnerContext>&;
 
     public:
         auto GetSceneObjectComponent() -> SceneObjectComponent&;
@@ -51,6 +58,6 @@ namespace sunlight
     private:
         const MonsterData& _data;
         Eigen::Vector2f _spawnPosition;
-        std::optional<game_entity_id_type> _spawnerId = std::nullopt;
+        std::optional<GameMonsterSpawnerContext> _spawnerContext = std::nullopt;
     };
 }

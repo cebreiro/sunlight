@@ -39,6 +39,7 @@
 #include "sl/emulator/game/system/player_profile_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
+#include "sl/emulator/game/system/event_object_spawner_component.h"
 #include "sl/emulator/game/system/event_object_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
@@ -49,6 +50,7 @@
 #include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/map/map_data_provider.h"
+#include "sl/emulator/service/gamedata/monster/monster_data_provider.h"
 #include "sl/emulator/service/gamedata/shop/npc_shop_data_provider.h"
 
 namespace sunlight
@@ -535,6 +537,66 @@ namespace sunlight
                 eventObject->AddComponent(std::make_unique<EventObjectStageExitPortalComponent>(linkId));
 
                 _serviceLocator.Get<ZoneChangeService>().RegisterStageExitPortal(linkId, _stageData.id, eventObject->GetId());
+            }
+            break;
+            case 20000:
+            {
+                const GameDataProvideService& gameDataProvider = _serviceLocator.Get<GameDataProvideService>();
+                const MapDataProvider& mapDataProvider = gameDataProvider.GetMapDataProvider();
+                const MonsterDataProvider& monsterDataProvider = gameDataProvider.GetMonsterDataProvider();
+
+                if (const NesScriptCall* scriptCall = mapDataProvider.FindNesScriptCall(_zoneId, event.id);
+                    scriptCall)
+                {
+                    for (const auto& [type, scriptId] : scriptCall->scriptCalls)
+                    {
+                        if (const NesScript* script = mapDataProvider.FindNesScript(_zoneId, scriptId);
+                            script && std::ssize(script->lines) >= 2)
+                        {
+                            auto iter = script->lines.begin();
+                            for (auto next = std::next(iter); next != script->lines.end(); iter = next++)
+                            {
+                                if (iter->type != 1901)
+                                {
+                                    continue;
+                                }
+
+                                if (next->type != 1902 || std::ssize(iter->tokens) < 2 || std::ssize(next->tokens) < 3)
+                                {
+                                    break;
+                                }
+
+                                const NesScriptToken& mobCount = iter->tokens[0];
+                                const NesScriptToken& mobId = iter->tokens[1];
+
+                                const NesScriptToken& firstDelay = next->tokens[1];
+                                const NesScriptToken& delay = next->tokens[2];
+
+                                constexpr auto token_type = NesScriptTokenType::Int1;
+
+                                if (mobCount.GetType() != token_type || mobId.GetType() != token_type ||
+                                    firstDelay.GetType() != token_type || delay.GetType() != token_type)
+                                {
+                                    break;
+                                }
+                                const MonsterData* monsterData = monsterDataProvider.Find(mobId.Get<token_type>());
+                                if (!monsterData)
+                                {
+                                    continue;
+                                }
+
+                                if (!eventObject->HasComponent<EventObjectSpawnerComponent>())
+                                {
+                                    eventObject->AddComponent(std::make_unique<EventObjectSpawnerComponent>());
+                                }
+
+                                eventObject->GetComponent<EventObjectSpawnerComponent>().AddContext(
+                                    *monsterData, mobCount.Get<token_type>(),
+                                    firstDelay.Get<token_type>(), delay.Get<token_type>());
+                            }
+                        }
+                    }
+                }
             }
             break;
             }
