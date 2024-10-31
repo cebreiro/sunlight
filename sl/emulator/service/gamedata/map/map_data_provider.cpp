@@ -25,6 +25,14 @@ namespace sunlight
                 const bool inserted = _mapFiles.try_emplace(mapId, MapFile::CreateFrom(path)).second;
                 assert(inserted);
             }
+            else if (::_stricmp(path.extension().string().c_str(), ".nes") == 0)
+            {
+                const int32_t mapId = boost::lexical_cast<int32_t>(path.stem().string());
+
+                [[maybe_unused]]
+                const bool inserted = _nesFiles.try_emplace(mapId, NesFile::CreateFrom(path)).second;
+                assert(inserted);
+            }
         }
 
         for (const auto& [mapId, mapFile] : _mapFiles)
@@ -86,6 +94,34 @@ namespace sunlight
         const auto iter = _mapGateData.find(std::make_pair(zoneId, linkId));
 
         return iter != _mapGateData.end() ? &iter->second : nullptr;
+    }
+
+    auto MapDataProvider::FindNesScript(int32_t zoneId, int32_t scriptId) const -> const NesScript*
+    {
+        const auto iter = _nesFiles.find(zoneId);
+        if (iter == _nesFiles.end())
+        {
+            return nullptr;
+        }
+
+        const auto& index = iter->second.scriptIdIndex;
+        const auto iter2 = index.find(scriptId);
+
+        return iter2 != index.end() ? iter2->second : nullptr;
+    }
+
+    auto MapDataProvider::FindNesScriptCall(int32_t zoneId, int32_t entityId) const -> const NesScriptCall*
+    {
+        const auto iter = _nesFiles.find(zoneId);
+        if (iter == _nesFiles.end())
+        {
+            return nullptr;
+        }
+
+        const auto& index = iter->second.callerIdIndex;
+        const auto iter2 = index.find(entityId);
+
+        return iter2 != index.end() ? iter2->second : nullptr;
     }
 
     auto MapDataProvider::ExtractPositionAndYaw(const Eigen::Matrix4f& matrix) -> std::pair<Eigen::Vector3f, float>
