@@ -6,6 +6,7 @@
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/zone.h"
+#include "sl/emulator/game/zone/zone_execution_environment.h"
 #include "sl/emulator/service/community/notification/community_notification.h"
 #include "sl/emulator/service/community/notification/party_notification.h"
 
@@ -79,12 +80,7 @@ namespace sunlight
                 SharedPtrNotNull<ICommunityNotification> notification = co_await enumerable;
                 assert(ExecutionContext::IsEqualTo(_zone.GetStrand()));
 
-                if (GameDebugger* debugger = _zone.GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-                {
-                    GameDebugger::SetInstance(debugger);
-                }
-
-                GameTimeService::SetNow(game_clock_type::now());
+                ZoneExecutionEnvironment environment(_zone.GetServiceLocator());
 
                 Visit([this]<typename T>(const T& notification)
                     {
@@ -149,8 +145,6 @@ namespace sunlight
                         }
 
                     }, *notification);
-
-                GameDebugger::SetInstance(nullptr);
             }
         }
         catch (const AsyncEnumerableClosedException&)

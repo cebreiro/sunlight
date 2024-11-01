@@ -7,6 +7,7 @@
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
+#include "sl/emulator/game/zone/zone_execution_environment.h"
 
 namespace sunlight
 {
@@ -168,12 +169,7 @@ namespace sunlight
                 }
             }
 
-            if (GameDebugger* debugger = _system.GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-            {
-                GameDebugger::SetInstance(debugger);
-            }
-
-            GameTimeService::SetNow(game_clock_type::now());
+            ZoneExecutionEnvironment environment(_system.GetServiceLocator());
 
             GameEntity* entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
             if (!entity)

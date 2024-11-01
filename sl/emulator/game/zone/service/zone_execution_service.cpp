@@ -7,6 +7,7 @@
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/zone.h"
+#include "sl/emulator/game/zone/zone_execution_environment.h"
 
 namespace sunlight
 {
@@ -31,16 +32,9 @@ namespace sunlight
                     return;
                 }
 
-                if (GameDebugger* debugger = zone->GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-                {
-                    GameDebugger::SetInstance(debugger);
-                }
-
-                GameTimeService::SetNow(game_clock_type::now());
+                ZoneExecutionEnvironment environment(zone->GetServiceLocator());
 
                 function();
-
-                GameDebugger::SetInstance(nullptr);
             });
     }
 
@@ -67,16 +61,9 @@ namespace sunlight
                     return;
                 }
 
-                if (GameDebugger* debugger = zone->GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-                {
-                    GameDebugger::SetInstance(debugger);
-                }
-
-                GameTimeService::SetNow(game_clock_type::now());
+                ZoneExecutionEnvironment environment(zone->GetServiceLocator());
 
                 function(*entity);
-
-                GameDebugger::SetInstance(nullptr);
             });
     }
 
@@ -103,16 +90,9 @@ namespace sunlight
                     return;
                 }
 
-                if (GameDebugger* debugger = zone->GetServiceLocator().Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-                {
-                    GameDebugger::SetInstance(debugger);
-                }
-
-                GameTimeService::SetNow(game_clock_type::now());
+                ZoneExecutionEnvironment environment(zone->GetServiceLocator());
 
                 function(*player);
-
-                GameDebugger::SetInstance(nullptr);
             });
     }
 }

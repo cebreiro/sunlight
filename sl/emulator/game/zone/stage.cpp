@@ -46,6 +46,7 @@
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
+#include "sl/emulator/game/zone/zone_execution_environment.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -87,12 +88,7 @@ namespace sunlight
 
     void Stage::Update()
     {
-        if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-        {
-            GameDebugger::SetInstance(debugger);
-        }
-
-        GameTimeService::SetNow(game_clock_type::now());
+        ZoneExecutionEnvironment environment(_serviceLocator);
 
         SUNLIGHT_GAME_DEBUG_REPORT_INTERVAL(
             GameDebugType::SceneStatus,
@@ -103,8 +99,6 @@ namespace sunlight
         {
             system.Update();
         }
-
-        GameDebugger::SetInstance(nullptr);
     }
 
     void Stage::HandleNetworkMessage(game_client_id_type id, ZonePacketC2S opcode, UniquePtrNotNull<SlPacketReader> reader)
@@ -117,12 +111,7 @@ namespace sunlight
 
         SharedPtrNotNull<GamePlayer> player = iter->second;
 
-        if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-        {
-            GameDebugger::SetInstance(debugger);
-        }
-
-        GameTimeService::SetNow(game_clock_type::now());
+        ZoneExecutionEnvironment environment(GetServiceLocator());
 
         switch (opcode)
         {
@@ -229,8 +218,6 @@ namespace sunlight
         default:
             assert(false);
         }
-
-        GameDebugger::SetInstance(nullptr);
     }
 
     void Stage::SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType)
@@ -239,20 +226,13 @@ namespace sunlight
 
         _players[player->GetClientId()] = player;
 
-        if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-        {
-            GameDebugger::SetInstance(debugger);
-        }
-
-        GameTimeService::SetNow(game_clock_type::now());
+        ZoneExecutionEnvironment environment(GetServiceLocator());
 
         Get<PlayerIndexSystem>().OnStageEnter(*player);
         Get<SceneObjectSystem>().SpawnPlayer(player, enterType);
         Get<PlayerChannelSystem>().OnStageEnter(*player, enterType);
         Get<EntityStatusEffectSystem>().OnStageEnter(*player, enterType);
         Get<EntitySkillEffectSystem>().OnStageEnter(*player, enterType);
-
-        GameDebugger::SetInstance(nullptr);
     }
 
     auto Stage::DespawnPlayer(game_client_id_type clientId, StageExitType exitType) -> Future<std::shared_ptr<GamePlayer>>
@@ -268,12 +248,7 @@ namespace sunlight
         player = std::move(iter->second);
         _players.erase(iter);
 
-        if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
-        {
-            GameDebugger::SetInstance(debugger);
-        }
-
-        GameTimeService::SetNow(game_clock_type::now());
+        ZoneExecutionEnvironment environment(GetServiceLocator());
 
         Get<SceneObjectSystem>().DespawnPlayer(player->GetId(), exitType);
         Get<NPCShopSystem>().OnStageExit(*player);
@@ -294,8 +269,6 @@ namespace sunlight
         }
 
         Get<PlayerIndexSystem>().OnStageExit(*player);
-
-        GameDebugger::SetInstance(nullptr);
 
         // to ignore client network message during exit
         co_await Delay(std::chrono::milliseconds(1000));
