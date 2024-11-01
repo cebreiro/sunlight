@@ -248,7 +248,7 @@ namespace sunlight
         player = std::move(iter->second);
         _players.erase(iter);
 
-        ZoneExecutionEnvironment environment(GetServiceLocator());
+        std::optional<ZoneExecutionEnvironment> environment(GetServiceLocator());
 
         Get<SceneObjectSystem>().DespawnPlayer(player->GetId(), exitType);
         Get<NPCShopSystem>().OnStageExit(*player);
@@ -269,6 +269,7 @@ namespace sunlight
         }
 
         Get<PlayerIndexSystem>().OnStageExit(*player);
+        environment.reset();
 
         // to ignore client network message during exit
         co_await Delay(std::chrono::milliseconds(1000));
