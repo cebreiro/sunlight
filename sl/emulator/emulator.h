@@ -9,6 +9,7 @@ namespace sunlight::db
 
 namespace sunlight
 {
+    class ConfigProvideService;
     class GameDataProvideService;
     class GameClientStorage;
     class SafeHashService;
@@ -52,8 +53,10 @@ namespace sunlight
         void RegisterService(const SharedPtrNotNull<T>& service);
 
     private:
-        static auto InitializeConfig() -> sl::emulator::AppConfig;
+        static auto FindBasePath() -> std::filesystem::path;
+        auto CreateConfig() const -> AppConfig;
 
+        void InitializeConfig();
         void InitializeLogger();
         void InitializeExecutor();
         void InitializeDatabaseConnection();
@@ -62,13 +65,15 @@ namespace sunlight
         void InitializeServer();
 
     private:
-        sl::emulator::AppConfig _config;
+        std::filesystem::path _basePath;
+        AppConfig _appConfig;
 
         SharedPtrNotNull<execution::AsioExecutor> _ioExecutor;
         SharedPtrNotNull<execution::GameExecutor> _gameExecutor;
         SharedPtrNotNull<LogService> _logService;
         SharedPtrNotNull<db::ConnectionPool> _connectionPool;
 
+        SharedPtrNotNull<ConfigProvideService> _configProvideService;
         SharedPtrNotNull<GameDataProvideService> _gameDataProvideService;
         SharedPtrNotNull<GameClientStorage> _gameClientStorage;
         SharedPtrNotNull<SafeHashService> _safeHashService;

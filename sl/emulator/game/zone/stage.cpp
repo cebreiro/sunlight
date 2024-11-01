@@ -49,6 +49,7 @@
 #include "sl/emulator/game/zone/zone_execution_environment.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
+#include "sl/emulator/service/config/config_provide_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/map/map_data_provider.h"
 #include "sl/emulator/service/gamedata/monster/monster_data_provider.h"
@@ -476,6 +477,8 @@ namespace sunlight
 
     void Stage::InitializeEventObject(const std::vector<MapEventObjectV5>& events)
     {
+        bool noSpawnMonster = _serviceLocator.Get<ConfigProvideService>().GetGameConfig().noSpawnMonster;
+
         for (const MapEventObjectV5& event : events)
         {
             const auto& [position, yaw] = MapDataProvider::ExtractPositionAndYaw(event.transform);
@@ -515,6 +518,11 @@ namespace sunlight
             break;
             case 20000:
             {
+                if (noSpawnMonster)
+                {
+                    break;
+                }
+
                 const GameDataProvideService& gameDataProvider = _serviceLocator.Get<GameDataProvideService>();
                 const MapDataProvider& mapDataProvider = gameDataProvider.GetMapDataProvider();
                 const MonsterDataProvider& monsterDataProvider = gameDataProvider.GetMonsterDataProvider();

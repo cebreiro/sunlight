@@ -19,6 +19,8 @@ namespace sunlight::execution
 
     void GameExecutor::Run()
     {
+        _running = true;
+
         for (int64_t i = 0; i < _concurrency; ++i)
         {
             Worker& worker = _workers[i];
@@ -36,7 +38,7 @@ namespace sunlight::execution
 
     void GameExecutor::Stop()
     {
-        if (_stopped)
+        if (!_running)
         {
             return;
         }
@@ -56,7 +58,7 @@ namespace sunlight::execution
             _workers[i].worker.join();
         }
 
-        _stopped = true;
+        _running = false;
     }
 
     void GameExecutor::Post(const std::function<void()>& function)

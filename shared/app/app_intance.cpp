@@ -14,7 +14,6 @@ namespace sunlight
 
     AppInstance::~AppInstance()
     {
-        assert(!IsRunning());
     }
 
     auto AppInstance::Run(std::span<char*> args) -> int32_t

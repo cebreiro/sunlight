@@ -1,5 +1,7 @@
 #include "emulator.h"
 
+#include <boost/filesystem/operations.hpp>
+
 #include "shared/database/connection/connection_pool.h"
 #include "shared/execution/executor/impl/asio_executor.h"
 #include "shared/execution/executor/impl/game_executor.h"
@@ -11,6 +13,7 @@
 #include "sl/emulator/server/client/game_client_storage.h"
 #include "sl/emulator/service/authentication/authentication_service.h"
 #include "sl/emulator/service/community/community_service.h"
+#include "sl/emulator/service/config/config_provide_service.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gateway/gateway_service.h"
@@ -19,14 +22,21 @@
 #include "sl/emulator/service/snowflake/snowflake_service.h"
 #include "sl/emulator/service/unique_name/unique_name_service.h"
 
+namespace
+{
+    constexpr const char* configFileName = "app_config.json";
+}
+
 namespace sunlight
 {
     SlEmulator::SlEmulator()
-        : _config(InitializeConfig())
-        , _ioExecutor(std::make_shared<execution::AsioExecutor>(_config.ioThreadCount))
-        , _gameExecutor(std::make_shared<execution::GameExecutor>(_config.gameThreadCount))
+        : _basePath(FindBasePath())
+        , _appConfig(CreateConfig())
+        , _ioExecutor(std::make_shared<execution::AsioExecutor>(_appConfig.ioThreadCount))
+        , _gameExecutor(std::make_shared<execution::GameExecutor>(_appConfig.gameThreadCount))
         , _logService(std::make_shared<LogService>())
         , _connectionPool(std::make_shared<db::ConnectionPool>(_ioExecutor))
+        , _configProvideService(std::make_shared<ConfigProvideService>())
         , _gameDataProvideService(std::make_shared<GameDataProvideService>(GetServiceLocator()))
         , _gameClientStorage(std::make_shared<GameClientStorage>())
         , _safeHashService(std::make_shared<SafeHashService>(GetServiceLocator(), *_ioExecutor))
@@ -40,6 +50,7 @@ namespace sunlight
         , _loginServer(std::make_shared<LoginServer>(*_ioExecutor))
         , _lobbyServer(std::make_shared<LobbyServer>(*_ioExecutor))
     {
+        RegisterService(_configProvideService);
         RegisterService(_gameDataProvideService);
         RegisterService(_gameClientStorage);
         RegisterService(_safeHashService);
@@ -66,6 +77,7 @@ namespace sunlight
     {
         (void)args;
 
+        InitializeConfig();
         InitializeLogger();
         InitializeExecutor();
         InitializeDatabaseConnection();
@@ -91,37 +103,99 @@ namespace sunlight
         }
     }
 
-    auto SlEmulator::InitializeConfig() -> sl::emulator::AppConfig
+    auto SlEmulator::FindBasePath() -> std::filesystem::path
     {
-        sl::emulator::AppConfig result;
+        std::unordered_set<std::filesystem::path> visited;
 
-        auto path = std::filesystem::current_path();
-        for (; exists(path) && path != path.parent_path(); path = path.parent_path())
+        std::queue<std::filesystem::path> queue;
+        queue.emplace(std::filesystem::current_path());
+
+        const std::filesystem::path root = queue.front().root_path();
+
+        while (!queue.empty())
         {
-            std::filesystem::path configPath = path / "sl/emulator/app_config.json";
-            if (!exists(configPath))
+            std::filesystem::path current = queue.front();
+            queue.pop();
+
+            if (current == root)
+            {
+                break;
+            }
+
+            if (!visited.emplace(current).second)
             {
                 continue;
             }
 
-            std::ifstream ifs(configPath);
-            if (!ifs.is_open())
+            if (is_directory(current))
             {
-                throw std::runtime_error("fail to open config file");
+                queue.emplace(current.parent_path());
+
+                for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(current))
+                {
+                    if (entry.is_directory())
+                    {
+                        continue;
+                    }
+
+                    if (const std::filesystem::path filePath = entry.path();
+                        filePath.filename().compare(configFileName) == 0)
+                    {
+                        return filePath.parent_path();
+                    }
+                }
             }
-
-            nlohmann::json json = nlohmann::json::parse(ifs);
-            json.get_to<sl::emulator::AppConfig>(result);
-
-            return result;
+            else
+            {
+                if (current.filename().compare(configFileName) == 0)
+                {
+                    return current.parent_path();
+                }
+            }
         }
 
-        throw std::runtime_error("fail to initialize config");
+        throw std::runtime_error("fail to find base path");
+    }
+
+    auto SlEmulator::CreateConfig() const -> AppConfig
+    {
+        AppConfig result;
+
+        std::filesystem::path configPath = _basePath / configFileName;
+        assert(exists(configPath));
+
+        std::ifstream ifs(configPath);
+        if (!ifs.is_open())
+        {
+            throw std::runtime_error("fail to open config file");
+        }
+
+        nlohmann::json json = nlohmann::json::parse(ifs);
+        json.get_to<AppConfig>(result);
+
+        return result;
+    }
+
+    void SlEmulator::InitializeConfig()
+    {
+        SUNLIGHT_LOG_INFO(GetServiceLocator(),
+            fmt::format("[{}] initialize config", GetName()));
+
+        const std::filesystem::path gameConfigPath = _basePath / _appConfig.pathConfig.gameConfigFilePath;
+        if (!exists(gameConfigPath))
+        {
+            throw std::runtime_error(fmt::format("fail to find game config file path. path: {}", gameConfigPath.string()));
+        }
+
+        _configProvideService->Initialize(_appConfig, gameConfigPath);
+
+        SUNLIGHT_LOG_INFO(GetServiceLocator(),
+            fmt::format("[{}] initialize config --> Done", GetName()));
     }
 
     void SlEmulator::InitializeLogger()
     {
-        const std::filesystem::path& logFilePath = std::filesystem::current_path() / _config.logFilePath;
+        const std::filesystem::path& logFilePath = _basePath / _appConfig.pathConfig.logFilePath;
 
         SpdLogLoggerBuilder builder;
         builder.ConfigureConsole().SetLogLevel(LogLevel::Debug).SetAsync(false);
@@ -155,7 +229,7 @@ namespace sunlight
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize database connection", GetName()));
 
-        const sl::emulator::DatabaseConfig& databaseConfig = _config.databaseConfig;
+        const DatabaseConfig& databaseConfig = _appConfig.databaseConfig;
 
         const auto endPoint = boost::asio::ip::tcp::endpoint(
             boost::asio::ip::make_address(databaseConfig.address), databaseConfig.port);
@@ -175,27 +249,13 @@ namespace sunlight
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize game data", GetName()));
 
-        const auto assetPath = [&]() -> std::optional<std::filesystem::path>
-            {
-                auto path = std::filesystem::current_path();
-                for (; exists(path) && path != path.parent_path(); path = path.parent_path())
-                {
-                    std::filesystem::path result = path / "asset";
-                    if (exists(result))
-                    {
-                        return result;
-                    }
-                }
-
-                return std::nullopt;
-            }();
-
-        if (!assetPath.has_value())
+        const std::filesystem::path assetPath = _basePath / _appConfig.pathConfig.assetPath;
+        if (!exists(assetPath))
         {
-            throw std::runtime_error("fail to find asset path");
+            throw std::runtime_error(fmt::format("fail to find asset path. path: {}", assetPath.string()));
         }
 
-        _gameDataProvideService->Initialize(*assetPath);
+        _gameDataProvideService->Initialize(assetPath);
 
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize game data --> Done", GetName()));
@@ -206,13 +266,13 @@ namespace sunlight
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize service", GetName()));
 
-        for (const sl::emulator::WorldConfig& worldConfig : _config.worldConfig)
+        for (const WorldConfig& worldConfig : _appConfig.worldConfig)
         {
-            _gatewayService->AddLobby(worldConfig.id, _config.publicAddress);
+            _gatewayService->AddLobby(worldConfig.id, _appConfig.publicAddress);
 
-            for (const sl::emulator::ZoneConfig& zoneConfig : worldConfig.zoneConfig)
+            for (const ZoneConfig& zoneConfig : worldConfig.zoneConfig)
             {
-                _gatewayService->AddZone(worldConfig.id, _config.publicAddress, zoneConfig.port, zoneConfig.zoneId);
+                _gatewayService->AddZone(worldConfig.id, _appConfig.publicAddress, zoneConfig.port, zoneConfig.zoneId);
             }
         }
 
@@ -232,11 +292,11 @@ namespace sunlight
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize server", GetName()));
 
-        for (const sl::emulator::WorldConfig& worldConfig : _config.worldConfig)
+        for (const WorldConfig& worldConfig : _appConfig.worldConfig)
         {
             auto& zoneServers = _zoneServers[worldConfig.id];
 
-            for (const sl::emulator::ZoneConfig& zoneConfig : worldConfig.zoneConfig)
+            for (const ZoneConfig& zoneConfig : worldConfig.zoneConfig)
             {
                 auto zoneServer = std::make_shared<ZoneServer>(*_ioExecutor, *_gameExecutor, worldConfig.id, zoneConfig.zoneId);
 

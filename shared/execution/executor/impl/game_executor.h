@@ -69,7 +69,7 @@ namespace sunlight::execution
         std::array<Worker, max_concurrency> _workers;
         std::array<WorkerContext, max_concurrency> _contexts;
 
-        bool _stopped = false;
+        bool _running = false;
 
         int64_t _concurrency = 0;
         int64_t _maxSpinCount = 0;
