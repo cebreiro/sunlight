@@ -6,7 +6,7 @@
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/system/server_command_system.h"
-#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 
 namespace sunlight
 {
@@ -114,7 +114,7 @@ namespace sunlight
 
         player.Notice(fmt::format("HP: {} / {}", hp, maxHP));
 
-        _system.GetServiceLocator().Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(1000), player.GetCId(), _system.GetStageId(),
+        _system.GetServiceLocator().Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(1000), player.GetCId(), _system.GetStageId(),
             [this](GamePlayer& player)
             {
                 DebugNotify(player);
@@ -157,7 +157,7 @@ namespace sunlight
 
         player.Notice(fmt::format("SP: {} / {}", sp, maxSP));
 
-        _system.GetServiceLocator().Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(1000), player.GetCId(), _system.GetStageId(),
+        _system.GetServiceLocator().Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(1000), player.GetCId(), _system.GetStageId(),
             [this](GamePlayer& player)
             {
                 DebugNotify(player);

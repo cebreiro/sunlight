@@ -31,7 +31,7 @@
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
-#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
 #include "sl/emulator/service/gamedata/skill/monster_skill_data.h"
@@ -167,7 +167,7 @@ namespace sunlight
 			const int32_t tickDamage = std::max(1, result.damage / result.damageCount);
 			const int32_t tickCount = result.damageCount - 1;
 
-            ZoneTimerService& timerService = _serviceLocator.Get<ZoneTimerService>();
+            ZoneExecutionService& timerService = _serviceLocator.Get<ZoneExecutionService>();
 
 			for (int32_t i = 0; i < tickCount; ++i)
 			{
@@ -253,7 +253,7 @@ namespace sunlight
             const int32_t tickDamage = std::max(1, result.damage / result.damageCount);
             const int32_t tickCount = result.damageCount - 1;
 
-            ZoneTimerService& timerService = _serviceLocator.Get<ZoneTimerService>();
+            ZoneExecutionService& timerService = _serviceLocator.Get<ZoneExecutionService>();
 
             for (int32_t i = 0; i < tickCount; ++i)
             {
@@ -415,7 +415,7 @@ namespace sunlight
                 player.FlushDeferred();
             });
 
-        _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(1500),
+        _serviceLocator.Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(1500),
             monster, _stageId, [this](const GameEntity& target)
             {
                 assert(target.GetType() == GameMonster::TYPE);

@@ -13,7 +13,7 @@
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/zone/stage.h"
-#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/exp/exp_data_provider.h"
 #include "sl/emulator/service/gamedata/skill/skill_data_provider.h"
@@ -264,7 +264,7 @@ namespace sunlight
         // it seems that the 'quick slot dummy item (item_id = 2)' exists to prevent new item from overlapping with skill when calculating item position.
         // I think that the skill and quick slot dummy item were in the same slot, and skill was rendered when dummy item was rendered
         // it exists to refresh quick slot UI because this emulator doesn't use 'item add' packet
-        _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(1200), player.GetCId(), _stageId,
+        _serviceLocator.Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(1200), player.GetCId(), _stageId,
             [](GamePlayer& player)
             {
                 player.Defer(ItemArchiveMessageCreator::CreateItemAddForRefresh(player, GameConstant::QUICK_SLOT_DUMMY_ITEM_ID));

@@ -7,12 +7,13 @@ namespace sunlight
     class GameEntity;
     class GamePlayer;
 }
+
 namespace sunlight
 {
-    class ZoneTimerService final : public IService
+    class ZoneExecutionService final : public IService
     {
     public:
-        explicit ZoneTimerService(Zone& zone);
+        explicit ZoneExecutionService(Zone& zone);
 
         auto GetName() const -> std::string_view override;
 

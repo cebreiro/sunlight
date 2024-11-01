@@ -14,7 +14,7 @@
 #include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
-#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/service/gamedata/skill/skill_effect_data.h"
 
 namespace sunlight
@@ -309,7 +309,7 @@ namespace sunlight
             std::chrono::duration_cast<std::chrono::milliseconds>(statusEffect.GetEndTimePoint() - now) :
             std::chrono::milliseconds(0);
 
-        _serviceLocator.Get<ZoneTimerService>().AddTimer(delay, entity, _stageId,
+        _serviceLocator.Get<ZoneExecutionService>().AddTimer(delay, entity, _stageId,
             [this, id = statusEffect.GetId(), endTimePoint = statusEffect.GetEndTimePoint()](GameEntity& entity)
             {
                 const EntityStatusEffectComponent& statusEffectComponent = entity.GetComponent<EntityStatusEffectComponent>();

@@ -2,7 +2,7 @@
 
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
-#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
@@ -89,7 +89,7 @@ namespace sunlight
                 {
                     const std::chrono::milliseconds genTime = RandItemGenTime(dropItemType, dropItemData.itemSetGenFrequency);
 
-                    _serviceLocator.Get<ZoneTimerService>().AddTimer(genTime,
+                    _serviceLocator.Get<ZoneExecutionService>().AddTimer(genTime,
                         [this, monsterId, i, itemPtr, probability]()
                         {
                             DropItemTable& dropItemTable = _dropItemTables[monsterId];
@@ -153,7 +153,7 @@ namespace sunlight
                     {
                         const std::chrono::milliseconds genTime = RandItemGenTime(dropItemType, dropItemData.itemSetGenFrequency);
 
-                        _serviceLocator.Get<ZoneTimerService>().AddTimer(genTime,
+                        _serviceLocator.Get<ZoneExecutionService>().AddTimer(genTime,
                             [this, monsterId, i, j, itemPtr, weight]()
                             {
                                 DropItemTable& dropItemTable = _dropItemTables[monsterId];

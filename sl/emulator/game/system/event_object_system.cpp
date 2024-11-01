@@ -15,7 +15,7 @@
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
-#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/map/map_data_provider.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
@@ -68,13 +68,13 @@ namespace sunlight
         if (EventObjectSpawnerComponent* spawnerComponent = eventObject->FindComponent<EventObjectSpawnerComponent>();
             spawnerComponent)
         {
-            ZoneTimerService& zoneTimerService = _serviceLocator.Get<ZoneTimerService>();
+            ZoneExecutionService& zoneExecutionService = _serviceLocator.Get<ZoneExecutionService>();
 
             for (SpawnerContext& context : spawnerComponent->GetSpawnDataRange())
             {
                 context.timerRunning = true;
 
-                zoneTimerService.AddTimer(std::chrono::milliseconds(context.firstDelay),
+                zoneExecutionService.AddTimer(std::chrono::milliseconds(context.firstDelay),
                     [this, id = id, mobId = context.data->GetId()]()
                     {
                         this->OnExpireSpawnerTimer(id, mobId);
@@ -129,7 +129,7 @@ namespace sunlight
 
         if (spawnContext->spawnCount < spawnContext->maxCount)
         {
-            _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(spawnContext->delay),
+            _serviceLocator.Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(spawnContext->delay),
                 [this, id, mobId]()
                 {
                     OnExpireSpawnerTimer(id, mobId);
@@ -176,7 +176,7 @@ namespace sunlight
                 {
                     spawnContext->timerRunning = true;
 
-                    _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(spawnContext->delay),
+                    _serviceLocator.Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(spawnContext->delay),
                         [this, id = eventObject->GetId(), mobId = monster.GetDataId()]()
                         {
                             OnExpireSpawnerTimer(id, mobId);

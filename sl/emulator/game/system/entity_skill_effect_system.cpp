@@ -38,7 +38,7 @@
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
-#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
@@ -373,7 +373,7 @@ namespace sunlight
                 }
                 else
                 {
-                    _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(abilityValue.begin),
+                    _serviceLocator.Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(abilityValue.begin),
                         player.GetCId(), _stageId, [applySkillEffect, &abilityValue](GamePlayer& player) mutable
                         {
                             applySkillEffect(player, &abilityValue);
@@ -427,7 +427,7 @@ namespace sunlight
         }
         else
         {
-            _serviceLocator.Get<ZoneTimerService>().AddTimer(
+            _serviceLocator.Get<ZoneExecutionService>().AddTimer(
                 std::chrono::milliseconds(motionData->hitTime), player.GetCId(), _stageId, processNormalAttack);
         }
     }
@@ -494,7 +494,7 @@ namespace sunlight
             return;
         }
 
-        _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(attackData.attackBeatFrame),
+        _serviceLocator.Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(attackData.attackBeatFrame),
             [this, mobId = monster.GetId(), targets = std::move(targets)]() mutable
             {
                 SceneObjectSystem& sceneObjectSystem = Get<SceneObjectSystem>();
@@ -626,7 +626,7 @@ namespace sunlight
                 }
                 else
                 {
-                    _serviceLocator.Get<ZoneTimerService>().AddTimer(std::chrono::milliseconds(beatFrame),
+                    _serviceLocator.Get<ZoneExecutionService>().AddTimer(std::chrono::milliseconds(beatFrame),
                         [this, applySkillEffect, &abilityValue, mobId = monster.GetId()]() mutable
                         {
                             GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, mobId);

@@ -12,7 +12,7 @@
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
-#include "sl/emulator/game/zone/service/zone_timer_service.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 #include "sl/emulator/service/community/community_service.h"
@@ -41,7 +41,7 @@ namespace sunlight
         _serviceLocator.Add<GameItemUniqueIdPublisher>(std::make_shared<GameItemUniqueIdPublisher>(_id, *snowflakeValue));
         _serviceLocator.Add<GameEntityIdPublisher>(std::make_shared<GameEntityIdPublisher>(_id));
         _serviceLocator.Add<ZoneChangeService>(std::make_shared<ZoneChangeService>(*this));
-        _serviceLocator.Add<ZoneTimerService>(std::make_shared<ZoneTimerService>(*this));
+        _serviceLocator.Add<ZoneExecutionService>(std::make_shared<ZoneExecutionService>(*this));
 
         auto communityCommandChannel = std::make_shared<Channel<SharedPtrNotNull<ICommunityCommand>>>();
         auto communityNotificationChannel = _serviceLocator.Get<CommunityService>()

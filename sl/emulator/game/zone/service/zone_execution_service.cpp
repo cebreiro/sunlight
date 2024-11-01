@@ -1,4 +1,4 @@
-#include "zone_timer_service.h"
+#include "zone_execution_service.h"
 
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_entity.h"
@@ -10,17 +10,17 @@
 
 namespace sunlight
 {
-    ZoneTimerService::ZoneTimerService(Zone& zone)
+    ZoneExecutionService::ZoneExecutionService(Zone& zone)
         : _zone(zone)
     {
     }
 
-    auto ZoneTimerService::GetName() const -> std::string_view
+    auto ZoneExecutionService::GetName() const -> std::string_view
     {
-        return "zone_timer_service";
+        return "zone_execution_service";
     }
 
-    void ZoneTimerService::AddTimer(std::chrono::milliseconds delay, const std::function<void()>& function)
+    void ZoneExecutionService::AddTimer(std::chrono::milliseconds delay, const std::function<void()>& function)
     {
         Delay(delay).Then(_zone.GetStrand(),
             [weak = _zone.weak_from_this(), function]()
@@ -44,7 +44,7 @@ namespace sunlight
             });
     }
 
-    void ZoneTimerService::AddTimer(std::chrono::milliseconds delay, const GameEntity& entity, int32_t stageId, const std::function<void(GameEntity&)>& function)
+    void ZoneExecutionService::AddTimer(std::chrono::milliseconds delay, const GameEntity& entity, int32_t stageId, const std::function<void(GameEntity&)>& function)
     {
         Delay(delay).Then(_zone.GetStrand(),
             [weak = _zone.weak_from_this(), type = entity.GetType(), id = entity.GetId(), stageId, function]()
@@ -80,7 +80,7 @@ namespace sunlight
             });
     }
 
-    void ZoneTimerService::AddTimer(std::chrono::milliseconds delay, int64_t playerId, int32_t stageId, const std::function<void(GamePlayer&)>& function)
+    void ZoneExecutionService::AddTimer(std::chrono::milliseconds delay, int64_t playerId, int32_t stageId, const std::function<void(GamePlayer&)>& function)
     {
         Delay(delay).Then(_zone.GetStrand(),
             [weak = _zone.weak_from_this(), playerId, stageId, function]()
