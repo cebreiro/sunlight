@@ -6,9 +6,13 @@
 
 namespace sunlight
 {
-    ZoneExecutionEnvironment::ZoneExecutionEnvironment(const ServiceLocator& serviceLocator)
+    thread_local std::vector<std::source_location> ZoneExecutionEnvironment::_sourceLocations;
+
+    ZoneExecutionEnvironment::ZoneExecutionEnvironment(const ServiceLocator& serviceLocator, const std::source_location& sourceLocation)
         : _serviceLocator(serviceLocator)
     {
+        _sourceLocations.emplace_back(sourceLocation);
+
         if (GameDebugger* debugger = _serviceLocator.Find<GameDebugger>(); debugger && debugger->HasDebugTarget())
         {
             GameDebugger::SetInstance(debugger);
@@ -20,5 +24,7 @@ namespace sunlight
     ZoneExecutionEnvironment::~ZoneExecutionEnvironment()
     {
         GameDebugger::SetInstance(nullptr);
+
+        _sourceLocations.pop_back();
     }
 }

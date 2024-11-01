@@ -17,10 +17,13 @@ namespace sunlight
         ZoneExecutionEnvironment& operator=(ZoneExecutionEnvironment&& other) noexcept = delete;
 
     public:
-        explicit ZoneExecutionEnvironment(const ServiceLocator& serviceLocator);
+        explicit ZoneExecutionEnvironment(const ServiceLocator& serviceLocator,
+            const std::source_location& sourceLocation = std::source_location::current());
         ~ZoneExecutionEnvironment();
 
     private:
         const ServiceLocator& _serviceLocator;
+
+        static thread_local std::vector<std::source_location> _sourceLocations;
     };
 }

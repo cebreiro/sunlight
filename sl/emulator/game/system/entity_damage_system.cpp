@@ -58,6 +58,7 @@ namespace sunlight
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<MonsterDropItemTableSystem>());
         Add(stage.Get<PlayerStatSystem>());
+        Add(stage.Get<PlayerJobSystem>());
         Add(stage.Get<EntityMovementSystem>());
     }
 
@@ -428,9 +429,7 @@ namespace sunlight
         if (exp > 0)
         {
             Get<PlayerStatSystem>().GainCharacterExp(player, exp);
-
-            // TODO: solve cycle dependency
-            //Get<PlayerJobSystem>().GainJobExp(player, exp);
+            Get<PlayerJobSystem>().GainJobExp(player, exp);
         }
     }
 

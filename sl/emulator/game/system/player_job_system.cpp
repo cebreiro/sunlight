@@ -9,9 +9,10 @@
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/event_bubbling_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
-#include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
+#include "sl/emulator/game/system/event_bubbling/player_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -30,8 +31,8 @@ namespace sunlight
     {
         Add(stage.Get<GameRepositorySystem>());
         Add(stage.Get<PlayerStatSystem>());
-        Add(stage.Get<EntitySkillEffectSystem>());
         Add(stage.Get<EntityViewRangeSystem>());
+        Add(stage.Get<EventBubblingSystem>());
     }
 
     bool PlayerJobSystem::Subscribe(Stage& stage)
@@ -171,9 +172,13 @@ namespace sunlight
         }
 
         Get<GameRepositorySystem>().SaveNewSkill(player, static_cast<int32_t>(jobId), skillData->index, 1);
-        Get<EntitySkillEffectSystem>().OnSkillAdd(player, *skillComponent.FindSkill(skillData->index));
 
         player.Send(GamePlayerMessageCreator::CreateJobSkillAdd(player, jobId, skillId, 0));
+
+        Get<EventBubblingSystem>().Publish(EventBubblingPlayerSkillAdd{
+            .player = &player,
+            .skill = skillComponent.FindSkill(skillData->index),
+            });
 
         return true;
     }
@@ -331,9 +336,14 @@ namespace sunlight
             Get<GameRepositorySystem>().SaveSkillLevel(player,
                 static_cast<int32_t>(job->GetId()), job->GetSkillPoint(), skill->GetId(), newLevel);
 
-            Get<EntitySkillEffectSystem>().OnSkillLevelChange(player, *skill, skillLevel, newLevel);
-
             player.Send(GamePlayerMessageCreator::CreateJobSkillPointChange(player, job->GetId(), job->GetSkillPoint(), false));
+
+            Get<EventBubblingSystem>().Publish(EventBubblingPlayerSkillLevelChange{
+                .player = &player,
+                .skill = skill,
+                .oldLevel = skillLevel,
+                .newLevel = newLevel,
+                });
 
             return;
             

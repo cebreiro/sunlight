@@ -1,5 +1,6 @@
 #include "monster_controller.h"
 
+#include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/contents/ai/monster/state/monster_ai_state_machine.h"
 #include "sl/emulator/game/contents/ai/monster/state/monster_ai_state_factory.h"
 #include "sl/emulator/game/debug/game_debugger.h"
@@ -169,7 +170,7 @@ namespace sunlight
                 }
             }
 
-            ZoneExecutionEnvironment environment(_system.GetServiceLocator());
+            std::optional<ZoneExecutionEnvironment> environment(_system.GetServiceLocator());
 
             GameEntity* entity = _system.Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, _entityId);
             if (!entity)
@@ -177,14 +178,26 @@ namespace sunlight
                 co_return;
             }
 
+            GameMonster& monster = *entity->Cast<GameMonster>();
+            if (monster.GetStatComponent().IsDead())
+            {
+                co_return;
+            }
+
             const MonsterAIStateParam param{
                 .system = _system,
                 .controller = *this,
-                .monster = *entity->Cast<GameMonster>(),
+                .monster = monster,
                 .stateMachine = _stateMachine,
             };
 
-            co_await _stateMachine.OnEvent(param);
+            Future<void> future = _stateMachine.OnEvent(param);
+            environment.reset();
+
+            if (future.IsPending())
+            {
+                co_await future;
+            }
 
             if (_shutdown)
             {

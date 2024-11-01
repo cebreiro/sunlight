@@ -37,6 +37,7 @@
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
+#include "sl/emulator/game/system/event_bubbling/player_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
@@ -78,8 +79,33 @@ namespace sunlight
         stage.Get<EventBubblingSystem>().AddSubscriber<EventBubblingMonsterSpawn>(
             [this](const EventBubblingMonsterSpawn& e)
             {
-                // TODO: post
-                OnStageEnter(*e.monster);
+                _serviceLocator.Get<ZoneExecutionService>().Post(e.monster->GetId(), _stageId,
+                    [this](GameMonster& monster)
+                    {
+                        OnStageEnter(monster);
+                    });
+            });
+
+        stage.Get<EventBubblingSystem>().AddSubscriber<EventBubblingPlayerSkillAdd>(
+            [this](const EventBubblingPlayerSkillAdd& event)
+            {
+                _serviceLocator.Get<ZoneExecutionService>().Post(event.player->GetCId(), _stageId,
+                    [this, skillId = event.skill->GetId()](GamePlayer& player)
+                    {
+                        PlayerSkill* skill = player.GetSkillComponent().FindSkill(skillId);
+                        if (!skill)
+                        {
+                            return;
+                        }
+
+                        OnSkillAdd(player, *skill);
+                    });
+            });
+
+        stage.Get<EventBubblingSystem>().AddSubscriber<EventBubblingPlayerSkillLevelChange>(
+            [this](const EventBubblingPlayerSkillLevelChange& event)
+            {
+                OnSkillLevelChange(*event.player, *event.skill, event.oldLevel, event.newLevel);
             });
 
         return true;
