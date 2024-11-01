@@ -25,6 +25,8 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandDebugServerOff>(system));
         system.AddCommand(std::make_shared<ServerCommandDebugPlayerHP>(system));
         system.AddCommand(std::make_shared<ServerCommandDebugPlayerSP>(system));
+        system.AddCommand(std::make_shared<ServerCommandDebugTile>(system));
+        system.AddCommand(std::make_shared<ServerCommandDebugPathFind>(system));
 
         system.AddCommand(std::make_shared<ServerCommandJobPromote>(system));
 

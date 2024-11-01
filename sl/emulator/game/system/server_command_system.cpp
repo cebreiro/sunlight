@@ -11,6 +11,7 @@
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
+#include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
@@ -37,6 +38,12 @@ namespace sunlight
         Add(stage.Get<NPCShopSystem>());
         Add(stage.Get<PlayerStateSystem>());
         Add(stage.Get<EntityDamageSystem>());
+
+        if (PathFindingSystem* pathFindSystem = stage.Find<PathFindingSystem>();
+            pathFindSystem)
+        {
+            Add(*pathFindSystem);
+        }
 
         ServerCommandRegister::Register(*this);
     }

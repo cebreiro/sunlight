@@ -73,4 +73,34 @@ namespace sunlight
     private:
         ServerCommandSystem& _system;
     };
+
+    class ServerCommandDebugTile final : public ServerCommandT<>
+    {
+    public:
+        explicit ServerCommandDebugTile(ServerCommandSystem& system);
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+    public:
+        bool Execute(GamePlayer& player) const override;
+
+    private:
+        ServerCommandSystem& _system;
+    };
+
+    class ServerCommandDebugPathFind final : public ServerCommandT<float, float>
+    {
+    public:
+        explicit ServerCommandDebugPathFind(ServerCommandSystem& system);
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+    public:
+        bool Execute(GamePlayer& player, float x, float y) const override;
+
+    private:
+        ServerCommandSystem& _system;
+    };
 }

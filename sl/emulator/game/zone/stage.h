@@ -59,6 +59,9 @@ namespace sunlight
         template <typename T> requires std::derived_from<T, GameSystem>
         auto Get() -> T&;
 
+        template <typename T> requires std::derived_from<T, GameSystem>
+        auto Find() -> T*;
+
     private:
         template <typename T> requires std::derived_from<T, GameSystem>
         bool Add(SharedPtrNotNull<T> system);
@@ -110,5 +113,22 @@ namespace sunlight
         assert(result == dynamic_cast<T*>(iter->second.get()));
 
         return *result;
+    }
+
+    template <typename T> requires std::derived_from<T, GameSystem>
+    auto Stage::Find() -> T*
+    {
+        const auto& id = GameSystem::GetClassId<T>();
+
+        const auto iter = _systems.find(id);
+        if (iter == _systems.end())
+        {
+            return nullptr;
+        }
+
+        T* result = static_cast<T*>(iter->second.get());
+        assert(result == dynamic_cast<T*>(iter->second.get()));
+
+        return result;
     }
 }

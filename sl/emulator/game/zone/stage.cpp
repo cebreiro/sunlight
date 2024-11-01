@@ -41,6 +41,7 @@
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/event_object_spawner_component.h"
 #include "sl/emulator/game/system/event_object_system.h"
+#include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -361,6 +362,11 @@ namespace sunlight
         Add(std::make_shared<EntityAIControlSystem>(_serviceLocator));
         Add(std::make_shared<EntityScanSystem>());
         Add(std::make_shared<EventObjectSystem>(_serviceLocator, _stageData.id));
+
+        if (_stageData.terrain)
+        {
+            Add(std::make_shared<PathFindingSystem>(_serviceLocator, *_stageData.terrain));
+        }
 
         const auto range = _systems | std::views::values;
 

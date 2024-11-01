@@ -1,4 +1,5 @@
 #pragma once
+#include "sl/emulator/game/contents/path_finding/tile.h"
 #include "sl/emulator/game/system/game_system.h"
 
 namespace sunlight
@@ -19,28 +20,33 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        bool IsOnMovableArea(const Eigen::Vector2f& position) const;
-        bool IsOnMovableArea(float x, float y) const;
+        bool FindPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest);
 
+    public:
         auto GetWidth() const -> int32_t;
         auto GetHeight() const -> int32_t;
-        auto GetMovableArea1() const -> const std::vector<std::vector<char>>&;
-        auto GetMovableArea2() const -> const std::vector<std::vector<char>>&;
+        auto GetXSize() const -> int32_t;
+        auto GetYSize() const -> int32_t;
+        auto GetTile(TileIndex index) -> Tile&;
+        auto GetTile(TileIndex index) const -> const Tile&;
 
     private:
         bool IsOutOfRange(float x, float y) const;
 
-        static auto CalculateIndex(float x, float y) -> std::pair<int32_t, int32_t>;
+        bool FindPathReverse(std::vector<Eigen::Vector2f>& result, TileIndex start, TileIndex end);
+
+        auto CalculateFlatIndex(TileIndex pair) const -> int32_t;
+
+        static auto CalculateHeuristic(TileIndex lhs, TileIndex rhs) -> int32_t;
+        static auto CalculateXYIndex(float x, float y) -> TileIndex;
 
     private:
         const ServiceLocator& _serviceLocator;
         const int32_t _width = 0;
         const int32_t _height = 0;
+        const int32_t _xSize = 0;
+        const int32_t _ySize = 0;
 
-
-        std::vector<std::vector<char>> _movableBlocks1;
-        std::vector<std::vector<char>> _movableBlocks2;
-
-        static constexpr int32_t movable_block_per_stage_block = 4;
+        std::vector<Tile> _tiles;
     };
 }

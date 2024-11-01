@@ -1,12 +1,20 @@
 #include "server_command_debug.h"
 
 #include "shared/execution/executor/operation/schedule.h"
+#include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/player_debug_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
+#include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
+#include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/system/path_finding_system.h"
+#include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
+#include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
 namespace sunlight
 {
@@ -162,5 +170,118 @@ namespace sunlight
             {
                 DebugNotify(player);
             });
+    }
+
+    ServerCommandDebugTile::ServerCommandDebugTile(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandDebugTile::GetName() const -> std::string_view
+    {
+        return "debug_tile";
+    }
+
+    auto ServerCommandDebugTile::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandDebugTile::Execute(GamePlayer& player) const
+    {
+        (void)player;
+
+        PathFindingSystem* pathFindSystem = _system.Find<PathFindingSystem>();
+        if (!pathFindSystem)
+        {
+            return false;
+        }
+
+        const ItemData* itemData = _system.GetServiceLocator().Get<GameDataProvideService>().GetItemDataProvider().Find(1);
+        if (!itemData)
+        {
+            assert(false);
+
+            return true;
+        }
+
+        for (int32_t y = 0; y < pathFindSystem->GetYSize(); ++y)
+        {
+            for (int32_t x = 0; x < pathFindSystem->GetXSize(); ++x)
+            {
+                const Tile& tile = pathFindSystem->GetTile(TileIndex(x, y));
+
+                auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData,
+                    tile.value == 0 ? 50000 : tile.value);
+
+                item->AddComponent(std::make_unique<SceneObjectComponent>());
+
+                const Eigen::Vector2f& position = tile.GetPosition();
+
+                item->GetComponent<SceneObjectComponent>().SetPosition(position);
+
+                _system.Get<SceneObjectSystem>().SpawnItem(item, position, position);
+            }
+        }
+
+        return true;
+    }
+
+    ServerCommandDebugPathFind::ServerCommandDebugPathFind(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandDebugPathFind::GetName() const -> std::string_view
+    {
+        return "debug_path_find";
+    }
+
+    auto ServerCommandDebugPathFind::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandDebugPathFind::Execute(GamePlayer& player, float x, float y) const
+    {
+        PathFindingSystem* pathFindSystem = _system.Find<PathFindingSystem>();
+        if (!pathFindSystem)
+        {
+            return false;
+        }
+
+        std::vector<Eigen::Vector2f> result;
+        if (!pathFindSystem->FindPath(result, player.GetSceneObjectComponent().GetPosition(), { x, y }))
+        {
+            player.Notice("find path - fail");   
+        }
+        else
+        {
+            player.Notice("find path - success");
+        }
+
+        const ItemData* itemData = _system.GetServiceLocator().Get<GameDataProvideService>().GetItemDataProvider().Find(1);
+        if (!itemData)
+        {
+            assert(false);
+
+            return true;
+        }
+
+        int32_t i = 1;
+
+        for (const Eigen::Vector2f position : result)
+        {
+            auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData, i * 100);
+            ++i;
+
+            item->AddComponent(std::make_unique<SceneObjectComponent>());
+
+            item->GetComponent<SceneObjectComponent>().SetPosition(position);
+
+            _system.Get<SceneObjectSystem>().SpawnItem(item, position, position);
+        }
+
+        return true;
     }
 }

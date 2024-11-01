@@ -14,6 +14,9 @@ namespace sunlight
         static constexpr int32_t STAGE_MAIN = 10000;
         static constexpr float STAGE_TERRAIN_BLOCK_SIZE = 256.f;
 
+        static constexpr int32_t TILE_PER_STAGE_BLOCK = 4;
+        static constexpr float TILE_SIZE = STAGE_TERRAIN_BLOCK_SIZE / static_cast<float>(TILE_PER_STAGE_BLOCK);
+
         // client 0x486748 0x48674F
         static constexpr int32_t PLAYER_CHARACTER_LEVEL_MAX = 70;
         static constexpr int32_t STAT_POINT_PER_CHARACTER_LEVEL_UP = 4;
