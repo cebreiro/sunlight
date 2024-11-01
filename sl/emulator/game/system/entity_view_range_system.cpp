@@ -562,12 +562,12 @@ namespace sunlight
 
     auto EntityViewRangeSystem::GetSector(const Eigen::Vector2f& position) -> GameSpatialSector&
     {
-        return GetSector(CalculateXIndex(position.x()), CalculateXIndex(position.y()));
+        return GetSector(CalculateXIndex(position.x()), CalculateYIndex(position.y()));
     }
 
     auto EntityViewRangeSystem::GetSector(const Eigen::Vector2f& position) const -> const GameSpatialSector&
     {
-        return GetSector(CalculateXIndex(position.x()), CalculateXIndex(position.y()));
+        return GetSector(CalculateXIndex(position.x()), CalculateYIndex(position.y()));
     }
 
     auto EntityViewRangeSystem::CalculateXIndex(float x) const -> int32_t
