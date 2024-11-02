@@ -44,10 +44,6 @@ namespace sunlight
             }
         }
 
-        constexpr std::array<std::pair<int32_t, int32_t>, 4> moveDirections = {
-
-        };
-
         for (int32_t y = 0; y < _ySize; ++y)
         {
             for (int32_t x = 0; x < _xSize; ++x)
@@ -100,14 +96,65 @@ namespace sunlight
         return GameSystem::GetClassId<PathFindingSystem>();
     }
 
-    bool PathFindingSystem::FindPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest)
+    bool PathFindingSystem::IsBlocked(Eigen::Vector2f src, Eigen::Vector2f dest) const
+    {
+        const TileIndex start = CalculateXYIndex(src.x(), src.y());
+        const TileIndex last = CalculateXYIndex(dest.x(), dest.y());
+
+        const int32_t dx = last.x - start.x;
+        const int32_t dy = last.y - start.y;
+
+        const int32_t steps = std::max(std::abs(dx), std::abs(dy));
+
+        float x = static_cast<float>(start.x);
+        float y = static_cast<float>(start.y);
+
+        const float incrementX = static_cast<float>(dx) / static_cast<float>(steps);
+        const float incrementY = static_cast<float>(dy) / static_cast<float>(steps);
+
+        for (int32_t i = 0; i < steps; ++i)
+        {
+            const int32_t tileX = static_cast<int32_t>(std::roundf(x));
+            const int32_t tileY = static_cast<int32_t>(std::roundf(y));
+
+            if (tileX < 0 || tileX >= _xSize || tileY < 0 || tileY >= _ySize)
+            {
+                return true;
+            }
+
+            if (GetTile(TileIndex(tileX, tileY)).IsBlocked())
+            {
+                return true;
+            }
+
+            x += incrementX;
+            y += incrementY;
+        }
+
+        return false;
+    }
+
+    bool PathFindingSystem::FindRawPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest)
     {
         if (IsOutOfRange(src.x(), src.y()) || IsOutOfRange(dest.x(), dest.y()))
         {
             return false;
         }
 
-        return FindPathReverse(result, CalculateXYIndex(dest.x(), dest.y()), CalculateXYIndex(src.x(), src.y()));
+        return FindPathRawReverse(result, CalculateXYIndex(dest.x(), dest.y()), CalculateXYIndex(src.x(), src.y()));
+    }
+
+    bool PathFindingSystem::FindPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest)
+    {
+        _pathBuffer.clear();
+        if (FindRawPath(_pathBuffer, src, dest))
+        {
+            SmoothPath(result, _pathBuffer);
+
+            return true;
+        }
+
+        return false;
     }
 
     auto PathFindingSystem::GetWidth() const -> int32_t
@@ -162,7 +209,7 @@ namespace sunlight
         return false;
     }
 
-    bool PathFindingSystem::FindPathReverse(std::vector<Eigen::Vector2f>& result, TileIndex start, TileIndex end)
+    bool PathFindingSystem::FindPathRawReverse(std::vector<Eigen::Vector2f>& result, TileIndex start, TileIndex end)
     {
         if (start == end)
         {
@@ -237,6 +284,31 @@ namespace sunlight
         }
 
         return false;
+    }
+
+    void PathFindingSystem::SmoothPath(std::vector<Eigen::Vector2f>& result, const std::vector<Eigen::Vector2f>& paths) const
+    {
+        if (std::ssize(paths) < 2)
+        {
+            std::ranges::copy(paths, std::back_inserter(result));
+
+            return;
+        }
+
+        result.emplace_back(paths[0]);
+
+        for (int64_t i = 2; i < std::ssize(paths) - 1; ++i)
+        {
+            const Eigen::Vector2f& from = result.back();
+            const Eigen::Vector2f& to = paths[i];
+
+            if (IsBlocked(from, to))
+            {
+                result.emplace_back(to);
+            }
+        }
+
+        result.emplace_back(paths.back());
     }
 
     auto PathFindingSystem::CalculateFlatIndex(TileIndex pair) const -> int32_t

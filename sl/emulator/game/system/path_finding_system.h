@@ -20,6 +20,9 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
+        bool IsBlocked(Eigen::Vector2f src, Eigen::Vector2f dest) const;
+
+        bool FindRawPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest);
         bool FindPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest);
 
     public:
@@ -33,7 +36,8 @@ namespace sunlight
     private:
         bool IsOutOfRange(float x, float y) const;
 
-        bool FindPathReverse(std::vector<Eigen::Vector2f>& result, TileIndex start, TileIndex end);
+        bool FindPathRawReverse(std::vector<Eigen::Vector2f>& result, TileIndex start, TileIndex end);
+        void SmoothPath(std::vector<Eigen::Vector2f>& result, const std::vector<Eigen::Vector2f>& paths) const;
 
         auto CalculateFlatIndex(TileIndex pair) const -> int32_t;
 
@@ -48,5 +52,7 @@ namespace sunlight
         const int32_t _ySize = 0;
 
         std::vector<Tile> _tiles;
+
+        std::vector<Eigen::Vector2f> _pathBuffer;
     };
 }

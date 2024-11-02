@@ -212,7 +212,7 @@ namespace sunlight
                 const Tile& tile = pathFindSystem->GetTile(TileIndex(x, y));
 
                 auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData,
-                    tile.value == 0 ? 50000 : tile.value);
+                    tile.value == 0 ? 50000 : static_cast<uint8_t>(tile.value));
 
                 item->AddComponent(std::make_unique<SceneObjectComponent>());
 
@@ -272,7 +272,8 @@ namespace sunlight
 
         for (const Eigen::Vector2f position : result)
         {
-            auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData, i * 100);
+            auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData,
+                30000 + (i * 100));
             ++i;
 
             item->AddComponent(std::make_unique<SceneObjectComponent>());
@@ -281,6 +282,98 @@ namespace sunlight
 
             _system.Get<SceneObjectSystem>().SpawnItem(item, position, position);
         }
+
+        return true;
+    }
+
+    ServerCommandDebugPathFindRaw::ServerCommandDebugPathFindRaw(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandDebugPathFindRaw::GetName() const -> std::string_view
+    {
+        return "debug_path_find_raw";
+    }
+
+    auto ServerCommandDebugPathFindRaw::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandDebugPathFindRaw::Execute(GamePlayer& player, float x, float y) const
+    {
+        PathFindingSystem* pathFindSystem = _system.Find<PathFindingSystem>();
+        if (!pathFindSystem)
+        {
+            return false;
+        }
+
+        std::vector<Eigen::Vector2f> result;
+        if (!pathFindSystem->FindRawPath(result, player.GetSceneObjectComponent().GetPosition(), { x, y }))
+        {
+            player.Notice("find path raw - fail");
+        }
+        else
+        {
+            player.Notice("find path raw - success");
+        }
+
+        const ItemData* itemData = _system.GetServiceLocator().Get<GameDataProvideService>().GetItemDataProvider().Find(1);
+        if (!itemData)
+        {
+            assert(false);
+
+            return true;
+        }
+
+        int32_t i = 0;
+
+        for (const Eigen::Vector2f position : result)
+        {
+            const int32_t quantity = ((i * 100) % 10000) + 1;
+            auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData, quantity);
+
+            ++i;
+
+            item->AddComponent(std::make_unique<SceneObjectComponent>());
+
+            item->GetComponent<SceneObjectComponent>().SetPosition(position);
+
+            _system.Get<SceneObjectSystem>().SpawnItem(item, position, position);
+        }
+
+        return true;
+    }
+
+    ServerCommandDebugPathBlocked::ServerCommandDebugPathBlocked(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandDebugPathBlocked::GetName() const -> std::string_view
+    {
+        return "debug_path_find_blocked";
+    }
+
+    auto ServerCommandDebugPathBlocked::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandDebugPathBlocked::Execute(GamePlayer& player, float x, float y) const
+    {
+        PathFindingSystem* pathFindSystem = _system.Find<PathFindingSystem>();
+        if (!pathFindSystem)
+        {
+            return false;
+        }
+
+        const Eigen::Vector2f& playerPos = player.GetSceneObjectComponent().GetPosition();
+        const bool blocked = pathFindSystem->IsBlocked(playerPos, { x, y });
+
+        player.Notice(fmt::format("from: {}, {}, to: {}, {} is blocked: {}",
+            playerPos.x(), playerPos.y(), x , y, blocked));
 
         return true;
     }
