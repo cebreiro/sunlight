@@ -145,9 +145,22 @@ namespace sunlight
         const int32_t distance = std::uniform_int_distribution{ actionData.moveRangeMin, actionData.moveRangeMax }(randomEngine);
         const double angle = std::uniform_int_distribution{ 0, 360 }(randomEngine) * std::numbers::pi / 180.0;
 
-        Eigen::Vector2f destPos = sceneObjectComponent.GetPosition();
+        const Eigen::Vector2f& position = sceneObjectComponent.GetPosition();
+
+        Eigen::Vector2f destPos = position;
         destPos.x() += static_cast<float>(std::cos(angle) * distance);
         destPos.y() += static_cast<float>(std::sin(angle) * distance);
+
+        if (const std::optional<GameMonsterSpawnerContext>& spawnContext = monster.GetSpawnerContext();
+            spawnContext.has_value())
+        {
+            if (!spawnContext->spawnerArea.contains(destPos))
+            {
+                const Eigen::Vector2f direction = (spawnContext->spawnerCenter - position).normalized();
+
+                destPos = position + direction * distance;
+            }
+        }
 
         const float speed = monster.GetMoveSpeed();
 
