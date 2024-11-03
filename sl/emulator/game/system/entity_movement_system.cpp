@@ -1,14 +1,18 @@
 #include "entity_movement_system.h"
 
 #include "sl/emulator/game/component/entity_movement_component.h"
+#include "sl/emulator/game/component/entity_observable_component.h"
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/movement/client_movement.h"
+#include "sl/emulator/game/contents/movement/path_point_movement.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_request.h"
+#include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
-#include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/system/path_finding_system.h"
+#include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
@@ -18,6 +22,13 @@ namespace sunlight
     void EntityMovementSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<EntityViewRangeSystem>());
+        Add(stage.Get<PlayerIndexSystem>());
+
+        if (PathFindingSystem* pathFindSystem = stage.Find<PathFindingSystem>();
+            pathFindSystem)
+        {
+            Add(*pathFindSystem);
+        }
     }
 
     bool EntityMovementSystem::Subscribe(Stage& stage)
@@ -52,11 +63,11 @@ namespace sunlight
             EntityMovementComponent& movementComponent = entity.GetComponent<EntityMovementComponent>();
             if (movementComponent.IsMoving())
             {
-                if (ClientMovement* clientMovement = movementComponent.GetForwardMovement(); clientMovement)
+                if (ClientMovement* clientMovement = movementComponent.GetClientMovement(); clientMovement)
                 {
                     std::chrono::duration<float> duration = (now - movementComponent.GetStartTimePoint());
                     const float totalDistance = (clientMovement->destPosition - clientMovement->position).norm();
-                    const float totalTime = totalDistance / clientMovement->speed / 100;
+                    const float totalTime = totalDistance / clientMovement->speed / 100.f;
 
                     const float t = std::min(duration.count() / totalTime, 1.f);
 
@@ -67,9 +78,49 @@ namespace sunlight
 
                     Get<EntityViewRangeSystem>().UpdateViewRange(entity, newPosition);
 
+                    NotifyNewPosition(entity, newPosition);
+
                     if (t >= 1.f)
                     {
-                        movementComponent.SetIsMoving(false);
+                        movementComponent.Reset();
+                        sceneObjectComponent.SetMoving(false);
+
+                        iter = _movingEntities.erase(iter);
+
+                        continue;
+                    }
+                }
+                else if (PathPointMovement* pathMovement = movementComponent.GetPathPointMovement(); pathMovement)
+                {
+                    int64_t oldIndex = 0;
+                    const Eigen::Vector2f newPosition = pathMovement->CalculatePointOnPath(now, oldIndex);
+
+                    std::swap(pathMovement->pathIndex, oldIndex);
+
+                    SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
+                    sceneObjectComponent.SetPosition(newPosition);
+
+                    Get<EntityViewRangeSystem>().UpdateViewRange(entity, newPosition);
+
+                    NotifyNewPosition(entity, newPosition);
+
+                    if (oldIndex != pathMovement->pathIndex)
+                    {
+                        if (const int64_t lastIndex = std::ssize(pathMovement->paths) - 1;
+                            oldIndex != lastIndex)
+                        {
+                            const Eigen::Vector2f& destPosition = pathMovement->paths[std::min(pathMovement->pathIndex, lastIndex)].second;
+
+                            sceneObjectComponent.SetYaw(CalculateYaw(newPosition, destPosition));
+                            sceneObjectComponent.SetDestPosition(destPosition);
+
+                            Get<EntityViewRangeSystem>().Broadcast(entity, ZonePacketS2CCreator::CreateObjectMove(entity), false);
+                        }
+                    }
+
+                    if (pathMovement->pathIndex >= std::ssize(pathMovement->paths))
+                    {
+                        movementComponent.Reset();
                         sceneObjectComponent.SetMoving(false);
 
                         iter = _movingEntities.erase(iter);
@@ -126,7 +177,7 @@ namespace sunlight
         Get<EntityViewRangeSystem>().UpdateViewRange(entity, sceneObjectComponent->GetPosition());
     }
 
-    void EntityMovementSystem::MoveTo(GameEntity& entity, Eigen::Vector2f position, float speed)
+    void EntityMovementSystem::MoveToPosition(GameEntity& entity, Eigen::Vector2f position, float speed)
     {
         if (speed <= 0.f)
         {
@@ -147,7 +198,7 @@ namespace sunlight
         movement.position = sceneObjectComponent.GetPosition();
         movement.destPosition = position;
         movement.speed = speed;
-        movement.yaw = CreateYaw(sceneObjectComponent.GetPosition(), position);
+        movement.yaw = CalculateYaw(sceneObjectComponent.GetPosition(), position);
         movement.movementTypeBitMask = 0x10;
 
         movementComponent.SetStartTimePoint(GameTimeService::Now());
@@ -162,6 +213,91 @@ namespace sunlight
                 player.Defer(SceneObjectPacketCreator::CreateState(entity));
                 player.FlushDeferred();
             });
+    }
+
+    void EntityMovementSystem::MoveToTarget(GameEntity& entity, const GameEntity& target, float speed)
+    {
+        const Eigen::Vector2f targetPosition = target.GetComponent<SceneObjectComponent>().GetPosition();
+
+        do
+        {
+            PathFindingSystem* pathFindSystem = Find<PathFindingSystem>();
+            if (!pathFindSystem)
+            {
+                break;
+            }
+
+            std::vector<Eigen::Vector2f> paths;
+            const Eigen::Vector2f entityPosition = entity.GetComponent<SceneObjectComponent>().GetPosition();
+
+            if (!pathFindSystem->FindPath(paths, entityPosition, targetPosition))
+            {
+                break;
+            }
+
+            if (std::ssize(paths) < 2)
+            {
+                break;
+            }
+
+            paths.front() = entityPosition;
+            paths.back() = targetPosition;
+
+            const game_time_point_type now = GameTimeService::Now();
+
+            PathPointMovement pathPointMovement;
+            pathPointMovement.paths.reserve(paths.size());
+            pathPointMovement.paths.emplace_back(now, paths[0]);
+            pathPointMovement.pathIndex = 1;
+
+            game_time_point_type prevEndTimePoint = now;
+
+            for (int32_t i = 1; i < std::ssize(paths); ++i)
+            {
+                const auto duration = std::chrono::duration<float>((paths[i] - paths[i - 1]).norm() / speed / 100.f);
+                const game_time_point_type currentEndTimePoint = prevEndTimePoint + std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+
+                pathPointMovement.paths.emplace_back(currentEndTimePoint,paths[i]);
+
+                prevEndTimePoint = currentEndTimePoint;
+            }
+
+            EntityStateComponent& stateComponent = entity.GetComponent<EntityStateComponent>();
+            stateComponent.SetState(GameEntityState{
+                .type = GameEntityStateType::Moving,
+                .moveType = GameEntityState::MoveType::Walk,
+                .destPosition = Eigen::Vector3f(paths[1].x(), paths[1].y(), 0.f),
+                });
+
+            EntityMovementComponent& movementComponent = entity.GetComponent<EntityMovementComponent>();
+            movementComponent.SetPathPointMovement(std::move(pathPointMovement));
+
+            SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
+
+            ClientMovement movement;
+            movement.position = sceneObjectComponent.GetPosition();
+            movement.destPosition = paths[1];
+            movement.speed = speed;
+            movement.yaw = CalculateYaw(sceneObjectComponent.GetPosition(), paths[1]);
+            movement.movementTypeBitMask = 0x10;
+
+            movementComponent.SetStartTimePoint(GameTimeService::Now());
+            sceneObjectComponent.Set(movement);
+
+            _movingEntities[entity.GetId()] = &entity;
+
+            Get<EntityViewRangeSystem>().VisitPlayer(entity, [&entity](GamePlayer& player)
+                {
+                    player.Defer(ZonePacketS2CCreator::CreateObjectMove(entity));
+                    player.Defer(SceneObjectPacketCreator::CreateState(entity));
+                    player.FlushDeferred();
+                });
+
+            return;
+            
+        } while (false);
+
+        MoveToPosition(entity, targetPosition, speed);
     }
 
     void EntityMovementSystem::HandleMovement(const ZoneRequest& request)
@@ -196,10 +332,36 @@ namespace sunlight
         viewRangeSystem.UpdateViewRange(player, sceneObjectComponent.GetPosition());
     }
 
-    auto EntityMovementSystem::CreateYaw(const Eigen::Vector2f& from, const Eigen::Vector2f& to) -> float
+    auto EntityMovementSystem::CalculateYaw(const Eigen::Vector2f& from, const Eigen::Vector2f& to) -> float
     {
         const Eigen::Vector2f vector = (to - from);
 
         return std::atan2f(vector.y(), vector.x()) * (180.f / static_cast<float>(std::numbers::pi));
+    }
+
+    void EntityMovementSystem::NotifyNewPosition(const GameEntity& entity, Eigen::Vector2f position)
+    {
+        const auto* observableComponent = entity.FindComponent<EntityObservableComponent>();
+
+        if (!observableComponent || !observableComponent->HasObserver(ObservableType::EntityPosition))
+        {
+            return;
+        }
+
+        PlayerIndexSystem& sceneObjectSystem = Get<PlayerIndexSystem>();
+
+        for (const int64_t playerId : observableComponent->GetObserverRange(ObservableType::EntityPosition))
+        {
+            GamePlayer* observer = sceneObjectSystem.FindByCId(playerId);
+            if (!observer)
+            {
+                continue;
+            }
+
+            const int32_t x = static_cast<int32_t>(position.x());
+            const int32_t y = static_cast<int32_t>(position.y());
+
+            observer->Send(GamePlayerMessageCreator::CreatePlayerGainGroupItem(*observer, x, y));
+        }
     }
 }

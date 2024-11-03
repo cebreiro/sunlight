@@ -240,6 +240,21 @@ namespace sunlight
                                 }
                             }
                             break;
+                            case GameEntityType::NPC:
+                            {
+                                const GameNPC& npc = *entity.Cast<GameNPC>();
+
+                                targetPlayer->Defer(SceneObjectPacketCreator::CreateInformation(npc));
+                            }
+                            break;
+                            case GameEntityType::Enemy:
+                            {
+                                const GameMonster& monster = *entity.Cast<GameMonster>();
+
+                                constexpr bool spawnEffect = false;
+                                targetPlayer->Defer(SceneObjectPacketCreator::CreateInformation(monster, spawnEffect));
+                            }
+                            break;
                             }
 
                             targetPlayer->FlushDeferred();

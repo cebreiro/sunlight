@@ -1,6 +1,7 @@
 #pragma once
 #include "sl/emulator/game/component/game_component.h"
 #include "sl/emulator/game/contents/movement/client_movement.h"
+#include "sl/emulator/game/contents/movement/path_point_movement.h"
 #include "sl/emulator/game/time/game_time.h"
 
 namespace sunlight
@@ -11,15 +12,21 @@ namespace sunlight
         bool IsMoving() const;
 
         auto GetStartTimePoint() const -> game_time_point_type;
-        auto GetForwardMovement() -> ClientMovement*;
-        auto GetForwardMovement() const -> const ClientMovement*;
 
-        void SetIsMoving(bool value);
+        auto GetClientMovement() -> ClientMovement*;
+        auto GetClientMovement() const -> const ClientMovement*;
+
+        auto GetPathPointMovement() -> PathPointMovement*;
+        auto GetPathPointMovement() const -> const PathPointMovement*;
+
+        void Reset();
+
         void SetStartTimePoint(game_time_point_type startTimePoint);
         void SetClientMovement(const ClientMovement& movement);
+        void SetPathPointMovement(PathPointMovement movement);
 
     private:
         game_time_point_type _startTimePoint;
-        std::variant<ClientMovement> _movement;
+        std::variant<ClientMovement, PathPointMovement> _movement;
     };
 }

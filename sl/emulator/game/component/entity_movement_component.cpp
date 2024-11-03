@@ -1,5 +1,7 @@
 #include "entity_movement_component.h"
 
+#include "sl/emulator/game/time/game_time_service.h"
+
 namespace sunlight
 {
     bool EntityMovementComponent::IsMoving() const
@@ -9,6 +11,10 @@ namespace sunlight
             if constexpr (std::is_same_v<T, ClientMovement>)
             {
                 return item.movementTypeBitMask == 0x10;
+            }
+            else if constexpr (std::is_same_v<T, PathPointMovement>)
+            {
+                return !item.paths.empty();
             }
             else
             {
@@ -23,23 +29,37 @@ namespace sunlight
         return _startTimePoint;
     }
 
-    auto EntityMovementComponent::GetForwardMovement() -> ClientMovement*
+    auto EntityMovementComponent::GetClientMovement() -> ClientMovement*
     {
         return std::get_if<ClientMovement>(&_movement);
     }
 
-    auto EntityMovementComponent::GetForwardMovement() const -> const ClientMovement*
+    auto EntityMovementComponent::GetClientMovement() const -> const ClientMovement*
     {
         return std::get_if<ClientMovement>(&_movement);
     }
 
-    void EntityMovementComponent::SetIsMoving(bool value)
+    auto EntityMovementComponent::GetPathPointMovement() -> PathPointMovement*
     {
-        std::visit([value]<typename T>(T& item)
+        return std::get_if<PathPointMovement>(&_movement);
+    }
+
+    auto EntityMovementComponent::GetPathPointMovement() const -> const PathPointMovement*
+    {
+        return std::get_if<PathPointMovement>(&_movement);
+    }
+
+    void EntityMovementComponent::Reset()
+    {
+        std::visit([]<typename T>(T& item)
         {
             if constexpr (std::is_same_v<T, ClientMovement>)
             {
-                item.movementTypeBitMask = value ? 0x10 : 0;
+                item.movementTypeBitMask = 0;
+            }
+            else if constexpr (std::is_same_v<T, PathPointMovement>)
+            {
+                return item.paths.clear();
             }
             else
             {
@@ -57,5 +77,10 @@ namespace sunlight
     void EntityMovementComponent::SetClientMovement(const ClientMovement& movement)
     {
         _movement = movement;
+    }
+
+    void EntityMovementComponent::SetPathPointMovement(PathPointMovement movement)
+    {
+        _movement = std::move(movement);
     }
 }

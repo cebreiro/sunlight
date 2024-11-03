@@ -5,6 +5,7 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/entity_damage_system.h"
+#include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
@@ -171,6 +172,34 @@ namespace sunlight
             [&entityAIControlSystem](const GameMonster& monster)
             {
                 entityAIControlSystem.ResumeMonsterControl(monster.GetId());
+            });
+
+        return true;
+    }
+
+    ServerCommandMonsterComeHere::ServerCommandMonsterComeHere(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandMonsterComeHere::GetName() const -> std::string_view
+    {
+        return "monster_come_here";
+    }
+
+    auto ServerCommandMonsterComeHere::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandMonsterComeHere::Execute(GamePlayer& player) const
+    {
+        EntityMovementSystem& entityMovementSystem = _system.Get<EntityMovementSystem>();
+
+        _system.Get<EntityViewRangeSystem>().VisitMonster(player,
+            [&entityMovementSystem , &player](GameMonster& monster)
+            {
+                entityMovementSystem.MoveToTarget(monster, player, monster.GetMoveSpeed());
             });
 
         return true;

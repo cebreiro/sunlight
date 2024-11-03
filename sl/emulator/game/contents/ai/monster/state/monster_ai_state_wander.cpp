@@ -149,9 +149,9 @@ namespace sunlight
         destPos.x() += static_cast<float>(std::cos(angle) * distance);
         destPos.y() += static_cast<float>(std::sin(angle) * distance);
 
-        const float speed = static_cast<float>(monster.GetData().GetBase().speed) / 100.f;
+        const float speed = monster.GetMoveSpeed();
 
-        system.Get<EntityMovementSystem>().MoveTo(monster, destPos, speed);
+        system.Get<EntityMovementSystem>().MoveToPosition(monster, destPos, speed);
 
         int32_t moveDelay = std::uniform_int_distribution{ actionData.moveDelayMin, actionData.moveDelayMax }(randomEngine);
         moveDelay += static_cast<int32_t>(static_cast<float>(distance) / speed);

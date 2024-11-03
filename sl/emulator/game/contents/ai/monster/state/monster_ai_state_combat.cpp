@@ -213,8 +213,7 @@ namespace sunlight
             co_return;
         }
 
-        const float chaseSpeed = static_cast<float>(monster.GetData().GetBase().speedChase) / 100.f;
-        system.Get<EntityMovementSystem>().MoveTo(monster, targetPosition, chaseSpeed);
+        system.Get<EntityMovementSystem>().MoveToTarget(monster, *target, monster.GetChaseSpeed());
 
         _nextChaseTimePoint = now + std::chrono::milliseconds(actionData.moveDelayChase);
 

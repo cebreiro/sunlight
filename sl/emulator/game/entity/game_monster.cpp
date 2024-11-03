@@ -9,6 +9,7 @@
 #include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/data/sox/monster_action.h"
+#include "sl/emulator/game/data/sox/monster_base.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
 
 namespace sunlight
@@ -55,6 +56,16 @@ namespace sunlight
     auto GameMonster::GetSpawnerContext() const -> const std::optional<GameMonsterSpawnerContext>&
     {
         return _spawnerContext;
+    }
+
+    auto GameMonster::GetMoveSpeed() const -> float
+    {
+        return static_cast<float>(GetData().GetBase().speed) / 100.f;
+    }
+
+    auto GameMonster::GetChaseSpeed() const -> float
+    {
+        return static_cast<float>(GetData().GetBase().speedChase) / 100.f;
     }
 
     auto GameMonster::GetSceneObjectComponent() -> SceneObjectComponent&

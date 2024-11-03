@@ -39,6 +39,9 @@ namespace sunlight
         auto GetSpawnPosition() const -> Eigen::Vector2f;
         auto GetSpawnerContext() const -> const std::optional<GameMonsterSpawnerContext>&;
 
+        auto GetMoveSpeed() const -> float;
+        auto GetChaseSpeed() const -> float;
+
     public:
         auto GetSceneObjectComponent() -> SceneObjectComponent&;
         auto GetSceneObjectComponent() const -> const SceneObjectComponent&;

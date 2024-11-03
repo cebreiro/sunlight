@@ -2,12 +2,15 @@
 
 #include "shared/execution/executor/operation/schedule.h"
 #include "sl/emulator/game/game_constant.h"
+#include "sl/emulator/game/component/entity_observable_component.h"
 #include "sl/emulator/game/component/player_debug_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
@@ -374,6 +377,46 @@ namespace sunlight
 
         player.Notice(fmt::format("from: {}, {}, to: {}, {} is blocked: {}",
             playerPos.x(), playerPos.y(), x , y, blocked));
+
+        return true;
+    }
+
+    ServerCommandDebugMonsterPosition::ServerCommandDebugMonsterPosition(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandDebugMonsterPosition::GetName() const -> std::string_view
+    {
+        return "debug_monster_position";
+    }
+
+    auto ServerCommandDebugMonsterPosition::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandDebugMonsterPosition::Execute(GamePlayer& player) const
+    {
+        _system.Get<EntityViewRangeSystem>().VisitMonster(player,
+            [id = player.GetCId()](GameMonster& monster)
+            {
+                if (!monster.HasComponent<EntityObservableComponent>())
+                {
+                    monster.AddComponent(std::make_unique<EntityObservableComponent>());
+                }
+
+                EntityObservableComponent& observableComponent = monster.GetComponent<EntityObservableComponent>();
+
+                if (observableComponent.HasObserver(ObservableType::EntityPosition, id))
+                {
+                    observableComponent.RemoveObserver(ObservableType::EntityPosition, id);
+                }
+                else
+                {
+                    observableComponent.AddObserver(ObservableType::EntityPosition, id);
+                }
+            });
 
         return true;
     }

@@ -92,7 +92,7 @@ namespace sunlight
 
         const Eigen::Vector2f& destPosition = monsterPosition + moveVector;
 
-        system.Get<EntityMovementSystem>().MoveTo(monster, destPosition, static_cast<float>(monster.GetData().GetBase().speedChase) / 100.f);
+        system.Get<EntityMovementSystem>().MoveToPosition(monster, destPosition, monster.GetMoveSpeed());
 
         _nextFleeTime = now + std::chrono::milliseconds(moveDelay);
     }

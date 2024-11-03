@@ -29,6 +29,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandDebugPathFind>(system));
         system.AddCommand(std::make_shared<ServerCommandDebugPathFindRaw>(system));
         system.AddCommand(std::make_shared<ServerCommandDebugPathBlocked>(system));
+        system.AddCommand(std::make_shared<ServerCommandDebugMonsterPosition>(system));
 
         system.AddCommand(std::make_shared<ServerCommandJobPromote>(system));
 
@@ -54,6 +55,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandMonsterRemove>(system));
         system.AddCommand(std::make_shared<ServerCommandMonsterAISuspend>(system));
         system.AddCommand(std::make_shared<ServerCommandMonsterAIResume>(system));
+        system.AddCommand(std::make_shared<ServerCommandMonsterComeHere>(system));
 
         system.AddCommand(std::make_shared<ServerCommandDamageSet>());
         system.AddCommand(std::make_shared<ServerCommandDamageClear>());
