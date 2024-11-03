@@ -62,5 +62,7 @@ namespace sunlight
         static constexpr auto DROP_ITEM_OWNERSHIP_DURATION = std::chrono::seconds(30);
 
         static constexpr int32_t PLAYER_BODY_SIZE = 10;
+
+        static constexpr float MONSTER_DROP_ITEM_RADIUS = TILE_SIZE / 2.f;
     };
 }

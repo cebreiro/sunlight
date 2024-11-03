@@ -6,6 +6,7 @@
 #include "sl/emulator/game/system/entity_scan_system.h"
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
+#include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -27,6 +28,12 @@ namespace sunlight
         Add(stage.Get<EntityMovementSystem>());
         Add(stage.Get<EntityScanSystem>());
         Add(stage.Get<EntitySkillEffectSystem>());
+
+        if (PathFindingSystem* pathFindSystem = stage.Find<PathFindingSystem>();
+            pathFindSystem)
+        {
+            Add(*pathFindSystem);
+        }
     }
 
     bool EntityAIControlSystem::Subscribe(Stage& stage)

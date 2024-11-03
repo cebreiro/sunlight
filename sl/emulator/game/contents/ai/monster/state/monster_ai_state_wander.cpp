@@ -11,6 +11,7 @@
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_scan_system.h"
+#include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
@@ -143,13 +144,19 @@ namespace sunlight
         }
 
         const int32_t distance = std::uniform_int_distribution{ actionData.moveRangeMin, actionData.moveRangeMax }(randomEngine);
-        const double angle = std::uniform_int_distribution{ 0, 360 }(randomEngine) * std::numbers::pi / 180.0;
-
         const Eigen::Vector2f& position = sceneObjectComponent.GetPosition();
 
-        Eigen::Vector2f destPos = position;
-        destPos.x() += static_cast<float>(std::cos(angle) * distance);
-        destPos.y() += static_cast<float>(std::sin(angle) * distance);
+        Eigen::Vector2f destPos;
+
+        if (PathFindingSystem * pathFindSystem = system.Find<PathFindingSystem>();
+            !pathFindSystem || !pathFindSystem->GetRandPositionOnCircleOutLine(position, static_cast<float>(distance), destPos))
+        {
+            const double angle = std::uniform_int_distribution{ 0, 360 }(randomEngine)*std::numbers::pi / 180.0;
+
+            destPos = position;
+            destPos.x() += static_cast<float>(std::cos(angle) * distance);
+            destPos.y() += static_cast<float>(std::sin(angle) * distance);
+        }
 
         if (const std::optional<GameMonsterSpawnerContext>& spawnContext = monster.GetSpawnerContext();
             spawnContext.has_value())

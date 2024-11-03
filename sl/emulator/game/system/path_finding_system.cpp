@@ -11,6 +11,7 @@ namespace sunlight
         , _height(terrain.height)
         , _xSize(_width * GameConstant::TILE_PER_STAGE_BLOCK)
         , _ySize(_height * GameConstant::TILE_PER_STAGE_BLOCK)
+        , _mt(std::random_device{}())
     {
         _tiles.resize(_xSize * _ySize);
 
@@ -134,6 +135,123 @@ namespace sunlight
         return false;
     }
 
+    bool PathFindingSystem::GetRandPositionOnCircleOutLine(Eigen::Vector2f position, float radius, Eigen::Vector2f& result)
+    {
+        constexpr std::array randAngles = { 0.f, 60.f, 120.f, 180.f, 240.f, 300.f };
+
+        _positionBuffer.clear();
+
+        for (const float angle : randAngles)
+        {
+            const float radian = angle * (static_cast<float>(std::numbers::pi) / 180.f);
+
+            Eigen::Vector2f checkPosition = position;
+            checkPosition.x() += std::cos(radian) * radius;
+            checkPosition.y() += std::sin(radian) * radius;
+
+            if (IsOutOfRange(checkPosition.x(), checkPosition.y()))
+            {
+                continue;
+            }
+
+            if (GetTile(CalculateXYIndex(checkPosition.x(), checkPosition.y())).IsBlocked())
+            {
+                continue;
+            }
+
+            _positionBuffer.emplace_back(checkPosition);
+        }
+
+        if (_positionBuffer.empty())
+        {
+            return false;
+        }
+
+        result = _positionBuffer[std::uniform_int_distribution<int64_t>(0, std::ssize(_positionBuffer) - 1)(_mt)];
+
+        return true;
+    }
+
+    bool PathFindingSystem::GetRandPositionInCircle(Eigen::Vector2f position, float radius, Eigen::Vector2f& result)
+    {
+        _tileBuffer.clear();
+
+        const int32_t startX = std::max(0, static_cast<int32_t>(std::ceil((position.x() - radius) / GameConstant::TILE_SIZE)));
+        const int32_t startY = std::max(0, static_cast<int32_t>(std::ceil((position.y() - radius) / GameConstant::TILE_SIZE)));
+        const int32_t lastX = std::min(_xSize - 1, static_cast<int32_t>(std::floor((position.x() + radius) / GameConstant::TILE_SIZE)));
+        const int32_t lastY = std::min(_ySize - 1, static_cast<int32_t>(std::floor((position.y() + radius) / GameConstant::TILE_SIZE)));
+
+        for (int32_t y = startY; y <= lastY; ++y)
+        {
+            for (int32_t x = startX; x <= lastX; ++x)
+            {
+                assert(x >= 0 && x < _xSize && y >= 0 && y < _ySize);
+
+                if (const Tile& tile = GetTile(TileIndex(x, y));
+                    !tile.IsBlocked())
+                {
+                    _tileBuffer.emplace_back(&tile);
+                }
+            }
+        }
+
+        if (_tileBuffer.empty())
+        {
+            return false;
+        }
+
+        const int64_t index = std::uniform_int_distribution<int64_t>(0, std::ssize(_tileBuffer) - 1)(_mt);
+        const Tile& selected = *_tileBuffer[index];
+
+        const float posX = static_cast<float>(selected.index.x) * GameConstant::TILE_SIZE;
+        const float posY = static_cast<float>(selected.index.y) * GameConstant::TILE_SIZE;
+
+        result.x() = std::uniform_real_distribution<float>(posX, posX + GameConstant::TILE_SIZE)(_mt);
+        result.y() = std::uniform_real_distribution<float>(posY, posY + GameConstant::TILE_SIZE)(_mt);
+
+        return true;
+    }
+
+    bool PathFindingSystem::GetRandPositionInBox(const Eigen::AlignedBox2f& box, Eigen::Vector2f& result)
+    {
+        _tileBuffer.clear();
+
+        const int32_t startX = std::max(0, static_cast<int32_t>(std::ceil(box.min().x() / GameConstant::TILE_SIZE)));
+        const int32_t startY = std::max(0, static_cast<int32_t>(std::ceil(box.min().y() / GameConstant::TILE_SIZE)));
+        const int32_t lastX = std::min(_xSize - 1, static_cast<int32_t>(std::floor(box.max().x() / GameConstant::TILE_SIZE)));
+        const int32_t lastY = std::min(_ySize - 1, static_cast<int32_t>(std::floor(box.max().y() / GameConstant::TILE_SIZE)));
+
+        for (int32_t y = startY; y <= lastY; ++y)
+        {
+            for (int32_t x = startX; x <= lastX; ++x)
+            {
+                assert(x >= 0 && x < _xSize && y >= 0 && y < _ySize);
+
+                if (const Tile& tile = GetTile(TileIndex(x, y));
+                    !tile.IsBlocked())
+                {
+                    _tileBuffer.emplace_back(&tile);
+                }
+            }
+        }
+
+        if (_tileBuffer.empty())
+        {
+            return false;
+        }
+
+        const int64_t index = std::uniform_int_distribution<int64_t>(0, std::ssize(_tileBuffer) - 1)(_mt);
+        const Tile& selected = *_tileBuffer[index];
+
+        const float posX = static_cast<float>(selected.index.x) * GameConstant::TILE_SIZE;
+        const float posY = static_cast<float>(selected.index.y) * GameConstant::TILE_SIZE;
+
+        result.x() = std::uniform_real_distribution<float>(posX, posX + GameConstant::TILE_SIZE)(_mt);
+        result.y() = std::uniform_real_distribution<float>(posY, posY + GameConstant::TILE_SIZE)(_mt);
+
+        return true;
+    }
+
     bool PathFindingSystem::FindRawPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest)
     {
         if (IsOutOfRange(src.x(), src.y()) || IsOutOfRange(dest.x(), dest.y()))
@@ -146,10 +264,10 @@ namespace sunlight
 
     bool PathFindingSystem::FindPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest)
     {
-        _pathBuffer.clear();
-        if (FindRawPath(_pathBuffer, src, dest))
+        _positionBuffer.clear();
+        if (FindRawPath(_positionBuffer, src, dest))
         {
-            SmoothPath(result, _pathBuffer);
+            SmoothPath(result, _positionBuffer);
 
             return true;
         }

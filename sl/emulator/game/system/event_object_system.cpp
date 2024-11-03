@@ -10,6 +10,7 @@
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
 #include "sl/emulator/game/system/event_object_spawner_component.h"
+#include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -31,6 +32,12 @@ namespace sunlight
     void EventObjectSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<SceneObjectSystem>());
+
+        if (PathFindingSystem* pathFindSystem = stage.Find<PathFindingSystem>();
+            pathFindSystem)
+        {
+            Add(*pathFindSystem);
+        }
     }
 
     bool EventObjectSystem::Subscribe(Stage& stage)
@@ -112,7 +119,13 @@ namespace sunlight
 
         const Eigen::Vector2f spawnPos = [&]() -> Eigen::Vector2f
             {
-                // TODO: select position on movable area
+                Eigen::Vector2f randPos;
+
+                if (PathFindingSystem* pathFindSystem = Find<PathFindingSystem>();
+                    pathFindSystem && pathFindSystem->GetRandPositionInBox(eventObject->GetArea(), randPos))
+                {
+                    return randPos;
+                }
 
                 return eventObject->GetCenterPosition();
             }();

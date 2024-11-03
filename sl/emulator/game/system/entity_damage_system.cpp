@@ -24,6 +24,7 @@
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/monster_drop_item_table_system.h"
+#include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
@@ -60,6 +61,12 @@ namespace sunlight
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerJobSystem>());
         Add(stage.Get<EntityMovementSystem>());
+
+        if (PathFindingSystem* pathFindSystem = stage.Find<PathFindingSystem>();
+            pathFindSystem)
+        {
+            Add(*pathFindSystem);
+        }
     }
 
     bool EntityDamageSystem::Subscribe(Stage& stage)
@@ -474,10 +481,15 @@ namespace sunlight
 				item->AddComponent(std::move(ownershipComponent));
 			}
 
-			// TODO: query movable area, spawn on that
-			Eigen::Vector2f spawnPos = monsterPos;
-			spawnPos.x() += dist(_mt);
-			spawnPos.x() += dist(_mt);
+            Eigen::Vector2f spawnPos;
+            if (PathFindingSystem* pathFindingSystem = Find<PathFindingSystem>();
+                !pathFindingSystem || !pathFindingSystem->GetRandPositionInCircle(monsterPos, GameConstant::MONSTER_DROP_ITEM_RADIUS, spawnPos))
+            {
+                spawnPos = monsterPos;
+
+                spawnPos.x() += dist(_mt);
+                spawnPos.x() += dist(_mt);
+            }
 
 			sceneObjectSystem.SpawnItem(std::move(item), monsterPos, spawnPos);
 		}

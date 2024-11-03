@@ -494,7 +494,7 @@ namespace sunlight
 
             const Eigen::Vector2f center(position.x(), position.y());
             const Eigen::Vector2f min(position.x() - x, position.y() - y);
-            const Eigen::Vector2f max(position.x() + y, position.y() + y);
+            const Eigen::Vector2f max(position.x() + x, position.y() + y);
 
             auto eventObject = std::make_shared<GameEventObject>(game_entity_id_type(event.id), center, yaw, Eigen::AlignedBox2f(min, max));
 

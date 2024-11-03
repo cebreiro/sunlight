@@ -22,6 +22,10 @@ namespace sunlight
     public:
         bool IsBlocked(Eigen::Vector2f src, Eigen::Vector2f dest) const;
 
+        bool GetRandPositionOnCircleOutLine(Eigen::Vector2f position, float radius, Eigen::Vector2f& result);
+        bool GetRandPositionInCircle(Eigen::Vector2f position, float radius, Eigen::Vector2f& result);
+        bool GetRandPositionInBox(const Eigen::AlignedBox2f& box, Eigen::Vector2f& result);
+
         bool FindRawPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest);
         bool FindPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest);
 
@@ -53,6 +57,8 @@ namespace sunlight
 
         std::vector<Tile> _tiles;
 
-        std::vector<Eigen::Vector2f> _pathBuffer;
+        std::mt19937 _mt;
+        std::vector<PtrNotNull<const Tile>> _tileBuffer;
+        std::vector<Eigen::Vector2f> _positionBuffer;
     };
 }
