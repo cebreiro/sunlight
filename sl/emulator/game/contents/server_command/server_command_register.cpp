@@ -52,6 +52,8 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandMonsterSpawn>(system));
         system.AddCommand(std::make_shared<ServerCommandMonsterKill>(system));
         system.AddCommand(std::make_shared<ServerCommandMonsterRemove>(system));
+        system.AddCommand(std::make_shared<ServerCommandMonsterAISuspend>(system));
+        system.AddCommand(std::make_shared<ServerCommandMonsterAIResume>(system));
 
         system.AddCommand(std::make_shared<ServerCommandDamageSet>());
         system.AddCommand(std::make_shared<ServerCommandDamageClear>());

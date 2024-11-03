@@ -50,6 +50,16 @@ namespace sunlight
     {
     }
 
+    bool MonsterController::IsRunning() const
+    {
+        if (_suspendContext && _suspendContext->IsPending())
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     void MonsterController::Start()
     {
         Post(*ExecutionContext::GetExecutor(), [self = shared_from_this()]()

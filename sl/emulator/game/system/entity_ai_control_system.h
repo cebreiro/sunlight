@@ -25,6 +25,14 @@ namespace sunlight
 
         auto GetServiceLocator() const -> const ServiceLocator&;
 
+    public:
+        bool SuspendMonsterControl(game_entity_id_type id);
+        bool ResumeMonsterControl(game_entity_id_type id);
+
+    private:
+        auto FindMonsterController(game_entity_id_type id) -> MonsterController*;
+        auto FindMonsterController(game_entity_id_type id) const -> const MonsterController*;
+
     private:
         void HandleEvent(const EventBubblingMonsterSpawn& e);
         void HandleEvent(const EventBubblingMonsterDespawn& e);

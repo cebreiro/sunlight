@@ -63,6 +63,46 @@ namespace sunlight
         return _serviceLocator;
     }
 
+    bool EntityAIControlSystem::SuspendMonsterControl(game_entity_id_type id)
+    {
+        MonsterController* controller = FindMonsterController(id);
+        if (!controller)
+        {
+            return false;
+        }
+
+        controller->Suspend();
+
+        return true;
+    }
+
+    bool EntityAIControlSystem::ResumeMonsterControl(game_entity_id_type id)
+    {
+        MonsterController* controller = FindMonsterController(id);
+        if (!controller)
+        {
+            return false;
+        }
+
+        controller->Resume();
+
+        return true;
+    }
+
+    auto EntityAIControlSystem::FindMonsterController(game_entity_id_type id) -> MonsterController*
+    {
+        const auto iter = _monsterControllers.find(id);
+
+        return iter != _monsterControllers.end() ? iter->second.get() : nullptr;
+    }
+
+    auto EntityAIControlSystem::FindMonsterController(game_entity_id_type id) const -> const MonsterController*
+    {
+        const auto iter = _monsterControllers.find(id);
+
+        return iter != _monsterControllers.end() ? iter->second.get() : nullptr;
+    }
+
     void EntityAIControlSystem::HandleEvent(const EventBubblingMonsterSpawn& e)
     {
         assert(!_monsterControllers.contains(e.monster->GetId()));

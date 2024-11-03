@@ -17,6 +17,8 @@ namespace sunlight
         MonsterController(EntityAIControlSystem& system, game_entity_id_type entityId, const MonsterData& data);
         ~MonsterController();
 
+        bool IsRunning() const;
+
         void Start();
         void Shutdown();
 

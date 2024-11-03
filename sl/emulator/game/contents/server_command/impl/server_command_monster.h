@@ -49,4 +49,32 @@ namespace sunlight
     private:
         ServerCommandSystem& _system;
     };
+
+    class ServerCommandMonsterAISuspend final : public ServerCommandT<>
+    {
+    public:
+        explicit ServerCommandMonsterAISuspend(ServerCommandSystem& system);
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+        bool Execute(GamePlayer& player) const override;
+
+    private:
+        ServerCommandSystem& _system;
+    };
+
+    class ServerCommandMonsterAIResume final : public ServerCommandT<>
+    {
+    public:
+        explicit ServerCommandMonsterAIResume(ServerCommandSystem& system);
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+        bool Execute(GamePlayer& player) const override;
+
+    private:
+        ServerCommandSystem& _system;
+    };
 }

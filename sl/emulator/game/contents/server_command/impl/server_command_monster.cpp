@@ -3,6 +3,7 @@
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/entity_damage_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -115,6 +116,62 @@ namespace sunlight
         {
             sceneObjectSystem.RemoveMonster(id);
         }
+
+        return true;
+    }
+
+    ServerCommandMonsterAISuspend::ServerCommandMonsterAISuspend(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandMonsterAISuspend::GetName() const -> std::string_view
+    {
+        return "monster_ai_suspend";
+    }
+
+    auto ServerCommandMonsterAISuspend::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandMonsterAISuspend::Execute(GamePlayer& player) const
+    {
+        EntityAIControlSystem& entityAIControlSystem = _system.Get<EntityAIControlSystem>();
+
+        _system.Get<EntityViewRangeSystem>().VisitMonster(player,
+            [&entityAIControlSystem](const GameMonster& monster)
+            {
+                entityAIControlSystem.SuspendMonsterControl(monster.GetId());
+            });
+
+        return true;
+    }
+
+    ServerCommandMonsterAIResume::ServerCommandMonsterAIResume(ServerCommandSystem& system)
+        : _system(system)
+    {
+    }
+
+    auto ServerCommandMonsterAIResume::GetName() const -> std::string_view
+    {
+        return "monster_ai_resume";
+    }
+
+    auto ServerCommandMonsterAIResume::GetRequiredGmLevel() const -> int8_t
+    {
+        return 0;
+    }
+
+    bool ServerCommandMonsterAIResume::Execute(GamePlayer& player) const
+    {
+        EntityAIControlSystem& entityAIControlSystem = _system.Get<EntityAIControlSystem>();
+
+        _system.Get<EntityViewRangeSystem>().VisitMonster(player,
+            [&entityAIControlSystem](const GameMonster& monster)
+            {
+                entityAIControlSystem.ResumeMonsterControl(monster.GetId());
+            });
 
         return true;
     }
