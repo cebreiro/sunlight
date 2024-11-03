@@ -41,3 +41,4 @@ logs/
 # Config
 *.config
 app_config.json
+game_config.json
