@@ -70,7 +70,13 @@ namespace sunlight
             PlayerStatType::Accr,
             PlayerStatType::Health,
             PlayerStatType::Wisdom,
+            PlayerStatType::Intell,
             PlayerStatType::Will,
+            PlayerStatType::MaxHP,
+            PlayerStatType::MaxSP,
+            PlayerStatType::Hit,
+            PlayerStatType::PhysicalDefense,
+            PlayerStatType::Protection,
         };
 
         const PlayerStatComponent& statComponent = player.GetStatComponent();
