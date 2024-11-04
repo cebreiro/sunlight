@@ -66,12 +66,19 @@ inline bool IsValid(const enumName element) {                                   
             default: return false;                                              \
         }                                                                       \
 }                                                                               \
-inline constexpr auto BOOST_PP_CAT(Get, BOOST_PP_CAT(enumName, List))() {       \
-    return std::array{                                                          \
-        BOOST_PP_SEQ_FOR_EACH(                                                  \
-            ENUM_LIST_ADD_ELEMENT,                                              \
-            enumName,                                                           \
-            ADD_PARENTHESES_FOR_EACH_TUPLE_IN_SEQ(enumElements)                 \
-        )                                                                       \
-    };                                                                          \
-}
+class BOOST_PP_CAT(enumName, Meta) {                                            \
+public:                                                                         \
+    static constexpr auto GetList() {                                           \
+        return std::array{                                                      \
+            BOOST_PP_SEQ_FOR_EACH(                                              \
+                ENUM_LIST_ADD_ELEMENT,                                          \
+                enumName,                                                       \
+                ADD_PARENTHESES_FOR_EACH_TUPLE_IN_SEQ(enumElements)             \
+            )                                                                   \
+        };                                                                      \
+    }                                                                           \
+                                                                                \
+    static constexpr auto GetSize() -> int64_t {                                \
+        return std::ssize(GetList());                                           \
+    }                                                                           \
+};

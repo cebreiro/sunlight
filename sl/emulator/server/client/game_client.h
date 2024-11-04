@@ -54,7 +54,7 @@ namespace sunlight
         int64_t _cid = -1;
 
         mutable std::shared_mutex _connectionMutex;
-        std::array<std::shared_ptr<ServerConnection>, static_cast<int32_t>(ServerType::Count)> _connections = {};
+        std::array<std::shared_ptr<ServerConnection>, ServerTypeMeta::GetSize()> _connections = {};
     };
 }
 

@@ -6,7 +6,5 @@ namespace sunlight
         (Login, 0)
         (Lobby)
         (Zone)
-
-        (Count)
     )
 }

@@ -31,6 +31,6 @@ namespace sunlight
         const ServiceLocator& _serviceLocator;
         SharedPtrNotNull<Strand> _strand;
 
-        std::array<Context, static_cast<int64_t>(SnowflakeCategory::Count)> _contexts;
+        std::array<Context, SnowflakeCategoryMeta::GetSize()> _contexts;
     };
 }

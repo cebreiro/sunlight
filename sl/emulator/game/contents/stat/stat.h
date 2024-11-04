@@ -12,7 +12,6 @@ namespace sunlight
         (StatusEffect)
         (StatusEffectPercentage)
         (JobReference)
-        (Count)
     )
 
     class Stat
@@ -30,7 +29,7 @@ namespace sunlight
         void SetChanges(bool value);
 
     private:
-        std::array<StatValue, static_cast<int32_t>(StatOriginType::Count)> _values = {};
+        std::array<StatValue, StatOriginTypeMeta::GetSize()> _values = {};
 
         bool _changes = false;
         StatValue _statSum = {};

@@ -61,7 +61,7 @@ namespace sunlight
 
     private:
         ServiceLocator _serviceLocator;
-        ServerType _type = ServerType::Count;
+        ServerType _type = {};
         std::atomic<bool> _shutdown = false;
 
         SharedPtrNotNull<Session> _session;

@@ -18,7 +18,7 @@ namespace sunlight
 
     private:
         std::unordered_multimap<int32_t, PtrNotNull<IPassiveEffect>> _effects;
-        std::array<std::vector<PtrNotNull<IPassiveEffect>>, static_cast<int32_t>(PassiveEffectType::Count)> _effectTypeIndex;
+        std::array<std::vector<PtrNotNull<IPassiveEffect>>, PassiveEffectTypeMeta::GetSize()> _effectTypeIndex;
     };
 
     template <typename T> requires std::derived_from<T, IPassiveEffect>

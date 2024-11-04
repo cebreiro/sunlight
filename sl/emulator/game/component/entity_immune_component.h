@@ -18,6 +18,6 @@ namespace sunlight
         auto GetList(ImmuneType type) const -> const std::vector<std::pair<ImmuneOrigin, int32_t>>&;
 
     private:
-        std::array<std::vector<std::pair<ImmuneOrigin, int32_t>>, static_cast<int32_t>(ImmuneType::Count)> _immuneOrigins;
+        std::array<std::vector<std::pair<ImmuneOrigin, int32_t>>, ImmuneTypeMeta::GetSize()> _immuneOrigins;
     };
 }

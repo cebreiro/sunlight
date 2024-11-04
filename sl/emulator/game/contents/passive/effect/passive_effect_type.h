@@ -7,7 +7,5 @@ namespace sunlight
         (PoisonEnchant)
         (Stat)
         (StatusEffect)
-
-        (Count)
     );
 }

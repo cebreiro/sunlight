@@ -81,13 +81,8 @@ namespace sunlight
 
             oss << fmt::format("{}: {} ||", ToString(statType), statComponent.GetFinalStat(statType).As<int32_t>());
             
-            for (StatOriginType originType : GetStatOriginTypeList())
+            for (StatOriginType originType : StatOriginTypeMeta::GetList())
             {
-                if (originType == StatOriginType::Count)
-                {
-                    continue;
-                }
-
                 const int32_t value = statComponent.Get(statType).Get(originType).As<int32_t>();
                 if (value != 0)
                 {
@@ -100,4 +95,17 @@ namespace sunlight
 
         return true;
     }
+
+
+    struct Test
+    {
+        static constexpr auto asd = std::array{
+            PlayerStatType::Str,
+            PlayerStatType::Dex,
+            PlayerStatType::Accr,
+            PlayerStatType::Health,
+            PlayerStatType::Wisdom,
+            PlayerStatType::Will,
+        };
+    };
 }

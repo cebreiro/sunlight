@@ -233,7 +233,6 @@ namespace sunlight
         case ItemMixGradeWeightType::Super:
             return dataList[static_cast<int32_t>(ItemMixGradeType::Super)];
         case ItemMixGradeWeightType::Fail:
-        case ItemMixGradeWeightType::Count:
         default:;
         }
 

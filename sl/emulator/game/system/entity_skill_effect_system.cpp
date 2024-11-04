@@ -736,7 +736,6 @@ namespace sunlight
         break;
         case PassiveEffectType::NormalAttack:
         case PassiveEffectType::PoisonEnchant:
-        case PassiveEffectType::Count:
         default:;
         }
     }
@@ -807,7 +806,6 @@ namespace sunlight
         break;
         case PassiveEffectType::NormalAttack:
         case PassiveEffectType::PoisonEnchant:
-        case PassiveEffectType::Count:
         default:;
         }
     }

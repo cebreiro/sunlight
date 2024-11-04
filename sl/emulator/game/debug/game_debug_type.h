@@ -7,7 +7,5 @@ namespace sunlight
         (PlayerItemSlot)
         (PlayerAccountStorageSlot)
         (NPCItemSlot)
-
-        (Count)
     )
 }

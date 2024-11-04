@@ -47,7 +47,7 @@ namespace sunlight
 
         if (GameDebugger* debugger = _system.GetServiceLocator().Find<GameDebugger>(); debugger)
         {
-            if (type < 0 || type >= static_cast<int32_t>(GameDebugType::Count))
+            if (type < 0 || type >= static_cast<int32_t>(GameDebugTypeMeta::GetSize()))
             {
                 return false;
             }

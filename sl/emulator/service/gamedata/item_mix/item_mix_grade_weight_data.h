@@ -14,12 +14,10 @@ namespace sunlight
         (Middle, 2)
         (High, 3)
         (Super, 4)
-
-        (Count)
     )
 
     constexpr int32_t item_mix_grade_level_size = 41;
-    constexpr int32_t item_mix_grade_weight_size = static_cast<int32_t>(ItemMixGradeWeightType::Count);
+    constexpr int32_t item_mix_grade_weight_size = static_cast<int32_t>(ItemMixGradeWeightTypeMeta::GetSize());
 
     class ItemMixGradeWeightData
     {
