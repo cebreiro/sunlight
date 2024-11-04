@@ -1,6 +1,7 @@
 #pragma once
 #include "sl/emulator/game/contents/server_command/impl/server_command_damage.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_debug.h"
+#include "sl/emulator/game/contents/server_command/impl/server_command_etc.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_exp.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_item.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_job.h"

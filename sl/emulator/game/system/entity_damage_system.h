@@ -40,7 +40,8 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
-        void KillMonster(GamePlayer& player, game_entity_id_type mobId);
+        void KillMonster(GamePlayer& player, GameMonster& target);
+        void KillPlayer(GamePlayer& target);
 
         void ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& target, int32_t attackId, WeaponClassType weaponClass, const sox::MotionData& motionData);
         void ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill, const SkillEffectData& effect,
@@ -54,6 +55,7 @@ namespace sunlight
         void ProcessPlayerDamageResult(GamePlayer& player, GameMonster& target, int32_t damage, const DamageResult* result);
         void ProcessMonsterDamageResult(GameEntity& target, int32_t damage, const DamageResult* result);
 
+        void ProcessPlayerDead(GamePlayer& player);
         void ProcessMonsterDead(GamePlayer& player, GameMonster& monster, const DamageResult* damageResult);
         void DropMonsterItem(const GameMonster& monster, const GamePlayer* player);
 

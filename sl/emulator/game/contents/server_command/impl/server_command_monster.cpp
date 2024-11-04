@@ -70,18 +70,18 @@ namespace sunlight
 
     bool ServerCommandMonsterKill::Execute(GamePlayer& player) const
     {
-        std::vector<game_entity_id_type> mobIds;
+        std::vector<PtrNotNull<GameMonster>> targets;
 
-        _system.Get<EntityViewRangeSystem>().VisitMonster(player, [&mobIds](const GameMonster& monster)
+        _system.Get<EntityViewRangeSystem>().VisitMonster(player, [&targets](GameMonster& monster)
             {
-                mobIds.push_back(monster.GetId());
+                targets.push_back(&monster);
             });
 
         EntityDamageSystem& damageSystem = _system.Get<EntityDamageSystem>();
 
-        for (const game_entity_id_type mobId : mobIds)
+        for (GameMonster& target : targets | notnull::reference)
         {
-            damageSystem.KillMonster(player, mobId);
+            damageSystem.KillMonster(player, target);
         }
 
         return true;

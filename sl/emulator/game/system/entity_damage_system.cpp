@@ -84,18 +84,44 @@ namespace sunlight
         return GameSystem::GetClassId<EntityDamageSystem>();
     }
 
-    void EntityDamageSystem::KillMonster(GamePlayer& player, game_entity_id_type mobId)
+    void EntityDamageSystem::KillMonster(GamePlayer& player, GameMonster& target)
     {
-        GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameMonster::TYPE, mobId);
-        if (!entity)
+        target.GetStatComponent().SetHP(0);
+
+        ProcessMonsterDead(player, target, nullptr);
+    }
+
+    void EntityDamageSystem::KillPlayer(GamePlayer& target)
+    {
+        if (target.GetStatComponent().IsDead())
         {
             return;
         }
 
-        GameMonster& monster = *entity->Cast<GameMonster>();
-        monster.GetStatComponent().SetHP(0);
+        Get<EntityMovementSystem>().Remove(target.GetId());
 
-        ProcessMonsterDead(player, monster, nullptr);
+        target.GetComponent<EntityStateComponent>().SetState(GameEntityState{
+                .type = GameEntityStateType::Dying
+            });
+
+        const int32_t maxHP = target.GetStatComponent().GetFinalStat(PlayerStatType::MaxHP).As<int32_t>();
+
+        int32_t _1 = 0;
+        int32_t _2 = 0;
+        Get<PlayerStatSystem>().ApplyDamage(target, maxHP, _1, _2);
+
+        SceneObjectComponent& sceneObjectComponent = target.GetComponent<SceneObjectComponent>();
+        sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
+        sceneObjectComponent.SetMoving(false);
+
+        Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
+            {
+                player.Defer(ZonePacketS2CCreator::CreateObjectMove(target));
+                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, 0, HPChangeFloaterType::None));
+                player.Defer(SceneObjectPacketCreator::CreateState(target));
+
+                player.FlushDeferred();
+            });
     }
 
     void EntityDamageSystem::ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& target, int32_t attackId, WeaponClassType weaponClass, const sox::MotionData& motionData)
@@ -352,6 +378,13 @@ namespace sunlight
             }
 
             Get<PlayerStatSystem>().ApplyDamage(player, damage, maxHP, hp);
+
+            if (hp <= 0)
+            {
+                ProcessPlayerDead(player);
+
+                return;
+            }
         }
         else
         {
@@ -360,14 +393,7 @@ namespace sunlight
             assert(false);
         }
 
-        if (hp <= 0)
-        {
-            target.GetComponent<EntityStateComponent>().SetState(GameEntityState{
-                .type = GameEntityStateType::Dying
-                });
-        }
-
-        if (blow || hp <= 0)
+        if (blow)
         {
             Get<EntityMovementSystem>().Remove(target.GetId());
 
@@ -378,7 +404,7 @@ namespace sunlight
 
         Get<EntityViewRangeSystem>().VisitPlayer(target, [&](GamePlayer& player)
             {
-                if (blow || hp <= 0)
+                if (blow)
                 {
                     player.Defer(ZonePacketS2CCreator::CreateObjectMove(target));
                 }
@@ -388,16 +414,39 @@ namespace sunlight
                     player.Defer(StatusMessageCreator::CreateDamageResult(target, *result));
                 }
 
-                if (hp <= 0)
-                {
-                    player.Defer(SceneObjectPacketCreator::CreateState(target));
-                }
-                else
-                {
-                    player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, hp, HPChangeFloaterType::None));
-                }
+                player.Defer(StatusMessageCreator::CreateHPChange(target, maxHP, hp, HPChangeFloaterType::None));
 
                 player.FlushDeferred();
+            });
+    }
+
+    void EntityDamageSystem::ProcessPlayerDead(GamePlayer& player)
+    {
+        Get<EntityMovementSystem>().Remove(player.GetId());
+
+        const auto newState = GameEntityState{
+            .type = GameEntityStateType::Dying
+        };
+
+        player.GetComponent<EntityStateComponent>().SetState(newState);
+
+        const int32_t maxHP = player.GetStatComponent().GetFinalStat(PlayerStatType::MaxHP).As<int32_t>();
+
+        int32_t _1 = 0;
+        int32_t _2 = 0;
+        Get<PlayerStatSystem>().ApplyDamage(player, maxHP, _1, _2);
+
+        SceneObjectComponent& sceneObjectComponent = player.GetComponent<SceneObjectComponent>();
+        sceneObjectComponent.SetDestPosition(sceneObjectComponent.GetPosition());
+        sceneObjectComponent.SetMoving(false);
+
+        Get<EntityViewRangeSystem>().VisitPlayer(player, [&](GamePlayer& visited)
+            {
+                visited.Defer(ZonePacketS2CCreator::CreateObjectMove(player));
+                visited.Defer(StatusMessageCreator::CreateHPChange(player, maxHP, 0, HPChangeFloaterType::None));
+                visited.Defer(SceneObjectPacketCreator::CreateState(player, newState));
+
+                visited.FlushDeferred();
             });
     }
 

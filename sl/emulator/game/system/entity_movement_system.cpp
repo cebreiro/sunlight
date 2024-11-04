@@ -163,18 +163,16 @@ namespace sunlight
             return;
         }
 
+        Remove(entity.GetId());
+
         sceneObjectComponent->SetMoving(false);
         sceneObjectComponent->SetPosition(position);
         sceneObjectComponent->SetDestPosition(position);
 
-        if (GamePlayer* player = entity.Cast<GamePlayer>(); player)
-        {
-            player->Send(ZonePacketS2CCreator::CreateObjectForceMove(entity));
-        }
+        EntityViewRangeSystem& viewRangeSystem = Get<EntityViewRangeSystem>();
 
-        Remove(entity.GetId());
-
-        Get<EntityViewRangeSystem>().UpdateViewRange(entity, sceneObjectComponent->GetPosition());
+        viewRangeSystem.Broadcast(entity, ZonePacketS2CCreator::CreateObjectForceMove(entity), true);
+        viewRangeSystem.UpdateViewRange(entity, sceneObjectComponent->GetPosition());
     }
 
     void EntityMovementSystem::MoveToPosition(GameEntity& entity, Eigen::Vector2f position, float speed)
