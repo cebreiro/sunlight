@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <boost/preprocessor.hpp>
 
 // https://stackoverflow.com/questions/5093460/how-to-convert-an-enum-type-variable-to-a-string/42317427#42317427
@@ -29,6 +30,9 @@ BOOST_PP_IF(BOOST_PP_EQUAL(BOOST_PP_TUPLE_SIZE(elementTuple), 3),               
 
 #define GENERATE_CASE_FOR_IS_VALID_SWITCH(r, enumName, elementTuple)                    \
     DEFINE_CASE_HAVING_ONLY_RETURN_TRUE(enumName, BOOST_PP_TUPLE_ELEM(0, elementTuple))
+
+#define ENUM_LIST_ADD_ELEMENT(r, enumName, elementTuple)                                \
+    enumName::BOOST_PP_TUPLE_ELEM(0, elementTuple),
 
 // ENUM_CLASS(Name, type,
 // (NAME0, value0)
@@ -61,4 +65,13 @@ inline bool IsValid(const enumName element) {                                   
             )                                                                   \
             default: return false;                                              \
         }                                                                       \
+}                                                                               \
+inline constexpr auto BOOST_PP_CAT(Get, BOOST_PP_CAT(enumName, List))() {       \
+    return std::array{                                                          \
+        BOOST_PP_SEQ_FOR_EACH(                                                  \
+            ENUM_LIST_ADD_ELEMENT,                                              \
+            enumName,                                                           \
+            ADD_PARENTHESES_FOR_EACH_TUPLE_IN_SEQ(enumElements)                 \
+        )                                                                       \
+    };                                                                          \
 }

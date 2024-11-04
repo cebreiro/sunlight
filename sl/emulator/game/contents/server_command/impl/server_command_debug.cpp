@@ -433,6 +433,7 @@ namespace sunlight
 
     auto ServerCommandDebugStringTable::GetRequiredGmLevel() const -> int8_t
     {
+        return 0;
     }
 
     bool ServerCommandDebugStringTable::Execute(GamePlayer& player, int32_t index) const

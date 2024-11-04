@@ -48,6 +48,7 @@ namespace sunlight
 
         system.AddCommand(std::make_shared<ServerCommandStatHPSet>(system));
         system.AddCommand(std::make_shared<ServerCommandStatSPSet>(system));
+        system.AddCommand(std::make_shared<ServerCommandStatShow>());
 
         system.AddCommand(std::make_shared<ServerCommandMonsterSpawn>(system));
         system.AddCommand(std::make_shared<ServerCommandMonsterKill>(system));
