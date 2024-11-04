@@ -10,7 +10,6 @@
 #include "sl/emulator/game/contents/server_command/impl/server_command_npc.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_packet.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_script.h"
-#include "sl/emulator/game/contents/server_command/impl/server_command_show.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_skill.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_stage.h"
 #include "sl/emulator/game/contents/server_command/impl/server_command_stat.h"

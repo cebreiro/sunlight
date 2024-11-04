@@ -149,5 +149,17 @@ namespace sunlight
         ServerCommandSystem& _system;
     };
 
+    class ServerCommandDebugStringTable final : public ServerCommandT<int32_t>
+    {
+    public:
+        ServerCommandDebugStringTable() = default;
+
+        auto GetName() const -> std::string_view override;
+        auto GetRequiredGmLevel() const -> int8_t override;
+
+    public:
+        bool Execute(GamePlayer& player, int32_t index) const override;
+    };
+
 
 }

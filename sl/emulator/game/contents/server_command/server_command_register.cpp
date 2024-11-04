@@ -10,8 +10,6 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandItemAdd>(system));
         system.AddCommand(std::make_shared<ServerCommandItemSpawn>(system));
 
-        system.AddCommand(std::make_shared<ServerCommandShowStringTable>());
-
         system.AddCommand(std::make_shared<ServerCommandPacketObjectLeave>());
         system.AddCommand(std::make_shared<ServerCommandPacketHairColorChange>(system));
         system.AddCommand(std::make_shared<ServerCommandPacketSkinColorChange>(system));
@@ -30,6 +28,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandDebugPathFindRaw>(system));
         system.AddCommand(std::make_shared<ServerCommandDebugPathBlocked>(system));
         system.AddCommand(std::make_shared<ServerCommandDebugMonsterPosition>(system));
+        system.AddCommand(std::make_shared<ServerCommandDebugStringTable>());
 
         system.AddCommand(std::make_shared<ServerCommandJobPromote>(system));
 

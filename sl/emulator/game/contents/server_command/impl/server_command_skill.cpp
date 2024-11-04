@@ -34,6 +34,5 @@ namespace sunlight
         }
 
         return _system.Get<PlayerJobSystem>().AddSkill(player, static_cast<JobId>(job), skillId);
-
     }
 }

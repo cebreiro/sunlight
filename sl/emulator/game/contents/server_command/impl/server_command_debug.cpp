@@ -7,15 +7,20 @@
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
+#include "sl/emulator/game/entity/game_entity_network_id.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
+#include "sl/emulator/game/message/zone_message_deliver_type.h"
+#include "sl/emulator/game/message/zone_message_type.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
+#include "sl/emulator/server/packet/zone_packet_s2c.h"
+#include "sl/emulator/server/packet/io/sl_packet_writer.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
@@ -417,6 +422,30 @@ namespace sunlight
                     observableComponent.AddObserver(ObservableType::EntityPosition, id);
                 }
             });
+
+        return true;
+    }
+
+    auto ServerCommandDebugStringTable::GetName() const -> std::string_view
+    {
+        return "show_string_table";
+    }
+
+    auto ServerCommandDebugStringTable::GetRequiredGmLevel() const -> int8_t
+    {
+    }
+
+    bool ServerCommandDebugStringTable::Execute(GamePlayer& player, int32_t index) const
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::STRING_TABLE_DEBUG_SHOW);
+        writer.Write<int32_t>(index);
+
+        player.Send(writer.Flush());
 
         return true;
     }
