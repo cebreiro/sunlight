@@ -14,7 +14,7 @@ namespace sunlight
     public:
         virtual ~GameSystem() = default;
 
-        bool HasCyclicSystemDependency() const;
+        bool HasCyclicSystemDependency(std::vector<std::string>* optResultCyclePath = nullptr) const;
 
         virtual void InitializeSubSystem(Stage& stage);
         virtual bool Subscribe(Stage& stage);

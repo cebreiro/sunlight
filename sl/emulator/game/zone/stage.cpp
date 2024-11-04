@@ -382,11 +382,26 @@ namespace sunlight
 
         for (const SharedPtrNotNull<GameSystem>& system : range)
         {
-            if (system->HasCyclicSystemDependency())
+            std::vector<std::string> cyclePaths;
+            if (system->HasCyclicSystemDependency(&cyclePaths))
             {
+                assert(!cyclePaths.empty());
+
+                std::ostringstream oss;
+
+                constexpr const char* connectionStr = " - ";
+
+                for (const std::string& path : cyclePaths)
+                {
+                    oss << path << connectionStr;
+                }
+
+                std::string str = oss.str();
+                str.erase(str.end() - static_cast<int64_t>(::strlen(connectionStr)), str.end());
+
                 assert(false);
 
-                throw std::runtime_error("system cyclic dependency detected!!");
+                throw std::runtime_error(fmt::format("system cyclic dependency detected. cycle: {}", str));
             }
         }
     }
