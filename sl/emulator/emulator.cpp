@@ -16,6 +16,7 @@
 #include "sl/emulator/service/config/config_provide_service.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/game_cheat_log/game_cheat_log_service.h"
 #include "sl/emulator/service/gateway/gateway_service.h"
 #include "sl/emulator/service/hash/safe_hash_service.h"
 #include "sl/emulator/service/hash/sha256_hash_service.h"
@@ -43,6 +44,7 @@ namespace sunlight
         , _sha256HashService(std::make_shared<Sha256HashService>(GetServiceLocator(), *_ioExecutor))
         , _snowflakeService(std::make_shared<SnowflakeService>(GetServiceLocator(), *_ioExecutor))
         , _uniqueNameService(std::make_shared<UniqueNameService>(GetServiceLocator(), *_ioExecutor))
+        , _gameCheatLogService(std::make_shared<GameCheatLogService>(GetServiceLocator(), *_ioExecutor))
         , _authenticationService(std::make_shared<AuthenticationService>(GetServiceLocator(), *_ioExecutor))
         , _databaseService(std::make_shared<DatabaseService>(GetServiceLocator(), *_ioExecutor, _connectionPool))
         , _gatewayService(std::make_shared<GatewayService>(GetServiceLocator(), *_ioExecutor))
@@ -57,6 +59,7 @@ namespace sunlight
         RegisterService(_sha256HashService);
         RegisterService(_snowflakeService);
         RegisterService(_uniqueNameService);
+        RegisterService(_gameCheatLogService);
 
         RegisterService(_authenticationService);
         RegisterService(_databaseService);
@@ -81,6 +84,7 @@ namespace sunlight
         InitializeLogger();
         InitializeExecutor();
         InitializeDatabaseConnection();
+        InitializeGameCheatLogger();
         InitializeGameData();
         InitializeService();
         InitializeServer();
@@ -242,6 +246,17 @@ namespace sunlight
 
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize database connection --> Done", GetName()));
+    }
+
+    void SlEmulator::InitializeGameCheatLogger()
+    {
+        SUNLIGHT_LOG_INFO(GetServiceLocator(),
+            fmt::format("[{}] initialize cheat logger", GetName()));
+
+        _gameCheatLogService->Initialize(_basePath / _appConfig.pathConfig.cheatLogPath);
+
+        SUNLIGHT_LOG_INFO(GetServiceLocator(),
+            fmt::format("[{}] initialize cheat logger --> Done.", GetName()));
     }
 
     void SlEmulator::InitializeGameData()

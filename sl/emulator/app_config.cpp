@@ -6,6 +6,7 @@ namespace sunlight
     {
         config.logFilePath = j.at("log_file_path").get<std::string>();
         config.gameConfigFilePath = j.at("game_config_file_path").get<std::string>();
+        config.cheatLogPath = j.at("cheat_log_path").get<std::string>();
         config.assetPath = j.at("asset_path").get<std::string>();
     }
 

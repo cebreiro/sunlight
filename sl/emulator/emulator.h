@@ -16,6 +16,7 @@ namespace sunlight
     class Sha256HashService;
     class SnowflakeService;
     class UniqueNameService;
+    class GameCheatLogService;
 }
 
 namespace sunlight
@@ -60,6 +61,7 @@ namespace sunlight
         void InitializeLogger();
         void InitializeExecutor();
         void InitializeDatabaseConnection();
+        void InitializeGameCheatLogger();
         void InitializeGameData();
         void InitializeService();
         void InitializeServer();
@@ -80,6 +82,7 @@ namespace sunlight
         SharedPtrNotNull<Sha256HashService> _sha256HashService;
         SharedPtrNotNull<SnowflakeService> _snowflakeService;
         SharedPtrNotNull<UniqueNameService> _uniqueNameService;
+        SharedPtrNotNull<GameCheatLogService> _gameCheatLogService;
 
         SharedPtrNotNull<AuthenticationService> _authenticationService;
         SharedPtrNotNull<DatabaseService> _databaseService;

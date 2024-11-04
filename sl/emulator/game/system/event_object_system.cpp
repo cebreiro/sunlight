@@ -20,6 +20,7 @@
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/map/map_data_provider.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
+#include "sl/emulator/service/game_cheat_log/game_cheat_log_service.h"
 
 namespace sunlight
 {
@@ -226,13 +227,14 @@ namespace sunlight
             const Eigen::AlignedBox2f& areaBox = eventObject->GetArea();
 
             const Eigen::Vector2f closetPoint = playerPosition.cwiseMax(areaBox.min()).cwiseMin(areaBox.max());
+
             const float radius = static_cast<float>(sceneObjectComponent.GetBodySize()) + GameConstant::AABB_COLLISION_NETWORK_DELAY_MARGIN;
+            const float distanceSq = (closetPoint - playerPosition).squaredNorm();
 
-            if ((closetPoint - playerPosition).squaredNorm() >= (radius * radius))
+            if (distanceSq >= (radius * radius))
             {
-                // TODO: allow and cheat log
-
-                break;
+                _serviceLocator.Get<GameCheatLogService>().Log(GameCheatLogType::Trigger, player.GetName(),
+                    fmt::format("trigger distance. allow: {}, distance: {}", radius, std::sqrt(distanceSq)));
             }
 
             if (const auto* stageEntranceComponent  = eventObject->FindComponent<EventObjectStageEntrancePortalComponent>();

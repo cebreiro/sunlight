@@ -6,6 +6,7 @@ namespace sunlight
     {
         std::string logFilePath;
         std::string gameConfigFilePath;
+        std::string cheatLogPath;
         std::string assetPath;
 
         friend void from_json(const nlohmann::json& j, PathConfig& config);

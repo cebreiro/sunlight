@@ -37,6 +37,7 @@ build/
 bin/
 obj/
 logs/
+cheat/
 
 # Config
 *.config
