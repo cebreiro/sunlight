@@ -110,6 +110,7 @@ namespace sunlight
     private:
         const ServiceLocator& _serviceLocator;
 
+        std::mt19937 _mt;
         std::vector<item_remove_result_type> _itemRemoveResult;
     };
 }

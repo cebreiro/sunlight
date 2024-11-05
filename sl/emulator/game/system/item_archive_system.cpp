@@ -21,6 +21,7 @@
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
@@ -40,6 +41,7 @@ namespace sunlight
 {
     ItemArchiveSystem::ItemArchiveSystem(const ServiceLocator& serviceLocator)
         : _serviceLocator(serviceLocator)
+        , _mt(std::random_device{}())
     {
     }
 
@@ -51,6 +53,12 @@ namespace sunlight
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerIndexSystem>());
         Add(stage.Get<PlayerAppearanceSystem>());
+
+        if (PathFindingSystem* pathFindingSystem = stage.Find<PathFindingSystem>();
+            pathFindingSystem)
+        {
+            Add(*pathFindingSystem);
+        }
     }
 
     bool ItemArchiveSystem::Subscribe(Stage& stage)
@@ -1594,12 +1602,22 @@ namespace sunlight
         ownershipComponent.Add(player.GetCId());
         ownershipComponent.SetEndTimePoint(GameTimeService::Now() + std::chrono::seconds(30));
 
-        Eigen::Vector2f destPosition = player.GetSceneObjectComponent().GetPosition();
-        destPosition.x() += 30.f;
-        destPosition.y() += 30.f;
+        const Eigen::Vector2f& playerPosition = player.GetSceneObjectComponent().GetPosition();
+        Eigen::Vector2f destPosition;
 
-        Get<SceneObjectSystem>().SpawnItem(std::move(pickedItem),
-            player.GetSceneObjectComponent().GetPosition(), destPosition);
+        if (PathFindingSystem* pathFindingSystem = Find<PathFindingSystem>();
+            !pathFindingSystem || pathFindingSystem->GetRandPositionInCircle(playerPosition, GameConstant::MONSTER_DROP_ITEM_RADIUS, destPosition))
+        {
+            constexpr int32_t range = static_cast<int32_t>(GameConstant::MONSTER_DROP_ITEM_RADIUS);
+
+            std::uniform_int_distribution<int32_t> dist(-range, range);
+
+            destPosition = playerPosition;
+            destPosition.x() += static_cast<float>(dist(_mt));
+            destPosition.y() += static_cast<float>(dist(_mt));
+        }
+
+        Get<SceneObjectSystem>().SpawnItem(std::move(pickedItem), playerPosition, destPosition);
 
         return true;
     }
