@@ -25,8 +25,9 @@
 
 namespace sunlight
 {
-    PlayerGroupSystem::PlayerGroupSystem(const ServiceLocator& serviceLocator)
+    PlayerGroupSystem::PlayerGroupSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
+        , _stageId(stageId)
         , _itemMixMessageHandlers([]() -> std::unordered_map<int32_t, UniquePtrNotNull<IGroupMessageHandler>>
             {
                 std::unordered_map<int32_t, UniquePtrNotNull<IGroupMessageHandler>> result;
@@ -118,6 +119,11 @@ namespace sunlight
     auto PlayerGroupSystem::GetServiceLocator() const -> const ServiceLocator&
     {
         return _serviceLocator;
+    }
+
+    auto PlayerGroupSystem::GetStageId() const -> int32_t
+    {
+        return _stageId;
     }
 
     auto PlayerGroupSystem::GetRandomEngine() -> std::mt19937&

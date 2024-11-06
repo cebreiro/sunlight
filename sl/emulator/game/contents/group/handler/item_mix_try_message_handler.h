@@ -27,6 +27,6 @@ namespace sunlight
         auto RollDiceAndGetResult(PlayerGroupSystem& system, const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& data, int32_t gradeLevel) const
             -> const ItemData*;
 
-        auto CalculateItemMixExp(const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& memberData, int32_t skillLevel, int32_t materialLevel) const -> int32_t;
+        static auto CalculateItemMixExp(const ItemMixDataProvider& dataProvider, const ItemMixGroupMemberData& memberData, int32_t skillLevel, int32_t materialLevel) -> int32_t;
     };
 }

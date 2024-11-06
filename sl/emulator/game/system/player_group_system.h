@@ -19,7 +19,7 @@ namespace sunlight
     class PlayerGroupSystem final : public GameSystem
     {
     public:
-        explicit PlayerGroupSystem(const ServiceLocator& serviceLocator);
+        PlayerGroupSystem(const ServiceLocator& serviceLocator, int32_t stageId);
         ~PlayerGroupSystem();
 
         void InitializeSubSystem(Stage& stage) override;
@@ -28,6 +28,7 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
         auto GetServiceLocator() const -> const ServiceLocator&;
+        auto GetStageId() const -> int32_t;
         auto GetRandomEngine() -> std::mt19937&;
 
     public:
@@ -43,19 +44,21 @@ namespace sunlight
 
         void SpawnStoredItem(const GameGroup& group, GamePlayer& player, const GameItem& item, int32_t page, int32_t price, int32_t offset);
 
+    public:
+        auto FindGroup(int32_t groupId) -> GameGroup*;
+        auto FindGroup(int32_t groupId) const -> const GameGroup*;
+
     private:
         void HandleStateProposition(const ZoneMessage& message);
         void HandleCreateGroup(const ZoneCommunityMessage& message);
         void HandleGroupMessage(const ZoneCommunityMessage& message);
 
     private:
-        auto FindGroup(int32_t groupId) -> GameGroup*;
-        auto FindGroup(int32_t groupId) const -> const GameGroup*;
-
         static auto CalculateStoredItemPosition(Eigen::Vector2f ownerPos, float ownerYaw, int64_t slot) -> std::pair<Eigen::Vector2f, float>;
 
     private:
         const ServiceLocator& _serviceLocator;
+        int32_t _stageId = 0;
 
         int32_t _nextGroupId = 0;
         std::unordered_map<int32_t, UniquePtrNotNull<GameGroup>> _gameGroups;

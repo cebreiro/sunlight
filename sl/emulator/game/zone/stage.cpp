@@ -350,7 +350,7 @@ namespace sunlight
         Add(std::make_shared<PlayerQuestSystem>());
         Add(std::make_shared<NPCShopSystem>(_serviceLocator));
         Add(std::make_shared<PlayerProfileSystem>(_serviceLocator, _zoneId));
-        Add(std::make_shared<PlayerGroupSystem>(_serviceLocator));
+        Add(std::make_shared<PlayerGroupSystem>(_serviceLocator, _stageData.id));
         Add(std::make_shared<ItemTradeSystem>(_serviceLocator));
         Add(std::make_shared<PlayerChannelSystem>(_serviceLocator, _zoneId));
         Add(std::make_shared<PlayerIndexSystem>());
