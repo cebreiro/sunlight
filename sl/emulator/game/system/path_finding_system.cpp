@@ -9,39 +9,34 @@ namespace sunlight
         : _serviceLocator(serviceLocator)
         , _width(terrain.width)
         , _height(terrain.height)
-        , _xSize(_width * GameConstant::TILE_PER_STAGE_BLOCK)
-        , _ySize(_height * GameConstant::TILE_PER_STAGE_BLOCK)
+        , _xSize(_width * 16)
+        , _ySize(_height * 16)
         , _mt(std::random_device{}())
     {
         _tiles.resize(_xSize * _ySize);
 
-        int32_t index = 0;
+        constexpr double scale = GameConstant::TILE_SCALE;
 
-        for (int32_t h = 0; h < _height * 4; ++h)
-        {
-            for (int32_t k = 0; k < 2; ++k)
+        // client 0x4DFB70
+        const auto isMovable = [&](double x, double y)
             {
-                for (int32_t i = 0; i <2; ++i)
-                {
-                    for (int32_t w = 0; w < _width * 2; ++w)
-                    {
-                        const TileIndex tileIndex(w * 2 + i, h);
-                        const int32_t flatIndex = CalculateFlatIndex(tileIndex);
+                const int64_t l = *(terrain.movableData.data() + (static_cast<int64_t>(x * scale) / 8 + (_width * 2) * static_cast<int64_t>(y * scale))) & 0xFF;
+                const int64_t r = (1 << (7 - static_cast<int64_t>(x * scale) % 8)) & 0xFF;
 
-                        if (k == 0)
-                        {
-                            Tile& tile = _tiles[flatIndex];
-                            tile.index = tileIndex;
-                            tile.value = terrain.movableData[index];
-                        }
-                        else
-                        {
-                            // unk.. data2
-                        }
+                return (l & r) == 0;
+            };
 
-                        ++index;
-                    }
-                }
+        // client 0x4DC689
+        for (int32_t y = 0; y < _ySize; ++y)
+        {
+            for (int32_t x = 0; x < _xSize; ++x)
+            {
+                const bool result = isMovable(x * 16.0, y * 16.0);
+
+                Tile& tile = _tiles[x + y * _xSize];
+
+                tile.index = { x, y };
+                tile.blocked = !result;
             }
         }
 
@@ -50,7 +45,7 @@ namespace sunlight
             for (int32_t x = 0; x < _xSize; ++x)
             {
                 Tile& current = GetTile(TileIndex(x, y));
-                if (current.IsBlocked())
+                if (current.blocked)
                 {
                     continue;
                 }
@@ -66,7 +61,7 @@ namespace sunlight
                     }
 
                     Tile& other = GetTile(TileIndex(otherX, otherY));
-                    if (!other.IsBlocked())
+                    if (!other.blocked)
                     {
                         current.connections.emplace_back(&other);
                     }
@@ -123,7 +118,7 @@ namespace sunlight
                 return true;
             }
 
-            if (GetTile(TileIndex(tileX, tileY)).IsBlocked())
+            if (GetTile(TileIndex(tileX, tileY)).blocked)
             {
                 return true;
             }
@@ -154,7 +149,7 @@ namespace sunlight
                 continue;
             }
 
-            if (GetTile(CalculateXYIndex(checkPosition.x(), checkPosition.y())).IsBlocked())
+            if (GetTile(CalculateXYIndex(checkPosition.x(), checkPosition.y())).blocked)
             {
                 continue;
             }
@@ -188,7 +183,7 @@ namespace sunlight
                 assert(x >= 0 && x < _xSize && y >= 0 && y < _ySize);
 
                 if (const Tile& tile = GetTile(TileIndex(x, y));
-                    !tile.IsBlocked())
+                    !tile.blocked)
                 {
                     _tileBuffer.emplace_back(&tile);
                 }
@@ -228,7 +223,7 @@ namespace sunlight
                 assert(x >= 0 && x < _xSize && y >= 0 && y < _ySize);
 
                 if (const Tile& tile = GetTile(TileIndex(x, y));
-                    !tile.IsBlocked())
+                    !tile.blocked)
                 {
                     _tileBuffer.emplace_back(&tile);
                 }

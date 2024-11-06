@@ -218,9 +218,12 @@ namespace sunlight
             for (int32_t x = 0; x < pathFindSystem->GetXSize(); ++x)
             {
                 const Tile& tile = pathFindSystem->GetTile(TileIndex(x, y));
+                if (!tile.blocked)
+                {
+                    continue;
+                }
 
-                auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData,
-                    tile.value == 0 ? 50000 : static_cast<uint8_t>(tile.value));
+                auto item = std::make_shared<GameItem>(_system.GetServiceLocator().Get<GameEntityIdPublisher>(), *itemData, 1);
 
                 item->AddComponent(std::make_unique<SceneObjectComponent>());
 

@@ -17,11 +17,13 @@ namespace sunlight
         }
 
         {
-            reader.ReadBuffer(unkDataDesc.data(), std::ssize(unkDataDesc));
+            reader.ReadBuffer(version.data(), std::ssize(version));
+            assert(::strcmp(version.data(), "TerrainV5") == 0 || ::strcmp(version.data(), "TerrainV3") == 0);
 
-            const int32_t size = reader.Read<int32_t>() - 14; // unk
+            const int32_t size = reader.Read<int32_t>();
+            reader.ReadBuffer(reinterpret_cast<char*>(data.data()), sizeof(data));
 
-            unkData.resize(size);
+            unkData.resize(size - 14 - 28);
             reader.ReadBuffer(unkData.data(), std::ssize(unkData));
         }
 
@@ -30,7 +32,7 @@ namespace sunlight
 
             const int32_t count = reader.Read<int32_t>();
             
-            const bool v3 = std::string(unkDataDesc.begin(), unkDataDesc.end()).find("V3") != std::string::npos;
+            const bool v3 = std::string(version.begin(), version.end()).find("V3") != std::string::npos;
 
             if (v3)
             {

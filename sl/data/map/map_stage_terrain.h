@@ -14,9 +14,10 @@ namespace sunlight
         int32_t height = 0;
 
         std::array<char, 72> moveDataDesc = {};
-        std::vector<char> movableData; // width * height * 32
+        std::vector<char> movableData;
 
-        std::array<char, 10> unkDataDesc = {};
+        std::array<char, 10> version = {};
+        std::array<int32_t, 7> data = {};
         std::vector<char> unkData;
 
         std::array<char, 5> evtDesc = {};

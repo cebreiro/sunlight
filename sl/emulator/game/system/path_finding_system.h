@@ -49,7 +49,7 @@ namespace sunlight
         static auto CalculateXYIndex(float x, float y) -> TileIndex;
 
     private:
-        const ServiceLocator& _serviceLocator;
+        const ServiceLocator& _serviceLocator;;
         const int32_t _width = 0;
         const int32_t _height = 0;
         const int32_t _xSize = 0;
