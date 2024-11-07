@@ -149,7 +149,7 @@ namespace sunlight
         Eigen::Vector2f destPos;
 
         if (PathFindingSystem * pathFindSystem = system.Find<PathFindingSystem>();
-            !pathFindSystem || !pathFindSystem->GetRandPositionOnCircleOutLine(position, static_cast<float>(distance), destPos))
+            !pathFindSystem || !pathFindSystem->GetRandPositionOnCircleOutLine(destPos, position, static_cast<float>(distance)))
         {
             const double angle = std::uniform_int_distribution{ 0, 360 }(randomEngine)*std::numbers::pi / 180.0;
 

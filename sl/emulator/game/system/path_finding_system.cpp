@@ -97,42 +97,12 @@ namespace sunlight
         const TileIndex start = CalculateXYIndex(src.x(), src.y());
         const TileIndex last = CalculateXYIndex(dest.x(), dest.y());
 
-        const int32_t dx = last.x - start.x;
-        const int32_t dy = last.y - start.y;
-
-        const int32_t steps = std::max(std::abs(dx), std::abs(dy));
-
-        float x = static_cast<float>(start.x);
-        float y = static_cast<float>(start.y);
-
-        const float incrementX = static_cast<float>(dx) / static_cast<float>(steps);
-        const float incrementY = static_cast<float>(dy) / static_cast<float>(steps);
-
-        for (int32_t i = 0; i < steps; ++i)
-        {
-            const int32_t tileX = static_cast<int32_t>(std::roundf(x));
-            const int32_t tileY = static_cast<int32_t>(std::roundf(y));
-
-            if (tileX < 0 || tileX >= _xSize || tileY < 0 || tileY >= _ySize)
-            {
-                return true;
-            }
-
-            if (GetTile(TileIndex(tileX, tileY)).blocked)
-            {
-                return true;
-            }
-
-            x += incrementX;
-            y += incrementY;
-        }
-
-        return false;
+        return IsBlocked(start, last);
     }
 
-    bool PathFindingSystem::GetRandPositionOnCircleOutLine(Eigen::Vector2f position, float radius, Eigen::Vector2f& result)
+    bool PathFindingSystem::GetRandPositionOnCircleOutLine(Eigen::Vector2f& result, Eigen::Vector2f position, float radius, bool rayTest)
     {
-        constexpr std::array randAngles = { 0.f, 60.f, 120.f, 180.f, 240.f, 300.f };
+        constexpr std::array randAngles = { 0.f, 30.f, 60.f, 90.f, 120.f, 150.f, 180.f, 210.f, 240.f, 270.f, 300.f, 330.f };
 
         _positionBuffer.clear();
 
@@ -162,12 +132,36 @@ namespace sunlight
             return false;
         }
 
+        if (rayTest)
+        {
+            if (!GetTile(CalculateXYIndex(position.x(), position.y())).blocked)
+            {
+                std::ranges::shuffle(_positionBuffer, _mt);
+
+                while (!_positionBuffer.empty())
+                {
+                    if (IsBlocked(position, _positionBuffer.back()))
+                    {
+                        _positionBuffer.pop_back();
+
+                        continue;
+                    }
+
+                    result = _positionBuffer.back();
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         result = _positionBuffer[std::uniform_int_distribution<int64_t>(0, std::ssize(_positionBuffer) - 1)(_mt)];
 
         return true;
     }
 
-    bool PathFindingSystem::GetRandPositionInCircle(Eigen::Vector2f position, float radius, Eigen::Vector2f& result)
+    bool PathFindingSystem::GetRandPositionInCircle(Eigen::Vector2f& result, Eigen::Vector2f position, float radius, bool rayTest)
     {
         _tileBuffer.clear();
 
@@ -195,8 +189,40 @@ namespace sunlight
             return false;
         }
 
-        const int64_t index = std::uniform_int_distribution<int64_t>(0, std::ssize(_tileBuffer) - 1)(_mt);
-        const Tile& selected = *_tileBuffer[index];
+        std::optional<TileIndex> index = std::nullopt;
+        const TileIndex src = CalculateXYIndex(position.x(), position.y());
+
+        if (rayTest && !GetTile(src).blocked)
+        {
+            std::ranges::shuffle(_tileBuffer, _mt);
+
+            while (!_tileBuffer.empty())
+            {
+                const TileIndex current = _tileBuffer.back()->index;
+
+                if (IsBlocked(src, current))
+                {
+                    _tileBuffer.pop_back();
+
+                    continue;
+                }
+
+                index = current;
+
+                break;
+            }
+        }
+        else
+        {
+            index = _tileBuffer[std::uniform_int_distribution<int64_t>(0, std::ssize(_tileBuffer) - 1)(_mt)]->index;
+        }
+
+        if (!index.has_value())
+        {
+            return false;
+        }
+
+        const Tile& selected = GetTile(*index);
 
         const float posX = static_cast<float>(selected.index.x) * GameConstant::TILE_SIZE;
         const float posY = static_cast<float>(selected.index.y) * GameConstant::TILE_SIZE;
@@ -317,6 +343,41 @@ namespace sunlight
             y >= static_cast<float>(_height) * GameConstant::STAGE_TERRAIN_BLOCK_SIZE)
         {
             return true;
+        }
+
+        return false;
+    }
+
+    bool PathFindingSystem::IsBlocked(TileIndex src, TileIndex dest) const
+    {
+        const int32_t dx = dest.x - src.x;
+        const int32_t dy = dest.y - src.y;
+
+        const int32_t steps = std::max(std::abs(dx), std::abs(dy));
+
+        float x = static_cast<float>(src.x);
+        float y = static_cast<float>(src.y);
+
+        const float incrementX = static_cast<float>(dx) / static_cast<float>(steps);
+        const float incrementY = static_cast<float>(dy) / static_cast<float>(steps);
+
+        for (int32_t i = 0; i < steps; ++i)
+        {
+            const int32_t tileX = static_cast<int32_t>(std::roundf(x));
+            const int32_t tileY = static_cast<int32_t>(std::roundf(y));
+
+            if (tileX < 0 || tileX >= _xSize || tileY < 0 || tileY >= _ySize)
+            {
+                return true;
+            }
+
+            if (GetTile(TileIndex(tileX, tileY)).blocked)
+            {
+                return true;
+            }
+
+            x += incrementX;
+            y += incrementY;
         }
 
         return false;

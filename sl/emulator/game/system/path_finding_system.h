@@ -22,8 +22,8 @@ namespace sunlight
     public:
         bool IsBlocked(Eigen::Vector2f src, Eigen::Vector2f dest) const;
 
-        bool GetRandPositionOnCircleOutLine(Eigen::Vector2f position, float radius, Eigen::Vector2f& result);
-        bool GetRandPositionInCircle(Eigen::Vector2f position, float radius, Eigen::Vector2f& result);
+        bool GetRandPositionOnCircleOutLine(Eigen::Vector2f& result, Eigen::Vector2f position, float radius, bool rayTest = true);
+        bool GetRandPositionInCircle(Eigen::Vector2f& result, Eigen::Vector2f position, float radius, bool rayTest = true);
         bool GetRandPositionInBox(const Eigen::AlignedBox2f& box, Eigen::Vector2f& result);
 
         bool FindRawPath(std::vector<Eigen::Vector2f>& result, Eigen::Vector2f src, Eigen::Vector2f dest);
@@ -39,6 +39,7 @@ namespace sunlight
 
     private:
         bool IsOutOfRange(float x, float y) const;
+        bool IsBlocked(TileIndex src, TileIndex dest) const;
 
         bool FindPathRawReverse(std::vector<Eigen::Vector2f>& result, TileIndex start, TileIndex end);
         void SmoothPath(std::vector<Eigen::Vector2f>& result, const std::vector<Eigen::Vector2f>& paths) const;

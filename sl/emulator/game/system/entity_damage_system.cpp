@@ -532,7 +532,7 @@ namespace sunlight
 
             Eigen::Vector2f spawnPos;
             if (PathFindingSystem* pathFindingSystem = Find<PathFindingSystem>();
-                !pathFindingSystem || !pathFindingSystem->GetRandPositionInCircle(monsterPos, GameConstant::MONSTER_DROP_ITEM_RADIUS, spawnPos))
+                !pathFindingSystem || !pathFindingSystem->GetRandPositionInCircle(spawnPos, monsterPos, GameConstant::MONSTER_DROP_ITEM_RADIUS))
             {
                 spawnPos = monsterPos;
 

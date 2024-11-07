@@ -1606,7 +1606,7 @@ namespace sunlight
         Eigen::Vector2f destPosition;
 
         if (PathFindingSystem* pathFindingSystem = Find<PathFindingSystem>();
-            !pathFindingSystem || pathFindingSystem->GetRandPositionInCircle(playerPosition, GameConstant::MONSTER_DROP_ITEM_RADIUS, destPosition))
+            !pathFindingSystem || pathFindingSystem->GetRandPositionInCircle(destPosition, playerPosition, GameConstant::MONSTER_DROP_ITEM_RADIUS))
         {
             constexpr int32_t range = static_cast<int32_t>(GameConstant::MONSTER_DROP_ITEM_RADIUS);
 
