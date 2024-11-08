@@ -22,10 +22,10 @@ namespace sunlight
 
         // client 491F67h
         // v21(type, moving, unk4 unk5) default initialization to (00 FF 00 FF)
-        /*index: 0*/GameEntityStateType type = GameEntityStateType::None;
-        /*index: 1*/MoveType moveType = MoveType::Stop;
-        /*index: 2*/uint8_t unk4 = 0;
-        /*index: 3*/uint8_t unk5 = uint8_t{ 0xFF };
+        /*index: 0*/GameEntityStateType type = GameEntityStateType::None; // LOBYTE
+        /*index: 1*/MoveType moveType = MoveType::Stop;                   // BYTE1
+        /*index: 2*/uint8_t unk4 = 0;                                     // BYTE2
+        /*index: 3*/uint8_t unk5 = uint8_t{ 0xFF };                       // HIBYTE
         /*index: 4*/Eigen::Vector3f destPosition = {};
         /*index: 5*/game_entity_id_type targetId = {};
         /*index: 5*/GameEntityType targetType = {};

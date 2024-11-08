@@ -29,6 +29,11 @@ namespace sunlight
         return _startTimePoint;
     }
 
+    auto EntityMovementComponent::GetLastSyncTimePoint() const -> game_time_point_type
+    {
+        return _lastSyncTimePoint;
+    }
+
     auto EntityMovementComponent::GetClientMovement() -> ClientMovement*
     {
         return std::get_if<ClientMovement>(&_movement);
@@ -72,6 +77,11 @@ namespace sunlight
     void EntityMovementComponent::SetStartTimePoint(game_time_point_type startTimePoint)
     {
         _startTimePoint = startTimePoint;
+    }
+
+    void EntityMovementComponent::SetLastSyncTimePoint(game_time_point_type timePoint)
+    {
+        _lastSyncTimePoint = timePoint;
     }
 
     void EntityMovementComponent::SetClientMovement(const ClientMovement& movement)

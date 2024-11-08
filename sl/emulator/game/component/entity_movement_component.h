@@ -12,6 +12,7 @@ namespace sunlight
         bool IsMoving() const;
 
         auto GetStartTimePoint() const -> game_time_point_type;
+        auto GetLastSyncTimePoint() const -> game_time_point_type;
 
         auto GetClientMovement() -> ClientMovement*;
         auto GetClientMovement() const -> const ClientMovement*;
@@ -22,11 +23,13 @@ namespace sunlight
         void Reset();
 
         void SetStartTimePoint(game_time_point_type startTimePoint);
+        void SetLastSyncTimePoint(game_time_point_type timePoint);
         void SetClientMovement(const ClientMovement& movement);
         void SetPathPointMovement(PathPointMovement movement);
 
     private:
         game_time_point_type _startTimePoint;
+        game_time_point_type _lastSyncTimePoint;
         std::variant<ClientMovement, PathPointMovement> _movement;
     };
 }

@@ -7,6 +7,7 @@ namespace sunlight
         (None, 0)
         (Moving, 1)
         (NormalAttack, 2)
+        (DamageAvoidance, 3)
         (DamagedMotion, 4)
         (Conversation, 5)
         (PlaySkill, 7)
@@ -18,7 +19,7 @@ namespace sunlight
         (Entering, 13)
         (Leaving, 14)
         (DamageCancel, 15)
-        (Idle, 17)
+        (Default, 17) // 0x491BF0
         (Greet, 18)
         (InteractWithPlayer, 21)
         (Resurrection, 24)

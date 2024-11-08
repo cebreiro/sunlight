@@ -61,80 +61,110 @@ namespace sunlight
             GameEntity& entity = *iter->second;
 
             EntityMovementComponent& movementComponent = entity.GetComponent<EntityMovementComponent>();
-            if (movementComponent.IsMoving())
+            SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
+
+            bool stopped = false;
+
+            if (ClientMovement* clientMovement = movementComponent.GetClientMovement(); clientMovement)
             {
-                if (ClientMovement* clientMovement = movementComponent.GetClientMovement(); clientMovement)
+                std::chrono::duration<float> duration = (now - movementComponent.GetStartTimePoint());
+                const float totalDistance = (clientMovement->destPosition - clientMovement->position).norm();
+                const float totalTime = totalDistance / clientMovement->speed / 100.f;
+
+                const float t = std::min(duration.count() / totalTime, 1.f);
+
+                const Eigen::Vector2f newPosition = ((1.f - t) * clientMovement->position) + (t * clientMovement->destPosition);
+                sceneObjectComponent.SetPosition(newPosition);
+
+                Get<EntityViewRangeSystem>().UpdateViewRange(entity, newPosition);
+
+                NotifyNewPosition(entity, newPosition);
+
+                if (t >= 1.f)
                 {
-                    std::chrono::duration<float> duration = (now - movementComponent.GetStartTimePoint());
-                    const float totalDistance = (clientMovement->destPosition - clientMovement->position).norm();
-                    const float totalTime = totalDistance / clientMovement->speed / 100.f;
+                    stopped = true;
 
-                    const float t = std::min(duration.count() / totalTime, 1.f);
+                    movementComponent.Reset();
+                    sceneObjectComponent.SetMoving(false);
 
-                    const Eigen::Vector2f newPosition = ((1.f - t) * clientMovement->position) + (t * clientMovement->destPosition);
-
-                    SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
-                    sceneObjectComponent.SetPosition(newPosition);
-
-                    Get<EntityViewRangeSystem>().UpdateViewRange(entity, newPosition);
-
-                    NotifyNewPosition(entity, newPosition);
-
-                    if (t >= 1.f)
+                    if (entity.GetType() == GameEntityType::Enemy)
                     {
-                        movementComponent.Reset();
-                        sceneObjectComponent.SetMoving(false);
+                        EntityStateComponent& stateComponent = entity.GetComponent<EntityStateComponent>();
+                        stateComponent.SetState(GameEntityState{ .type = GameEntityStateType::Default, });
 
-                        iter = _movingEntities.erase(iter);
-
-                        continue;
-                    }
-                }
-                else if (PathPointMovement* pathMovement = movementComponent.GetPathPointMovement(); pathMovement)
-                {
-                    int64_t oldIndex = 0;
-                    const Eigen::Vector2f newPosition = pathMovement->CalculatePointOnPath(now, oldIndex);
-
-                    std::swap(pathMovement->pathIndex, oldIndex);
-
-                    SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
-                    sceneObjectComponent.SetPosition(newPosition);
-
-                    Get<EntityViewRangeSystem>().UpdateViewRange(entity, newPosition);
-
-                    NotifyNewPosition(entity, newPosition);
-
-                    if (oldIndex != pathMovement->pathIndex)
-                    {
-                        if (const int64_t lastIndex = std::ssize(pathMovement->paths) - 1;
-                            oldIndex != lastIndex)
+                        Get<EntityViewRangeSystem>().VisitPlayer(entity, [&entity](GamePlayer& visited)
                         {
-                            const Eigen::Vector2f& destPosition = pathMovement->paths[std::min(pathMovement->pathIndex, lastIndex)].second;
-
-                            sceneObjectComponent.SetYaw(CalculateYaw(newPosition, destPosition));
-                            sceneObjectComponent.SetDestPosition(destPosition);
-
-                            Get<EntityViewRangeSystem>().Broadcast(entity, ZonePacketS2CCreator::CreateObjectMove(entity), false);
-                        }
+                            visited.Send(ZonePacketS2CCreator::CreateObjectMove(entity));
+                            visited.Send(SceneObjectPacketCreator::CreateState(entity));
+                        });
                     }
 
-                    if (pathMovement->pathIndex >= std::ssize(pathMovement->paths))
-                    {
-                        movementComponent.Reset();
-                        sceneObjectComponent.SetMoving(false);
+                    iter = _movingEntities.erase(iter);
 
-                        iter = _movingEntities.erase(iter);
-
-                        continue;
-                    }
-                }
-                else
-                {
-                    assert(false);
+                    continue;
                 }
             }
+            else if (PathPointMovement* pathMovement = movementComponent.GetPathPointMovement(); pathMovement)
+            {
+                int64_t oldIndex = 0;
+                const Eigen::Vector2f newPosition = pathMovement->CalculatePointOnPath(now, oldIndex);
 
-            ++iter;
+                std::swap(pathMovement->pathIndex, oldIndex);
+
+                sceneObjectComponent.SetPosition(newPosition);
+
+                Get<EntityViewRangeSystem>().UpdateViewRange(entity, newPosition);
+
+                NotifyNewPosition(entity, newPosition);
+
+                if (oldIndex != pathMovement->pathIndex)
+                {
+                    if (const int64_t lastIndex = std::ssize(pathMovement->paths) - 1;
+                        oldIndex != lastIndex)
+                    {
+                        const Eigen::Vector2f& destPosition = pathMovement->paths[std::min(pathMovement->pathIndex, lastIndex)].second;
+
+                        sceneObjectComponent.SetYaw(CalculateYaw(newPosition, destPosition));
+                        sceneObjectComponent.SetDestPosition(destPosition);
+
+                        Get<EntityViewRangeSystem>().Broadcast(entity, ZonePacketS2CCreator::CreateObjectMove(entity), false);
+                    }
+                }
+
+                if (pathMovement->pathIndex >= std::ssize(pathMovement->paths))
+                {
+                    stopped = true;
+                }
+            }
+            else
+            {
+                assert(false);
+            }
+
+            if (stopped)
+            {
+                movementComponent.Reset();
+                sceneObjectComponent.SetMoving(false);
+
+                EntityStateComponent& stateComponent = entity.GetComponent<EntityStateComponent>();
+                stateComponent.SetState(GameEntityState{ .type = GameEntityStateType::Default });
+
+                Get<EntityViewRangeSystem>().Broadcast(entity, SceneObjectPacketCreator::CreateState(entity), false);
+
+                iter = _movingEntities.erase(iter);
+            }
+            else
+            {
+                // client 0x495608
+                if (now <= movementComponent.GetLastSyncTimePoint() + std::chrono::milliseconds(100))
+                {
+                    Get<EntityViewRangeSystem>().Broadcast(entity, ZonePacketS2CCreator::CreateObjectMove(entity), false);
+
+                    movementComponent.SetLastSyncTimePoint(now);
+                }
+
+                ++iter;
+            }
         }
     }
 
@@ -182,12 +212,12 @@ namespace sunlight
             return;
         }
 
-        EntityStateComponent& stateComponent = entity.GetComponent<EntityStateComponent>();
+        /*EntityStateComponent& stateComponent = entity.GetComponent<EntityStateComponent>();
         stateComponent.SetState(GameEntityState{
             .type = GameEntityStateType::Moving,
             .moveType = GameEntityState::MoveType::Walk,
             .destPosition = Eigen::Vector3f(position.x(), position.y(), 0.f),
-            });
+            });*/
 
         EntityMovementComponent& movementComponent = entity.GetComponent<EntityMovementComponent>();
         SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
@@ -198,8 +228,11 @@ namespace sunlight
         movement.speed = speed;
         movement.yaw = CalculateYaw(sceneObjectComponent.GetPosition(), position);
         movement.movementTypeBitMask = 0x10;
+        movement.unk1 = 123.f;
+        movement.unk2 = 0xAABB;
 
         movementComponent.SetStartTimePoint(GameTimeService::Now());
+        movementComponent.SetLastSyncTimePoint(GameTimeService::Now());
         movementComponent.SetClientMovement(movement);
         sceneObjectComponent.Set(movement);
 
@@ -208,7 +241,7 @@ namespace sunlight
         Get<EntityViewRangeSystem>().VisitPlayer(entity, [&entity](GamePlayer& player)
             {
                 player.Defer(ZonePacketS2CCreator::CreateObjectMove(entity));
-                player.Defer(SceneObjectPacketCreator::CreateState(entity));
+                //player.Defer(SceneObjectPacketCreator::CreateState(entity));
                 player.FlushDeferred();
             });
     }
@@ -269,6 +302,8 @@ namespace sunlight
 
             EntityMovementComponent& movementComponent = entity.GetComponent<EntityMovementComponent>();
             movementComponent.SetPathPointMovement(std::move(pathPointMovement));
+            movementComponent.SetStartTimePoint(GameTimeService::Now());
+            movementComponent.SetLastSyncTimePoint(GameTimeService::Now());
 
             SceneObjectComponent& sceneObjectComponent = entity.GetComponent<SceneObjectComponent>();
 
@@ -279,7 +314,6 @@ namespace sunlight
             movement.yaw = CalculateYaw(sceneObjectComponent.GetPosition(), paths[1]);
             movement.movementTypeBitMask = 0x10;
 
-            movementComponent.SetStartTimePoint(GameTimeService::Now());
             sceneObjectComponent.Set(movement);
 
             _movingEntities[entity.GetId()] = &entity;

@@ -430,7 +430,7 @@ namespace sunlight
 
         switch (state.type)
         {
-        case GameEntityStateType::Idle:
+        case GameEntityStateType::Default:
         case GameEntityStateType::Moving:
             break;
         case GameEntityStateType::Disarming:

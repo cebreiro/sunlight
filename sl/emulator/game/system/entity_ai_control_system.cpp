@@ -5,6 +5,7 @@
 #include "sl/emulator/game/system/entity_movement_system.h"
 #include "sl/emulator/game/system/entity_scan_system.h"
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
+#include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
 #include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -28,6 +29,7 @@ namespace sunlight
         Add(stage.Get<EntityMovementSystem>());
         Add(stage.Get<EntityScanSystem>());
         Add(stage.Get<EntitySkillEffectSystem>());
+        Add(stage.Get<EntityViewRangeSystem>());
 
         if (PathFindingSystem* pathFindSystem = stage.Find<PathFindingSystem>();
             pathFindSystem)
