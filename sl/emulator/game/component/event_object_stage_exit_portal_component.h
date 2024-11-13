@@ -13,6 +13,5 @@ namespace sunlight
     private:
         int32_t _linkId = 0;
         Eigen::Vector2f _position = {};
-        float _yaw = 0.f;
     };
 }

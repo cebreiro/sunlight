@@ -50,7 +50,9 @@ namespace sunlight
                     continue;
                 }
 
-                for (const auto& [dx, dy] : std::initializer_list{ std::pair{ 1, 0 }, std::pair{ -1, 0 }, std::pair{ 0, 1 }, std::pair{ 0, -1 } })
+                const std::initializer_list<std::pair<int32_t, int32_t>> initializerList{ std::pair{ 1, 0 }, std::pair{ -1, 0 }, std::pair{ 0, 1 }, std::pair{ 0, -1 } };
+
+                for (const auto& [dx, dy] : initializerList)
                 {
                     const int32_t otherX = x + dx;
                     const int32_t otherY = y + dy;

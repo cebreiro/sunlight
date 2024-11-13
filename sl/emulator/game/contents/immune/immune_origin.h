@@ -11,7 +11,6 @@ namespace sunlight
     class ImmuneOrigin
     {
     public:
-        ImmuneOrigin() = default;
         ImmuneOrigin(ImmuneType immuneType, const ImmuneOriginSkill& param);
 
         auto GetImmuneType() const -> ImmuneType;

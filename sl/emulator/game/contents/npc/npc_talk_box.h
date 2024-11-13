@@ -53,7 +53,6 @@ namespace sunlight
     private:
         int32_t _width = 0;
         int32_t _height = 0;
-        int32_t _content = 0;
 
         std::vector<npc_talk_box_item_type> _talkBoxItems;
     };

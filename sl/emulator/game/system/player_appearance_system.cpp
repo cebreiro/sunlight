@@ -49,7 +49,7 @@ namespace sunlight
 
     void PlayerAppearanceSystem::UpdateEquipmentAppearance(GamePlayer& player)
     {
-        constexpr auto appearanceEquipPositions = {
+        constexpr std::array appearanceEquipPositions = {
             EquipmentPosition::Hat,
             EquipmentPosition::Jacket,
             EquipmentPosition::Gloves,
