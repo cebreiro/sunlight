@@ -182,9 +182,6 @@ namespace sunlight
 
     void SlEmulator::InitializeConfig()
     {
-        SUNLIGHT_LOG_INFO(GetServiceLocator(),
-            fmt::format("[{}] initialize config", GetName()));
-
         const std::filesystem::path gameConfigPath = _basePath / _appConfig.pathConfig.gameConfigFilePath;
         if (!exists(gameConfigPath))
         {
@@ -192,9 +189,6 @@ namespace sunlight
         }
 
         _configProvideService->Initialize(_appConfig, gameConfigPath);
-
-        SUNLIGHT_LOG_INFO(GetServiceLocator(),
-            fmt::format("[{}] initialize config --> Done", GetName()));
     }
 
     void SlEmulator::InitializeLogger()
