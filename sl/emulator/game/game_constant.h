@@ -63,6 +63,6 @@ namespace sunlight
 
         static constexpr int32_t PLAYER_BODY_SIZE = 10;
 
-        static constexpr float MONSTER_DROP_ITEM_RADIUS = TILE_SIZE / 2.f;
+        static constexpr float MONSTER_DROP_ITEM_RADIUS = TILE_SIZE * 2.f;
     };
 }
