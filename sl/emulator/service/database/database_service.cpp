@@ -35,6 +35,8 @@ namespace sunlight
 
     auto DatabaseService::CreateAccount(std::string account, std::string password, int8_t gmLevel) -> Future<std::optional<db::dto::Account>>
     {
+        (void)gmLevel;
+
         [[maybe_unused]]
         const auto self = shared_from_this();
 

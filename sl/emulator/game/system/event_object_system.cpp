@@ -162,6 +162,7 @@ namespace sunlight
         if (const std::optional<GameMonsterSpawnerContext>& spawnerContext = event.monster->GetSpawnerContext();
             spawnerContext.has_value())
         {
+            [[maybe_unused]]
             bool success = false;
 
             do

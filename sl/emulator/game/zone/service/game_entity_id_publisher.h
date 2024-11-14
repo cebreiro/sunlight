@@ -31,9 +31,6 @@ namespace sunlight
         game_entity_id_type::value_type _nextValue = {};
         std::queue<game_entity_id_type> _recycleQueue;
 
-        int32_t _nextSceneObjectId = 1;
-        std::queue<int32_t> _recycleQueueSceneObjectId;
-
         int32_t _nextDynamicEntityId = 0x10000000;
         int32_t _nextStaticEntityId = 0x20000000;
         int32_t _nextUnknownEntityId = 0x30000000;

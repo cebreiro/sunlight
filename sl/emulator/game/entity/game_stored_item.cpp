@@ -5,9 +5,9 @@ namespace sunlight
     GameStoredItem::GameStoredItem(GameEntityIdPublisher& idPublisher, game_entity_id_type ownerId, GameEntityType ownerType,
         const ItemData& data, int32_t quantity, int32_t groupId, int32_t page, int32_t price, int32_t fieldOffset)
         : GameEntity(idPublisher, TYPE)
+        , _data(data)
         , _ownerId(ownerId)
         , _ownerType(ownerType)
-        , _data(data)
         , _quantity(quantity)
         , _groupId(groupId)
         , _page(page)

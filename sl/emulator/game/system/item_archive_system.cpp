@@ -1253,6 +1253,7 @@ namespace sunlight
             auto newPickedItem = CreateNewGameItem(targetItem->GetData(), quantity);
             newPickedItem->SetUId(_serviceLocator.Get<GameItemUniqueIdPublisher>().Publish());
 
+            [[maybe_unused]]
             bool success = itemComponent.DecreaseItemQuantity(targetItemId, quantity);
             assert(success);
 
@@ -1320,6 +1321,7 @@ namespace sunlight
 
                 if (sum > maxOverlapCount)
                 {
+                    [[maybe_unused]]
                     bool result = itemComponent.SetItemQuantity(invenItemId, maxOverlapCount);
                     assert(result);
 
@@ -1328,6 +1330,7 @@ namespace sunlight
                 }
                 else
                 {
+                    [[maybe_unused]]
                     bool result = itemComponent.SetItemQuantity(invenItemId, sum);
                     assert(result);
 
@@ -1404,6 +1407,7 @@ namespace sunlight
 
                 if (sum > maxOverlapCount)
                 {
+                    [[maybe_unused]]
                     bool result = itemComponent.SetItemQuantity(quickSlotItemId, maxOverlapCount);
                     assert(result);
 
@@ -1412,6 +1416,7 @@ namespace sunlight
                 }
                 else
                 {
+                    [[maybe_unused]]
                     bool result = itemComponent.SetItemQuantity(quickSlotItemId, sum);
                     assert(result);
 

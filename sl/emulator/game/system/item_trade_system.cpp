@@ -336,6 +336,7 @@ namespace sunlight
         hostItemComponent.FlushItemLogTo(transaction.logs);
         guestItemComponent.FlushItemLogTo(transaction.logs);
 
+        [[maybe_unused]]
         bool added = false;
 
         for (const auto& [itemId, position] : hostInventoryAddPositions)

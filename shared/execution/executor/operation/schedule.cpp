@@ -8,6 +8,8 @@ namespace sunlight::execution
     auto RepeatDelayExecution(SharedPtrNotNull<IExecutor> executor, std::function<void()> function,
         std::chrono::milliseconds delay, std::stop_token token) -> Future<void>
     {
+        (void)executor;
+
         while (true)
         {
             co_await Delay(delay);
