@@ -32,6 +32,8 @@ namespace sunlight
         void Add(GameEntity& entity);
         void Remove(GameEntity& entity);
 
+        bool IsAdjacent(const GameEntity& entity, const GameEntity& other) const;
+
         void UpdateViewRange(GameEntity& entity, const Eigen::Vector2f& newPosition);
 
         void VisitEntity(const Eigen::Vector2f& position, const std::function<void(GameEntity&)>& function);

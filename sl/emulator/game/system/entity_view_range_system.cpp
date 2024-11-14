@@ -168,6 +168,27 @@ namespace sunlight
         _entitySectorIndex.erase(iter);
     }
 
+    bool EntityViewRangeSystem::IsAdjacent(const GameEntity& entity, const GameEntity& other) const
+    {
+        assert(entity.HasComponent<SceneObjectComponent>());
+        assert(other.HasComponent<SceneObjectComponent>());
+
+        const game_spatial_cell_id_type id1 = GetSector(entity).GetCenter().GetId();
+        const game_spatial_cell_id_type id2 = GetSector(other).GetCenter().GetId();
+
+        if (std::abs(id1.GetX() - id2.GetX()) > 1)
+        {
+            return false;
+        }
+
+        if (std::abs(id1.GetY() - id2.GetY()) > 1)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     void EntityViewRangeSystem::UpdateViewRange(GameEntity& entity, const Eigen::Vector2f& newPosition)
     {
         const auto iter = _entitySectorIndex.find(entity.GetId());

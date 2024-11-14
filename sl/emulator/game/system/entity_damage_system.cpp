@@ -16,6 +16,7 @@
 #include "sl/emulator/game/contents/stat/stat_value.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/monster_base.h"
+#include "sl/emulator/game/data/sox/party_add_exp.h"
 #include "sl/emulator/game/entity/game_item.h"
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -34,6 +35,7 @@
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
+#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
 #include "sl/emulator/service/gamedata/skill/monster_skill_data.h"
 
@@ -46,6 +48,15 @@ namespace sunlight
         , _monsterAttackDamageCalculator(std::make_unique<MonsterAttackDamageCalculator>())
         , _mt(std::random_device{}())
     {
+        for (const sox::PartyAddExp& data : _serviceLocator.Get<GameDataProvideService>().Get<sox::PartyAddExpTable>().Get())
+        {
+			if (data.addExpFactor <= 0.f)
+			{
+			    continue;
+			}
+
+            _partyExpFactors[data.index] = data.addExpFactor;
+        }
     }
 
     EntityDamageSystem::~EntityDamageSystem()
@@ -480,12 +491,61 @@ namespace sunlight
                 Get<SceneObjectSystem>().RemoveMonster(target.GetId());
             });
 
-        const int32_t exp = monster.GetData().GetBase().exp;
+        const int32_t monsterExp = [&monster]() -> int32_t
+            {
+                const int32_t base = monster.GetData().GetBase().exp;
 
-        if (exp > 0)
+                return base;
+            }();
+
+        if (monsterExp > 0)
         {
-            Get<PlayerStatSystem>().GainCharacterExp(player, exp);
-            Get<PlayerJobSystem>().GainJobExp(player, exp);
+            PlayerStatSystem& playerStatSystem = Get<PlayerStatSystem>();
+            PlayerJobSystem& playerJobSystem = Get<PlayerJobSystem>();
+
+            if (const PlayerPartyComponent& partyComponent = player.GetPartyComponent();
+				partyComponent.HasParty())
+            {
+				_partyMemberBuffer.clear();
+
+                PlayerIndexSystem& playerIndexSystem = Get<PlayerIndexSystem>();
+                const EntityViewRangeSystem& entityViewRangeSystem = Get<EntityViewRangeSystem>();
+
+                for (int64_t partyMemberId : partyComponent.GetMemberIds())
+                {
+                    GamePlayer* partyMember = playerIndexSystem.FindByCId(partyMemberId);
+                    if (!partyMember)
+                    {
+                        continue;
+                    }
+
+					if (!entityViewRangeSystem.IsAdjacent(player, *partyMember))
+                    {
+                        continue;
+                    }
+
+					_partyMemberBuffer.emplace_back(partyMember);
+                }
+
+				const float partyExpFactor = GetPartyExpFactor(std::ssize(_partyMemberBuffer)).value_or(1.f);
+				const int32_t expPerPartyMember = std::max(1, static_cast<int32_t>(std::round(monsterExp * partyExpFactor) / static_cast<int32_t>(std::ssize(_partyMemberBuffer))));
+
+				for (GamePlayer& partyMember : _partyMemberBuffer | notnull::reference)
+				{
+					if (partyMember.GetStatComponent().IsDead())
+					{
+						continue;
+					}
+
+					playerStatSystem.GainCharacterExp(partyMember, expPerPartyMember);
+					playerJobSystem.GainJobExp(partyMember, expPerPartyMember);
+				}
+            }
+            else
+            {
+				playerStatSystem.GainCharacterExp(player, monsterExp);
+				playerJobSystem.GainJobExp(player, monsterExp);
+            }
         }
     }
 
@@ -542,5 +602,12 @@ namespace sunlight
 
 			sceneObjectSystem.SpawnItem(std::move(item), monsterPos, spawnPos);
 		}
+    }
+
+    auto EntityDamageSystem::GetPartyExpFactor(int64_t partyMemberCount) const -> std::optional<float>
+    {
+        const auto iter = _partyExpFactors.find(partyMemberCount);
+
+		return iter != _partyExpFactors.end() ? iter->second : std::optional<float>();
     }
 }

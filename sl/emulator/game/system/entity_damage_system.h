@@ -6,6 +6,7 @@
 namespace sunlight::sox
 {
     struct MotionData;
+    struct PartyAddExp;
 }
 
 namespace sunlight
@@ -60,12 +61,17 @@ namespace sunlight
         void DropMonsterItem(const GameMonster& monster, const GamePlayer* player);
 
     private:
+        auto GetPartyExpFactor(int64_t partyMemberCount) const -> std::optional<float>;
+
+    private:
         const ServiceLocator& _serviceLocator;
         int32_t _stageId = 0;
+        std::unordered_map<int64_t, float> _partyExpFactors;
 
         UniquePtrNotNull<IPlayerAttackDamageCalculator> _playerAttackDamageCalculator;
         UniquePtrNotNull<IMonsterAttackDamageCalculator> _monsterAttackDamageCalculator;
 
+        std::vector<PtrNotNull<GamePlayer>> _partyMemberBuffer;
         std::vector<std::pair<PtrNotNull<const ItemData>, int32_t>> _dropItemQueryResult;
         std::mt19937 _mt;
     };
