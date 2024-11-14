@@ -7,7 +7,6 @@ target_link_libraries(cebreiro_sl_pch PUBLIC
     nlohmann_json
     nlohmann_json::nlohmann_json
 )
-target_compile_definitions(cebreiro_sl_pch PRIVATE LUA_BUILD_AS_DLL=1)
 
 target_precompile_headers(cebreiro_sl_pch PUBLIC
     <cstdint>
