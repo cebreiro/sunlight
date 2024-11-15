@@ -226,7 +226,7 @@ namespace sunlight
     {
         bool success = true;
 
-        for (const auto& entry : std::filesystem::directory_iterator(directory))
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(directory))
         {
             const std::filesystem::path& path = entry.path();
             if (!path.has_extension() || ::_stricmp(path.extension().string().c_str(), ".lua") != 0)
