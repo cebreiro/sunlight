@@ -1649,11 +1649,11 @@ namespace sunlight
                 return false;
             }
 
-            std::shared_ptr<GameItem> shared = itemComponent.FindItemShared(pickedItemId);
-            assert(shared);
+            std::shared_ptr<GameItem> released = itemComponent.ReleaseItem(pickedItemId);
+            assert(released);
 
             std::shared_ptr<GameItem> outLifted;
-            if (!accountStorageComponent->LowerItem(std::move(shared), page, x, y, outLifted))
+            if (!accountStorageComponent->LowerItem(std::move(released), page, x, y, outLifted))
             {
                 SUNLIGHT_LOG_ERROR(_serviceLocator,
                     fmt::format("[{}] fail to lower item to account storage. player: {}, picked: {}, pos: [{}, {}, {}]",
@@ -1663,10 +1663,6 @@ namespace sunlight
             }
 
             player.Defer(ItemArchiveMessageCreator::CreateItemRemove(player, pickedItem->GetId(), pickedItem->GetType()));
-
-            [[maybe_unused]]
-            const bool removed = itemComponent.RemovePickedItem();
-            assert(removed);
 
             if (outLifted)
             {
