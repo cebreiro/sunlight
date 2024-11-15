@@ -37,12 +37,15 @@ namespace sunlight
         NPCTalkBox& operator=(NPCTalkBox&& other) noexcept = default;
 
     public:
+        // func_400
         NPCTalkBox(int32_t width, int32_t height);
 
+        // func_403
         void AddString(int32_t tableIndex);
         void AddStringWithInt(int32_t tableIndex, int32_t value);
         void AddStringWithIntItem(int32_t tableIndex, int32_t itemId);
 
+        // func_404
         void AddMenu(int32_t tableIndexDefault, int32_t tableIndexMouseOver, int32_t index);
 
     public:

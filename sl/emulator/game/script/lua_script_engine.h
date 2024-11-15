@@ -31,12 +31,14 @@ namespace sunlight
         bool ExecuteNPCScript(int32_t scriptId, LuaSystem& system, LuaNPC& npc, LuaPlayer& player, int32_t sequence);
         
     private:
+        bool InitializeNgs(const std::filesystem::path& directory);
         bool InitializeCommandScript(std::unordered_map<std::string, sol::protected_function>& outScript, const std::filesystem::path& directory);
         bool InitializeNPCScript(std::unordered_map<int32_t, sol::protected_function>& outScript, const std::filesystem::path& directory);
 
     private:
         const ServiceLocator& _serviceLocator;
         std::filesystem::path _scriptPath;
+        std::filesystem::path _ngsScriptPath;
         std::filesystem::path _commandScriptPath;
         std::filesystem::path _npcScriptPath;
 

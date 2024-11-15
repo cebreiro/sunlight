@@ -13,6 +13,7 @@ namespace sunlight
     LuaScriptEngine::LuaScriptEngine(const ServiceLocator& serviceLocator, const std::filesystem::path& scriptPath)
         : _serviceLocator(serviceLocator)
         , _scriptPath(scriptPath)
+        , _ngsScriptPath(_scriptPath / "ngs")
         , _commandScriptPath(_scriptPath / "command")
         , _npcScriptPath(_scriptPath / "npc")
     {
@@ -23,6 +24,7 @@ namespace sunlight
                 sol::lib::math,
                 sol::lib::string,
                 sol::lib::table,
+                sol::lib::package,
             };
 
             for (const sol::lib library : libraries)
@@ -30,8 +32,11 @@ namespace sunlight
                 _luaState.open_libraries(library);
             }
 
+            _luaState["package"]["path"] = _luaState["package"]["path"].get<std::string>() + fmt::format(";{}/?.lua", _ngsScriptPath.string());
+
             LuaScriptBinder::Bind(_luaState);
 
+            InitializeNgs(_ngsScriptPath);
             InitializeCommandScript(_commandScripts, _npcScriptPath);
             InitializeNPCScript(_npcScripts, _npcScriptPath);
         }
@@ -130,6 +135,33 @@ namespace sunlight
         }
 
         return true;
+    }
+
+    bool LuaScriptEngine::InitializeNgs(const std::filesystem::path& directory)
+    {
+        bool success = true;
+
+        for (const auto& entry : std::filesystem::directory_iterator(directory))
+        {
+            const std::filesystem::path& path = entry.path();
+            if (!path.has_extension() || ::_stricmp(path.extension().string().c_str(), ".lua") != 0)
+            {
+                continue;
+            }
+
+            sol::load_result script = _luaState.load_file(path.string());
+            if (!script.valid())
+            {
+                success = false;
+                const sol::error error = script;
+
+                SUNLIGHT_LOG_CRITICAL(_serviceLocator,
+                    fmt::format("[{}] fail to load file. path: {}, error: {}",
+                        GetName(), path.string(), error.what()));
+            }
+        }
+
+        return success;
     }
 
     bool LuaScriptEngine::InitializeCommandScript(std::unordered_map<std::string, sol::protected_function>& outScript, const std::filesystem::path& directory)
