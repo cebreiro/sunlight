@@ -50,6 +50,11 @@ namespace sunlight
         _system.Get<PlayerStatSystem>().RecoverSP(_player, SPChangeFloaterType::None);
     }
 
+    bool LuaPlayer::Charge(int32_t cost)
+    {
+        return _system.Get<ItemArchiveSystem>().Charge(_player, cost);
+    }
+
     bool LuaPlayer::AddItem(int32_t itemId, int32_t quantity)
     {
         return _system.Get<ItemArchiveSystem>().AddItem(_player, itemId, quantity);
@@ -58,6 +63,11 @@ namespace sunlight
     bool LuaPlayer::RemoveInventoryItem(int32_t itemId, int32_t quantity)
     {
         return _system.Get<ItemArchiveSystem>().RemoveInventoryItem(_player, itemId, quantity);
+    }
+
+    void LuaPlayer::RemoveInventoryItemAll(int32_t itemId)
+    {
+        _system.Get<ItemArchiveSystem>().RemoveInventoryItemAll(_player, itemId);
     }
 
     void LuaPlayer::Show(const EventScript& eventScript)
@@ -150,6 +160,11 @@ namespace sunlight
         return static_cast<int32_t>(_player.GetType());
     }
 
+    auto LuaPlayer::GetLevel() const -> int32_t
+    {
+        return _player.GetStatComponent().GetLevel();
+    }
+
     auto LuaPlayer::GetNoviceJobLevel() const -> int32_t
     {
         const Job* novice = _player.GetJobComponent().Find(JobType::Novice);
@@ -180,8 +195,10 @@ namespace sunlight
             "hasInventoryItem", &LuaPlayer::HasInventoryItem,
             "recoverHP", &LuaPlayer::RecoverHP,
             "recoverSP", &LuaPlayer::RecoverSP,
+            "charge", &LuaPlayer::Charge,
             "addItem", &LuaPlayer::AddItem,
             "removeInventoryItem", &LuaPlayer::RemoveInventoryItem,
+            "removeInventoryItemAll", &LuaPlayer::RemoveInventoryItemAll,
             "show", &LuaPlayer::Show,
             "talk", &LuaPlayer::Talk,
             "disposeTalk", &LuaPlayer::DisposeTalk,
@@ -197,6 +214,7 @@ namespace sunlight
             "findNearestMonster", &LuaPlayer::FindNearestMonster,
             "getId", &LuaPlayer::GetId,
             "getTypeValue", &LuaPlayer::GetTypeValue,
+            "getLevel", &LuaPlayer::GetLevel,
             "getNoviceJobLevel", &LuaPlayer::GetNoviceJobLevel,
             "getSelection", &LuaPlayer::GetSelection,
             "getState", &LuaPlayer::GetState,

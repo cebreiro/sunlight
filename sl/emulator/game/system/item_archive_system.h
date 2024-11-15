@@ -55,6 +55,7 @@ namespace sunlight
         bool GainItem(GamePlayer& player, SharedPtrNotNull<GameItem> item, int32_t& addedQuantity);
 
         bool RemoveInventoryItem(GamePlayer& player, int32_t itemId, int32_t quantity);
+        void RemoveInventoryItemAll(GamePlayer& player, int32_t itemId);
 
         bool Charge(GamePlayer& player, int32_t cost);
 
@@ -112,5 +113,6 @@ namespace sunlight
 
         std::mt19937 _mt;
         std::vector<item_remove_result_type> _itemRemoveResult;
+        std::vector<game_entity_id_type> _itemRemoveAllResult;
     };
 }

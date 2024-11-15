@@ -33,8 +33,10 @@ namespace sunlight
         void RecoverHP();
         void RecoverSP();
 
+        bool Charge(int32_t cost);
         bool AddItem(int32_t itemId, int32_t quantity);
         bool RemoveInventoryItem(int32_t itemId, int32_t quantity);
+        void RemoveInventoryItemAll(int32_t itemId);
 
         void Show(const EventScript& eventScript);
         void Talk(LuaNPC& npc, const NPCTalkBox& talkBox);
@@ -57,6 +59,7 @@ namespace sunlight
 
         auto GetId() const -> int32_t;
         auto GetTypeValue() const -> int32_t;
+        auto GetLevel() const -> int32_t;
         auto GetNoviceJobLevel() const -> int32_t;
         auto GetSelection() const -> int32_t;
         auto GetState() const -> int32_t;

@@ -5,7 +5,7 @@
 return function (system, npc, player, sequence)
 
     local width = 400
-    local height = 160
+    local height = 250
 
     if sequence == 0 then
 
@@ -56,6 +56,20 @@ return function (system, npc, player, sequence)
             talkBox:addString(2508) --뭐, 잘가도록 하세요.
 
             player:talk(npc, talkBox)
+
+            --  현재 초캠 퀘스트 중이라면 실패시킨다
+            local quest = player:findQuest(200)
+            if quest ~= nil and quest:getState() ~= 1 then
+
+                local questChange = QuestChange:new()
+                questChange:setNewState(2)
+
+                player:changeQuest(200, questChange)
+
+            end
+
+            -- 슬라푸딩 핵 제거
+            player:removeInventoryItemAll(5050016)
 
             return
 

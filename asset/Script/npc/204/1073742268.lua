@@ -9,7 +9,7 @@ return function (system, npc, player, sequence)
 
     if sequence == 0 then
         local talkBox = NPCTalkBox:new(width, height)
-        talkBox:addString(24023) -- 어서오세요! 트랜돌 최고의 헤어 디자이너인 미치르의 가게에 잘 오셨습니다
+        talkBox:addString(10401) -- 흐음... 머리를 다듬으러 온 건가요?
 
         player:talk(npc, talkBox)
 

@@ -33,7 +33,10 @@ namespace sunlight
         EventScript() = default;
         ~EventScript() = default;
 
+        // func_1602
         void AddString(int32_t tableIndex);
+
+        // func_1603
         void AddStringWithInt(int32_t tableIndex, int32_t value);
         void AddStringWithIntItem(int32_t tableIndex, int32_t itemId);
 

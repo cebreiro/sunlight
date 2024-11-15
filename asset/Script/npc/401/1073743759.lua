@@ -2,6 +2,7 @@
 -- Stage : 10000
 -- Name  : 교관 프란시스
 -- Quest : 200
+-- Nes   : 100018
 
 return function (system, npc, player, sequence)
 

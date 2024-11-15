@@ -391,6 +391,29 @@ namespace sunlight
         return true;
     }
 
+    bool PlayerItemComponent::RemoveInventoryItemAll(int32_t itemId, std::vector<game_entity_id_type>* result)
+    {
+        const auto [begin, end] = _inventoryItemIdIndex.equal_range(itemId);
+        if (begin == end)
+        {
+            return false;
+        }
+
+        const auto vector = std::ranges::to<std::vector>(std::ranges::subrange(begin, end) | std::views::values);
+
+        for (GameItem& item : vector | notnull::reference)
+        {
+            if (result)
+            {
+                result->emplace_back(item.GetId());
+            }
+
+            Erase(item.GetId());
+        }
+
+        return true;
+    }
+
     bool PlayerItemComponent::TryRemoveInventoryItem(int32_t itemId, int32_t quantity, std::vector<item_remove_result_type>* result)
     {
         if (quantity <= 0)

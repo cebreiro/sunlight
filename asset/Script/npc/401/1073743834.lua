@@ -5,9 +5,10 @@
 return function (system, npc, player, sequence)
 
     local width = 400
-    local height = 150
+    local height = 200
 
     if sequence == 0 then
+
         local talkBox = NPCTalkBox:new(width, height)
         talkBox:addString(3120) -- 필요한 물건을 골라주세요~!
 

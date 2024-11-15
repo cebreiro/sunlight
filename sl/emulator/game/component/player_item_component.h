@@ -62,6 +62,8 @@ namespace sunlight
 
         bool AddVendorItem(SharedPtrNotNull<GameItem> item, int32_t slot);
 
+        bool RemoveInventoryItemAll(int32_t itemId, std::vector<game_entity_id_type>* result);
+
         bool TryRemoveInventoryItem(int32_t itemId, int32_t quantity, std::vector<item_remove_result_type>* result);
 
         bool TryStackInventoryItem(int32_t itemId, int32_t quantity,

@@ -602,6 +602,32 @@ namespace sunlight
         return true;
     }
 
+    void ItemArchiveSystem::RemoveInventoryItemAll(GamePlayer& player, int32_t itemId)
+    {
+        if (IsExternItemTransactionRunning(player))
+        {
+            SUNLIGHT_LOG_WARN(_serviceLocator,
+                fmt::format("[{}] fail to remove item. extern transaction is running. player: {}, item_id: {}",
+                    GetName(), player.GetCId(), itemId));
+
+            return;
+        }
+
+        if (!player.GetItemComponent().RemoveInventoryItemAll(itemId, &_itemRemoveAllResult))
+        {
+            return;
+        }
+
+        SaveChanges(player);
+
+        for (game_entity_id_type removed : _itemRemoveAllResult)
+        {
+            player.Defer(ItemArchiveMessageCreator::CreateItemRemove(player, removed, GameEntityType::Item));
+        }
+
+        player.FlushDeferred();
+    }
+
     bool ItemArchiveSystem::Charge(GamePlayer& player, int32_t cost)
     {
         if (IsExternItemTransactionRunning(player))
