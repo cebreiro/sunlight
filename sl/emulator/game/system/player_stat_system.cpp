@@ -111,7 +111,7 @@ namespace sunlight
     {
         PlayerStatComponent& statComponent = player.GetStatComponent();
 
-        const int32_t maxHP = statComponent.GetFinalStat(PlayerStatType::MaxSP).As<int32_t>();
+        const int32_t maxHP = statComponent.GetFinalStat(PlayerStatType::MaxHP).As<int32_t>();
         const int32_t hp = std::clamp(value, 0, maxHP);
 
         statComponent.SetRecoveryStat(RecoveryStatType::HP, StatValue(hp));
