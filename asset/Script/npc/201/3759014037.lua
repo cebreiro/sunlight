@@ -201,12 +201,23 @@ return function (system, npc, player, sequence)
 
                     end
 
-                    local quest = Quest:new(progressCheckQuestId)
-                    quest:setState(3)
-                    quest:setFlag(0, jobId)
-                    quest:setFlag(1, 1)
+                    if progressCheckQuest ~= nil then
 
-                    player:startQuest(quest)
+                        local questChange = QuestChange:new()
+                        questChange:setState(3)
+                        questChange:setFlag(0, jobId)
+                        questChange:setFlag(1, 1)
+
+                        player:changeQuest(progressCheckQuestId, questChange)
+
+                    else
+                        local quest = Quest:new(progressCheckQuestId)
+                        quest:setState(3)
+                        quest:setFlag(0, jobId)
+                        quest:setFlag(1, 1)
+
+                        player:startQuest(quest)
+                    end
 
                 end
 

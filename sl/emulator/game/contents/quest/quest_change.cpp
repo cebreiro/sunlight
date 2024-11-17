@@ -8,7 +8,7 @@ namespace sunlight
     {
     }
 
-    void QuestChange::SetNewState(int32_t newState)
+    void QuestChange::SetState(int32_t newState)
     {
         _newState = newState;
     }

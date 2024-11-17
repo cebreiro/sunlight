@@ -47,7 +47,7 @@ namespace sunlight
     bool ServerCommandQuestStateSet::Execute(GamePlayer& player, int32_t questId, int32_t state) const
     {
         QuestChange change;
-        change.SetNewState(state);
+        change.SetState(state);
 
         return _system.Get<PlayerQuestSystem>().ChangeQuest(player, questId, change);
     }

@@ -62,7 +62,7 @@ return function (system, npc, player, sequence)
             if quest ~= nil and quest:getState() ~= 1 then
 
                 local questChange = QuestChange:new()
-                questChange:setNewState(2)
+                questChange:setState(2)
 
                 player:changeQuest(200, questChange)
 

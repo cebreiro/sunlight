@@ -44,7 +44,7 @@ namespace sunlight
 
         luaState.new_usertype<QuestChange>("QuestChange",
             sol::constructors<QuestChange()>(),
-            "setNewState", &QuestChange::SetNewState,
+            "setState", &QuestChange::SetState,
             "setFlag", &QuestChange::SetFlag,
             "configureTimeLimit", &QuestChange::ConfigureTimeLimit
         );

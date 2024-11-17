@@ -70,7 +70,7 @@ return function (system, npc, player, sequence)
                         local questChange = QuestChange:new()
                         questChange:setFlag(questStepflagIndex, stepAchieveJobLevel)
 
-                        player:changeQuest(noviceQuestId,questChange)
+                        player:changeQuest(noviceQuestId, questChange)
 
                     end
 
@@ -278,7 +278,7 @@ return function (system, npc, player, sequence)
                     elseif sequence == 1 then
 
                         local questChange = QuestChange:new()
-                        questChange:setNewState(1)
+                        questChange:setState(1)
 
                         player:changeQuest(noviceQuestId, questChange)
                         player:removeInventoryItem(requiredItemId, 1)

@@ -11,7 +11,7 @@ namespace sunlight
         QuestChange();
 
         // func_1203
-        void SetNewState(int32_t newState);
+        void SetState(int32_t newState);
 
         // func_1205
         void SetFlag(int32_t index, int32_t value);
