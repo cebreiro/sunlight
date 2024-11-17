@@ -112,6 +112,11 @@ namespace sunlight
             return true;
         }
 
+        if (entity->GetComponent<MonsterStatComponent>().IsDead())
+        {
+            return true;
+        }
+
         return false;
     }
 

@@ -1,6 +1,7 @@
 #include "monster_ai_state_spawn.h"
 
 #include "sl/emulator/game/component/entity_state_component.h"
+#include "sl/emulator/game/contents/ai/monster/monster_controller.h"
 #include "sl/emulator/game/entity/game_monster.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
@@ -19,6 +20,11 @@ namespace sunlight
         while (true)
         {
             co_await Delay(std::chrono::milliseconds(4000));
+
+            if (event.controller.ShouldStopCoroutine())
+            {
+                co_return;
+            }
 
             GameMonster& monster = event.monster;
 
