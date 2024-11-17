@@ -238,19 +238,15 @@ namespace sunlight
 
     bool PlayerItemComponent::HasInventoryItem(int32_t itemId, int32_t quantity) const
     {
-        const auto filter = [itemId](const GameItem& item) -> bool
-            {
-                if (item.GetData().GetId() != itemId)
-                {
-                    return false;
-                }
-
-                return item.GetComponent<ItemPositionComponent>().GetPositionType() == ItemPositionType::Inventory;
-            };
+        const auto [begin, end] = _inventoryItemIdIndex.equal_range(itemId);
+        if (begin == end)
+        {
+            return false;
+        }
 
         int32_t sum = 0;
 
-        for (const GameItem& item : _items | std::views::values | notnull::reference | std::views::filter(filter))
+        for (const GameItem& item : std::ranges::subrange(begin, end) | std::views::values | notnull::reference)
         {
             sum += item.GetQuantity();
 

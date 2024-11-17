@@ -32,7 +32,6 @@ namespace sunlight
         auto GetServiceLocator() const -> const ServiceLocator&;
 
     public:
-        void ShowEventScript(GamePlayer& player, const EventScript& eventScript);
         void CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox);
         void DisposeNPCTalk(GamePlayer& player);
 

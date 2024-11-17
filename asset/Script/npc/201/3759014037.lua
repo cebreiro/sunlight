@@ -20,9 +20,9 @@ return function (system, npc, player, sequence)
 
             if progressCheckQuest ~= nil then
 
-                local flag = progressCheckQuest:getFlag(1)
+                local step = progressCheckQuest:getFlag(1)
 
-                if flag == 2 then -- 전직 담당에게서 퀘스트 받은 경우
+                if step == 2 then -- 전직 담당에게서 퀘스트 받은 경우
 
                     local talkBox = NPCTalkBox:new(width, height)
                     talkBox:addString(1220) -- 흠, 전직시험을 열심히 보는 중이로군
@@ -32,7 +32,7 @@ return function (system, npc, player, sequence)
 
                     return
 
-                elseif flag == 3 then -- 성공 후 전직 담당과 얘기 끝
+                elseif step == 3 then -- 성공 후 전직 담당과 얘기 끝
 
                     if sequence == 0 then
 
@@ -41,17 +41,56 @@ return function (system, npc, player, sequence)
 
                         player:talk(npc, talkBox)
 
+                        return
+
                     elseif sequence == 1 then
 
                         local talkBox = NPCTalkBox:new(width, height)
                         talkBox:addString(1231) -- 자, 그럼 앞으로 훌륭한 전사의 길을 가길 바라네
 
                         player:talk(npc, talkBox)
-                        player:disposeTalk()
 
-                        -- TODO: 전직 처리
+                        return
+
+                    elseif sequence == 2 then
+
+                        local advancedJob = progressCheckQuest:getFlag(2)
+
+                        if not player:promoteJob(advancedJob) then
+
+                            system:error("fail to premote job change quest - job: " .. advancedJob)
+                            player:disposeTalk()
+
+                            return
+
+                        end
+
+                        local progressQuestChange = QuestChange:new()
+                        progressQuestChange:setFlag(0, 0)
+                        progressQuestChange:setFlag(1, 999)
+
+                        player:changeQuest(progressCheckQuestId, progressQuestChange)
+
+                        local jobChangeQuestId = progressCheckQuest:getFlag(0)
+                        local jobChangeQuest = player:findQuest(jobChangeQuestId)
+
+                        if jobChangeQuest == nil then
+
+                            system:error("fail to find job change quest")
+
+                        else
+
+                            local jobChangeQuestChange = QuestChange:new()
+                            jobChangeQuestChange:setState(1)
+                            jobChangeQuestChange:setFlag(1, 999)
+
+                            player:changeQuest(jobChangeQuestId, jobChangeQuestChange)
+
+                        end
 
                     end
+
+                    player:disposeTalk()
 
                     return
 
@@ -181,23 +220,23 @@ return function (system, npc, player, sequence)
 
                     end
 
-                    local jobId = -1
+                    local jobChangeQuestId = -1
 
                     if selection == 1 then
 
-                        jobId = 2100
+                        jobChangeQuestId = 1001
 
                     elseif selection == 2 then
 
-                        jobId = 2101
+                        jobChangeQuestId = 1002
 
                     elseif selection == 3 then
 
-                        jobId = 2102
+                        jobChangeQuestId = 1002
 
                     elseif selection == 4 then
 
-                        jobId = 2103
+                        jobChangeQuestId = 1004
 
                     end
 
@@ -205,7 +244,7 @@ return function (system, npc, player, sequence)
 
                         local questChange = QuestChange:new()
                         questChange:setState(3)
-                        questChange:setFlag(0, jobId)
+                        questChange:setFlag(0, jobChangeQuestId)
                         questChange:setFlag(1, 1)
 
                         player:changeQuest(progressCheckQuestId, questChange)
@@ -213,7 +252,7 @@ return function (system, npc, player, sequence)
                     else
                         local quest = Quest:new(progressCheckQuestId)
                         quest:setState(3)
-                        quest:setFlag(0, jobId)
+                        quest:setFlag(0, jobChangeQuestId)
                         quest:setFlag(1, 1)
 
                         player:startQuest(quest)

@@ -18,9 +18,11 @@
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
+#include "sl/emulator/game/contents/event_script/event_script.h"
 #include "sl/emulator/game/contents/item/equipment_position.h"
 #include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/game/message/creator/chat_message_creator.h"
+#include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
@@ -247,6 +249,38 @@ namespace sunlight
     void GamePlayer::Notice(const std::string& message)
     {
         Send(ChatMessageCreator::CreateServerMessage(message));
+    }
+
+    void GamePlayer::Show(const EventScript& eventScript)
+    {
+        Defer(GamePlayerMessageCreator::CreateEventScriptClear(*this));
+
+        for (const event_script_item_type& element : eventScript.GetItems())
+        {
+            std::visit([&]<typename T>(const T & item)
+            {
+                if constexpr (std::is_same_v<T, EventScriptString>)
+                {
+                    Defer(GamePlayerMessageCreator::CreateEventScriptAddString(*this, item.tableIndex));
+                }
+                else if constexpr (std::is_same_v<T, EventScriptStringWithInt>)
+                {
+                    Defer(GamePlayerMessageCreator::CreateEventScriptAddStringWithInt(*this, item.tableIndex, item.value));
+                }
+                else if constexpr (std::is_same_v<T, EventScriptStringWithItem>)
+                {
+                    Defer(GamePlayerMessageCreator::CreateEventScriptAddStringWithItem(*this, item.tableIndex, item.itemId));
+                }
+                else
+                {
+                    static_assert(sizeof(T), "not implemented");
+                }
+
+            }, element);
+        }
+
+        Defer(GamePlayerMessageCreator::CreateEventScriptShow(*this));
+        FlushDeferred();
     }
 
     bool GamePlayer::IsArmed() const

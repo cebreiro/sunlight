@@ -34,6 +34,8 @@ namespace sunlight
         bool IsMagician() const;
         bool IsArtisan() const;
 
+        bool PromoteJob(int32_t jobId);
+
         bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
 
         void RecoverHP();

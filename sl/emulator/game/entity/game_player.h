@@ -9,6 +9,7 @@ namespace sunlight::db::dto
 
 namespace sunlight
 {
+    class EventScript;
     class Stage;
     class GameClient;
     class GameDataProvideService;
@@ -53,6 +54,7 @@ namespace sunlight
 
     public:
         void Notice(const std::string& message);
+        void Show(const EventScript& eventScript);
 
     public:
         bool IsArmed() const;

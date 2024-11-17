@@ -17,6 +17,7 @@
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
+#include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
@@ -85,6 +86,17 @@ namespace sunlight
         return job->GetId() == JobId::NoviceArtisan;
     }
 
+    bool LuaPlayer::PromoteJob(int32_t jobId)
+    {
+        const JobId casted = static_cast<JobId>(jobId);
+        if (!IsValid(casted))
+        {
+            return false;
+        }
+
+        return _system.Get<PlayerJobSystem>().Promote(_player, casted);
+    }
+
     bool LuaPlayer::HasInventoryItem(int32_t itemId, int32_t quantity) const
     {
         return _player.GetItemComponent().HasInventoryItem(itemId, quantity);
@@ -122,7 +134,7 @@ namespace sunlight
 
     void LuaPlayer::Show(const EventScript& eventScript)
     {
-        _system.ShowEventScript(_player, eventScript);
+        _player.Show(eventScript);
     }
 
     void LuaPlayer::Talk(LuaNPC& npc, const NPCTalkBox& talkBox)
@@ -253,6 +265,7 @@ namespace sunlight
             "isMagician", &LuaPlayer::IsMagician,
             "isArtisan", &LuaPlayer::IsArtisan,
             "hasInventoryItem", &LuaPlayer::HasInventoryItem,
+            "promoteJob", &LuaPlayer::PromoteJob,
             "recoverHP", &LuaPlayer::RecoverHP,
             "recoverSP", &LuaPlayer::RecoverSP,
             "charge", &LuaPlayer::Charge,

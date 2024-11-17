@@ -235,6 +235,7 @@ namespace sunlight
         Get<PlayerChannelSystem>().OnStageEnter(*player, enterType);
         Get<EntityStatusEffectSystem>().OnStageEnter(*player, enterType);
         Get<EntitySkillEffectSystem>().OnStageEnter(*player, enterType);
+        Get<PlayerQuestSystem>().OnStageEnter(*player, enterType);
     }
 
     auto Stage::DespawnPlayer(game_client_id_type clientId, StageExitType exitType) -> Future<std::shared_ptr<GamePlayer>>

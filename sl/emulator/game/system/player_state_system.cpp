@@ -33,6 +33,7 @@
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
+#include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
@@ -65,6 +66,7 @@ namespace sunlight
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerIndexSystem>());
         Add(stage.Get<EntitySkillEffectSystem>());
+        Add(stage.Get<PlayerJobSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)
@@ -97,38 +99,6 @@ namespace sunlight
     auto PlayerStateSystem::GetServiceLocator() const -> const ServiceLocator&
     {
         return _serviceLocator;
-    }
-
-    void PlayerStateSystem::ShowEventScript(GamePlayer& player, const EventScript& eventScript)
-    {
-        player.Defer(GamePlayerMessageCreator::CreateEventScriptClear(player));
-
-        for (const event_script_item_type& element : eventScript.GetItems())
-        {
-            std::visit([&]<typename T>(const T& item)
-                {
-                    if constexpr (std::is_same_v<T, EventScriptString>)
-                    {
-                        player.Defer(GamePlayerMessageCreator::CreateEventScriptAddString(player, item.tableIndex));
-                    }
-                    else if constexpr (std::is_same_v<T, EventScriptStringWithInt>)
-                    {
-                        player.Defer(GamePlayerMessageCreator::CreateEventScriptAddStringWithInt(player, item.tableIndex, item.value));
-                    }
-                    else if constexpr (std::is_same_v<T, EventScriptStringWithItem>)
-                    {
-                        player.Defer(GamePlayerMessageCreator::CreateEventScriptAddStringWithItem(player, item.tableIndex, item.itemId));
-                    }
-                    else
-                    {
-                        static_assert(sizeof(T), "not implemented");
-                    }
-
-                }, element);
-        }
-
-        player.Defer(GamePlayerMessageCreator::CreateEventScriptShow(player));
-        player.FlushDeferred();
     }
 
     void PlayerStateSystem::CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox)

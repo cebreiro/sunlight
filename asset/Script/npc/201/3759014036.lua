@@ -58,10 +58,9 @@ return function (system, npc, player, sequence)
 
     end
 
-    local targetJobId = 2100
-    local jobId = progressCheckQuest:getFlag(0)
+    local jobChangeQuestId = 1001
 
-    if jobId ~= targetJobId then
+    if progressCheckQuest:getFlag(0) ~= jobChangeQuestId then
 
         local talkBox = NPCTalkBox:new(width, height)
         talkBox:addString(1610) -- 어라, 다른 직업의 시험을 보는 중이시군요?
@@ -73,10 +72,16 @@ return function (system, npc, player, sequence)
 
     end
 
-    local jobChangeQuestId = 1001
+    local targetJobId = 2100
+
+    local requiredItemId = 5050001
     local progressState = progressCheckQuest:getFlag(1)
 
     if progressState == 1 then
+
+        local monsterId = 11802
+        local monsterCount = 10
+        local probability = 1000000
 
         local jobChangeQuest = player:findQuest(jobChangeQuestId)
 
@@ -101,14 +106,15 @@ return function (system, npc, player, sequence)
 
                     questChange:setFlag(0, 0)
                     questChange:setFlag(1, 2)
-                    questChange:setFlag(2, 11802)
-                    questChange:setFlag(3, 10)
+                    questChange:setFlag(2, monsterId)
+                    questChange:setFlag(3, monsterCount)
                     questChange:setFlag(4, 0)
-                    questChange:setFlag(5, 5050001)
-                    questChange:setFlag(6, 1000000)
+                    questChange:setFlag(5, requiredItemId)
+                    questChange:setFlag(6, probability)
                     questChange:setFlag(7, 0)
                     questChange:setFlag(8, 0)
                     questChange:setFlag(9, 0)
+                    questChange:configureItemGain(monsterId, requiredItemId, probability, 1, monsterCount)
 
                     player:changeQuest(jobChangeQuestId, questChange)
 
@@ -145,17 +151,18 @@ return function (system, npc, player, sequence)
             elseif sequence == 2 then
 
                 local quest = Quest:new(jobChangeQuestId)
-                quest:setFlag(0, jobId)
+
                 quest:setFlag(0, 0)
                 quest:setFlag(1, 2)
-                quest:setFlag(2, 11802) -- 잡아야 할 몬스터
-                quest:setFlag(3, 10) -- 잡아야 할 마리수
+                quest:setFlag(2, monsterId)
+                quest:setFlag(3, monsterCount)
                 quest:setFlag(4, 0)
-                quest:setFlag(5, 5050001) -- 드롭 아이템
-                quest:setFlag(6, 1000000) -- 드롭 확률 (1/1000000 단위) << 100% 를 의도한듯??
+                quest:setFlag(5, requiredItemId)
+                quest:setFlag(6, probability)
                 quest:setFlag(7, 0)
                 quest:setFlag(8, 0)
                 quest:setFlag(9, 0)
+                quest:configureItemGain(monsterId, requiredItemId, probability, 1, monsterCount)
 
                 player:startQuest(quest)
 
@@ -222,21 +229,26 @@ return function (system, npc, player, sequence)
 
                     player:talk(npc, talkBox)
 
-                    -- TODO: remove quest item
-
-                    local jobChangeQuestChange = QuestChange:new()
-                    jobChangeQuestChange:setFlag(0, 1)
-                    jobChangeQuestChange:setFlag(1, 0)
-
-                    player:changeQuest(jobChangeQuestId, jobChangeQuestChange)
-
-                    local progressQuestChange = QuestChange:new()
-                    progressQuestChange:setFlag(1, 0)
-                    progressQuestChange:setFlag(0, 0)
-
-                    player:changeQuest(progressCheckQuestId, progressQuestChange)
+                    return
 
                 end
+
+            elseif sequence == 2 then
+
+                player:removeInventoryItemAll(requiredItemId)
+
+                local jobChangeQuestChange = QuestChange:new()
+                jobChangeQuestChange:setFlag(0, 1)
+                jobChangeQuestChange:setFlag(1, 0)
+                jobChangeQuestChange:resetItemGain()
+
+                player:changeQuest(jobChangeQuestId, jobChangeQuestChange)
+
+                local progressQuestChange = QuestChange:new()
+                progressQuestChange:setFlag(1, 0)
+                progressQuestChange:setFlag(0, 0)
+
+                player:changeQuest(progressCheckQuestId, progressQuestChange)
 
             end
 

@@ -1,18 +1,27 @@
 #include "player_quest_system.h"
 
+#include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_quest_component.h"
+#include "sl/emulator/game/contents/event_script/event_script.h"
 #include "sl/emulator/game/contents/quest/quest_change.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/system/game_repository_system.h"
+#include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 
 namespace sunlight
 {
+    PlayerQuestSystem::PlayerQuestSystem()
+        : _mt19937(std::random_device{}())
+    {
+    }
+
     void PlayerQuestSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<GameRepositorySystem>());
+        Add(stage.Get<ItemArchiveSystem>());
     }
 
     bool PlayerQuestSystem::Subscribe(Stage& stage)
@@ -32,26 +41,86 @@ namespace sunlight
         return GameSystem::GetClassId<PlayerQuestSystem>();
     }
 
-    void PlayerQuestSystem::OnInitialize(GamePlayer& player)
+    void PlayerQuestSystem::OnStageEnter(GamePlayer& player, StageEnterType enterType)
     {
-        const game_time_point_type now = GameTimeService::Now();
-
-        for (Quest& quest : player.GetQuestComponent().GetQuests() | std::views::values)
+        if (enterType == StageEnterType::Login)
         {
-            if (!quest.HasTimeLimit())
+            const game_time_point_type now = GameTimeService::Now();
+
+            PlayerQuestComponent& questComponent = player.GetQuestComponent();
+
+            for (Quest& quest : questComponent.GetQuests() | std::views::values)
             {
-                continue;
+                if (quest.GetState() == 0)
+                {
+                    if (quest.HasTimeLimit())
+                    {
+                        const QuestTimeLimit& timeLimit = quest.GetTimeLimit();
+                        const game_time_point_type startTimePoint(game_time_point_type::duration(timeLimit.startTimePoint));
+                        const game_time_point_type endTimePoint(game_time_point_type::duration(timeLimit.endTimePoint));
+
+                        const int32_t value = now >= endTimePoint
+                            ? std::chrono::duration_cast<std::chrono::minutes>(endTimePoint - startTimePoint).count() + 1
+                            : std::chrono::duration_cast<std::chrono::minutes>(now - startTimePoint).count();
+
+                        quest.SetFlag(timeLimit.flagIndex, -value);
+                    }
+
+                    if (quest.HasItemGain())
+                    {
+                        questComponent.SetQuestItemGainIndex(quest.GetId());
+                    }
+                }
             }
+        }
+    }
 
-            const QuestTimeLimit& timeLimit = quest.GetTimeLimit();
-            const game_time_point_type startTimePoint(game_time_point_type::duration(timeLimit.startTimePoint));
-            const game_time_point_type endTimePoint(game_time_point_type::duration(timeLimit.endTimePoint));
+    void PlayerQuestSystem::OnMonsterKill(GamePlayer& player, int32_t monsterId)
+    {
+        PlayerQuestComponent& questComponent = player.GetQuestComponent();
 
-            const int32_t value = now >= endTimePoint
-                ? std::chrono::duration_cast<std::chrono::minutes>(endTimePoint - startTimePoint).count() + 1
-                : std::chrono::duration_cast<std::chrono::minutes>(now - startTimePoint).count();
+        _questItemGainsBuffer.clear();
+        if (questComponent.GetItemGain(monsterId, _questItemGainsBuffer))
+        {
+            const PlayerItemComponent& itemComponent = player.GetItemComponent();
 
-            quest.SetFlag(timeLimit.flagIndex, -value);
+            for (QuestItemGain& questItemGain : _questItemGainsBuffer | notnull::reference)
+            {
+                ++questItemGain.killCount;
+
+                if (questItemGain.minKillCount > 0 && questItemGain.killCount < questItemGain.minKillCount)
+                {
+                    continue;
+                }
+
+                if (itemComponent.HasInventoryItem(questItemGain.itemId, questItemGain.itemMaxQuantity))
+                {
+                    continue;
+                }
+
+                bool gain = false;
+
+                if (questItemGain.probability >= GameConstant::ITEM_PROBABILITY_MAX)
+                {
+                    gain = true;
+                }
+                else
+                {
+                    std::uniform_int_distribution dist(0, GameConstant::ITEM_PROBABILITY_MAX);
+                    gain = dist(_mt19937) < questItemGain.probability;
+                }
+
+                if (gain)
+                {
+                    if (Get<ItemArchiveSystem>().AddItem(player, questItemGain.itemId, 1))
+                    {
+                        EventScript eventScript;
+                        eventScript.AddStringWithInt(503, questItemGain.itemId);
+
+                        player.Show(eventScript);
+                    }
+                }
+            }
         }
     }
 
@@ -70,7 +139,15 @@ namespace sunlight
             newQuest.GetFlagString(), newQuest.GetData());
 
         player.Send(GamePlayerMessageCreator::CreateQuestAdd(player, newQuest));
+
+        const bool hasItemGain = newQuest.HasItemGain();
+
         questComponent.AddQuest(std::move(newQuest));
+
+        if (hasItemGain)
+        {
+            questComponent.SetQuestItemGainIndex(questId);
+        }
 
         return true;
     }
@@ -107,6 +184,22 @@ namespace sunlight
         if (const std::optional<QuestTimeLimit>& timeLimit = change.GetQuestTimeLimit(); timeLimit.has_value())
         {
             quest->SetTimeLimit(timeLimit);
+        }
+
+        if (const std::optional<QuestItemGain>& itemGain = change.GetQuestItemGain(); itemGain.has_value())
+        {
+            quest->SetItemGain(itemGain);
+            questComponent.SetQuestItemGainIndex(quest->GetId());
+        }
+
+        if (change.IsResetQuestItemGain())
+        {
+            questComponent.ResetQuestItemGainIndex(quest->GetId());
+        }
+
+        if (quest->GetState() != 0)
+        {
+            questComponent.ResetQuestItemGainIndex(quest->GetId());
         }
 
         Get<GameRepositorySystem>().SaveQuestChange(player, quest->GetId(), quest->GetState(),

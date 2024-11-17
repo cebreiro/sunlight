@@ -44,7 +44,6 @@ namespace sunlight
         Add(stage.Get<EntityMovementSystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerAppearanceSystem>());
-        Add(stage.Get<PlayerQuestSystem>());
         Add(stage.Get<EventBubblingSystem>());
     }
 
@@ -100,7 +99,6 @@ namespace sunlight
         _entityIdIndex[player->GetId()] = player.get();
 
         Get<PlayerStatSystem>().OnInitialize(*player);
-        Get<PlayerQuestSystem>().OnInitialize(*player);
         Get<PlayerAppearanceSystem>().UpdateEquipmentAppearance(*player);
 
         SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();

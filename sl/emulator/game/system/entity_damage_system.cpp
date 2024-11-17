@@ -28,6 +28,7 @@
 #include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
+#include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
@@ -71,6 +72,7 @@ namespace sunlight
         Add(stage.Get<MonsterDropItemTableSystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<PlayerJobSystem>());
+        Add(stage.Get<PlayerQuestSystem>());
         Add(stage.Get<EntityMovementSystem>());
 
         if (PathFindingSystem* pathFindSystem = stage.Find<PathFindingSystem>();
@@ -547,6 +549,8 @@ namespace sunlight
 				playerJobSystem.GainJobExp(player, monsterExp);
             }
         }
+
+        Get<PlayerQuestSystem>().OnMonsterKill(player, monster.GetDataId());
     }
 
     void EntityDamageSystem::DropMonsterItem(const GameMonster& monster, const GamePlayer* player)
