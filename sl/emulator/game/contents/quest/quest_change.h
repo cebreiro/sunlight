@@ -10,7 +10,10 @@ namespace sunlight
     public:
         QuestChange();
 
+        // func_1203
         void SetNewState(int32_t newState);
+
+        // func_1205
         void SetFlag(int32_t index, int32_t value);
         void ConfigureTimeLimit(int32_t localIndex, int32_t minute);
 

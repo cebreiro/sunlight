@@ -28,6 +28,12 @@ namespace sunlight
         LuaPlayer(PlayerStateSystem& system, GamePlayer& player);
 
         bool IsMale() const;
+        bool IsNovice() const;
+        bool IsFighter() const;
+        bool IsRanger() const;
+        bool IsMagician() const;
+        bool IsArtisan() const;
+
         bool HasInventoryItem(int32_t itemId, int32_t quantity) const;
 
         void RecoverHP();
@@ -64,6 +70,7 @@ namespace sunlight
         auto GetSelection() const -> int32_t;
         auto GetState() const -> int32_t;
 
+        void SetSequence(int32_t sequence);
         void SetState(int32_t state);
 
     public:

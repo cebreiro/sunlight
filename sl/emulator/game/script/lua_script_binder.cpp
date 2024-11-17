@@ -38,6 +38,7 @@ namespace sunlight
             "getId", &Quest::GetId,
             "getState", &Quest::GetState,
             "getFlag", &Quest::GetFlag,
+            "setState", &Quest::SetState,
             "setFlag", &Quest::SetFlag
         );
 

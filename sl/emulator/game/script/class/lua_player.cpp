@@ -35,6 +35,56 @@ namespace sunlight
         return _player.GetStatComponent().GetGender() == 0;
     }
 
+    bool LuaPlayer::IsNovice() const
+    {
+        return _player.GetJobComponent().GetMainJob().IsNovice();
+    }
+
+    bool LuaPlayer::IsFighter() const
+    {
+        const Job* job = _player.GetJobComponent().Find(JobType::Novice);
+        if (!job)
+        {
+            return false;
+        }
+
+        return job->GetId() == JobId::NoviceFighter;
+    }
+
+    bool LuaPlayer::IsRanger() const
+    {
+        const Job* job = _player.GetJobComponent().Find(JobType::Novice);
+        if (!job)
+        {
+            return false;
+        }
+
+        return job->GetId() == JobId::NoviceRanger;
+
+    }
+
+    bool LuaPlayer::IsMagician() const
+    {
+        const Job* job = _player.GetJobComponent().Find(JobType::Novice);
+        if (!job)
+        {
+            return false;
+        }
+
+        return job->GetId() == JobId::NoviceMagician;
+    }
+
+    bool LuaPlayer::IsArtisan() const
+    {
+        const Job* job = _player.GetJobComponent().Find(JobType::Novice);
+        if (!job)
+        {
+            return false;
+        }
+
+        return job->GetId() == JobId::NoviceArtisan;
+    }
+
     bool LuaPlayer::HasInventoryItem(int32_t itemId, int32_t quantity) const
     {
         return _player.GetItemComponent().HasInventoryItem(itemId, quantity);
@@ -182,6 +232,11 @@ namespace sunlight
         return _player.GetNPCScriptComponent().GetState();
     }
 
+    void LuaPlayer::SetSequence(int32_t sequence)
+    {
+        _player.GetNPCScriptComponent().SetSequence(sequence);
+    }
+
     void LuaPlayer::SetState(int32_t state)
     {
         _player.GetNPCScriptComponent().SetState(state);
@@ -192,6 +247,11 @@ namespace sunlight
         luaState.new_usertype<LuaPlayer>("Player",
             sol::no_constructor,
             "isMale", &LuaPlayer::IsMale,
+            "isNovice", &LuaPlayer::IsNovice,
+            "isFighter", &LuaPlayer::IsFighter,
+            "isRanger", &LuaPlayer::IsRanger,
+            "isMagician", &LuaPlayer::IsMagician,
+            "isArtisan", &LuaPlayer::IsArtisan,
             "hasInventoryItem", &LuaPlayer::HasInventoryItem,
             "recoverHP", &LuaPlayer::RecoverHP,
             "recoverSP", &LuaPlayer::RecoverSP,
@@ -218,6 +278,7 @@ namespace sunlight
             "getNoviceJobLevel", &LuaPlayer::GetNoviceJobLevel,
             "getSelection", &LuaPlayer::GetSelection,
             "getState", &LuaPlayer::GetState,
+            "setSequence", &LuaPlayer::SetSequence,
             "setState", &LuaPlayer::SetState
         );
     }

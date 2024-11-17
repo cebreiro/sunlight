@@ -14,12 +14,19 @@ namespace sunlight
         bool HasTimeLimit() const;
 
         auto GetId() const -> int32_t;
+
+        // func_1202
         auto GetState() const -> int32_t;
         auto GetFlags() const -> const std::map<int32_t, int32_t>&;
+
+        // func_1204
         auto GetFlag(int32_t index) const -> int32_t;
         auto GetTimeLimit() const -> const QuestTimeLimit&;
 
+        // func_1203
         void SetState(int32_t state);
+
+        // func_1205
         void SetFlag(int32_t index, int32_t value);
         void SetTimeLimit(const std::optional<QuestTimeLimit>& limit);
 
