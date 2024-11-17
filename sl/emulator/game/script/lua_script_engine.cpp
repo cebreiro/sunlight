@@ -114,7 +114,7 @@ namespace sunlight
         return true;
     }
 
-    bool LuaScriptEngine::ExecuteNPCScript(int32_t scriptId, LuaSystem& system, LuaNPC& npc, LuaPlayer& player, int32_t sequence)
+    bool LuaScriptEngine::ExecuteNPCScript(int64_t scriptId, LuaSystem& system, LuaNPC& npc, LuaPlayer& player, int32_t sequence)
     {
         const auto iter = _npcScripts.find(scriptId);
         if (iter == _npcScripts.end())
@@ -222,7 +222,7 @@ namespace sunlight
         return success;
     }
 
-    bool LuaScriptEngine::InitializeNPCScript(std::unordered_map<int32_t, sol::protected_function>& outScript, const std::filesystem::path& directory)
+    bool LuaScriptEngine::InitializeNPCScript(std::unordered_map<int64_t, sol::protected_function>& outScript, const std::filesystem::path& directory)
     {
         bool success = true;
 
@@ -234,7 +234,7 @@ namespace sunlight
                 continue;
             }
 
-            const int32_t npcId = boost::lexical_cast<int32_t>(path.stem().string());
+            const int64_t npcId = boost::lexical_cast<int64_t>(path.stem().string());
 
             sol::load_result script = _luaState.load_file(path.string());
             if (!script.valid())

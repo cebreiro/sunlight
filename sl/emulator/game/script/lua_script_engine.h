@@ -28,12 +28,12 @@ namespace sunlight
         bool ReloadCommandScript();
 
         bool ExecuteCommandScript(const std::string& name, LuaPlayer& player);
-        bool ExecuteNPCScript(int32_t scriptId, LuaSystem& system, LuaNPC& npc, LuaPlayer& player, int32_t sequence);
+        bool ExecuteNPCScript(int64_t scriptId, LuaSystem& system, LuaNPC& npc, LuaPlayer& player, int32_t sequence);
         
     private:
         bool InitializeNgs(const std::filesystem::path& directory);
         bool InitializeCommandScript(std::unordered_map<std::string, sol::protected_function>& outScript, const std::filesystem::path& directory);
-        bool InitializeNPCScript(std::unordered_map<int32_t, sol::protected_function>& outScript, const std::filesystem::path& directory);
+        bool InitializeNPCScript(std::unordered_map<int64_t, sol::protected_function>& outScript, const std::filesystem::path& directory);
 
     private:
         const ServiceLocator& _serviceLocator;
@@ -44,6 +44,6 @@ namespace sunlight
 
         sol::state _luaState;
         std::unordered_map<std::string, sol::protected_function> _commandScripts;
-        std::unordered_map<int32_t, sol::protected_function> _npcScripts;
+        std::unordered_map<int64_t, sol::protected_function> _npcScripts;
     };
 }

@@ -18,9 +18,9 @@ namespace sunlight
         );
     }
 
-    auto LuaNPC::GetId() const -> int32_t
+    auto LuaNPC::GetId() const -> uint32_t
     {
-        return static_cast<int32_t>(_npc.GetId().Unwrap());
+        return _npc.GetId().Unwrap();
     }
 
     auto LuaNPC::GetImpl() const -> GameNPC&

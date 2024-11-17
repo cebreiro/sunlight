@@ -29,7 +29,7 @@ namespace sunlight
         static void Bind(sol::state& luaState);
 
     public:
-        auto GetId() const -> int32_t;
+        auto GetId() const -> uint32_t;
         auto GetImpl() const -> GameNPC&;
 
     private:
