@@ -60,6 +60,10 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandDamageSet>());
         system.AddCommand(std::make_shared<ServerCommandDamageClear>());
 
+        system.AddCommand(std::make_shared<ServerCommandQuestAdd>(system));
+        system.AddCommand(std::make_shared<ServerCommandQuestStateSet>(system));
+        system.AddCommand(std::make_shared<ServerCommandQuestFlagSet>(system));
+
         system.AddCommand(std::make_shared<ServerCommandSuicide>(system));
         system.AddCommand(std::make_shared<ServerCommandGoldAdd>(system));
     }
