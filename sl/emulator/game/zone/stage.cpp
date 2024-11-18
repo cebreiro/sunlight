@@ -26,7 +26,6 @@
 #include "sl/emulator/game/system/entity_status_effect_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/item_trade_system.h"
 #include "sl/emulator/game/system/monster_drop_item_table_system.h"
@@ -347,8 +346,7 @@ namespace sunlight
         Add(std::make_shared<PlayerJobSystem>(_serviceLocator, _stageData.id));
         Add(std::make_shared<PlayerStateSystem>(_serviceLocator, _stageData, _zoneId));
         Add(std::make_shared<PlayerAppearanceSystem>(_serviceLocator));
-        Add(std::make_shared<GameRepositorySystem>(_serviceLocator));
-        Add(std::make_shared<PlayerQuestSystem>());
+        Add(std::make_shared<PlayerQuestSystem>(_serviceLocator));
         Add(std::make_shared<NPCShopSystem>(_serviceLocator));
         Add(std::make_shared<PlayerProfileSystem>(_serviceLocator, _zoneId));
         Add(std::make_shared<PlayerGroupSystem>(_serviceLocator, _stageData.id));

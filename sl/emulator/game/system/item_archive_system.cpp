@@ -20,7 +20,6 @@
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/path_finding_system.h"
 #include "sl/emulator/game/system/player_appearance_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
@@ -30,6 +29,7 @@
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -47,7 +47,6 @@ namespace sunlight
 
     void ItemArchiveSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<GameRepositorySystem>());
         Add(stage.Get<SceneObjectSystem>());
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<PlayerStatSystem>());
@@ -137,7 +136,7 @@ namespace sunlight
 
         if (success)
         {
-            Get<GameRepositorySystem>().Save(host, guest, std::move(transaction));
+            _serviceLocator.Get<GameRepositoryService>().Save(host, guest, std::move(transaction));
 
             AddDummyPacketForInventoryRefresh(guest);
             guest.FlushDeferred();
@@ -678,7 +677,7 @@ namespace sunlight
             accountStorageComponent = temp.get();
             player.AddComponent(std::move(temp));
 
-            Get<GameRepositorySystem>().LoadAccountStorage(player,
+            _serviceLocator.Get<GameRepositoryService>().LoadAccountStorage(player,
                 [this, cid = player.GetCId()](const db::dto::AccountStorage& storage)
                 {
                     OnCompleteLoadAccountStorage(cid, storage);
@@ -1767,7 +1766,7 @@ namespace sunlight
             return;
         }
 
-        Get<GameRepositorySystem>().Save(player, std::move(transaction));
+        _serviceLocator.Get<GameRepositoryService>().Save(player, std::move(transaction));
     }
 
     void ItemArchiveSystem::LogHandleItemError(const char* func, const std::string& message) const

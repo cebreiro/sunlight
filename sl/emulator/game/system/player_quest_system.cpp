@@ -6,21 +6,21 @@
 #include "sl/emulator/game/contents/quest/quest_change.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 
 namespace sunlight
 {
-    PlayerQuestSystem::PlayerQuestSystem()
-        : _mt19937(std::random_device{}())
+    PlayerQuestSystem::PlayerQuestSystem(const ServiceLocator& serviceLocator)
+        : _serviceLocator(serviceLocator)
+        , _mt19937(std::random_device{}())
     {
     }
 
     void PlayerQuestSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<GameRepositorySystem>());
         Add(stage.Get<ItemArchiveSystem>());
     }
 
@@ -135,7 +135,7 @@ namespace sunlight
             return false;
         }
 
-        Get<GameRepositorySystem>().SaveNewQuest(player, newQuest.GetId(), newQuest.GetState(),
+        _serviceLocator.Get<GameRepositoryService>().SaveNewQuest(player, newQuest.GetId(), newQuest.GetState(),
             newQuest.GetFlagString(), newQuest.GetData());
 
         player.Send(GamePlayerMessageCreator::CreateQuestAdd(player, newQuest));
@@ -202,7 +202,7 @@ namespace sunlight
             questComponent.ResetQuestItemGainIndex(quest->GetId());
         }
 
-        Get<GameRepositorySystem>().SaveQuestChange(player, quest->GetId(), quest->GetState(),
+        _serviceLocator.Get<GameRepositoryService>().SaveQuestChange(player, quest->GetId(), quest->GetState(),
             quest->GetFlagString(), quest->GetData());
 
         if (player.HasDeferred())

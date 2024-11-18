@@ -1,5 +1,7 @@
 #pragma once
-#include "sl/emulator/game/system/game_system.h"
+#include <boost/container/small_vector.hpp>
+#include <boost/container/flat_set.hpp>
+#include "sl/emulator/game/time/game_time.h"
 #include "sl/emulator/service/database/request/skill_create.h"
 #include "sl/emulator/service/database/transaction/item/item_transaction.h"
 
@@ -10,29 +12,29 @@ namespace sunlight::db::dto
 
 namespace sunlight
 {
-    class Quest;
     struct PlayerProfileIntroduction;
 
-    class GameClient;
+    class Zone;
+
     class GamePlayer;
+    class GameClient;
 }
 
 namespace sunlight
 {
-    class GameRepositorySystem final : public GameSystem
+    class GameRepositoryService final : public IService
     {
     public:
-        explicit GameRepositorySystem(const ServiceLocator& serviceLocator);
+        explicit GameRepositoryService(Zone& zone);
+        ~GameRepositoryService();
 
-        void InitializeSubSystem(Stage& stage) override;
-        bool Subscribe(Stage& stage) override;
         auto GetName() const -> std::string_view override;
-        auto GetClassId() const -> game_system_id_type override;
-
-        // TODO: Join
 
     public:
-        bool IsPending() const;
+        void OnZoneEnter(const GamePlayer& player);
+        void OnZoneLeave(const GamePlayer& player);
+
+    public:
         bool IsPendingSaves(const GamePlayer& player) const;
 
         auto WaitForSaveCompletion(const GamePlayer& player) -> Future<void>;
@@ -66,13 +68,42 @@ namespace sunlight
         void SaveState(const GamePlayer& player, int32_t zone, int32_t stage, float x, float y, float yaw);
 
     private:
-        void OnComplete(int64_t cid);
-        void OnError(int64_t cid);
+        struct Task
+        {
+            game_time_point_type created = game_clock_type::now();
+            boost::container::small_vector<int64_t, 4> resources;
+
+            std::function<Future<bool>()> operation;
+
+            bool operator==(const Task& other) const;
+            bool operator<(const Task& other) const;
+        };
+
+        struct Resource
+        {
+            int64_t cid = 0;
+
+            const Task* owner = nullptr;
+            boost::container::small_flat_set<SharedPtrNotNull<Task>, 4, std::owner_less<>> waiters;
+
+            std::optional<Promise<void>> completionPromise = std::nullopt;
+        };
 
     private:
+        void Schedule(const SharedPtrNotNull<Task>& task);
+
+    private:
+        bool CanRun(const Task& task) const;
+        void Run(const SharedPtrNotNull<Task>& task);
+        void OnComplete(const SharedPtrNotNull<Task>& task);
+
+    private:
+        Zone& _zone;
         const ServiceLocator& _serviceLocator;
 
-        std::unordered_map<int64_t, std::pair<int32_t, WeakPtrNotNull<GameClient>>> _pending;
-        std::unordered_map<int64_t, Promise<void>> _saveCompletionPromise;
+        std::unordered_map<int64_t, std::weak_ptr<GameClient>> _players;
+
+        std::unordered_map<int64_t, Resource> _resources;
+        std::vector<PtrNotNull<Resource>> _resourceBuffer;
     };
 }

@@ -8,13 +8,11 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/message/creator/item_trade_message_creator.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/service/database/transaction/item/item_transaction.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
-#include "sl/emulator/service/gamedata/gamedata_provide_service.h"
-#include "sl/emulator/service/gamedata/item/item_data_provider.h"
 
 namespace sunlight
 {
@@ -25,7 +23,7 @@ namespace sunlight
 
     void ItemTradeSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<GameRepositorySystem>());
+        (void)stage;
     }
 
     auto ItemTradeSystem::GetName() const -> std::string_view
@@ -380,7 +378,7 @@ namespace sunlight
         hostItemComponent.FlushItemLogTo(transaction.logs);
         guestItemComponent.FlushItemLogTo(transaction.logs);
 
-        Get<GameRepositorySystem>().Save(host, guest, std::move(transaction));
+        _serviceLocator.Get<GameRepositoryService>().Save(host, guest, std::move(transaction));
 
         for (Buffer& buffer : hostSyncPackets)
         {

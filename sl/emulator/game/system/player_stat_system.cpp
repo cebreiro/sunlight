@@ -9,8 +9,8 @@
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/status_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/exp/character_exp_data.h"
 #include "sl/emulator/service/gamedata/exp/exp_data_provider.h"
@@ -25,7 +25,6 @@ namespace sunlight
     void PlayerStatSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<EntityViewRangeSystem>());
-        Add(stage.Get<GameRepositorySystem>());
     }
 
     bool PlayerStatSystem::Subscribe(Stage& stage)
@@ -63,8 +62,6 @@ namespace sunlight
             return;
         }
 
-        GameRepositorySystem& repositorySystem = Get<GameRepositorySystem>();
-
         statComponent.SetExp(statComponent.GetExp() + exp);
         player.Send(GamePlayerMessageCreator::CreateCharacterExpGain(player, exp));
 
@@ -74,14 +71,14 @@ namespace sunlight
             statComponent.SetExp(0);
             statComponent.SetStatPoint(statComponent.GetStatPoint() + GameConstant::STAT_POINT_PER_CHARACTER_LEVEL_UP);
 
-            repositorySystem.SaveCharacterLevel(player, statComponent.GetLevel(), statComponent.GetStatPoint());
+            _serviceLocator.Get<GameRepositoryService>().SaveCharacterLevel(player, statComponent.GetLevel(), statComponent.GetStatPoint());
 
             Get<EntityViewRangeSystem>().Broadcast(player,
                 GamePlayerMessageCreator::CreateCharacterLevelUp(player), true);
         }
         else
         {
-            repositorySystem.SaveCharacterExp(player, statComponent.GetExp());
+            _serviceLocator.Get<GameRepositoryService>().SaveCharacterExp(player, statComponent.GetExp());
         }
     }
 
@@ -335,7 +332,7 @@ namespace sunlight
         statComponent.AddStat(PlayerStatType::Wisdom, StatOriginType::Base, addStats[5]);
         statComponent.AddStat(PlayerStatType::Will, StatOriginType::Base, addStats[6]);
 
-        Get<GameRepositorySystem>().SaveStat(player,
+        _serviceLocator.Get<GameRepositoryService>().SaveStat(player,
             statComponent.GetStatPoint(),
             statComponent.Get(PlayerStatType::Str).Get(StatOriginType::Base).As<int32_t>(),
             statComponent.Get(PlayerStatType::Dex).Get(StatOriginType::Base).As<int32_t>(),

@@ -7,9 +7,9 @@
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/character_message_creator.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/player_index_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/service/database/dto/profile_introduction.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 
@@ -36,7 +36,6 @@ namespace sunlight
 
     void PlayerProfileSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<GameRepositorySystem>());
         Add(stage.Get<PlayerIndexSystem>());
     }
 
@@ -69,7 +68,7 @@ namespace sunlight
 
     void PlayerProfileSystem::OnZoneExit(const GamePlayer& player)
     {
-        Get<GameRepositorySystem>().SaveProfile(player);
+        _serviceLocator.Get<GameRepositoryService>().SaveProfile(player);
     }
 
     void PlayerProfileSystem::OnProfileSettingChange(const ZoneMessage& message)
@@ -153,7 +152,7 @@ namespace sunlight
 
         targetProfileComponent.SetLoadPendingIntroduction(true);
 
-        Get<GameRepositorySystem>().LoadProfileIntroduction(*targetPlayer,
+        _serviceLocator.Get<GameRepositoryService>().LoadProfileIntroduction(*targetPlayer,
             [this, playerName = player.GetName(), targetName = targetPlayer->GetName()](PlayerProfileIntroduction introduction)
             {
                 OnProfileIntroductionLoadComplete(playerName, targetName, introduction);

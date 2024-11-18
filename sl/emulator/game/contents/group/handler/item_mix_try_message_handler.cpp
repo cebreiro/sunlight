@@ -10,9 +10,9 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/message/creator/item_mix_message_creator.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/player_group_system.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/packet/io/sl_packet_reader.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
@@ -103,7 +103,7 @@ namespace sunlight
                             player.Defer(GamePlayerMessageCreator::CreateMixSkillExpChange(player, skill->GetId(), exp));
                         }
 
-                        system.Get<GameRepositorySystem>().SaveMixSkillExp(player, skill->GetId(), level, exp);
+                        system.GetServiceLocator().Get<GameRepositoryService>().SaveMixSkillExp(player, skill->GetId(), level, exp);
 
                         player.Defer(ItemMixMessageCreator::CreateItemMixSuccess(group.GetId(), itemData->GetId(), level, exp));
                     }

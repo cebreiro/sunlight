@@ -15,7 +15,6 @@
 #include "sl/emulator/game/message/creator/item_trade_message_creator.h"
 #include "sl/emulator/game/message/creator/street_vendor_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/item_trade_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
@@ -80,7 +79,6 @@ namespace sunlight
         Add(stage.Get<ItemTradeSystem>());
         Add(stage.Get<ItemArchiveSystem>());
         Add(stage.Get<SceneObjectSystem>());
-        Add(stage.Get<GameRepositorySystem>());
     }
 
     bool PlayerGroupSystem::Subscribe(Stage& stage)

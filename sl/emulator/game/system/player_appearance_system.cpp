@@ -9,8 +9,8 @@
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
 
 namespace sunlight
@@ -23,7 +23,6 @@ namespace sunlight
     void PlayerAppearanceSystem::InitializeSubSystem(Stage& stage)
     {
         Add(stage.Get<EntityViewRangeSystem>());
-        Add(stage.Get<GameRepositorySystem>());
     }
 
     bool PlayerAppearanceSystem::Subscribe(Stage& stage)
@@ -162,7 +161,7 @@ namespace sunlight
         Get<EntityViewRangeSystem>().Broadcast(player,
             GamePlayerMessageCreator::CreatePlayerHairColorChange(player, newColor), false);
 
-        Get<GameRepositorySystem>().SaveHairColor(player, newColor);
+        _serviceLocator.Get<GameRepositoryService>().SaveHairColor(player, newColor);
     }
 
     void PlayerAppearanceSystem::HandleHairChange(GamePlayer& player, int32_t newHair)
@@ -181,7 +180,7 @@ namespace sunlight
         Get<EntityViewRangeSystem>().Broadcast(player,
             GamePlayerMessageCreator::CreatePlayerHairChange(player, newHair, hasHat), false);
 
-        Get<GameRepositorySystem>().SaveHair(player, newHair);
+        _serviceLocator.Get<GameRepositoryService>().SaveHair(player, newHair);
     }
 
     auto PlayerAppearanceSystem::GetWeaponMotionCategory(const GamePlayer& player) const -> int32_t

@@ -16,7 +16,7 @@ namespace sunlight
     class PlayerQuestSystem final : public GameSystem
     {
     public:
-        PlayerQuestSystem();
+        explicit PlayerQuestSystem(const ServiceLocator& serviceLocator);
 
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
@@ -33,6 +33,8 @@ namespace sunlight
         bool ChangeQuest(GamePlayer& player, int32_t questId, const QuestChange& change);
 
     private:
+        const ServiceLocator& _serviceLocator;
+
         std::mt19937 _mt19937;
         std::vector<PtrNotNull<QuestItemGain>> _questItemGainsBuffer;
     };

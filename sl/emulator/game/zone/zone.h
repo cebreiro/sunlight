@@ -5,11 +5,13 @@
 #include "sl/emulator/server/packet/io/sl_packet_reader.h"
 #include "sl/emulator/service/database/dto/character.h"
 
+
 namespace sunlight
 {
     struct MapFile;
 
     class GameCommunityService;
+    class GameRepositoryService;
 
     class Stage;
     class GameClient;
@@ -76,5 +78,6 @@ namespace sunlight
         std::unordered_map<game_client_id_type, SharedPtrNotNull<GameClient>> _clients;
 
         SharedPtrNotNull<GameCommunityService> _gameCommunityService;
+        SharedPtrNotNull<GameRepositoryService> _gameRepositoryService;
     };
 }

@@ -10,10 +10,10 @@
 #include "sl/emulator/game/message/creator/item_archive_message_creator.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/event_bubbling_system.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/event_bubbling/player_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/exp/exp_data_provider.h"
@@ -29,7 +29,6 @@ namespace sunlight
 
     void PlayerJobSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<GameRepositorySystem>());
         Add(stage.Get<PlayerStatSystem>());
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<EventBubblingSystem>());
@@ -117,7 +116,7 @@ namespace sunlight
             }
         }
 
-        Get<GameRepositorySystem>().SaveNewJob(player, static_cast<int32_t>(newJob.GetId()),
+        _serviceLocator.Get<GameRepositoryService>().SaveNewJob(player, static_cast<int32_t>(newJob.GetId()),
             static_cast<int32_t>(JobType::Advanced), newJob.GetLevel(), newJob.GetSkillPoint(),
             std::ranges::to<std::vector>(skills | std::views::transform([cid = player.GetCId(), &newJob](int32_t skillId) -> req::SkillCreate
                 {
@@ -171,7 +170,7 @@ namespace sunlight
             return false;
         }
 
-        Get<GameRepositorySystem>().SaveNewSkill(player, static_cast<int32_t>(jobId), skillData->index, 1);
+        _serviceLocator.Get<GameRepositoryService>().SaveNewSkill(player, static_cast<int32_t>(jobId), skillData->index, 1);
 
         player.Send(GamePlayerMessageCreator::CreateJobSkillAdd(player, jobId, skillId, 0));
 
@@ -240,7 +239,7 @@ namespace sunlight
                 }
             }
 
-            Get<GameRepositorySystem>().SaveJobLevel(player, static_cast<int32_t>(job.GetId()), job.GetLevel(), job.GetSkillPoint(),
+            _serviceLocator.Get<GameRepositoryService>().SaveJobLevel(player, static_cast<int32_t>(job.GetId()), job.GetLevel(), job.GetSkillPoint(),
                 std::ranges::to<std::vector>(skills | std::views::transform([cid = player.GetCId(), &job](int32_t skillId) -> req::SkillCreate
                     {
                         return req::SkillCreate{
@@ -256,7 +255,7 @@ namespace sunlight
         }
         else
         {
-            Get<GameRepositorySystem>().SaveJobExp(player, static_cast<int32_t>(job.GetId()), job.GetExp());
+            _serviceLocator.Get<GameRepositoryService>().SaveJobExp(player, static_cast<int32_t>(job.GetId()), job.GetExp());
         }
 
         player.FlushDeferred();
@@ -333,7 +332,7 @@ namespace sunlight
 
             assert(job->GetSkillPoint() >= 0);
 
-            Get<GameRepositorySystem>().SaveSkillLevel(player,
+            _serviceLocator.Get<GameRepositoryService>().SaveSkillLevel(player,
                 static_cast<int32_t>(job->GetId()), job->GetSkillPoint(), skill->GetId(), newLevel);
 
             player.Send(GamePlayerMessageCreator::CreateJobSkillPointChange(player, job->GetId(), job->GetSkillPoint(), false));
@@ -379,7 +378,7 @@ namespace sunlight
         skill->SetX(x);
         skill->SetX(y);
 
-        Get<GameRepositorySystem>().SaveSkillPosition(player, skillId, page, x, y);
+        _serviceLocator.Get<GameRepositoryService>().SaveSkillPosition(player, skillId, page, x, y);
     }
 
     auto PlayerJobSystem::GetJobGainSkills(JobId id, int32_t level) const -> std::vector<int32_t>

@@ -4,13 +4,13 @@
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/debug/game_debugger.h"
 #include "sl/emulator/game/entity/game_player.h"
-#include "sl/emulator/game/system/game_repository_system.h"
 #include "sl/emulator/game/message/creator/normal_message_creator.h"
 #include "sl/emulator/game/script/lua_script_engine.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_community_service.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
+#include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/client/game_client.h"
@@ -51,6 +51,9 @@ namespace sunlight
         _gameCommunityService->Start();
 
         _serviceLocator.Add<GameCommunityService>(_gameCommunityService);
+
+        _gameRepositoryService = std::make_shared<GameRepositoryService>(*this);
+        _serviceLocator.Add<GameRepositoryService>(_gameRepositoryService);
     }
 
     Zone::~Zone()
@@ -128,6 +131,8 @@ namespace sunlight
             _playerStages[client->GetId()] = stage;
             _playerCIdStageIndex[dto.id] = stage;
             _clients[client->GetId()] = client;
+
+            _gameRepositoryService->OnZoneEnter(*player);
         }
         catch (const std::exception& e)
         {
@@ -168,11 +173,11 @@ namespace sunlight
         const SceneObjectComponent& sceneObjectComponent = player->GetSceneObjectComponent();
         const Eigen::Vector2f& position = sceneObjectComponent.GetPosition();
 
-        GameRepositorySystem& repositorySystem = stage.Get<GameRepositorySystem>();
-        repositorySystem.SaveState(*player, _id, stage.GetId(), position.x(), position.y(), sceneObjectComponent.GetYaw());
+        _gameRepositoryService->SaveState(*player, _id, stage.GetId(), position.x(), position.y(), sceneObjectComponent.GetYaw());
 
-        co_await repositorySystem.WaitForSaveCompletion(*player);
+        co_await _gameRepositoryService->WaitForSaveCompletion(*player);
 
+        _gameRepositoryService->OnZoneLeave(*player);
         _playerCIdStageIndex.erase(player->GetCId());
 
         [[maybe_unused]]
@@ -212,10 +217,11 @@ namespace sunlight
         _playerCIdStageIndex.erase(player->GetCId());
         _playerStages.erase(iter);
 
-        GameRepositorySystem& repositorySystem = stage.Get<GameRepositorySystem>();
-        repositorySystem.SaveState(*player, destZoneId, GameConstant::STAGE_MAIN, x, y, yaw);
+        _gameRepositoryService->SaveState(*player, destZoneId, GameConstant::STAGE_MAIN, x, y, yaw);
 
-        co_await repositorySystem.WaitForSaveCompletion(*player);
+        co_await _gameRepositoryService->WaitForSaveCompletion(*player);
+
+        _gameRepositoryService->OnZoneLeave(*player);
 
         [[maybe_unused]]
         const size_t erased =_clients.erase(id);
