@@ -13,8 +13,6 @@ namespace sunlight
         _sequence = 0;
         _selection = 0;
         _state = 0;
-
-        _npcYaw = 0.f;
     }
 
     auto PlayerNPCScriptComponent::GetTargetNPCId() const -> game_entity_id_type
@@ -39,11 +37,6 @@ namespace sunlight
         return _state;
     }
 
-    auto PlayerNPCScriptComponent::GetNPCYaw() const -> float
-    {
-        return _npcYaw;
-    }
-
     void PlayerNPCScriptComponent::SetTargetNPCId(game_entity_id_type id)
     {
         _targetNPCId = id;
@@ -62,10 +55,5 @@ namespace sunlight
     void PlayerNPCScriptComponent::SetState(int32_t state)
     {
         _state = state;
-    }
-
-    void PlayerNPCScriptComponent::SetNPCYaw(float yaw)
-    {
-        _npcYaw = yaw;
     }
 }

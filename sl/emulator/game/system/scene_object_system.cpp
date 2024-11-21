@@ -592,13 +592,6 @@ namespace sunlight
     void SceneObjectSystem::HandleNPCDirectionSet(const ZoneMessage& message)
     {
         SlPacketReader& reader = message.reader;
-        GamePlayer& player = message.player;
-
-        PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
-        if (!scriptComponent.HasTargetNPC())
-        {
-            return;
-        }
 
         const auto& target = FindEntity(GameEntityType::NPC, message.targetId);
         if (!target)
@@ -619,14 +612,6 @@ namespace sunlight
         const float y = reader.Read<float>();
 
         const float newYaw = std::atan2f(y, x) * (180.f / static_cast<float>(std::numbers::pi));
-        const float prevYaw = scriptComponent.GetNPCYaw();
-
-        if (std::abs(newYaw - prevYaw) < 1.f)
-        {
-            return;
-        }
-
-        scriptComponent.SetNPCYaw(newYaw);
 
         ClientMovement movement = npc->GetComponent<SceneObjectComponent>().GetMovement();
         movement.yaw = newYaw;
