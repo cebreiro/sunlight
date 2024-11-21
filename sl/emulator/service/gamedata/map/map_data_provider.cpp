@@ -96,6 +96,13 @@ namespace sunlight
         return iter != _mapGateData.end() ? &iter->second : nullptr;
     }
 
+    auto MapDataProvider::FindNesFile(int32_t zoneId) const -> const NesFile*
+    {
+        const auto iter = _nesFiles.find(zoneId);
+
+        return iter != _nesFiles.end() ? &iter->second : nullptr;
+    }
+
     auto MapDataProvider::FindNesScript(int32_t zoneId, int32_t scriptId) const -> const NesScript*
     {
         const auto iter = _nesFiles.find(zoneId);

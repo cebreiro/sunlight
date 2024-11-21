@@ -18,6 +18,7 @@ namespace sunlight
         auto FindMap(int32_t id) const -> const MapFile*;
         auto FindMapGateData(int32_t zoneId, int32_t linkId) const -> const MapGateData*;
 
+        auto FindNesFile(int32_t zoneId) const -> const NesFile*;
         auto FindNesScript(int32_t zoneId, int32_t scriptId) const -> const NesScript*;
         auto FindNesScriptCall(int32_t zoneId, int32_t entityId) const -> const NesScriptCall*;
 

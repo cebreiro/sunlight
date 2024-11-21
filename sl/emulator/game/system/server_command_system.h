@@ -13,7 +13,7 @@ namespace sunlight
     class ServerCommandSystem final : public GameSystem
     {
     public:
-        ServerCommandSystem(const ServiceLocator& serviceLocator, int32_t stageId);
+        ServerCommandSystem(const ServiceLocator& serviceLocator, int32_t zoneId, int32_t stageId);
 
         void InitializeSubSystem(Stage& stage) override;
         bool Subscribe(Stage& stage) override;
@@ -25,6 +25,7 @@ namespace sunlight
         void AddCommand(SharedPtrNotNull<IServerCommand> command);
 
         auto GetServiceLocator() const -> const ServiceLocator&;
+        auto GetZoneId() const -> int32_t;
         auto GetStageId() const -> int32_t;
         auto GetRandomEngine() -> std::mt19937&;
 
@@ -37,6 +38,7 @@ namespace sunlight
 
     private:
         const ServiceLocator& _serviceLocator;
+        int32_t _zoneId = 0;
         int32_t _stageId = 0;
 
         std::vector<std::string> _splitStringBuffer;
