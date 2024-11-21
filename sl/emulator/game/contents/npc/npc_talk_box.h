@@ -42,6 +42,8 @@ namespace sunlight
 
         // func_403
         void AddString(int32_t tableIndex);
+
+        // func_405
         void AddStringWithInt(int32_t tableIndex, int32_t value);
         void AddStringWithIntItem(int32_t tableIndex, int32_t itemId);
 

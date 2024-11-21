@@ -232,7 +232,7 @@ return function (system, npc, player, sequence)
 
                     elseif selection == 3 then
 
-                        jobChangeQuestId = 1002
+                        jobChangeQuestId = 1003
 
                     elseif selection == 4 then
 
