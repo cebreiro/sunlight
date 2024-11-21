@@ -474,6 +474,20 @@ namespace sunlight
         return writer.Flush();
     }
 
+    auto GamePlayerMessageCreator::CreateQuestGiveUpNotify(const GamePlayer& player, bool success) -> Buffer
+    {
+        SlPacketWriter writer;
+        writer.Write(ZonePacketS2C::NMS_DELIVER_MESSAGE);
+        writer.Write(ZoneMessageDeliverType::MSG_SC_GOB_MESSAGE);
+        writer.Write<int32_t>(0);
+        writer.WriteObject(GameEntityNetworkId(player).ToBuffer());
+        writer.Write(ZoneMessageType::QUESTARCHIVEMSG);
+        writer.Write(ZoneMessageType::QUESTARCHIVE_GIVEUP_QUEST);
+        writer.Write<int32_t>(success ? 1 : 0);
+
+        return writer.Flush();
+    }
+
     auto GamePlayerMessageCreator::CreateEventScriptAddString(const GamePlayer& player, int32_t index) -> Buffer
     {
         SlPacketWriter writer;
