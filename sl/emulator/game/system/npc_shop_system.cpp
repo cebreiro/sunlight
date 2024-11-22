@@ -18,6 +18,7 @@
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
 #include "sl/emulator/service/gamedata/shop/item_shop_data.h"
+#include "sl/emulator/service/game_cheat_log/game_cheat_log_service.h"
 
 namespace sunlight
 {
@@ -128,9 +129,9 @@ namespace sunlight
 
         if (playerNPCShopComponent.HasShoppingNPC())
         {
-            SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] player already is looking a npc shop. player: {}, old: {}, new: {}",
-                    GetName(), player.GetCId(), playerNPCShopComponent.GetShoppingNPC().GetId(), npc.GetId()));
+            _serviceLocator.Get<GameCheatLogService>().Log(GameCheatLogType::NPCShop,
+                player.GetName(), fmt::format("player is already open a npc shop. old: {}, new: {}",
+                    playerNPCShopComponent.GetShoppingNPC().GetId(), npc.GetId()));
 
             return;
         }
@@ -160,9 +161,8 @@ namespace sunlight
 
         if (!playerNPCShopComponent.HasShoppingNPC())
         {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] client inaccesable npc shop open request. player: {}",
-                    GetName(), player.GetCId()));
+            _serviceLocator.Get<GameCheatLogService>().Log(GameCheatLogType::NPCShop,
+                player.GetName(), fmt::format("invalid client npc shop open request"));
 
             return;
         }
@@ -201,9 +201,8 @@ namespace sunlight
 
         if (!playerNPCShopComponent.HasShoppingNPC())
         {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] client inaccesable npc item shop buy request. player: {}",
-                    GetName(), player.GetCId()));
+            _serviceLocator.Get<GameCheatLogService>().Log(GameCheatLogType::NPCShop,
+                player.GetName(), fmt::format("invalid client npc item shop buy request"));
 
             return;
         }
@@ -251,9 +250,8 @@ namespace sunlight
 
         if (!playerNPCShopComponent.HasShoppingNPC())
         {
-            SUNLIGHT_LOG_WARN(_serviceLocator,
-                fmt::format("[{}] client inaccesable npc item shop buy request. player: {}",
-                    GetName(), player.GetCId()));
+            _serviceLocator.Get<GameCheatLogService>().Log(GameCheatLogType::NPCShop,
+                player.GetName(), fmt::format("invalid client npc item shop sell request"));
 
             return;
         }
@@ -272,9 +270,8 @@ namespace sunlight
         const int32_t cost = reader.Read<int32_t>();
         if (cost > 0)
         {
-            SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] cost cheat detected. player: {}, gold: {}",
-                    GetName(), player.GetCId(), cost));
+            _serviceLocator.Get<GameCheatLogService>().Log(GameCheatLogType::NPCShop,
+                player.GetName(), fmt::format("money printing cheat detected. gold: {}", cost));
         }
         else if (cost == 0)
         {
@@ -283,9 +280,8 @@ namespace sunlight
 
         if (!Get<ItemArchiveSystem>().Charge(player, -cost))
         {
-            SUNLIGHT_LOG_ERROR(_serviceLocator,
-                fmt::format("[{}] fail to charge barber payment. player: {}, value: {}",
-                    GetName(), player.GetCId(), cost));
+            _serviceLocator.Get<GameCheatLogService>().Log(GameCheatLogType::NPCShop,
+                player.GetName(), fmt::format("fail to charge barber payment. value: {}", cost));
         }
     }
 

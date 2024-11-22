@@ -7,5 +7,6 @@ namespace sunlight
         (Movmenet)
         (Combat)
         (Trigger)
+        (NPCShop)
     )
 }
