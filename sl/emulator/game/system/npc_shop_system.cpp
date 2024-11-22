@@ -14,6 +14,7 @@
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
 #include "sl/emulator/service/gamedata/shop/item_shop_data.h"
@@ -370,18 +371,12 @@ namespace sunlight
         const std::chrono::minutes nextRollTime(rollTimeDist(_mt19937));
 
         itemShopComponent.SetRollTimer(true);
-        itemShopComponent.SetNextRollTimePoint(GameTimeService::Now() + nextRollTime);;
+        itemShopComponent.SetNextRollTimePoint(GameTimeService::Now() + nextRollTime);
 
-        Delay(nextRollTime).Then(*ExecutionContext::GetExecutor(),
-            [weak = weak_from_this(), npcId = npc.GetId()]()
+        _serviceLocator.Get<ZoneExecutionService>().AddTimer(nextRollTime,
+            [this, npcId = npc.GetId()]()
             {
-                const auto self = weak.lock();
-                if (!self)
-                {
-                    return;
-                }
-
-                self->OnRollTimerEnd(npcId);
+                this->OnRollTimerEnd(npcId);
             });
     }
 
@@ -406,16 +401,10 @@ namespace sunlight
             constexpr auto delay = std::chrono::minutes(1);
             itemShopComponent.SetNextRollTimePoint(itemShopComponent.GetNextRollTimePoint() + delay);
 
-            Delay(delay).Then(*ExecutionContext::GetExecutor(),
-                [weak = weak_from_this(), npcId = npc->GetId()]()
+            _serviceLocator.Get<ZoneExecutionService>().AddTimer(delay,
+                [this, npcId = npc->GetId()]()
                 {
-                    const auto self = weak.lock();
-                    if (!self)
-                    {
-                        return;
-                    }
-
-                    self->OnRollTimerEnd(npcId);
+                    this->OnRollTimerEnd(npcId);
                 });
 
             return;
