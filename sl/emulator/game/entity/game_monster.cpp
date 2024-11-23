@@ -88,6 +88,16 @@ namespace sunlight
         return GetComponent<EntityStateComponent>();
     }
 
+    auto GameMonster::GetStatusEffectComponent() -> EntityStatusEffectComponent&
+    {
+        return GetComponent<EntityStatusEffectComponent>();
+    }
+
+    auto GameMonster::GetStatusEffectComponent() const -> const EntityStatusEffectComponent&
+    {
+        return GetComponent<EntityStatusEffectComponent>();
+    }
+
     auto GameMonster::GetMovementComponent() -> EntityMovementComponent&
     {
         return GetComponent<EntityMovementComponent>();

@@ -3,6 +3,7 @@
 #include <boost/container/static_vector.hpp>
 
 #include "sl/emulator/game/component/entity_state_component.h"
+#include "sl/emulator/game/component/entity_status_effect_component.h"
 #include "sl/emulator/game/component/item_ownership_component.h"
 #include "sl/emulator/game/component/monster_stat_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
@@ -15,6 +16,7 @@
 #include "sl/emulator/game/entity/game_stored_item.h"
 #include "sl/emulator/game/message/zone_message_deliver_type.h"
 #include "sl/emulator/game/message/zone_message_type.h"
+#include "sl/emulator/game/message/creator/zone_data_transfer_object_creator.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/server/packet/zone_packet_s2c.h"
 #include "sl/emulator/server/packet/io/sl_packet_writer.h"
@@ -139,8 +141,19 @@ namespace sunlight
         writer.Write<int32_t>(monster.GetDataId());
         writer.Write<int32_t>(monster.GetStatComponent().GetHP().As<int32_t>());
         writer.Write<int8_t>(showSpawnEffect ? 0 : 1);
-        writer.Write<int32_t>(0); // buff count
-        // buffs
+
+        const EntityStatusEffectComponent& statusEffectComponent = monster.GetStatusEffectComponent();
+
+        const int32_t buffCount = static_cast<int32_t>(statusEffectComponent.GetCount());
+        writer.Write<int32_t>(buffCount);
+
+        if (buffCount > 0)
+        {
+            for (const StatusEffect& statusEffect : statusEffectComponent.GetRange())
+            {
+                writer.WriteObject(ZoneDataTransferObjectCreator::CreateStatusEffect(monster, statusEffect));
+            }
+        }
 
         return writer.Flush();
     }

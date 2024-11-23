@@ -7,6 +7,7 @@ namespace sunlight
 
     class SceneObjectComponent;
     class EntityStateComponent;
+    class EntityStatusEffectComponent;
     class EntityMovementComponent;
     class MonsterStatComponent;
     class MonsterAggroComponent;
@@ -47,6 +48,8 @@ namespace sunlight
         auto GetSceneObjectComponent() const -> const SceneObjectComponent&;
         auto GetStateComponent() -> EntityStateComponent&;
         auto GetStateComponent() const -> const EntityStateComponent&;
+        auto GetStatusEffectComponent() -> EntityStatusEffectComponent&;
+        auto GetStatusEffectComponent() const -> const EntityStatusEffectComponent&;
         auto GetMovementComponent() -> EntityMovementComponent&;
         auto GetMovementComponent() const -> const EntityMovementComponent&;
         auto GetStatComponent() -> MonsterStatComponent&;
