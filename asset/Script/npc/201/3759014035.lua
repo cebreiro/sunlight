@@ -15,7 +15,7 @@ return function (system, npc, player, sequence)
         probability = 1000000
     }
 
-    local ngs = require("job_promote_novice_fighter")
+    local ngs = require("job_promote")
 
     ngs.handleScript_JobChangeSupervisor(system, npc, player, sequence, param)
 

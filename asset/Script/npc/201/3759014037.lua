@@ -11,6 +11,7 @@ return function (system, npc, player, sequence)
     local height = 250
 
     local progressCheckQuestId = 1000
+    local stringBase = 1100
 
     if player:isFighter() then
 
