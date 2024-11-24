@@ -7,6 +7,7 @@ return function (system, npc, player, sequence)
 
     local param = {
         stringBase = 1600,
+        progressCheckQuestId = 1000,
         questId = 1001,
         jobId = 2100,
         requiredItemId = 5050001,

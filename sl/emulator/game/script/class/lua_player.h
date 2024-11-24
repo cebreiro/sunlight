@@ -42,7 +42,11 @@ namespace sunlight
         void RecoverSP();
 
         bool Charge(int32_t cost);
+
+        // func_1119
         bool AddItem(int32_t itemId, int32_t quantity);
+
+        // func_1104
         bool RemoveInventoryItem(int32_t itemId, int32_t quantity);
         void RemoveInventoryItemAll(int32_t itemId);
 
