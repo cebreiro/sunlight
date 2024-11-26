@@ -37,11 +37,6 @@ namespace sunlight
         return _timeLimit.has_value();
     }
 
-    bool Quest::HasItemGain() const
-    {
-        return _itemGain.has_value();
-    }
-
     bool Quest::HasFlagValue(int32_t value) const
     {
         for (int32_t flagValue : _flags | std::views::values)
@@ -53,11 +48,6 @@ namespace sunlight
         }
 
         return false;
-    }
-
-    void Quest::ConfigureItemGain(int32_t monsterId, int32_t itemId, int32_t probability, int32_t maxItemQuantity, int32_t minKillCount)
-    {
-        _itemGain.emplace(monsterId, itemId, probability, maxItemQuantity, minKillCount);
     }
 
     auto Quest::GetId() const -> int32_t
@@ -93,20 +83,6 @@ namespace sunlight
         return *_timeLimit;
     }
 
-    auto Quest::GetItemGain() -> QuestItemGain&
-    {
-        assert(_itemGain);
-
-        return *_itemGain;
-    }
-
-    auto Quest::GetItemGain() const -> const QuestItemGain&
-    {
-        assert(_itemGain);
-
-        return *_itemGain;
-    }
-
     void Quest::SetState(int32_t state)
     {
         _state = state;
@@ -120,11 +96,6 @@ namespace sunlight
     void Quest::SetTimeLimit(const std::optional<QuestTimeLimit>& limit)
     {
         _timeLimit = limit;
-    }
-
-    void Quest::SetItemGain(const std::optional<QuestItemGain>& itemGain)
-    {
-        _itemGain = itemGain;
     }
 
     auto Quest::GetFlagString() const -> std::string
@@ -146,11 +117,6 @@ namespace sunlight
         if (_timeLimit.has_value())
         {
             to_json(j[QuestTimeLimit::NAME], *_timeLimit);
-        }
-
-        if (_itemGain)
-        {
-            to_json(j[QuestItemGain::NAME], *_itemGain);
         }
 
         return j.dump();
@@ -183,11 +149,6 @@ namespace sunlight
                 if (const auto iter = json.find(QuestTimeLimit::NAME); iter != json.end())
                 {
                     from_json(*iter, result._timeLimit.emplace());
-                }
-
-                if (const auto iter = json.find(QuestItemGain::NAME); iter != json.end())
-                {
-                    from_json(*iter, result._itemGain.emplace());
                 }
             }
 

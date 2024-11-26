@@ -36,6 +36,5 @@ namespace sunlight
         const ServiceLocator& _serviceLocator;
 
         std::mt19937 _mt19937;
-        std::vector<PtrNotNull<QuestItemGain>> _questItemGainsBuffer;
     };
 }

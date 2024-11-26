@@ -1,5 +1,4 @@
 #pragma once
-#include "sl/emulator/game/contents/quest/quest_item_gain.h"
 #include "sl/emulator/game/contents/quest/quest_time_limit.h"
 
 namespace sunlight
@@ -13,10 +12,7 @@ namespace sunlight
         bool IsExpired() const;
         bool HasFlag(int32_t index) const;
         bool HasTimeLimit() const;
-        bool HasItemGain() const;
         bool HasFlagValue(int32_t value) const;
-
-        void ConfigureItemGain(int32_t monsterId, int32_t itemId, int32_t probability, int32_t maxItemQuantity, int32_t minKillCount);
 
         auto GetId() const -> int32_t;
 
@@ -27,8 +23,6 @@ namespace sunlight
         // func_1204
         auto GetFlag(int32_t index) const -> int32_t;
         auto GetTimeLimit() const -> const QuestTimeLimit&;
-        auto GetItemGain() -> QuestItemGain&;
-        auto GetItemGain() const -> const QuestItemGain&;
 
         // func_1203
         void SetState(int32_t state);
@@ -36,7 +30,6 @@ namespace sunlight
         // func_1205
         void SetFlag(int32_t index, int32_t value);
         void SetTimeLimit(const std::optional<QuestTimeLimit>& limit);
-        void SetItemGain(const std::optional<QuestItemGain>& itemGain);
 
         auto GetFlagString() const -> std::string;
         auto GetData() const -> std::string;
@@ -50,6 +43,5 @@ namespace sunlight
         std::map<int32_t, int32_t> _flags;
 
         std::optional<QuestTimeLimit> _timeLimit;
-        std::optional<QuestItemGain> _itemGain;
     };
 }

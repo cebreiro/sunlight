@@ -8,11 +8,6 @@ namespace sunlight
     {
     }
 
-    bool QuestChange::IsResetQuestItemGain() const
-    {
-        return _questItemGainReset;
-    }
-
     void QuestChange::SetState(int32_t newState)
     {
         _newState = newState;
@@ -33,16 +28,6 @@ namespace sunlight
             + std::chrono::duration_cast<game_time_point_type::duration>(std::chrono::minutes(minute)).count();
     }
 
-    void QuestChange::ConfigureItemGain(int32_t monsterId, int32_t itemId, int32_t probability, int32_t maxItemQuantity, int32_t minKillCount)
-    {
-        _questItemGain.emplace(monsterId, itemId, probability, maxItemQuantity, minKillCount);
-    }
-
-    void QuestChange::ResetItemGain()
-    {
-        _questItemGainReset = true;
-    }
-
     auto QuestChange::GetNewState() const -> std::optional<int32_t>
     {
         return _newState;
@@ -56,10 +41,5 @@ namespace sunlight
     auto QuestChange::GetQuestTimeLimit() const -> const std::optional<QuestTimeLimit>&
     {
         return _questTimeLimit;
-    }
-
-    auto QuestChange::GetQuestItemGain() const -> const std::optional<QuestItemGain>&
-    {
-        return _questItemGain;
     }
 }

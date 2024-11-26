@@ -390,7 +390,6 @@ function handleScript_JobChangeSupervisor (system, npc, player, sequence, param)
                     questChange:setFlag(7, 0)
                     questChange:setFlag(8, 0)
                     questChange:setFlag(9, 0)
-                    questChange:configureItemGain(monsterId, requiredItemId, probability, 1, monsterCount)
 
                     player:changeQuest(jobChangeQuestId, questChange)
 
@@ -438,7 +437,6 @@ function handleScript_JobChangeSupervisor (system, npc, player, sequence, param)
                 quest:setFlag(7, 0)
                 quest:setFlag(8, 0)
                 quest:setFlag(9, 0)
-                quest:configureItemGain(monsterId, requiredItemId, probability, 1, monsterCount)
 
                 player:startQuest(quest)
 
@@ -517,7 +515,6 @@ function handleScript_JobChangeSupervisor (system, npc, player, sequence, param)
                 jobChangeQuestChange:setState(2)
                 jobChangeQuestChange:setFlag(0, 1)
                 jobChangeQuestChange:setFlag(1, 0)
-                jobChangeQuestChange:resetItemGain()
 
                 player:changeQuest(jobChangeQuestId, jobChangeQuestChange)
 

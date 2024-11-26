@@ -2,7 +2,6 @@
 
 #include "sl/emulator/game/component/player_item_component.h"
 #include "sl/emulator/game/component/player_quest_component.h"
-#include "sl/emulator/game/contents/event_script/event_script.h"
 #include "sl/emulator/game/contents/quest/quest_change.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
@@ -70,11 +69,6 @@ namespace sunlight
 
                         quest.SetFlag(timeLimit.flagIndex, -value);
                     }
-
-                    if (quest.HasItemGain())
-                    {
-                        questComponent.SetQuestItemGainIndex(quest.GetId());
-                    }
                 }
             }
         }
@@ -95,50 +89,6 @@ namespace sunlight
                     });
             }
         }
-
-        _questItemGainsBuffer.clear();
-        if (questComponent.GetItemGain(monsterId, _questItemGainsBuffer))
-        {
-            const PlayerItemComponent& itemComponent = player.GetItemComponent();
-
-            for (QuestItemGain& questItemGain : _questItemGainsBuffer | notnull::reference)
-            {
-                ++questItemGain.killCount;
-
-                if (questItemGain.minKillCount > 0 && questItemGain.killCount < questItemGain.minKillCount)
-                {
-                    continue;
-                }
-
-                if (itemComponent.HasInventoryItem(questItemGain.itemId, questItemGain.itemMaxQuantity))
-                {
-                    continue;
-                }
-
-                bool gain = false;
-
-                if (questItemGain.probability >= GameConstant::ITEM_PROBABILITY_MAX)
-                {
-                    gain = true;
-                }
-                else
-                {
-                    std::uniform_int_distribution dist(0, GameConstant::ITEM_PROBABILITY_MAX);
-                    gain = dist(_mt19937) < questItemGain.probability;
-                }
-
-                if (gain)
-                {
-                    if (Get<ItemArchiveSystem>().AddItem(player, questItemGain.itemId, 1))
-                    {
-                        EventScript eventScript;
-                        eventScript.AddStringWithInt(503, questItemGain.itemId);
-
-                        player.Show(eventScript);
-                    }
-                }
-            }
-        }
     }
 
     bool PlayerQuestSystem::StartQuest(GamePlayer& player, Quest& newQuest)
@@ -157,14 +107,7 @@ namespace sunlight
 
         player.Send(GamePlayerMessageCreator::CreateQuestAdd(player, newQuest));
 
-        const bool hasItemGain = newQuest.HasItemGain();
-
         questComponent.AddQuest(std::move(newQuest));
-
-        if (hasItemGain)
-        {
-            questComponent.SetQuestItemGainIndex(questId);
-        }
 
         return true;
     }
@@ -201,22 +144,6 @@ namespace sunlight
         if (const std::optional<QuestTimeLimit>& timeLimit = change.GetQuestTimeLimit(); timeLimit.has_value())
         {
             quest->SetTimeLimit(timeLimit);
-        }
-
-        if (const std::optional<QuestItemGain>& itemGain = change.GetQuestItemGain(); itemGain.has_value())
-        {
-            quest->SetItemGain(itemGain);
-            questComponent.SetQuestItemGainIndex(quest->GetId());
-        }
-
-        if (change.IsResetQuestItemGain())
-        {
-            questComponent.ResetQuestItemGainIndex(quest->GetId());
-        }
-
-        if (quest->GetState() != 0)
-        {
-            questComponent.ResetQuestItemGainIndex(quest->GetId());
         }
 
         _serviceLocator.Get<GameRepositoryService>().SaveQuestChange(player, quest->GetId(), quest->GetState(),

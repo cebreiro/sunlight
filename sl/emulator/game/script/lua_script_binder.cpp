@@ -35,7 +35,6 @@ namespace sunlight
             "isExpired", &Quest::IsExpired,
             "hasFlag", &Quest::HasFlag,
             "hasTimeLimit", &Quest::HasTimeLimit,
-            "configureItemGain", &Quest::ConfigureItemGain,
             "getId", &Quest::GetId,
             "getState", &Quest::GetState,
             "getFlag", &Quest::GetFlag,
@@ -47,9 +46,7 @@ namespace sunlight
             sol::constructors<QuestChange()>(),
             "setState", &QuestChange::SetState,
             "setFlag", &QuestChange::SetFlag,
-            "configureTimeLimit", &QuestChange::ConfigureTimeLimit,
-            "configureItemGain", &QuestChange::ConfigureItemGain,
-            "resetItemGain", &QuestChange::ResetItemGain
+            "configureTimeLimit", &QuestChange::ConfigureTimeLimit
         );
 
         luaState.new_usertype<EventScript>("EventScript",
