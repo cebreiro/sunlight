@@ -391,6 +391,7 @@ namespace sunlight
     {
         assert(!task->resources.empty());
         assert(task->operation.operator bool());
+        assert(task->created != game_time_point_type{});
 
         if (CanRun(*task))
         {
@@ -542,5 +543,13 @@ namespace sunlight
         }
 
         return created < other.created;
+    }
+
+    bool GameRepositoryService::TaskComparer::operator()(const SharedPtrNotNull<Task>& lhs, const SharedPtrNotNull<Task>& rhs) const
+    {
+        assert(lhs);
+        assert(rhs);
+
+        return *lhs < *rhs;
     }
 }

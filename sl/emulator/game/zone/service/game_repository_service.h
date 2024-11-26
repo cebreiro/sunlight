@@ -70,7 +70,7 @@ namespace sunlight
     private:
         struct Task
         {
-            game_time_point_type created = game_clock_type::now();
+            const game_time_point_type created = game_clock_type::now();
             boost::container::small_vector<int64_t, 4> resources;
 
             std::function<Future<bool>()> operation;
@@ -79,12 +79,15 @@ namespace sunlight
             bool operator<(const Task& other) const;
         };
 
+        struct TaskComparer
+        {
+            bool operator()(const SharedPtrNotNull<Task>& lhs, const SharedPtrNotNull<Task>& rhs) const;
+        };
+
         struct Resource
         {
-            int64_t cid = 0;
-
             const Task* owner = nullptr;
-            boost::container::small_flat_set<SharedPtrNotNull<Task>, 4, std::owner_less<>> waiters;
+            boost::container::small_flat_set<SharedPtrNotNull<Task>, 4, TaskComparer> waiters;
 
             std::optional<Promise<void>> completionPromise = std::nullopt;
         };
