@@ -16,7 +16,7 @@
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
-#include "sl/emulator/game/system/player_state_system.h"
+#include "sl/emulator/game/system/game_script_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
 #include "sl/emulator/game/zone/stage.h"
 
@@ -39,7 +39,7 @@ namespace sunlight
         Add(stage.Get<EntityViewRangeSystem>());
         Add(stage.Get<EntityMovementSystem>());
         Add(stage.Get<NPCShopSystem>());
-        Add(stage.Get<PlayerStateSystem>());
+        Add(stage.Get<GameScriptSystem>());
         Add(stage.Get<EntityDamageSystem>());
         Add(stage.Get<EntityAIControlSystem>());
         Add(stage.Get<PlayerQuestSystem>());

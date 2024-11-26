@@ -1,23 +1,19 @@
 #include "player_state_system.h"
 
 #include "sl/data/map/map_stage.h"
-#include "sl/emulator/game/entity/game_npc.h"
-#include "sl/emulator/game/script/class/lua_npc.h"
-#include "sl/emulator/game/script/class/lua_player.h"
 
 #include "sl/emulator/game/component/entity_state_component.h"
 #include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/player_item_component.h"
-#include "sl/emulator/game/component/player_npc_script_component.h"
 #include "sl/emulator/game/component/player_skill_component.h"
 #include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/event_script/event_script.h"
 #include "sl/emulator/game/contents/group/item_mix_prop_item_mapping.h"
-#include "sl/emulator/game/contents/npc/npc_talk_box.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
 #include "sl/emulator/game/data/sox/item_etc.h"
 #include "sl/emulator/game/entity/game_item.h"
+#include "sl/emulator/game/entity/game_npc.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/zone_message.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
@@ -25,17 +21,13 @@
 #include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/game/message/creator/scene_object_message_creator.h"
 #include "sl/emulator/game/script/lua_script_engine.h"
-#include "sl/emulator/game/script/class/lua_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
-#include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_group_system.h"
-#include "sl/emulator/game/system/player_index_system.h"
-#include "sl/emulator/game/system/player_quest_system.h"
 #include "sl/emulator/game/system/entity_skill_effect_system.h"
-#include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/game/system/scene_object_system.h"
+#include "sl/emulator/game/system/game_script_system.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/zone_change_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
@@ -57,16 +49,13 @@ namespace sunlight
 
     void PlayerStateSystem::InitializeSubSystem(Stage& stage)
     {
-        Add(stage.Get<SceneObjectSystem>());
-        Add(stage.Get<EntityViewRangeSystem>());
-        Add(stage.Get<ItemArchiveSystem>());
-        Add(stage.Get<PlayerQuestSystem>());
-        Add(stage.Get<NPCShopSystem>());
-        Add(stage.Get<PlayerGroupSystem>());
         Add(stage.Get<PlayerStatSystem>());
-        Add(stage.Get<PlayerIndexSystem>());
+        Add(stage.Get<SceneObjectSystem>());
+        Add(stage.Get<ItemArchiveSystem>());
         Add(stage.Get<EntitySkillEffectSystem>());
-        Add(stage.Get<PlayerJobSystem>());
+        Add(stage.Get<PlayerGroupSystem>());
+        Add(stage.Get<GameScriptSystem>());
+        Add(stage.Get<EntityViewRangeSystem>());
     }
 
     bool PlayerStateSystem::Subscribe(Stage& stage)
@@ -99,67 +88,6 @@ namespace sunlight
     auto PlayerStateSystem::GetServiceLocator() const -> const ServiceLocator&
     {
         return _serviceLocator;
-    }
-
-    void PlayerStateSystem::CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox)
-    {
-        player.Defer(NPCMessageCreator::CreateTalkBoxClear(npc));
-
-        for (const npc_talk_box_item_type& element : talkBox.GetTalkBoxItems())
-        {
-            std::visit([&]<typename T>(const T & item)
-            {
-                if constexpr (std::is_same_v<T, NPCTalkBoxString>)
-                {
-                    player.Defer(NPCMessageCreator::CreateTalkBoxAddString(npc, item.tableIndex));
-                }
-                else if constexpr (std::is_same_v<T, NPCTalkBoxStringWithInt>)
-                {
-                    player.Defer(NPCMessageCreator::CreateTalkBoxAddRuntimeIntString(npc, item.tableIndex, item.value));
-                }
-                else if constexpr (std::is_same_v<T, NPCTalkBoxStringWithItem>)
-                {
-                    player.Defer(NPCMessageCreator::CreateTalkBoxAddItemName(npc, item.tableIndex, item.tableIndex));
-                }
-                else if constexpr (std::is_same_v<T, NPCTalkBoxMenu>)
-                {
-                    player.Defer(NPCMessageCreator::CreateTalkBoxAddMenu(npc, item.tableIndexDefault, item.tableIndexMouseOver, item.index));
-                }
-                else
-                {
-                    static_assert(sizeof(T), "not implemented");
-                }
-
-            }, element);
-        }
-
-        player.Defer(NPCMessageCreator::CreateTalkBoxCreate(npc, player,
-            talkBox.GetWidth(), talkBox.GetHeight()));
-        player.FlushDeferred();
-    }
-
-    void PlayerStateSystem::DisposeNPCTalk(GamePlayer& player)
-    {
-        PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
-        if (!scriptComponent.HasTargetNPC())
-        {
-            return;
-        }
-
-        game_entity_id_type targetId = scriptComponent.GetTargetNPCId();
-        player.Send(NPCMessageCreator::CreateTalkBoxClose(targetId));
-
-        scriptComponent.Clear();
-    }
-
-    void PlayerStateSystem::ChangeStage(GamePlayer& player, int32_t stageId, int32_t destX, int32_t destY)
-    {
-        _serviceLocator.Get<ZoneChangeService>().StartStageChange(player, stageId, destX, destY);
-    }
-
-    void PlayerStateSystem::ChangeZone(GamePlayer& player, int32_t zoneId, int32_t destX, int32_t destY)
-    {
-        _serviceLocator.Get<ZoneChangeService>().StartZoneChange(player.GetClientId(), zoneId, destX, destY);
     }
 
     void PlayerStateSystem::OnUseItem(const ZoneMessage& message)
@@ -277,26 +205,8 @@ namespace sunlight
             }
             else
             {
-                PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
-                if (scriptComponent.HasTargetNPC())
+                if (!Get<GameScriptSystem>().StartNPCScript(player, *npc))
                 {
-                    SUNLIGHT_LOG_WARN(_serviceLocator,
-                        fmt::format("[{}] player has already talk npc. player: {}, prev_npc: {}, new_npc: {}",
-                            GetName(), player.GetCId(), scriptComponent.GetTargetNPCId(), target));
-
-                    break;
-                }
-
-                scriptComponent.SetTargetNPCId(target);
-
-                LuaSystem luaSystem(*this);
-                LuaNPC luaNPC(*npc);
-                LuaPlayer luaPlayer(*this, player);
-
-                if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaSystem, luaNPC, luaPlayer, 0))
-                {
-                    scriptComponent.Clear();
-
                     break;
                 }
 
@@ -334,53 +244,8 @@ namespace sunlight
         const int32_t selection = message.reader.Read<int32_t>();
 
         GamePlayer& player = message.player;
-        PlayerNPCScriptComponent& scriptComponent = player.GetNPCScriptComponent();
 
-        if (!scriptComponent.HasTargetNPC())
-        {
-            // npc script is disposed
-            return;
-        }
-
-        do
-        {
-            GameEntity* entity = Get<SceneObjectSystem>().FindEntity(GameEntityType::NPC, scriptComponent.GetTargetNPCId());
-            if (!entity)
-            {
-                break;
-            }
-
-            GameNPC* npc = entity->Cast<GameNPC>();
-            if (!npc)
-            {
-                assert(false);
-
-                break;
-            }
-
-            scriptComponent.SetSequence(scriptComponent.GetSequence() + 1);
-            scriptComponent.SetSelection(selection);
-
-            LuaSystem luaSystem(*this);
-            LuaNPC luaNPC(*npc);
-            LuaPlayer luaPlayer(*this, player);
-
-            if (!_serviceLocator.Get<LuaScriptEngine>().ExecuteNPCScript(luaNPC.GetId(), luaSystem, luaNPC, luaPlayer, scriptComponent.GetSequence()))
-            {
-                scriptComponent.Clear();
-
-                break;
-            }
-
-            return;
-
-        } while (false);
-
-        SUNLIGHT_LOG_WARN(_serviceLocator,
-            fmt::format("[{}] fail to execute script. player: {}",
-                GetName(), player.GetCId()));
-
-        DisposeNPCTalk(player);
+        Get<GameScriptSystem>().ContinueNPCScript(player, selection);
     }
 
     bool PlayerStateSystem::HandleCharacterState(const ZoneMessage& message)

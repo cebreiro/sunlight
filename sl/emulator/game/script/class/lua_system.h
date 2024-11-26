@@ -7,7 +7,7 @@ namespace sol
 
 namespace sunlight
 {
-    class PlayerStateSystem;
+    class GameScriptSystem;
 }
 
 namespace sunlight
@@ -15,7 +15,7 @@ namespace sunlight
     class LuaSystem
     {
     public:
-        explicit LuaSystem(PlayerStateSystem& system);
+        explicit LuaSystem(GameScriptSystem& system);
 
         void Debug(const std::string& str);
         void Info(const std::string& str);
@@ -28,6 +28,6 @@ namespace sunlight
         static void Bind(sol::state& luaState);
 
     private:
-        PlayerStateSystem& _system;
+        GameScriptSystem& _system;
     };
 }

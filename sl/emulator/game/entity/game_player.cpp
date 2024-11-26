@@ -20,9 +20,11 @@
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/event_script/event_script.h"
 #include "sl/emulator/game/contents/item/equipment_position.h"
+#include "sl/emulator/game/contents/npc/npc_talk_box.h"
 #include "sl/emulator/game/contents/passive/passive.h"
 #include "sl/emulator/game/message/creator/chat_message_creator.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/message/creator/npc_message_creator.h"
 #include "sl/emulator/server/client/game_client.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data_provider.h"
@@ -249,6 +251,42 @@ namespace sunlight
     void GamePlayer::Notice(const std::string& message)
     {
         Send(ChatMessageCreator::CreateServerMessage(message));
+    }
+
+    void GamePlayer::Talk(const GameNPC& npc, const NPCTalkBox& talkBox)
+    {
+        Defer(NPCMessageCreator::CreateTalkBoxClear(npc));
+
+        for (const npc_talk_box_item_type& element : talkBox.GetTalkBoxItems())
+        {
+            std::visit([&]<typename T>(const T & item)
+            {
+                if constexpr (std::is_same_v<T, NPCTalkBoxString>)
+                {
+                    Defer(NPCMessageCreator::CreateTalkBoxAddString(npc, item.tableIndex));
+                }
+                else if constexpr (std::is_same_v<T, NPCTalkBoxStringWithInt>)
+                {
+                    Defer(NPCMessageCreator::CreateTalkBoxAddRuntimeIntString(npc, item.tableIndex, item.value));
+                }
+                else if constexpr (std::is_same_v<T, NPCTalkBoxStringWithItem>)
+                {
+                    Defer(NPCMessageCreator::CreateTalkBoxAddItemName(npc, item.tableIndex, item.tableIndex));
+                }
+                else if constexpr (std::is_same_v<T, NPCTalkBoxMenu>)
+                {
+                    Defer(NPCMessageCreator::CreateTalkBoxAddMenu(npc, item.tableIndexDefault, item.tableIndexMouseOver, item.index));
+                }
+                else
+                {
+                    static_assert(sizeof(T), "not implemented");
+                }
+
+            }, element);
+        }
+
+        Defer(NPCMessageCreator::CreateTalkBoxCreate(npc, *this,talkBox.GetWidth(), talkBox.GetHeight()));
+        FlushDeferred();
     }
 
     void GamePlayer::Show(const EventScript& eventScript)

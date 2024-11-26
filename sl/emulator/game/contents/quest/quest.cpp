@@ -42,6 +42,19 @@ namespace sunlight
         return _itemGain.has_value();
     }
 
+    bool Quest::HasFlagValue(int32_t value) const
+    {
+        for (int32_t flagValue : _flags | std::views::values)
+        {
+            if (flagValue == value)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     void Quest::ConfigureItemGain(int32_t monsterId, int32_t itemId, int32_t probability, int32_t maxItemQuantity, int32_t minKillCount)
     {
         _itemGain.emplace(monsterId, itemId, probability, maxItemQuantity, minKillCount);

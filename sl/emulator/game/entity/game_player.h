@@ -9,9 +9,11 @@ namespace sunlight::db::dto
 
 namespace sunlight
 {
+    class NPCTalkBox;
     class EventScript;
     class Stage;
     class GameClient;
+    class GameNPC;
     class GameDataProvideService;
 
     class PlayerAppearanceComponent;
@@ -54,6 +56,7 @@ namespace sunlight
 
     public:
         void Notice(const std::string& message);
+        void Talk(const GameNPC& npc, const NPCTalkBox& talkBox);
         void Show(const EventScript& eventScript);
 
     public:

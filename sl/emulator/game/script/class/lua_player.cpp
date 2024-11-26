@@ -15,17 +15,17 @@
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/script/class/lua_npc.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
+#include "sl/emulator/game/system/game_script_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
 #include "sl/emulator/game/system/player_job_system.h"
 #include "sl/emulator/game/system/player_quest_system.h"
-#include "sl/emulator/game/system/player_state_system.h"
 #include "sl/emulator/game/system/player_stat_system.h"
 #include "sl/emulator/server/packet/io/sl_packet_writer.h"
 
 namespace sunlight
 {
-    LuaPlayer::LuaPlayer(PlayerStateSystem& system, GamePlayer& player)
+    LuaPlayer::LuaPlayer(GameScriptSystem& system, GamePlayer& player)
         : _system(system)
         , _player(player)
     {
@@ -139,12 +139,12 @@ namespace sunlight
 
     void LuaPlayer::Talk(LuaNPC& npc, const NPCTalkBox& talkBox)
     {
-        _system.CreateNPCTalkBox(_player, npc.GetImpl(), talkBox);
+        _system.Talk(_player, npc.GetImpl(), talkBox);
     }
 
     void LuaPlayer::DisposeTalk()
     {
-        _system.DisposeNPCTalk(_player);
+        _system.DisposeTalk(_player);
     }
 
     void LuaPlayer::OpenShop(LuaNPC& npc)

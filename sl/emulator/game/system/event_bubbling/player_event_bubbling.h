@@ -23,4 +23,12 @@ namespace sunlight
         int32_t oldLevel = 0;
         int32_t newLevel = 0;
     };
+
+    struct EventBubblingPlayerQuestMonsterKill
+    {
+        PtrNotNull<GamePlayer> player = nullptr;
+
+        int32_t questId = 0;
+        int32_t monsterId = 0;
+    };
 }

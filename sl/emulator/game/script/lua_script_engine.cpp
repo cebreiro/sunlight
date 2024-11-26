@@ -16,6 +16,7 @@ namespace sunlight
         , _ngsScriptPath(_scriptPath / "ngs")
         , _commandScriptPath(_scriptPath / "command")
         , _npcScriptPath(_scriptPath / "npc")
+        , _questScriptPath(_scriptPath / "quest")
     {
         try
         {
@@ -39,6 +40,7 @@ namespace sunlight
             InitializeNgs(_ngsScriptPath);
             InitializeCommandScript(_commandScripts, _npcScriptPath);
             InitializeNPCScript(_npcScripts, _npcScriptPath);
+            InitializeQuestScript(_questScripts, _questScriptPath);
         }
         catch (const std::exception& e)
         {
@@ -72,8 +74,15 @@ namespace sunlight
             return false;
         }
 
+        decltype(_questScripts) newQuestScript;
+        if (!InitializeQuestScript(newQuestScript, _questScriptPath))
+        {
+            return false;
+        }
+
         std::swap(_commandScripts, newCommandScripts);
         std::swap(_npcScripts, newScript);
+        std::swap(_questScripts, newQuestScript);
 
         return true;
     }
@@ -135,6 +144,35 @@ namespace sunlight
         }
 
         return true;
+    }
+
+    bool LuaScriptEngine::ExecuteQuestScriptMonsterKill(LuaSystem& system, LuaPlayer& player, Quest& quest, int32_t monsterId)
+    {
+        const auto iter = _questScripts.find(quest.GetId());
+        if (iter == _questScripts.end())
+        {
+            return false;
+        }
+
+        if (const sol::function& function = iter->second["handleMonsterKill"];
+            function.valid())
+        {
+            sol::protected_function_result result = function(system, player, quest, monsterId);
+            if (!result.valid())
+            {
+                const sol::error error = result;
+
+                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                    fmt::format("[{}] fail to execute script. player: {}, quest: {}, error: {}",
+                        GetName(), player.GetCId(), quest.GetId(), error.what()));
+
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     bool LuaScriptEngine::InitializeNgs(const std::filesystem::path& directory)
@@ -275,6 +313,52 @@ namespace sunlight
             }
 
             outScript[npcId] = function;
+        }
+
+        return success;
+    }
+
+    bool LuaScriptEngine::InitializeQuestScript(std::unordered_map<int32_t, sol::table>& outScript, const std::filesystem::path& directory)
+    {
+        bool success = true;
+
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(directory))
+        {
+            const std::filesystem::path& path = entry.path();
+            if (!path.has_extension() || ::_stricmp(path.extension().string().c_str(), ".lua") != 0)
+            {
+                continue;
+            }
+
+            const int32_t questId = boost::lexical_cast<int32_t>(path.stem().string());
+
+            sol::load_result script = _luaState.load_file(path.string());
+            if (!script.valid())
+            {
+                success = false;
+                const sol::error error = script;
+
+                SUNLIGHT_LOG_CRITICAL(_serviceLocator,
+                    fmt::format("[{}] fail to load file. path: {}, error: {}",
+                        GetName(), path.string(), error.what()));
+
+                continue;
+            }
+
+            sol::protected_function_result result = script();
+            if (!result.valid())
+            {
+                success = false;
+                const sol::error error = result;
+
+                SUNLIGHT_LOG_CRITICAL(_serviceLocator,
+                    fmt::format("[{}] fail to file. path: {}, error: {}",
+                        GetName(), path.string(), error.what()));
+
+                continue;
+            }
+
+            outScript[questId] = result;
         }
 
         return success;

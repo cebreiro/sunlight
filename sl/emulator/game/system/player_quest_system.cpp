@@ -6,7 +6,11 @@
 #include "sl/emulator/game/contents/quest/quest_change.h"
 #include "sl/emulator/game/entity/game_player.h"
 #include "sl/emulator/game/message/creator/game_player_message_creator.h"
+#include "sl/emulator/game/script/lua_script_engine.h"
+#include "sl/emulator/game/script/class/lua_player.h"
+#include "sl/emulator/game/system/event_bubbling_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
+#include "sl/emulator/game/system/event_bubbling/player_event_bubbling.h"
 #include "sl/emulator/game/time/game_time_service.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_repository_service.h"
@@ -21,6 +25,7 @@ namespace sunlight
 
     void PlayerQuestSystem::InitializeSubSystem(Stage& stage)
     {
+        Add(stage.Get<EventBubblingSystem>());
         Add(stage.Get<ItemArchiveSystem>());
     }
 
@@ -78,6 +83,18 @@ namespace sunlight
     void PlayerQuestSystem::OnMonsterKill(GamePlayer& player, int32_t monsterId)
     {
         PlayerQuestComponent& questComponent = player.GetQuestComponent();
+
+        for (const Quest& quest : questComponent.GetQuests() | std::views::values)
+        {
+            if (quest.GetState() == 0 && quest.HasFlagValue(monsterId))
+            {
+                Get<EventBubblingSystem>().Publish(EventBubblingPlayerQuestMonsterKill{
+                    .player = &player,
+                    .questId = quest.GetId(),
+                    .monsterId = monsterId,
+                    });
+            }
+        }
 
         _questItemGainsBuffer.clear();
         if (questComponent.GetItemGain(monsterId, _questItemGainsBuffer))

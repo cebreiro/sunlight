@@ -32,13 +32,6 @@ namespace sunlight
         auto GetServiceLocator() const -> const ServiceLocator&;
 
     public:
-        void CreateNPCTalkBox(GamePlayer& player, GameNPC& npc, const NPCTalkBox& talkBox);
-        void DisposeNPCTalk(GamePlayer& player);
-
-        void ChangeStage(GamePlayer& player, int32_t stageId, int32_t destX, int32_t destY);
-        void ChangeZone(GamePlayer& player, int32_t zoneId, int32_t destX, int32_t destY);
-
-    public:
         void OnUseItem(const ZoneMessage& message);
 
     private:

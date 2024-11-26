@@ -2,12 +2,12 @@
 
 #include <sol/state.hpp>
 
-#include "sl/emulator/game/system/player_state_system.h"
+#include "sl/emulator/game/system/game_script_system.h"
 #include "sl/emulator/game/time/game_time_service.h"
 
 namespace sunlight
 {
-    LuaSystem::LuaSystem(PlayerStateSystem& system)
+    LuaSystem::LuaSystem(GameScriptSystem& system)
         : _system(system)
     {
     }

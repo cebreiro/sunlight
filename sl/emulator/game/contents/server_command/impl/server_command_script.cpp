@@ -2,7 +2,7 @@
 
 #include "sl/emulator/game/script/lua_script_engine.h"
 #include "sl/emulator/game/script/class/lua_player.h"
-#include "sl/emulator/game/system/player_state_system.h"
+#include "sl/emulator/game/system/game_script_system.h"
 #include "sl/emulator/game/system/server_command_system.h"
 
 namespace sunlight
@@ -52,7 +52,7 @@ namespace sunlight
             return false;
         }
 
-        LuaPlayer luaPlayer(_system.Get<PlayerStateSystem>(), player);
+        LuaPlayer luaPlayer(_system.Get<GameScriptSystem>(), player);
 
         return luaScriptEngine.ExecuteCommandScript(name, luaPlayer);
     }

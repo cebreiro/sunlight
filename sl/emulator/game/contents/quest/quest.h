@@ -14,6 +14,7 @@ namespace sunlight
         bool HasFlag(int32_t index) const;
         bool HasTimeLimit() const;
         bool HasItemGain() const;
+        bool HasFlagValue(int32_t value) const;
 
         void ConfigureItemGain(int32_t monsterId, int32_t itemId, int32_t probability, int32_t maxItemQuantity, int32_t minKillCount);
 

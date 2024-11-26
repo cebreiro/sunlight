@@ -9,7 +9,7 @@ namespace sol
 
 namespace sunlight
 {
-    class PlayerStateSystem;
+    class GameScriptSystem;
     class GamePlayer;
     class QuestChange;
 
@@ -25,7 +25,7 @@ namespace sunlight
     class LuaPlayer
     {
     public:
-        LuaPlayer(PlayerStateSystem& system, GamePlayer& player);
+        LuaPlayer(GameScriptSystem& system, GamePlayer& player);
 
         bool IsMale() const;
         bool IsNovice() const;
@@ -86,7 +86,7 @@ namespace sunlight
         auto GetCId() const -> int64_t;
 
     private:
-        PlayerStateSystem& _system;
+        GameScriptSystem& _system;
         GamePlayer& _player;
     };
 }
