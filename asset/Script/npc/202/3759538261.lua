@@ -14,9 +14,9 @@ return function (system, npc, player, sequence)
     table.insert(list, player:findQuest(1002))
     table.insert(list, player:findQuest(1003))
 
-    for i, jobChangeQuest in ipairs(list) do
+    for i, quest in ipairs(list) do
 
-        local step = jobChangeQuest:getFlag(1)
+        local step = quest:getFlag(1)
 
         if step > 2 and step < 5 then
 
@@ -32,7 +32,7 @@ return function (system, npc, player, sequence)
                 local questChange = QuestChange:new()
                 questChange:setFlag(1, 4)
 
-                player:changeQuest(jobChangeQuest:getId(), questChange)
+                player:changeQuest(quest:getId(), questChange)
 
             end
 
@@ -44,7 +44,50 @@ return function (system, npc, player, sequence)
 
     end
 
-    -- TODO: 트레저헌터 전직 퀘스트
+    local quest = player:findQuest(1103)
+    if quest ~= nil then
+
+        local step = quest:getFlag(1)
+
+        if step == 3 then
+
+            if sequence == 0 then
+
+                local talkBox = NPCTalkBox:new(width, height)
+                talkBox:addString(stringBase + 20)
+                talkBox:addString(stringBase + 21)
+                talkBox:addString(stringBase + 22)
+
+                player:talk(npc, talkBox)
+
+                return
+
+            elseif sequence == 1 then
+
+                local questChange = QuestChange:new()
+                questChange:setFlag(1, 4)
+
+                player:changeQuest(quest:getId(), questChange)
+
+            end
+
+            player:disposeTalk()
+
+            return
+
+        elseif step == 4 then
+
+            local talkBox = NPCTalkBox:new(width, height)
+            talkBox:addString(stringBase + 23)
+
+            player:talk(npc, talkBox)
+            player:disposeTalk()
+
+            return
+
+        end
+
+    end
 
 
     -- TODO: 녹슨 단검 퀘스트
