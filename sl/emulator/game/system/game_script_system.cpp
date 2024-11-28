@@ -193,4 +193,9 @@ namespace sunlight
     {
         _serviceLocator.Get<ZoneChangeService>().StartZoneChange(player.GetClientId(), zoneId, destX, destY);
     }
+
+    void GameScriptSystem::ChangeZoneWithStage(GamePlayer& player, int32_t zoneId, int32_t stage, int32_t destX, int32_t destY)
+    {
+        _serviceLocator.Get<ZoneChangeService>().StartZoneChange(player.GetClientId(), zoneId, stage, destX, destY);
+    }
 }

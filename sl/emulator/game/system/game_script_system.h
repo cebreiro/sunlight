@@ -35,6 +35,7 @@ namespace sunlight
 
         void ChangeStage(GamePlayer& player, int32_t stageId, int32_t destX, int32_t destY);
         void ChangeZone(GamePlayer& player, int32_t zoneId, int32_t destX, int32_t destY);
+        void ChangeZoneWithStage(GamePlayer& player, int32_t zoneId, int32_t stage, int32_t destX, int32_t destY);
 
     private:
         const ServiceLocator& _serviceLocator;

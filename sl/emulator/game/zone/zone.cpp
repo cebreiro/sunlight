@@ -189,7 +189,7 @@ namespace sunlight
         co_return true;
     }
 
-    auto Zone::RemovePlayerByZoneChange(game_client_id_type id, int32_t destZoneId, float x, float y, float yaw) -> Future<bool>
+    auto Zone::RemovePlayerByZoneChange(game_client_id_type id, int32_t destZoneId, int32_t destStage, float x, float y, float yaw) -> Future<bool>
     {
         assert(ExecutionContext::IsEqualTo(*_strand));
 
@@ -217,7 +217,7 @@ namespace sunlight
         _playerCIdStageIndex.erase(player->GetCId());
         _playerStages.erase(iter);
 
-        _gameRepositoryService->SaveState(*player, destZoneId, GameConstant::STAGE_MAIN, x, y, yaw);
+        _gameRepositoryService->SaveState(*player, destZoneId, destStage, x, y, yaw);
 
         co_await _gameRepositoryService->WaitForSaveCompletion(*player);
 

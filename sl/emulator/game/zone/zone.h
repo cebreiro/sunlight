@@ -34,7 +34,7 @@ namespace sunlight
 
         auto SpawnPlayer(SharedPtrNotNull<GameClient> client, db::dto::Character dto) -> Future<bool>;
         auto LogoutPlayer(game_client_id_type id) -> Future<bool>;
-        auto RemovePlayerByZoneChange(game_client_id_type id, int32_t destZoneId, float x, float y, float yaw) -> Future<bool>;
+        auto RemovePlayerByZoneChange(game_client_id_type id, int32_t destZoneId, int32_t destStage, float x, float y, float yaw) -> Future<bool>;
         auto ChangePlayerStage(game_client_id_type id, int32_t destStageId, int32_t destX, int32_t destY, std::optional<float> yaw) -> Future<bool>;
 
         void HandleClientDisconnect(game_client_id_type id);

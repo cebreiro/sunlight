@@ -26,6 +26,8 @@ namespace sunlight
         bool StartStageChange(GamePlayer& player, int32_t destStageId, int32_t destX, int32_t destY, std::optional<float> yaw = std::nullopt);
         auto StartZoneChange(game_client_id_type clientId, int32_t destZoneId, int32_t destX, int32_t destY,
             std::optional<float> yaw = std::nullopt) -> Future<void>;
+        auto StartZoneChange(game_client_id_type clientId, int32_t destZoneId, int32_t destStage, int32_t destX, int32_t destY,
+            std::optional<float> yaw = std::nullopt) -> Future<void>;
 
     private:
         Zone& _zone;

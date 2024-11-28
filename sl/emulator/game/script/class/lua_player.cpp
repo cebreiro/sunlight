@@ -182,6 +182,11 @@ namespace sunlight
         _system.ChangeZone(_player, zoneId, destX, destY);
     }
 
+    void LuaPlayer::ChangeZoneWithStage(int32_t zoneId, int32_t stage, int32_t destX, int32_t destY)
+    {
+        _system.ChangeZoneWithStage(_player, zoneId, stage, destX, destY);
+    }
+
     void LuaPlayer::Send(SlPacketWriter& writer)
     {
         _player.Send(writer.Flush());
@@ -282,6 +287,7 @@ namespace sunlight
             "findQuest", &LuaPlayer::FindQuest,
             "changeStage", &LuaPlayer::ChangeStage,
             "changeZone", &LuaPlayer::ChangeZone,
+            "changeZoneWithStage", &LuaPlayer::ChangeZoneWithStage,
             "send", &LuaPlayer::Send,
             "broadcast", &LuaPlayer::Broadcast,
             "findNearestMonster", &LuaPlayer::FindNearestMonster,

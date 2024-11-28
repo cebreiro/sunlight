@@ -1,5 +1,6 @@
 #include "zone_change_service.h"
 
+#include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/component/event_object_stage_exit_portal_component.h"
 #include "sl/emulator/game/entity/game_event_object.h"
 #include "sl/emulator/game/entity/game_player.h"
@@ -100,6 +101,11 @@ namespace sunlight
 
     auto ZoneChangeService::StartZoneChange(game_client_id_type clientId, int32_t destZoneId, int32_t destX, int32_t destY, std::optional<float> yaw) -> Future<void>
     {
+        return StartZoneChange(clientId, destZoneId, GameConstant::STAGE_MAIN, destX, destY, yaw);
+    }
+
+    auto ZoneChangeService::StartZoneChange(game_client_id_type clientId, int32_t destZoneId, int32_t destStage, int32_t destX, int32_t destY, std::optional<float> yaw) -> Future<void>
+    {
         [[maybe_unused]]
         const auto holder = _zone.shared_from_this();
 
@@ -119,7 +125,7 @@ namespace sunlight
 
         SharedPtrNotNull<GameClient> client = clientPtr->shared_from_this();
 
-        const bool removed = co_await _zone.RemovePlayerByZoneChange(clientId, destZoneId, (float)destX, (float)destY, yaw.value_or(0.f));
+        const bool removed = co_await _zone.RemovePlayerByZoneChange(clientId, destZoneId, destStage, (float)destX, (float)destY, yaw.value_or(0.f));
         if (!removed)
         {
             co_return;

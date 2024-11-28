@@ -63,6 +63,7 @@ namespace sunlight
 
         void ChangeStage(int32_t stageId, int32_t destX, int32_t destY);
         void ChangeZone(int32_t zoneId, int32_t destX, int32_t destY);
+        void ChangeZoneWithStage(int32_t zoneId, int32_t stage, int32_t destX, int32_t destY);
 
         void Send(SlPacketWriter& writer);
         void Broadcast(SlPacketWriter& writer, bool includeSelf);
