@@ -22,6 +22,7 @@ namespace sunlight
         void Warn(const std::string& str);
         void Error(const std::string& str);
 
+        auto GetSeconds() const -> int32_t;
         auto GetTimePoint() const -> int64_t;
 
     public:

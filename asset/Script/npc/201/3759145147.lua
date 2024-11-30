@@ -49,8 +49,6 @@ return function (system, npc, player, sequence)
 
         elseif step == 5 then
 
-            -- 전직
-
             if sequence == 0 then
 
                 local talkBox = NPCTalkBox:new(width, height)

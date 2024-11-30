@@ -2,7 +2,7 @@
 -- Stage : 10018
 -- Name  : 카엘 (네스트)
 -- Nes   : 100055, 100056, 100066
--- Role  : 창기사, 광전사 전직 퀘스트, 주/부 직업 변경
+-- Role  : 창기사, 광전사 전직 퀘스트, 요리사 전직 퀘스트, 주/부 직업 변경
 
 return function (system, npc, player, sequence)
 
@@ -107,6 +107,69 @@ return function (system, npc, player, sequence)
             handleJobChangeQuest(jobChangeQuest)
 
             return
+
+        end
+
+    end
+
+    local chefQuestId = 201
+    local chefQuest = player:findQuest(201)
+
+    if chefQuest ~= nil then
+
+        local state = chefQuest:getState()
+        if state == 0 then
+
+            local step = chefQuest:getFlag(1)
+
+            if step == 10 then
+
+                local subStep = chefQuest:getFlag(2)
+
+                if subStep == 0 then
+
+                    if sequence == 0 then
+
+                        local talkBox = NPCTalkBox:new(width, height)
+                        talkBox:addString(46002) -- 네넷? 칼빈슨씨의 단검이요? <#FF0000>죽순 팬더<#000000>였을 거에요
+
+                        player:talk(npc, talkBox)
+
+                        return
+
+                    elseif sequence == 1 then
+
+                        local questChange = QuestChange:new()
+                        questChange:setFlag(2, 1)
+                        questChange:setFlag(5, 701) -- 죽순 팬더
+
+                        player:changeQuest(chefQuestId, questChange)
+
+                    end
+
+                elseif subStep == 1 then
+
+                    local talkBox = NPCTalkBox:new(width, height)
+                    talkBox:addString(46004) -- 단검을 찾던 못 찾든 간에… 꼭 칼빈슨 씨에게 전해주세요. 제가 너무나 죄송해 하고 있다구요. 알았죠?
+
+                    player:talk(npc, talkBox)
+
+                end
+
+                player:disposeTalk()
+                return
+
+            elseif step == 20 then
+
+                local talkBox = NPCTalkBox:new(width, height)
+                talkBox:addString(46003) -- 네? 단검을 찾았다구요? 휴~~ 정말 다행이군요.
+
+                player:talk(npc, talkBox)
+
+                player:disposeTalk()
+                return
+
+            end
 
         end
 

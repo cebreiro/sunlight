@@ -1,8 +1,8 @@
 -- Zone  : 202
 -- Stage : 10022
 -- Name  : 칼빈슨 (무기점)
--- Nes   : 100093
--- Role  : 창기사, 광전사 전직 퀘스트, 트레저헌터 전직 퀘스트, 녹슨 단검 퀘스트
+-- Nes   : 100093, 100101
+-- Role  : 창기사, 광전사 전직 퀘스트, 트레저헌터 전직 퀘스트, 요리사 전직 퀘스트, 녹슨 단검 퀘스트
 
 return function (system, npc, player, sequence)
 
@@ -84,6 +84,106 @@ return function (system, npc, player, sequence)
             player:disposeTalk()
 
             return
+
+        end
+
+    end
+
+    local chefQuestId = 201
+    local chefQuest = player:findQuest(201)
+
+    if chefQuest ~= nil then
+
+        local state = chefQuest:getState()
+        if state == 0 then
+
+            local step = chefQuest:getFlag(1)
+
+            if step == 0 then
+
+                if sequence == 0 then
+
+                    local talkBox = NPCTalkBox:new(width, height)
+                    talkBox:addString(40126) -- 음… 바다라의 고기가 필요하다고?<BR> 
+
+                    player:talk(npc, talkBox)
+
+                    return
+
+                elseif sequence == 1 then
+
+                    local questChange = QuestChange:new()
+                    questChange:setFlag(1, 10)
+
+                    player:changeQuest(chefQuestId, questChange)
+
+                end
+
+                player:disposeTalk()
+
+                return
+
+            elseif step == 10 then
+
+                local talkBox = NPCTalkBox:new(width, height)
+                talkBox:addString(40127) -- 먼저 카엘을 한번 만나보게나. 그 녀석이 단검을 잃어버린 장소에서 찾는다면 쉽게 찾을 수도 있을 테니까.
+
+                player:talk(npc, talkBox)
+                player:disposeTalk()
+
+                return
+
+            elseif step == 20 then
+
+                if sequence == 0 then
+
+                    local talkBox = NPCTalkBox:new(width, height)
+                    talkBox:addString(40128) -- 자네 정말 단검을 찾아가지고 왔군!
+
+                    player:talk(npc, talkBox)
+
+                    return
+
+                elseif sequence == 1 then
+
+                    local gainItemId = 5050024
+                    local removeItemId = 5050019
+
+                    if player:addItem(gainItemId, 1) then
+
+                        player:removeInventoryItemAll(removeItemId)
+
+                        local questChange = QuestChange:new()
+                        questChange:setFlag(1, 30)
+
+                        player:changeQuest(chefQuestId, questChange)
+
+                    else
+
+                        local talkBox = NPCTalkBox:new(width, height)
+                        talkBox:addString(40117) -- 인벤이 꽉차서 줄수가 없네. 비운뒤 다시오게
+
+                        player:talk(npc, talkBox)
+
+                    end
+
+                end
+
+                player:disposeTalk()
+
+                return
+
+            elseif step == 30 then
+
+                local talkBox = NPCTalkBox:new(width, height)
+                talkBox:addString(41127) -- 자네 덕에 단검을 되찾게 되어 정말 다행이네. 카엘 녀석도 이번 일을 계기로 앞으로 남의 물건에 각별히 신경 쓰게 될 걸세. 
+
+                player:talk(npc, talkBox)
+                player:disposeTalk()
+
+                return
+
+            end
 
         end
 

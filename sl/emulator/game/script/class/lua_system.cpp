@@ -36,6 +36,13 @@ namespace sunlight
             fmt::format("[lua_script] {}", str));
     }
 
+    auto LuaSystem::GetSeconds() const -> int32_t
+    {
+        const auto& duration = std::chrono::duration_cast<std::chrono::seconds>(GameTimeService::Now().time_since_epoch());
+
+        return static_cast<int32_t>(duration.count());
+    }
+
     auto LuaSystem::GetTimePoint() const -> int64_t
     {
         return std::chrono::time_point_cast<std::chrono::milliseconds>(GameTimeService::Now()).time_since_epoch().count();
@@ -49,6 +56,7 @@ namespace sunlight
             "info", &LuaSystem::Info,
             "warn", &LuaSystem::Warn,
             "error", &LuaSystem::Error,
+            "getSeconds", &LuaSystem::GetSeconds,
             "getTimePoint", &LuaSystem::GetTimePoint
         );
     }
