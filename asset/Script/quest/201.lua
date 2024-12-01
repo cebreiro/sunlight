@@ -7,11 +7,6 @@ local function handleMonsterKill(system, player, quest, monsterId)
     local killCount = quest:getFlag(3)
     local targetMonsterId = quest:getFlag(5)
 
-    system:error("step: " .. step)
-    system:error("killCount: " .. killCount)
-    system:error("targetMonsterId: " .. targetMonsterId)
-    system:error("monsterId: " .. monsterId)
-
     if step == 10 and monsterId == targetMonsterId then
 
         local itemId = 5050019
