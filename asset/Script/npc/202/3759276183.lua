@@ -1,8 +1,8 @@
 -- Zone  : 202
 -- Stage : 10018
 -- Name  : 카엘 (네스트)
--- Nes   : 100055, 100056, 100066
--- Role  : 창기사, 광전사 전직 퀘스트, 요리사 전직 퀘스트, 주/부 직업 변경
+-- Nes   : 100055, 100056, 100066, 100103
+-- Role  : 창기사, 광전사 전직 퀘스트, 요리사 전직 퀘스트, 세공사 전직 퀘스트, 주/부 직업 변경
 
 return function (system, npc, player, sequence)
 
@@ -170,6 +170,82 @@ return function (system, npc, player, sequence)
                 return
 
             end
+
+        end
+
+    end
+
+    local chemistQuestId = 204
+    local chemistQuest = player:findQuest(204)
+
+    if chemistQuest ~= nil then
+
+        if chemistQuest:getState() == 0 then
+
+            local step = chemistQuest:getFlag(3)
+
+            if step == 0 then
+
+                if sequence == 0 then
+
+                    local talkBox = NPCTalkBox:new(width, height)
+                    talkBox:addString(46006)
+
+                    player:talk(npc, talkBox)
+
+                    return
+
+                elseif sequence == 1 then
+
+                    local questChange = QuestChange:new()
+                    questChange:setFlag(3, 1)
+
+                    player:changeQuest(chemistQuestId, questChange)
+
+                end
+
+            elseif step == 1 then
+
+                local talkBox = NPCTalkBox:new(width, height)
+                talkBox:addString(46008)
+
+                player:talk(npc, talkBox)
+
+            elseif step == 2 then
+
+                if sequence == 0 then
+
+                    local talkBox = NPCTalkBox:new(width, height)
+                    talkBox:addString(46007)
+
+                    player:talk(npc, talkBox)
+
+                    return
+
+                elseif sequence == 1 then
+
+                    player:removeInventoryItemAll(5050023) -- 반지
+
+                    local questChange = QuestChange:new()
+                    questChange:setFlag(1, 1)
+                    questChange:setFlag(3, 3)
+
+                    player:changeQuest(chemistQuestId, questChange)
+
+                end
+
+            elseif step == 3 then
+
+                local talkBox = NPCTalkBox:new(width, height)
+                talkBox:addString(46009)
+
+                player:talk(npc, talkBox)
+
+            end
+
+            player:disposeTalk()
+
+            return
 
         end
 

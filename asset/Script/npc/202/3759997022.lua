@@ -1,8 +1,8 @@
 -- Zone  : 202
 -- Stage : 10029
 -- Name  : 애쉬타 (잡화점)
--- Nes   : 100097
--- Role  : 검투사 전직 퀘스트
+-- Nes   : 100097, 100100
+-- Role  : 검투사 전직 퀘스트, 세공사 전직 퀘스트
 
 return function (system, npc, player, sequence)
 
@@ -58,6 +58,140 @@ return function (system, npc, player, sequence)
                 player:talk(npc, talkBox)
 
             end
+
+        end
+
+        player:disposeTalk()
+
+        return
+
+    end
+
+    local chemistQuestId = 204
+    local chemistQuest = player:findQuest(204)
+
+    if chemistQuest ~= nil and chemistQuest:getState() == 0 then
+
+        local step = chemistQuest:getFlag(3)
+
+        if step == 1 then
+
+            local phase = chemistQuest:getFlag(2)
+
+            if phase == 0 then
+
+                if sequence == 0 then
+
+                    local talkBox = NPCTalkBox:new(width, height)
+                    talkBox:addString(43021)
+
+                    player:talk(npc, talkBox)
+
+                    return
+
+                elseif sequence == 1 then
+
+                    local questChange = QuestChange:new()
+                    questChange:setFlag(2, 1)
+                    questChange:setFlag(4, 901) -- 바위 독침 선생
+
+                    player:changeQuest(chemistQuestId, questChange)
+
+                end
+
+            elseif phase == 1 then
+
+                local itemId = 5050022
+                local itemQuantity = 3
+
+                if player:hasInventoryItem(itemId, itemQuantity) then
+
+                    if sequence == 0 then
+
+                        local talkBox = NPCTalkBox:new(width, height)
+                        talkBox:addString(43022)
+
+                        player:talk(npc, talkBox)
+
+                        return
+
+                    elseif sequence == 1 then
+
+                        player:removeInventoryItem(itemId, itemQuantity)
+
+                        local questChange = QuestChange:new()
+                        questChange:setFlag(2, 2)
+                        questChange:setFlag(4, system:getSeconds())
+
+                        player:changeQuest(chemistQuestId, questChange)
+
+                    end
+
+                else
+
+                    local talkBox = NPCTalkBox:new(width, height)
+                    talkBox:addString(43020)
+
+                    player:talk(npc, talkBox)
+
+                end
+
+            elseif phase == 2 then
+
+                local now = system:getSeconds()
+                local start = chemistQuest:getFlag(4)
+
+                local elapsed = now - start
+
+                if elapsed < 300 then
+
+                    local talkBox = NPCTalkBox:new(width, height)
+                    talkBox:addString(43023)
+
+                    player:talk(npc, talkBox)
+
+                else
+
+                    if sequence == 0 then
+
+                        local talkBox = NPCTalkBox:new(width, height)
+                        talkBox:addString(43024)
+
+                        player:talk(npc, talkBox)
+
+                        return
+
+                    elseif sequence == 1 then
+
+                        if player:addItem(5050023, 1) then
+
+                            local questChange = QuestChange:new()
+                            questChange:setFlag(3, 2)
+                            questChange:setFlag(2, 3)
+
+                            player:changeQuest(chemistQuestId, questChange)
+
+                        else
+
+                            local talkBox = NPCTalkBox:new(width, height)
+                            talkBox:addString(43019)
+
+                            player:talk(npc, talkBox)
+
+                        end
+
+                    end
+
+                end
+
+            end
+
+        elseif step == 2 then
+
+            local talkBox = NPCTalkBox:new(width, height)
+            talkBox:addString(44010)
+
+            player:talk(npc, talkBox)
 
         end
 
