@@ -129,8 +129,6 @@ return function (system, npc, player, sequence)
 
             elseif step == 3 then
 
-                -- 진행중
-
                 local phase = quest:getFlag(0)
 
                 if phase == 40 then
