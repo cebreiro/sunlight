@@ -27,6 +27,7 @@ local function handleMonsterKill(system, player, quest, monsterId)
                     questChange:setFlag(1, 20)
 
                     local eventScript = EventScript:new()
+                    eventScript:addString(455)
                     eventScript:addString(60080)
 
                     player:show(eventScript)
@@ -68,6 +69,7 @@ local function handleMonsterKill(system, player, quest, monsterId)
                 if player:addItem(itemId, 1) then
 
                     local eventScript = EventScript:new()
+                    eventScript:addString(455)
                     eventScript:addString(60081)
 
                     player:show(eventScript)

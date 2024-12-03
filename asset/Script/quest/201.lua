@@ -29,6 +29,7 @@ local function handleMonsterKill(system, player, quest, monsterId)
                 questChange:setFlag(1, 20)
 
                 local eventScript = EventScript:new()
+                eventScript:addString(455)
                 eventScript:addString(60066) -- 칼빈슨의 단검을 획득했습니다.
 
                 player:show(eventScript)

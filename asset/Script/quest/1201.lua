@@ -20,6 +20,7 @@ local function handleMonsterKill(system, player, quest, monsterId)
             questChange:setFlag(1, 995)
 
             local eventScript = EventScript:new()
+            eventScript:addString(455)
             eventScript:addString(14000900 + 52)
 
             player:show(eventScript)

@@ -28,6 +28,7 @@ local function handleMonsterKill(system, player, quest, monsterId)
             if player:addItem(itemId, 1) then
 
                 local eventScript = EventScript:new()
+                eventScript:addString(455)
                 eventScript:addString(60112)
 
                 player:show(eventScript)
