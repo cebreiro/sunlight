@@ -3,6 +3,7 @@
 #include "sl/emulator/game/component/player_appearance_component.h"
 #include "sl/emulator/game/component/player_group_component.h"
 #include "sl/emulator/game/component/player_npc_script_component.h"
+#include "sl/emulator/game/component/player_stat_component.h"
 #include "sl/emulator/game/component/scene_object_component.h"
 #include "sl/emulator/game/contents/group/item_mix_prop_item_mapping.h"
 #include "sl/emulator/game/contents/state/game_entity_state.h"
@@ -339,27 +340,40 @@ namespace sunlight
 
         GamePlayer& player = *iter2->second->Cast<GamePlayer>();
 
-        switch (exitType)
-        {
-        case StageExitType::Logout:
-        {
-            Get<EntityViewRangeSystem>().Broadcast(player,
-                SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::Leaving, }), false);
-        }
-        break;
-        case StageExitType::ZoneChange:
-        {
-            Get<EntityViewRangeSystem>().Broadcast(player,
-                SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::ChangingZone, }), true);
-        }
-        break;
-        case StageExitType::StageChange:
-        {
-            Get<EntityViewRangeSystem>().Broadcast(player,
-                SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::ChangingRoom, }), true);
-        }
-        break;
-        }
+        Get<EntityViewRangeSystem>().VisitPlayer(player,
+            [&player, exitType](GamePlayer& visited)
+            {
+                if (&player == &visited)
+                {
+                    return;
+                }
+
+                if (player.GetStatComponent().IsDead())
+                {
+                    visited.Send(ZonePacketS2CCreator::CreateObjectLeave(player));
+                }
+                else
+                {
+                    switch (exitType)
+                    {
+                    case StageExitType::Logout:
+                    {
+                        visited.Send(SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::Leaving, }));
+                    }
+                    break;
+                    case StageExitType::ZoneChange:
+                    {
+                        visited.Send(SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::ChangingZone, }));
+                    }
+                    break;
+                    case StageExitType::StageChange:
+                    {
+                        visited.Send(SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::ChangingRoom, }));
+                    }
+                    break;
+                    }
+                }
+            });
 
         Get<EntityViewRangeSystem>().Remove(player);
         Get<EntityMovementSystem>().Remove(player.GetId());
