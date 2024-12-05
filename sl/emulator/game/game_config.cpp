@@ -13,6 +13,10 @@ namespace sunlight
         {
             config.dropItemOwnershipSeconds = std::chrono::seconds(std::max(1, iter->get<int32_t>()));
         }
+
+        if (const auto iter = j.find("drop_item_keep_seconds"); iter != j.end())
+        {
+            config.dropItemKeepSeconds = std::chrono::seconds(std::max(1, iter->get<int32_t>()));
         }
     }
 }

@@ -1649,7 +1649,7 @@ namespace sunlight
             destPosition.y() += static_cast<float>(dist(_mt));
         }
 
-        Get<SceneObjectSystem>().SpawnItem(std::move(pickedItem), playerPosition, destPosition);
+        Get<SceneObjectSystem>().SpawnItem(std::move(pickedItem), playerPosition, destPosition, _gameConfig.dropItemKeepSeconds);
 
         return true;
     }

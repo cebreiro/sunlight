@@ -43,7 +43,7 @@ namespace sunlight
     public:
         void SpawnPlayer(SharedPtrNotNull<GamePlayer> player, StageEnterType enterType);
         bool SpawnNPC(SharedPtrNotNull<GameNPC> npc);
-        void SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos);
+        void SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos, std::optional<std::chrono::seconds> keepDuration);
         void SpawnItem(SharedPtrNotNull<GameStoredItem> item);
         void SpawnMonster(SharedPtrNotNull<GameMonster> monster, Eigen::Vector2f pos, float yaw);
 

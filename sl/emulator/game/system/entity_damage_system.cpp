@@ -606,7 +606,7 @@ namespace sunlight
                 spawnPos.x() += dist(_mt);
             }
 
-			sceneObjectSystem.SpawnItem(std::move(item), monsterPos, spawnPos);
+			sceneObjectSystem.SpawnItem(std::move(item), monsterPos, spawnPos, _gameConfig.dropItemKeepSeconds);
 		}
     }
 

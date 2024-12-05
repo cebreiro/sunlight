@@ -68,7 +68,7 @@ namespace sunlight
 
         SceneObjectSystem& sceneObjectSystem = _system.Get<SceneObjectSystem>();
 
-        sceneObjectSystem.SpawnItem(std::move(item), playerPos, playerPos);
+        sceneObjectSystem.SpawnItem(std::move(item), playerPos, playerPos, std::nullopt);
 
         return true;
     }

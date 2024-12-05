@@ -25,6 +25,7 @@
 #include "sl/emulator/game/system/event_bubbling/monster_event_bubbling.h"
 #include "sl/emulator/game/zone/stage.h"
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
+#include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
 
 namespace sunlight
@@ -243,7 +244,7 @@ namespace sunlight
         return true;
     }
 
-    void SceneObjectSystem::SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos)
+    void SceneObjectSystem::SpawnItem(SharedPtrNotNull<GameItem> item, Eigen::Vector2f originPos, Eigen::Vector2f destPos, std::optional<std::chrono::seconds> keepDuration)
     {
         assert(!_entityIdIndex.contains(item->GetId()));
 
@@ -271,6 +272,21 @@ namespace sunlight
                 player.FlushDeferred();
             });
         viewRangeSystem.Add(*item);
+
+        if (keepDuration.has_value())
+        {
+            _serviceLocator.Get<ZoneExecutionService>().AddTimer(*keepDuration,
+                [this, itemId = item->GetId(), type = item->GetType()]()
+                {
+                    const GameEntity* entity = FindEntity(type, itemId);
+                    if (!entity || entity->GetId().GetRecycleSequence() != itemId.GetRecycleSequence())
+                    {
+                        return;
+                    }
+
+                    RemoveItem(itemId);
+                });
+        }
     }
 
     void SceneObjectSystem::SpawnItem(SharedPtrNotNull<GameStoredItem> item)

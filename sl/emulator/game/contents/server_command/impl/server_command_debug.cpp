@@ -231,7 +231,7 @@ namespace sunlight
 
                 item->GetComponent<SceneObjectComponent>().SetPosition(position);
 
-                _system.Get<SceneObjectSystem>().SpawnItem(item, position, position);
+                _system.Get<SceneObjectSystem>().SpawnItem(item, position, position, std::nullopt);
             }
         }
 
@@ -291,7 +291,7 @@ namespace sunlight
 
             item->GetComponent<SceneObjectComponent>().SetPosition(position);
 
-            _system.Get<SceneObjectSystem>().SpawnItem(item, position, position);
+            _system.Get<SceneObjectSystem>().SpawnItem(item, position, position, std::nullopt);
         }
 
         return true;
@@ -351,7 +351,7 @@ namespace sunlight
 
             item->GetComponent<SceneObjectComponent>().SetPosition(position);
 
-            _system.Get<SceneObjectSystem>().SpawnItem(item, position, position);
+            _system.Get<SceneObjectSystem>().SpawnItem(item, position, position, std::nullopt);
         }
 
         return true;
