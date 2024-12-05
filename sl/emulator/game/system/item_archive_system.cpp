@@ -31,6 +31,7 @@
 #include "sl/emulator/game/zone/service/game_item_unique_id_publisher.h"
 #include "sl/emulator/game/zone/service/game_repository_service.h"
 #include "sl/emulator/server/client/game_client.h"
+#include "sl/emulator/service/config/config_provide_service.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/item/item_data.h"
@@ -41,6 +42,7 @@ namespace sunlight
 {
     ItemArchiveSystem::ItemArchiveSystem(const ServiceLocator& serviceLocator)
         : _serviceLocator(serviceLocator)
+        , _gameConfig(_serviceLocator.Get<ConfigProvideService>().GetGameConfig())
         , _mt(std::random_device{}())
     {
     }
@@ -1630,7 +1632,7 @@ namespace sunlight
         ownershipComponent.Clear();
 
         ownershipComponent.Add(player.GetCId());
-        ownershipComponent.SetEndTimePoint(GameTimeService::Now() + std::chrono::seconds(30));
+        ownershipComponent.SetEndTimePoint(GameTimeService::Now() + _gameConfig.dropItemOwnershipSeconds);
 
         const Eigen::Vector2f& playerPosition = player.GetSceneObjectComponent().GetPosition();
         Eigen::Vector2f destPosition;

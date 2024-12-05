@@ -15,6 +15,7 @@ namespace sunlight
 {
     enum class ZoneMessageType : int32_t;
 
+    struct GameConfig;
     struct ItemMixMaterial;
     struct ZoneMessage;
 
@@ -110,6 +111,7 @@ namespace sunlight
 
     private:
         const ServiceLocator& _serviceLocator;
+        const GameConfig& _gameConfig;
 
         std::mt19937 _mt;
         std::vector<item_remove_result_type> _itemRemoveResult;

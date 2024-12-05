@@ -8,5 +8,11 @@ namespace sunlight
         {
             config.noSpawnMonster = iter->get<bool>();
         }
+
+        if (const auto iter = j.find("drop_item_ownership_seconds"); iter != j.end())
+        {
+            config.dropItemOwnershipSeconds = std::chrono::seconds(std::max(1, iter->get<int32_t>()));
+        }
+        }
     }
 }

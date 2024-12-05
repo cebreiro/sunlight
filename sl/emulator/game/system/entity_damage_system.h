@@ -16,6 +16,8 @@ namespace sunlight
     struct DamageResult;
     struct MonsterSkillData;
 
+    struct GameConfig;
+
     class ItemData;
     class PlayerSkill;
 
@@ -66,6 +68,7 @@ namespace sunlight
     private:
         const ServiceLocator& _serviceLocator;
         int32_t _stageId = 0;
+        const GameConfig& _gameConfig;
         std::unordered_map<int64_t, float> _partyExpFactors;
 
         UniquePtrNotNull<IPlayerAttackDamageCalculator> _playerAttackDamageCalculator;

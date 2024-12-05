@@ -58,9 +58,6 @@ namespace sunlight
         static constexpr int32_t ITEM_ID_GOLD = 1;
         static constexpr int32_t ITEM_PROBABILITY_MAX = 100'0000;
 
-        // TODO: move to GameSetting
-        static constexpr auto DROP_ITEM_OWNERSHIP_DURATION = std::chrono::seconds(30);
-
         static constexpr int32_t PLAYER_BODY_SIZE = 10;
 
         static constexpr float MONSTER_DROP_ITEM_RADIUS = TILE_SIZE * 2.f;

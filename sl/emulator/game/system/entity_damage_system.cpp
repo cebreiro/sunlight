@@ -36,6 +36,7 @@
 #include "sl/emulator/game/zone/service/game_entity_id_publisher.h"
 #include "sl/emulator/game/zone/service/zone_execution_service.h"
 #include "sl/emulator/server/packet/creator/zone_packet_s2c_creator.h"
+#include "sl/emulator/service/config/config_provide_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
 #include "sl/emulator/service/gamedata/monster/monster_data.h"
 #include "sl/emulator/service/gamedata/skill/monster_skill_data.h"
@@ -45,6 +46,7 @@ namespace sunlight
     EntityDamageSystem::EntityDamageSystem(const ServiceLocator& serviceLocator, int32_t stageId)
         : _serviceLocator(serviceLocator)
         , _stageId(stageId)
+        , _gameConfig(_serviceLocator.Get<ConfigProvideService>().GetGameConfig())
         , _playerAttackDamageCalculator(std::make_unique<PlayerAttackDamageCalculator>())
         , _monsterAttackDamageCalculator(std::make_unique<MonsterAttackDamageCalculator>())
         , _mt(std::random_device{}())
@@ -577,7 +579,7 @@ namespace sunlight
 			if (player)
 			{
 				auto ownershipComponent = std::make_unique<ItemOwnershipComponent>();
-				ownershipComponent->SetEndTimePoint(GameTimeService::Now() + GameConstant::DROP_ITEM_OWNERSHIP_DURATION);
+				ownershipComponent->SetEndTimePoint(GameTimeService::Now() + _gameConfig.dropItemOwnershipSeconds);
 
 				if (player->GetPartyComponent().HasParty())
 				{
