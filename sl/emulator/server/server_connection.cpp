@@ -335,9 +335,8 @@ namespace sunlight
             const uint32_t bodySize = reader.Read<uint32_t>();
             if (bodySize != size - 9)
             {
-                // client bug 0x5189BA when trying to send packet greater than 1024 bytes
-                // client make an incorrect packet size so sends only a portion of the front of packet and discards all the rest
-                // to fix this bug, change a byte at address 0x5189C0 to 0xEB (JNZ -> JMP)
+                // client 0x5189BA when trying to send packet greater than 1024 bytes
+                // to fix this, change a byte at address 0x5189C0 to 0xEB (JNZ -> JMP) or make decompression logic
 
                 return false;
             }
