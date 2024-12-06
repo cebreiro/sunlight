@@ -7,6 +7,7 @@
 #include "shared/network/session/session.h"
 #include "sl/emulator/game/game_constant.h"
 #include "sl/emulator/game/contents/item/equipment_position.h"
+#include "sl/emulator/game/data/sox/item_clothes.h"
 #include "sl/emulator/server/lobby_server.h"
 #include "sl/emulator/server/server_connection.h"
 #include "sl/emulator/server/server_constant.h"
@@ -20,9 +21,296 @@
 #include "sl/emulator/service/authentication/authentication_token.h"
 #include "sl/emulator/service/database/database_service.h"
 #include "sl/emulator/service/gamedata/gamedata_provide_service.h"
+#include "sl/emulator/service/gamedata/item/item_data_provider.h"
 #include "sl/emulator/service/gamedata/skill/skill_data_provider.h"
 #include "sl/emulator/service/gateway/gateway_service.h"
 #include "sl/emulator/service/unique_name/unique_name_service.h"
+
+namespace
+{
+    // client 0x513990
+    bool IsAllowedItemOnCharacterCreation(int32_t itemId)
+    {
+        switch (itemId)
+        {
+        case 2311011:
+        case 2311021:
+        case 2311031:
+        case 2111011:
+        case 2111021:
+        case 2111031:
+        case 2111041:
+        case 2111051:
+        case 2111061:
+        case 2111071:
+        case 2111081:
+        case 2111091:
+        case 2111101:
+        case 2111111:
+        case 2111121:
+        case 2211011:
+        case 2211021:
+        case 2211031:
+        case 2211041:
+        case 2211051:
+        case 2211061:
+        case 2211071:
+        case 2211081:
+        case 2211091:
+        case 2211101:
+        case 2211111:
+        case 2211121:
+        case 2411011:
+        case 2411021:
+        case 2411031:
+        case 2411041:
+        case 2411051:
+        case 2411061:
+        case 2411071:
+        case 2411081:
+        case 2411091:
+        case 2411101:
+        case 2411111:
+        case 2411121:
+        case 2121011:
+        case 2121021:
+        case 2121031:
+        case 2121041:
+        case 2121051:
+        case 2121061:
+        case 2121071:
+        case 2121081:
+        case 2121091:
+        case 2121101:
+        case 2121111:
+        case 2121121:
+        case 2221011:
+        case 2221021:
+        case 2221031:
+        case 2221041:
+        case 2221051:
+        case 2221061:
+        case 2221071:
+        case 2221081:
+        case 2221091:
+        case 2221101:
+        case 2221111:
+        case 2221121:
+        case 2421011:
+        case 2421021:
+        case 2421031:
+        case 2421041:
+        case 2421051:
+        case 2421061:
+        case 2421071:
+        case 2421081:
+        case 2421091:
+        case 2421101:
+        case 2421111:
+        case 2421121:
+        case 2131011:
+        case 2131021:
+        case 2131031:
+        case 2131041:
+        case 2131051:
+        case 2131061:
+        case 2131071:
+        case 2131081:
+        case 2131091:
+        case 2131101:
+        case 2131111:
+        case 2131121:
+        case 2231011:
+        case 2231021:
+        case 2231031:
+        case 2231041:
+        case 2231051:
+        case 2231061:
+        case 2231071:
+        case 2231081:
+        case 2231091:
+        case 2231101:
+        case 2231111:
+        case 2231121:
+        case 2431011:
+        case 2431021:
+        case 2431031:
+        case 2431041:
+        case 2431051:
+        case 2431061:
+        case 2431071:
+        case 2431081:
+        case 2431091:
+        case 2431101:
+        case 2431111:
+        case 2431121:
+        case 2141011:
+        case 2141021:
+        case 2141031:
+        case 2141041:
+        case 2141051:
+        case 2141061:
+        case 2141071:
+        case 2141081:
+        case 2141091:
+        case 2811011:
+        case 2811021:
+        case 2811031:
+        case 2611011:
+        case 2611021:
+        case 2611031:
+        case 2611041:
+        case 2611051:
+        case 2611061:
+        case 2611071:
+        case 2611081:
+        case 2611091:
+        case 2611101:
+        case 2711011:
+        case 2711021:
+        case 2711031:
+        case 2711041:
+        case 2711051:
+        case 2711061:
+        case 2711071:
+        case 2711081:
+        case 2711091:
+        case 2711101:
+        case 2911011:
+        case 2911021:
+        case 2911031:
+        case 2911041:
+        case 2911051:
+        case 2911061:
+        case 2911071:
+        case 2911081:
+        case 2911091:
+        case 2911101:
+        case 2621011:
+        case 2621021:
+        case 2621031:
+        case 2621041:
+        case 2621051:
+        case 2621061:
+        case 2621071:
+        case 2621081:
+        case 2621091:
+        case 2621101:
+        case 2721011:
+        case 2721021:
+        case 2721031:
+        case 2721041:
+        case 2721051:
+        case 2721061:
+        case 2721071:
+        case 2721081:
+        case 2721091:
+        case 2721101:
+        case 2921011:
+        case 2921021:
+        case 2921031:
+        case 2921041:
+        case 2921051:
+        case 2921061:
+        case 2921071:
+        case 2921081:
+        case 2921091:
+        case 2921101:
+        case 2631011:
+        case 2631021:
+        case 2631031:
+        case 2631041:
+        case 2631051:
+        case 2631061:
+        case 2631071:
+        case 2631081:
+        case 2631091:
+        case 2631101:
+        case 2731011:
+        case 2731021:
+        case 2731031:
+        case 2731041:
+        case 2731051:
+        case 2731061:
+        case 2731071:
+        case 2731081:
+        case 2731091:
+        case 2731101:
+        case 2931011:
+        case 2931021:
+        case 2931031:
+        case 2931041:
+        case 2931051:
+        case 2931061:
+        case 2931071:
+        case 2931081:
+        case 2931091:
+        case 2931101:
+        case 2641011:
+        case 2641021:
+        case 2641031:
+        case 2641041:
+        case 2641051:
+        case 2641061:
+        case 2641071:
+        case 2641081:
+        case 2641091:
+        case 2641101:
+        case 2741011:
+        case 2741021:
+        case 2741031:
+        case 2741041:
+        case 2741051:
+        case 2741061:
+        case 2741071:
+        case 2741081:
+        case 2741091:
+        case 2741101:
+        case 2941011:
+        case 2941021:
+        case 2941031:
+        case 2941041:
+        case 2941051:
+        case 2941061:
+        case 2941071:
+        case 2941081:
+        case 2941091:
+        case 2941101:
+        case 2141101:
+        case 2141111:
+        case 2141121:
+        case 2241011:
+        case 2241021:
+        case 2241031:
+        case 2241041:
+        case 2241051:
+        case 2241061:
+        case 2241071:
+        case 2241081:
+        case 2241091:
+        case 2241101:
+        case 2241111:
+        case 2241121:
+        case 2441011:
+        case 2441021:
+        case 2441031:
+        case 2441041:
+        case 2441051:
+        case 2441061:
+        case 2441071:
+        case 2441081:
+        case 2441091:
+        case 2441101:
+        case 2441111:
+        case 2441121:
+            return true;
+        default:
+            break;
+        }
+
+        return false;
+    }
+}
 
 namespace sunlight
 {
@@ -263,10 +551,12 @@ namespace sunlight
 
         boost::scope::scope_exit exit([&]()
             {
+                connection.Send(LobbyPacketS2CCreator::CreateCharacterCreateResult(success));
+
                 if (success)
                 {
                     (void)uniqueNameService.Commit(*uniqueNameReserveKey);
-                    
+
                 }
                 else
                 {
@@ -308,6 +598,78 @@ namespace sunlight
             std::pair{ characterCreate.shoesId, EquipmentPosition::Shoes },
         };
 
+        const GameDataProvideService& gameDataProvider = _serviceLocator.Get<GameDataProvideService>();
+        const ItemDataProvider& itemDataProvider = gameDataProvider.GetItemDataProvider();
+
+        if (std::ranges::any_of(equipments, [&itemDataProvider](const std::pair<int32_t, EquipmentPosition>& pair) -> bool
+            {
+                if (!IsAllowedItemOnCharacterCreation(pair.first))
+                {
+                    return true;
+                }
+
+                const ItemData* itemData = itemDataProvider.Find(pair.first);
+                if (!itemData)
+                {
+                    return true;
+                }
+
+                const sox::ItemClothes* clothesData = itemData->GetClothesData();
+                if (!clothesData)
+                {
+                    return true;
+                }
+
+                switch (static_cast<sox::EquipmentType>(clothesData->equipPos))
+                {
+                case sox::EquipmentType::Jacket:
+                {
+                    if (pair.second != EquipmentPosition::Jacket)
+                    {
+                        return true;
+                    }
+                }
+                break;
+                case sox::EquipmentType::Pants:
+                {
+                    if (pair.second != EquipmentPosition::Pants)
+                    {
+                        return true;
+                    }
+                }
+                break;
+                case sox::EquipmentType::Shoes:
+                {
+                    if (pair.second != EquipmentPosition::Shoes)
+                    {
+                        return true;
+                    }
+                }
+                break;
+                case sox::EquipmentType::Hat:
+                case sox::EquipmentType::Gloves:
+                case sox::EquipmentType::Necklace:
+                case sox::EquipmentType::Ring:
+                case sox::EquipmentType::Weapon:
+                case sox::EquipmentType::Bullet:
+                case sox::EquipmentType::Count:
+                case sox::EquipmentType::None:
+                    return true;
+                }
+
+                return false;
+            }))
+        {
+            // TODO: add cheat log
+            SUNLIGHT_LOG_CRITICAL(_serviceLocator,
+                fmt::format("[{}] item creation cheat detected. session: {}, item0: {}, item1: {}, item2: {}",
+                    GetName(), connection.GetSession(), equipments[0].first, equipments[1].first, equipments[2].first));
+
+            success = false;
+
+            co_return;
+        }
+
         for (const auto [itemId, pos] : equipments)
         {
             request.items.emplace_back(req::ItemCreate{
@@ -322,7 +684,7 @@ namespace sunlight
                 });
         }
 
-        const SkillDataProvider& skillDataProvider = _serviceLocator.Get<GameDataProvideService>().GetSkillDataProvider();
+        const SkillDataProvider& skillDataProvider = gameDataProvider.GetSkillDataProvider();
 
         for (const PlayerSkillData& skillData : skillDataProvider.FindByJob(request.job, 1) | notnull::reference)
         {
@@ -355,8 +717,6 @@ namespace sunlight
                 fmt::format("[{}] fail to create character. client: {}, request: {}",
                     GetName(), *client, j.dump()));
         }
-
-        connection.Send(LobbyPacketS2CCreator::CreateCharacterCreateResult(success));
     }
 
     auto LobbyPacketC2SHandler::HandleCharacterDelete(ServerConnection& connection, SlPacketReader& reader) const -> Future<void>
