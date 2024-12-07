@@ -322,7 +322,7 @@ namespace sunlight
         case GameEntityStateType::Leaving:
         {
             // request revival
-            if (state.motionId == -666)
+            if (state.motionId == -666 && player.IsDead())
             {
                 int32_t destZoneId = 0;
                 Eigen::Vector2f position;
@@ -333,6 +333,7 @@ namespace sunlight
                     position = player.GetSceneObjectComponent().GetPosition();
                 }
 
+                player.SetDead(false);
                 player.GetStatComponent().SetRecoveryStat(RecoveryStatType::HP, 1);
 
                 _serviceLocator.Get<ZoneChangeService>().StartZoneChange(
