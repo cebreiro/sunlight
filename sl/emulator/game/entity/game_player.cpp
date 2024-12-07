@@ -198,6 +198,7 @@ namespace sunlight
     {
         _armed = dto.arms;
         _running = dto.running;
+        _dead = dto.dead;
 
         (void)AddComponent(CreatePlayerAppearanceComponent(dataProvider.GetItemDataProvider(), dto));
         (void)AddComponent(std::make_unique<PlayerItemComponent>(idPublisher, dataProvider.GetItemDataProvider(), dto));
@@ -331,6 +332,11 @@ namespace sunlight
         return _running;
     }
 
+    bool GamePlayer::IsDead() const
+    {
+        return _dead;
+    }
+
     auto GamePlayer::GetCId() const -> int64_t
     {
         return _cid;
@@ -378,6 +384,11 @@ namespace sunlight
     void GamePlayer::SetRunning(bool value)
     {
         _running = value;
+    }
+
+    void GamePlayer::SetDead(bool value)
+    {
+        _dead = value;
     }
 
     auto GamePlayer::GetAppearanceComponent() -> PlayerAppearanceComponent&

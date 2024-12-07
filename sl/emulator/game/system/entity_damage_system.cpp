@@ -108,7 +108,7 @@ namespace sunlight
 
     void EntityDamageSystem::KillPlayer(GamePlayer& target)
     {
-        if (target.GetStatComponent().IsDead())
+        if (target.IsDead())
         {
             return;
         }
@@ -387,7 +387,7 @@ namespace sunlight
         if (target.GetType() == GamePlayer::TYPE)
         {
             GamePlayer& player = *target.Cast<GamePlayer>();
-            if (player.GetStatComponent().IsDead())
+            if (player.IsDead())
             {
                 return;
             }
@@ -536,7 +536,7 @@ namespace sunlight
 
 				for (GamePlayer& partyMember : _partyMemberBuffer | notnull::reference)
 				{
-					if (partyMember.GetStatComponent().IsDead())
+					if (partyMember.IsDead())
 					{
 						continue;
 					}

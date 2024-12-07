@@ -84,7 +84,7 @@ namespace sunlight
         // client 0x4E6BE1
         // state dying, dead or none(0)
         // other state causes client crash
-        writer.Write<int32_t>(player.GetStatComponent().IsDead() ? static_cast<int32_t>(GameEntityStateType::Dead) : 0);
+        writer.Write<int32_t>(player.IsDead() ? static_cast<int32_t>(GameEntityStateType::Dead) : 0);
 
         return writer.Flush();
     }

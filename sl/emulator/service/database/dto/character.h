@@ -14,6 +14,7 @@ namespace sunlight::db::dto
         int32_t skinColor = 0;
         int8_t arms = 0;
         int8_t running = 0;
+        int8_t dead = 0;
         int32_t gold = 0;
         int8_t inventoryPage = 0;
         int32_t zone = 0;

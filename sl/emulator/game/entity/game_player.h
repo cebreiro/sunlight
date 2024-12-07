@@ -62,6 +62,7 @@ namespace sunlight
     public:
         bool IsArmed() const;
         bool IsRunning() const;
+        bool IsDead() const;
 
         auto GetCId() const -> int64_t;
         auto GetAId() const -> int64_t;
@@ -73,6 +74,7 @@ namespace sunlight
 
         void SetArmed(bool value);
         void SetRunning(bool value);
+        void SetDead(bool value);
 
     public:
         auto GetAppearanceComponent() -> PlayerAppearanceComponent&;
@@ -120,6 +122,7 @@ namespace sunlight
         int8_t _gmLevel = 0;
         bool _armed = false;
         bool _running = false;
+        bool _dead = false;
 
         SharedPtrNotNull<GameClient> _client;
 

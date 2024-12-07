@@ -144,7 +144,7 @@ namespace sunlight
 
         if (newHP <= 0)
         {
-            statComponent.SetDead(true);
+            player.SetDead(true);
             statComponent.Suspend(RecoveryStatType::HP);
             statComponent.Suspend(RecoveryStatType::SP);
         }
@@ -216,7 +216,7 @@ namespace sunlight
         statComponent.SetRecoveryStateFactor(RecoveryStatType::SP, StatValue(0.25));
         UpdateRegenStat(player);
 
-        if (!statComponent.IsDead())
+        if (!player.IsDead())
         {
             if (const double hp = statComponent.GetFinalStat(RecoveryStatType::HP).As<double>();
                 hp <= 0.0)

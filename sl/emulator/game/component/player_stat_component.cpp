@@ -6,8 +6,7 @@
 namespace sunlight
 {
     PlayerStatComponent::PlayerStatComponent(const db::dto::Character& dto)
-        : _dead(dto.hp.has_value() && *dto.hp == 0)
-        , _gender(dto.gender)
+        : _gender(dto.gender)
         , _level(dto.level)
         , _exp(dto.exp)
         , _statPoint(dto.statPoint)
@@ -49,11 +48,6 @@ namespace sunlight
 
         Mutable(RecoveryStatType::HP).SetRegenTickCount(regenTickOneSecond);
         Mutable(RecoveryStatType::SP).SetRegenTickCount(regenTickOneSecond);
-    }
-
-    bool PlayerStatComponent::IsDead() const
-    {
-        return _dead;
     }
 
     bool PlayerStatComponent::IsStatChanged(PlayerStatType type) const
@@ -159,11 +153,6 @@ namespace sunlight
         const auto iter = _stats.find(type);
 
         return iter != _stats.end() ? iter->second : nullObject;
-    }
-
-    void PlayerStatComponent::SetDead(bool value)
-    {
-        _dead = value;
     }
 
     void PlayerStatComponent::SetRecoveryTimePoint(RecoveryStatType type, game_time_point_type timePoint)

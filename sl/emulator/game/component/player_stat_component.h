@@ -22,7 +22,6 @@ namespace sunlight
     public:
         explicit PlayerStatComponent(const db::dto::Character& dto);
 
-        bool IsDead() const;
         bool IsStatChanged(PlayerStatType type) const;
 
         void Suspend(RecoveryStatType type);
@@ -45,7 +44,6 @@ namespace sunlight
 
         auto Get(PlayerStatType type) const -> const Stat&;
 
-        void SetDead(bool value);
         void SetRecoveryTimePoint(RecoveryStatType type, game_time_point_type timePoint);
         void SetJobReferenceStat(PlayerStatType type, StatValue value);
         void SetRecoveryStat(RecoveryStatType type, StatValue value);
@@ -64,7 +62,6 @@ namespace sunlight
         auto Mutable(PlayerStatType type) -> Stat&;
 
     private:
-        bool _dead = false;
         int8_t _gender = 0;
         int32_t _level = 0;
         int32_t _exp = 0;

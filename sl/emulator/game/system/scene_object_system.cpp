@@ -364,7 +364,7 @@ namespace sunlight
                     return;
                 }
 
-                if (player.GetStatComponent().IsDead())
+                if (player.IsDead())
                 {
                     visited.Send(ZonePacketS2CCreator::CreateObjectLeave(player));
                 }

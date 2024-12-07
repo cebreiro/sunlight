@@ -70,6 +70,7 @@ namespace sunlight::db::sp
             character.skinColor = static_cast<int32_t>(row.at(index++).as_int64());
             character.arms = static_cast<int8_t>(row.at(index++).as_int64());
             character.running = static_cast<int8_t>(row.at(index++).as_int64());
+            character.dead = static_cast<int8_t>(row.at(index++).as_int64());
             character.gold = static_cast<int32_t>(row.at(index++).as_int64());
             character.inventoryPage = static_cast<int8_t>(row.at(index++).as_int64());
             character.zone = static_cast<int32_t>(row.at(index++).as_int64());;
