@@ -69,7 +69,7 @@ namespace sunlight
             int8_t refusePartyInvite, int8_t refuseChannelInvite, int8_t refuseGuildInvite, int8_t privateProfile,
             std::string age, std::string sex, std::string mail, std::string message) -> Future<bool>;
 
-        auto SaveState(int64_t cid, int32_t zone, int32_t stage, float x, float y, float yaw, int8_t arms, int8_t running, int32_t hp, int32_t sp) -> Future<bool>;
+        auto SaveState(int64_t cid, int32_t zone, int32_t stage, float x, float y, float yaw, int8_t arms, int8_t running, int8_t dead, int32_t hp, int32_t sp) -> Future<bool>;
 
         auto StartTransaction(db::ItemTransaction transaction) -> Future<bool>;
 

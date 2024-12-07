@@ -3,7 +3,7 @@
 namespace sunlight::db::sp
 {
     CharacterStateSave::CharacterStateSave(ConnectionPool::Borrowed& conn, int64_t cid, int32_t zone, int32_t stage,
-        float x, float y, float yaw, int8_t arms, int8_t running, int32_t hp, int32_t sp)
+        float x, float y, float yaw, int8_t arms, int8_t running, int8_t dead, int32_t hp, int32_t sp)
         : StoredProcedure(conn)
         , _cid(cid)
         , _zone(zone)
@@ -13,6 +13,7 @@ namespace sunlight::db::sp
         , _yaw(yaw)
         , _arms(arms)
         , _running(running)
+        , _dead(dead)
         , _hp(hp)
         , _sp(sp)
     {
@@ -20,7 +21,7 @@ namespace sunlight::db::sp
 
     auto CharacterStateSave::GetSQL() const -> std::string_view
     {
-        return "CALL character_state_save(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return "CALL character_state_save(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
     auto CharacterStateSave::GetInput() const -> boost::container::small_vector<boost::mysql::field, 16>
@@ -34,6 +35,7 @@ namespace sunlight::db::sp
         inputs.emplace_back(_yaw);
         inputs.emplace_back(_arms);
         inputs.emplace_back(_running);
+        inputs.emplace_back(_dead);
         inputs.emplace_back(_hp);
         inputs.emplace_back(_sp);
 

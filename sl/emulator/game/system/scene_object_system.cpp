@@ -603,6 +603,13 @@ namespace sunlight
 
         player.Defer(GamePlayerMessageCreator::CreateAllState(player));
         player.Defer(GamePlayerMessageCreator::CreateQuestAllState(player));
+
+        // TODO: find 'dead' field in 'GamePlayerMessageCreator::CreateAllState'
+        if (player.IsDead())
+        {
+            player.Defer(SceneObjectPacketCreator::CreateState(player, GameEntityState{ .type = GameEntityStateType::Dying }));
+        }
+
         player.FlushDeferred();
     }
 

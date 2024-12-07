@@ -376,12 +376,13 @@ namespace sunlight
         const int32_t sp = statComponent.GetFinalStat(RecoveryStatType::SP).As<int32_t>();
         const int8_t isArmed = player.IsArmed() ? 1 : 0;
         const int8_t isRunning = player.IsRunning() ? 1 : 0;
+        const int8_t isDead = player.IsDead() ? 1 : 0;
 
         auto task = std::make_shared<Task>();
         task->resources.emplace_back(player.GetCId());
-        task->operation = [this, cid = player.GetCId(), zone, stage, x, y, yaw, isArmed, isRunning, hp, sp]() -> Future<bool>
+        task->operation = [this, cid = player.GetCId(), zone, stage, x, y, yaw, isArmed, isRunning, isDead, hp, sp]() -> Future<bool>
             {
-                return _serviceLocator.Get<DatabaseService>().SaveState(cid, zone, stage, x, y, yaw, isArmed, isRunning, hp, sp);
+                return _serviceLocator.Get<DatabaseService>().SaveState(cid, zone, stage, x, y, yaw, isArmed, isRunning, isDead, hp, sp);
             };
 
         Schedule(task);

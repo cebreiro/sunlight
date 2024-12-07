@@ -7,7 +7,7 @@ namespace sunlight::db::sp
     {
     public:
         CharacterStateSave(ConnectionPool::Borrowed& conn, int64_t cid, int32_t zone, int32_t stage,
-            float x, float y, float yaw, int8_t arms, int8_t running, int32_t hp, int32_t sp);
+            float x, float y, float yaw, int8_t arms, int8_t running, int8_t dead, int32_t hp, int32_t sp);
 
     private:
         auto GetSQL() const -> std::string_view override;
@@ -23,6 +23,7 @@ namespace sunlight::db::sp
         float _yaw = 0.f;
         int8_t _arms = 0;
         int8_t _running = 0;
+        int8_t _dead = 0;
         int32_t _hp = 0;
         int32_t _sp = 0;
     };
