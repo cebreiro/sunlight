@@ -38,6 +38,7 @@ bin/
 obj/
 logs/
 cheat/
+asset/
 
 # Config
 *.config
