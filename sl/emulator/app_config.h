@@ -8,6 +8,7 @@ namespace sunlight
         std::string gameConfigFilePath;
         std::string cheatLogPath;
         std::string assetPath;
+        std::string scriptPath;
 
         friend void from_json(const nlohmann::json& j, PathConfig& config);
     };

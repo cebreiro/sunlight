@@ -28,10 +28,10 @@ namespace sunlight
         return "game_data_provide_service";
     }
 
-    void GameDataProvideService::Initialize(const std::filesystem::path& assetPath)
+    void GameDataProvideService::Initialize(const std::filesystem::path& assetPath, const std::filesystem::path& scriptPath)
     {
         _assertPath = assetPath;
-        _scriptPath = assetPath / "Script";
+        _scriptPath = scriptPath;
 
         _assetDataProvider = std::make_shared<AssetDataProvider>(assetPath / "Soda.dat");
         _mapDataProvider = std::make_shared<MapDataProvider>(_serviceLocator, assetPath / "Zone");

@@ -8,6 +8,7 @@ namespace sunlight
         config.gameConfigFilePath = j.at("game_config_file_path").get<std::string>();
         config.cheatLogPath = j.at("cheat_log_path").get<std::string>();
         config.assetPath = j.at("asset_path").get<std::string>();
+        config.scriptPath = j.at("scriptPath").get<std::string>();
     }
 
     void from_json(const nlohmann::json& j, DatabaseConfig& config)

@@ -264,7 +264,13 @@ namespace sunlight
             throw std::runtime_error(fmt::format("fail to find asset path. path: {}", assetPath.string()));
         }
 
-        _gameDataProvideService->Initialize(assetPath);
+        const std::filesystem::path scriptPath = _basePath / _appConfig.pathConfig.scriptPath;
+        if (!exists(scriptPath))
+        {
+            throw std::runtime_error(fmt::format("fail to find script path. path: {}", scriptPath.string()));
+        }
+
+        _gameDataProvideService->Initialize(assetPath, scriptPath);
 
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize game data --> Done", GetName()));

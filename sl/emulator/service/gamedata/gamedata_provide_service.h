@@ -29,7 +29,7 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
 
     public:
-        void Initialize(const std::filesystem::path& assetPath);
+        void Initialize(const std::filesystem::path& assetPath, const std::filesystem::path& scriptPath);
 
         auto GetAssetPath() const -> const std::filesystem::path&;
         auto GetScriptPath() const -> const std::filesystem::path&;
