@@ -38,6 +38,11 @@ namespace sunlight
         return false;
     }
 
+    bool GameMonster::IsDead() const
+    {
+        return _dead;
+    }
+
     auto GameMonster::GetDataId() const -> int32_t
     {
         return _data.GetId();
@@ -66,6 +71,11 @@ namespace sunlight
     auto GameMonster::GetChaseSpeed() const -> float
     {
         return static_cast<float>(GetData().GetBase().speedChase) / 100.f;
+    }
+
+    void GameMonster::SetDead(bool value)
+    {
+        _dead = value;
     }
 
     auto GameMonster::GetSceneObjectComponent() -> SceneObjectComponent&

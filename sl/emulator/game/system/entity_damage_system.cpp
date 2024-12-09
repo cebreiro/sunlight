@@ -141,8 +141,7 @@ namespace sunlight
 
     void EntityDamageSystem::ProcessPlayerNormalAttack(GamePlayer& player, GameMonster& target, int32_t attackId, WeaponClassType weaponClass, const sox::MotionData& motionData)
     {
-        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
-        if (monsterStatComponent.IsDead())
+        if (target.IsDead())
         {
             return;
         }
@@ -172,8 +171,7 @@ namespace sunlight
     void EntityDamageSystem::ProcessPlayerSkillEffect(GamePlayer& player, GameMonster& target, const PlayerSkill& skill,
         const SkillEffectData& effect, int32_t attackId, int32_t chargeCount, WeaponClassType weaponClass, const AbilityValue* abilityValue)
     {
-        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
-        if (monsterStatComponent.IsDead())
+        if (target.IsDead())
         {
             return;
         }
@@ -323,8 +321,7 @@ namespace sunlight
 
     void EntityDamageSystem::ProcessPlayerDamageResult(GamePlayer& player, GameMonster& target, int32_t damage, const DamageResult* result)
     {
-        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
-        if (monsterStatComponent.IsDead())
+        if (target.IsDead())
         {
             return;
         }
@@ -338,6 +335,8 @@ namespace sunlight
                 return;
             }
         }
+
+        MonsterStatComponent& monsterStatComponent = target.GetStatComponent();
 
         const int32_t currentHP = monsterStatComponent.GetHP().As<int32_t>();
         const int32_t newHP = std::max(0, currentHP - damage);
@@ -471,8 +470,8 @@ namespace sunlight
             .type = GameEntityStateType::Dead,
         };
 
+        monster.SetDead(true);
         monster.GetStateComponent().SetState(newState);
-        monster.GetStatComponent().SetDead(true);
 
         DropMonsterItem(monster, &player);
 

@@ -430,8 +430,8 @@ namespace sunlight
             return;
         }
 
-        if (const auto* statComponent = target->FindComponent<MonsterStatComponent>();
-            !statComponent || statComponent->IsDead())
+        GameMonster& monster = *target->Cast<GameMonster>();
+        if (monster.IsDead() || !target->HasComponent<MonsterStatComponent>())
         {
             return;
         }
@@ -460,7 +460,7 @@ namespace sunlight
 
     void EntitySkillEffectSystem::ProcessMonsterNormalAttack(GameMonster& monster, GameEntity& target, int32_t attackIndex)
     {
-        if (monster.GetStatComponent().IsDead())
+        if (monster.IsDead())
         {
             return;
         }
@@ -534,7 +534,7 @@ namespace sunlight
                 EntityDamageSystem& entityDamageSystem = Get<EntityDamageSystem>();
                 GameMonster& monster = *entity->Cast<GameMonster>();
 
-                if (monster.GetStatComponent().IsDead())
+                if (monster.IsDead())
                 {
                     return;
                 }
@@ -556,7 +556,7 @@ namespace sunlight
 
     void EntitySkillEffectSystem::ProcessMonsterSkill(GameMonster& monster, GameEntity& target, const MonsterAttackData::Skill& attackData, int32_t attackIndex)
     {
-        if (monster.GetStatComponent().IsDead())
+        if (monster.IsDead())
         {
             return;
         }
@@ -602,7 +602,7 @@ namespace sunlight
 
         auto applySkillEffect = [this, skillData, skillLevel = attackData.level, skillTargets](GameMonster& monster, const AbilityValue* abilityValue) mutable
             {
-                if (monster.GetStatComponent().IsDead())
+                if (monster.IsDead())
                 {
                     return;
                 }

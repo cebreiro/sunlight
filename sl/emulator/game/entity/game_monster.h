@@ -34,6 +34,7 @@ namespace sunlight
             Eigen::Vector2f spawnPosition, const std::optional<GameMonsterSpawnerContext>& spawnContext);
 
         bool IsInvisible() const;
+        bool IsDead() const;
 
         auto GetDataId() const -> int32_t;
         auto GetData() const -> const MonsterData&;
@@ -42,6 +43,8 @@ namespace sunlight
 
         auto GetMoveSpeed() const -> float;
         auto GetChaseSpeed() const -> float;
+
+        void SetDead(bool value);
 
     public:
         auto GetSceneObjectComponent() -> SceneObjectComponent&;
@@ -65,5 +68,7 @@ namespace sunlight
         const MonsterData& _data;
         Eigen::Vector2f _spawnPosition;
         std::optional<GameMonsterSpawnerContext> _spawnerContext = std::nullopt;
+
+        bool _dead = false;
     };
 }

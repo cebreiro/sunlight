@@ -112,7 +112,8 @@ namespace sunlight
             return true;
         }
 
-        if (entity->GetComponent<MonsterStatComponent>().IsDead())
+        const GameMonster& monster = *entity->Cast<GameMonster>();
+        if (monster.IsDead())
         {
             return true;
         }
@@ -194,7 +195,7 @@ namespace sunlight
             }
 
             GameMonster& monster = *entity->Cast<GameMonster>();
-            if (monster.GetStatComponent().IsDead())
+            if (monster.IsDead())
             {
                 co_return;
             }

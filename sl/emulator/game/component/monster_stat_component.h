@@ -14,12 +14,9 @@ namespace sunlight
     public:
         explicit MonsterStatComponent(const sox::MonsterBase& data);
 
-        bool IsDead() const;
-
         auto GetData() const -> const sox::MonsterBase&;
         auto GetHP() const -> StatValue;
 
-        void SetDead(bool value);
         void SetHP(StatValue value);
 
     private:

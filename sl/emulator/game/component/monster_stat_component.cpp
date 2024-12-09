@@ -10,11 +10,6 @@ namespace sunlight
     {
     }
 
-    bool MonsterStatComponent::IsDead() const
-    {
-        return _dead;
-    }
-
     auto MonsterStatComponent::GetData() const -> const sox::MonsterBase&
     {
         return _data;
@@ -23,11 +18,6 @@ namespace sunlight
     auto MonsterStatComponent::GetHP() const -> StatValue
     {
         return _hp;
-    }
-
-    void MonsterStatComponent::SetDead(bool value)
-    {
-        _dead = value;
     }
 
     void MonsterStatComponent::SetHP(StatValue value)
