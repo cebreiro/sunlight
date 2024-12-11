@@ -9,6 +9,7 @@
 #include "sl/emulator/game/system/entity_ai_control_system.h"
 #include "sl/emulator/game/system/entity_damage_system.h"
 #include "sl/emulator/game/system/entity_movement_system.h"
+#include "sl/emulator/game/system/entity_status_effect_system.h"
 #include "sl/emulator/game/system/entity_view_range_system.h"
 #include "sl/emulator/game/system/item_archive_system.h"
 #include "sl/emulator/game/system/npc_shop_system.h"
@@ -43,6 +44,7 @@ namespace sunlight
         Add(stage.Get<EntityDamageSystem>());
         Add(stage.Get<EntityAIControlSystem>());
         Add(stage.Get<PlayerQuestSystem>());
+        Add(stage.Get<EntityStatusEffectSystem>());
 
         if (PathFindingSystem* pathFindSystem = stage.Find<PathFindingSystem>();
             pathFindSystem)

@@ -68,5 +68,7 @@ namespace sunlight
         system.AddCommand(std::make_shared<ServerCommandGoldAdd>(system));
 
         system.AddCommand(std::make_shared<ServerCommandQueryNesCaller>(system));
+
+        system.AddCommand(std::make_shared<ServerCommandStatusEffectPlayerAdd>(system));
     }
 }
