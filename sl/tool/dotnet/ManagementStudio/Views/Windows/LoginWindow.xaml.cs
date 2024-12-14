@@ -7,8 +7,6 @@ namespace Sunlight.ManagementStudio.Views.Windows;
 
 public partial class LoginWindow
 {
-    private bool _isThemeChangeSubscribed = false;
-
     public LoginViewModel ViewModel { get; init; }
 
     public LoginWindow(LoginViewModel viewModel, IServiceProvider serviceProvider)
@@ -17,34 +15,20 @@ public partial class LoginWindow
         DataContext = this;
 
         InitializeComponent();
-
-        SystemThemeWatcher.Watch(this);
     }
 
-    private void LoginWindow_OnActivated(object? sender, EventArgs e)
+    private void LoginWindow_OnInitialized(object? sender, EventArgs e)
     {
-        if (!_isThemeChangeSubscribed)
-        {
-            _isThemeChangeSubscribed = true;
-
-            ApplicationThemeManager.Changed += OnApplicationThemeChanged;
-        }
+        ApplicationThemeManager.Changed += OnApplicationThemeChanged;
     }
 
     private void LoginWindow_OnClosed(object? sender, EventArgs e)
     {
-        if (_isThemeChangeSubscribed)
-        {
-            _isThemeChangeSubscribed = false;
-
-            ApplicationThemeManager.Changed -= OnApplicationThemeChanged;
-        }
+        ApplicationThemeManager.Changed -= OnApplicationThemeChanged;
     }
 
     private void OnApplicationThemeChanged(ApplicationTheme theme, Color systemAccent)
     {
-        System.Diagnostics.Debug.Assert(_isThemeChangeSubscribed);
-
         WindowBackgroundManager.UpdateBackground(this, theme, WindowBackdropType.Mica);
     }
 }

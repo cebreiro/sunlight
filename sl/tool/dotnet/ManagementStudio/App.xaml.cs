@@ -38,8 +38,8 @@ public partial class App
 
                 _ = services.AddSingleton<HomePage>();
 
-                _ = services.AddSingleton<LoginViewModel>();
-                _ = services.AddSingleton<LoginWindow>();
+                _ = services.AddTransient<LoginViewModel>();
+                _ = services.AddTransient<LoginWindow>();
 
             })
             .Build();

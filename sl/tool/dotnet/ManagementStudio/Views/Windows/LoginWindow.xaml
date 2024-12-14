@@ -7,18 +7,87 @@
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  mc:Ignorable="d"
                  Width="400"
-                 Height="200"
+                 Height="300"
                  d:DesignWidth="400"
-                 d:DesignHeight="200"
+                 d:DesignHeight="300"
                  ResizeMode="NoResize"
+                 WindowStyle="None"
                  WindowCornerPreference="Round"
                  WindowStartupLocation="CenterOwner"
-                 Activated="LoginWindow_OnActivated"
+                 Initialized="LoginWindow_OnInitialized"
                  Closed="LoginWindow_OnClosed"
                  >
-    <Grid>
-        <ui:TitleBar Title="LoginWindow"
+    <Window.Resources>
+
+        <Style x:Key="LoginWindowTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+    </Window.Resources>
+
+    <StackPanel>
+        <ui:TitleBar Title="Connect to Sunlight Server"
                      ShowMinimize="False"
                      ShowMaximize="False" />
-    </Grid>
+        <Grid Margin="30, 20, 30, 30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="IP" />
+            <TextBlock Grid.Row="0"  Grid.Column="2" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Port" />
+            <TextBlock Grid.Row="1"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Id" />
+            <TextBlock Grid.Row="2"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Password" />
+
+
+            <ui:TextBox  Grid.Row="0"  Grid.Column="1"
+                         Margin="10, 10, 10, 10"
+                         MaxHeight="33"
+                         IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
+                         Text="{Binding ViewModel.Ip}"
+                         />
+            <ui:TextBox Grid.Row="0" Grid.Column="3"
+                        Margin="10, 10, 10, 10"
+                        MaxHeight="33"
+                        IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
+                        Text="{Binding ViewModel.Port}"/>
+            <ui:TextBox  Grid.Row="1"  Grid.Column="1"
+                         Margin="10, 10, 10, 10"
+                         MaxHeight="33"
+                         IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
+                         Text="{Binding ViewModel.Id}"/>
+            <ui:PasswordBox Grid.Row="2"  Grid.Column="1"
+                            Icon="Password24"
+                            Margin="10, 10, 10, 10"
+                            MaxHeight="33"
+                            IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
+                            x:Name="PasswordBox"/>
+
+            <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <ui:Button Content="Connect"
+                           Margin="0, 10, 10, 10"
+                           MaxHeight="33"
+                           IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
+                           Command="{Binding ViewModel.ConnectButtonClickedCommand}"
+                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+            </StackPanel>
+
+        </Grid>
+    </StackPanel>
+
 </ui:FluentWindow>

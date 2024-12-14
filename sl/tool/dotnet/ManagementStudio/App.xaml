@@ -16,6 +16,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <helpers:ThemeToIndexConverter x:Key="ThemeToIndexConverter" />
+            <helpers:InverseBooleanConverter x:Key="InverseBooleanConverter" />
 
         </ResourceDictionary>
     </Application.Resources>
