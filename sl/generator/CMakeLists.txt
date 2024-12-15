@@ -18,3 +18,5 @@ file(GLOB_RECURSE CEBREIRO_SL_GENERATOR_SRC_FILES CONFIGURE_DEPENDS
 )
 
 target_sources(cebreiro_sl_generator PRIVATE ${CEBREIRO_SL_GENERATOR_SRC_FILES})
+
+set_target_properties(cebreiro_sl_generator PROPERTIES OUTPUT_NAME "SunlightGenerator")
