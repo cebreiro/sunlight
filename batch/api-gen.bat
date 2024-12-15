@@ -1,0 +1,14 @@
+"../third_party/protoc-29.0-win64/bin/protoc.exe" ^
+--proto_path=../sl/generator/api/ ^
+--cpp_out=../sl/generator/api/generated/ ^
+request.proto ^
+response.proto
+
+"../third_party/protoc-29.0-win64/bin/protoc.exe" ^
+--proto_path=../sl/generator/api/ ^
+--csharp_out=../sl/tool/dotnet/ManagementStudio/Models/Controller/Message/ ^
+request.proto ^
+response.proto 
+
+
+pause

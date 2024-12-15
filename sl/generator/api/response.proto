@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package sunlight;
+
+message AuthenticationResponse
+{
+    int32 success = 1;
+}
+
+message Response
+{
+    int32 request_id = 1;
+
+    oneof payload
+    {
+        AuthenticationResponse authentication = 100;
+    }
+}

@@ -6,6 +6,7 @@ target_link_libraries(cebreiro_sl_pch PUBLIC
     cebreiro_shared
     nlohmann_json
     nlohmann_json::nlohmann_json
+    protobuf::libprotobuf
 )
 
 target_precompile_headers(cebreiro_sl_pch PUBLIC

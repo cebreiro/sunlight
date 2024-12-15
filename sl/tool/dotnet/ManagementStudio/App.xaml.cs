@@ -3,6 +3,8 @@ using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sunlight.ManagementStudio.Helpers;
+using Sunlight.ManagementStudio.Models.Controller;
+using Sunlight.ManagementStudio.Models.Controller.Tcp;
 using Sunlight.ManagementStudio.Models.Setting;
 using Sunlight.ManagementStudio.ViewModels.Pages;
 using Sunlight.ManagementStudio.ViewModels.Windows;
@@ -29,6 +31,8 @@ public partial class App
                 _ = services.AddSingleton<INavigationService, NavigationService>();
                 _ = services.AddSingleton<ISnackbarService, SnackbarService>();
                 _ = services.AddSingleton<IContentDialogService, ContentDialogService>();
+
+                _ = services.AddSingleton<ISunlightController, SunlightTcpController>();
 
                 _ = services.AddSingleton<MainWindowViewModel>();
                 _ = services.AddSingleton<MainWindow>();

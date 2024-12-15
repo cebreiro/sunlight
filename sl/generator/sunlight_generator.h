@@ -17,6 +17,7 @@ namespace sunlight
     class SnowflakeService;
     class UniqueNameService;
     class GameCheatLogService;
+    class GeneratorControlService;
 }
 
 namespace sunlight
@@ -83,6 +84,7 @@ namespace sunlight
         SharedPtrNotNull<SnowflakeService> _snowflakeService;
         SharedPtrNotNull<UniqueNameService> _uniqueNameService;
         SharedPtrNotNull<GameCheatLogService> _gameCheatLogService;
+        SharedPtrNotNull<GeneratorControlService> _generatorControlService;
 
         SharedPtrNotNull<AuthenticationService> _authenticationService;
         SharedPtrNotNull<DatabaseService> _databaseService;

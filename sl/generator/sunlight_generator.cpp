@@ -6,14 +6,15 @@
 #include "shared/execution/executor/impl/asio_executor.h"
 #include "shared/execution/executor/impl/game_executor.h"
 #include "shared/log/spdlog/spdlog_logger_builder.h"
-#include "sl/generator/server/login_server.h"
 #include "sl/generator/server/lobby_server.h"
+#include "sl/generator/server/login_server.h"
 #include "sl/generator/server/server_constant.h"
 #include "sl/generator/server/zone_server.h"
 #include "sl/generator/server/client/game_client_storage.h"
 #include "sl/generator/service/authentication/authentication_service.h"
 #include "sl/generator/service/community/community_service.h"
 #include "sl/generator/service/config/config_provide_service.h"
+#include "sl/generator/service/control/generator_control_service.h"
 #include "sl/generator/service/database/database_service.h"
 #include "sl/generator/service/gamedata/gamedata_provide_service.h"
 #include "sl/generator/service/game_cheat_log/game_cheat_log_service.h"
@@ -45,6 +46,7 @@ namespace sunlight
         , _snowflakeService(std::make_shared<SnowflakeService>(GetServiceLocator(), *_ioExecutor))
         , _uniqueNameService(std::make_shared<UniqueNameService>(GetServiceLocator(), *_ioExecutor))
         , _gameCheatLogService(std::make_shared<GameCheatLogService>(GetServiceLocator(), *_ioExecutor))
+        , _generatorControlService(std::make_shared<GeneratorControlService>(GetServiceLocator(), *_ioExecutor))
         , _authenticationService(std::make_shared<AuthenticationService>(GetServiceLocator(), *_ioExecutor))
         , _databaseService(std::make_shared<DatabaseService>(GetServiceLocator(), *_ioExecutor, _connectionPool))
         , _gatewayService(std::make_shared<GatewayService>(GetServiceLocator(), *_ioExecutor))
@@ -60,6 +62,7 @@ namespace sunlight
         RegisterService(_snowflakeService);
         RegisterService(_uniqueNameService);
         RegisterService(_gameCheatLogService);
+        RegisterService(_generatorControlService);
 
         RegisterService(_authenticationService);
         RegisterService(_databaseService);
@@ -297,6 +300,8 @@ namespace sunlight
         }
 
         _uniqueNameService->InitializeName(*_databaseService).Get();
+
+        _generatorControlService->StartGatewayServer(8989);
 
         SUNLIGHT_LOG_INFO(GetServiceLocator(),
             fmt::format("[{}] initialize service --> Done", GetName()));
