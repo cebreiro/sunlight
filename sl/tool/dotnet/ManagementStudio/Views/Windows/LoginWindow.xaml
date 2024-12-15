@@ -23,20 +23,22 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="5, 20, 0, 10"/>
         </Style>
 
     </Window.Resources>
 
     <StackPanel>
-        <ui:TitleBar Title="Connect to Sunlight Server"
+        <ui:TitleBar Title="Connect to Sunlight Generator"
+                     Height="33"
                      ShowMinimize="False"
                      ShowMaximize="False" />
-        <Grid Margin="30, 20, 30, 30">
+        <Grid Margin="20, 20, 20, 20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="2.1*"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
@@ -47,38 +49,43 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="IP" />
+            <TextBlock Grid.Row="0"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Address" />
             <TextBlock Grid.Row="0"  Grid.Column="2" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Port" />
             <TextBlock Grid.Row="1"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Id" />
             <TextBlock Grid.Row="2"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Password" />
 
 
             <ui:TextBox  Grid.Row="0"  Grid.Column="1"
-                         Margin="10, 10, 10, 10"
+                         Margin="10, 20, 10, 10"
                          MaxHeight="33"
                          IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
-                         Text="{Binding ViewModel.Ip}"
+                         Text="{Binding ViewModel.Address}"
                          />
             <ui:TextBox Grid.Row="0" Grid.Column="3"
-                        Margin="10, 10, 10, 10"
+                        Margin="10, 20, 5, 10"
                         MaxHeight="33"
+                        PreviewTextInput="OnPortTextBoxPreviewTextInput"
                         IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
                         Text="{Binding ViewModel.Port}"/>
             <ui:TextBox  Grid.Row="1"  Grid.Column="1"
-                         Margin="10, 10, 10, 10"
+                         Margin="10, 20, 10, 10"
                          MaxHeight="33"
                          IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
                          Text="{Binding ViewModel.Id}"/>
             <ui:PasswordBox Grid.Row="2"  Grid.Column="1"
                             Icon="Password24"
-                            Margin="10, 10, 10, 10"
+                            Margin="10, 20, 10, 10"
                             MaxHeight="33"
                             IsEnabled="{Binding ViewModel.IsPendingConnection, Converter={StaticResource InverseBooleanConverter}}"
                             x:Name="PasswordBox"/>
 
             <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4"
+                        Margin="0, 5, 0, 0"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
+                <ui:Button Content="Save"
+                           Margin="0, 10, 15, 10"
+                           MaxHeight="33" />
                 <ui:Button Content="Connect"
                            Margin="0, 10, 10, 10"
                            MaxHeight="33"

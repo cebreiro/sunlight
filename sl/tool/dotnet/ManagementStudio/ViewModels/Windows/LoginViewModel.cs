@@ -11,8 +11,8 @@ public partial class LoginViewModel(IServiceProvider serviceProvider) : Observab
 {
     [ObservableProperty]
     private bool _isPendingConnection = false;
-    public string Ip { get; set; } = string.Empty;
-    public string Port { get; set; } = string.Empty;
+    public string Address { get; set; } = "127.0.0.1";
+    public string Port { get; set; } = "9876";
     public string Id { get; set; } = string.Empty;
 
     [RelayCommand]
