@@ -4,10 +4,15 @@
 
 namespace sunlight
 {
-    GeneratorControlService::GeneratorControlService(const ServiceLocator& serviceLocator, execution::AsioExecutor& executor)
+    GeneratorControlService::GeneratorControlService(ServiceLocator& serviceLocator, execution::AsioExecutor& executor)
         : _serviceLocator(serviceLocator)
         , _apiGatewayServer(std::make_shared<GeneratorControlAPIGatewayServer>(executor))
     {
+    }
+
+    void GeneratorControlService::Initialize()
+    {
+        _apiGatewayServer->Initialize(_serviceLocator);
     }
 
     void GeneratorControlService::StartGatewayServer(uint16_t port)

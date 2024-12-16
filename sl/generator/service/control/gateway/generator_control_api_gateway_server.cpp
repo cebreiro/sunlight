@@ -4,12 +4,16 @@
 #include "shared/network/session/session.h"
 #include "sl/generator/api/generated/request.pb.h"
 #include "sl/generator/api/generated/response.pb.h"
+#include "sl/generator/service/control/gateway/generator_control_api_gateway_connection.h"
 #include "sl/generator/service/control/gateway/zero_copy_input_stream.h"
+#include "sl/generator/service/control/gateway/handler/generator_control_reqeust_router.h"
+#include "sl/generator/service/control/gateway/handler/impl/generator_control_reqeust_handler.hpp"
 
 namespace sunlight
 {
     GeneratorControlAPIGatewayServer::GeneratorControlAPIGatewayServer(execution::AsioExecutor& executor)
         : Server(std::string(GetName()), executor)
+        , _router(std::make_shared<GeneratorControlRequestRouter>())
     {
     }
 
@@ -18,15 +22,21 @@ namespace sunlight
         Server::Initialize(serviceLocator);
 
         _serviceLocator = serviceLocator;
+
+        auto a = std::make_shared<GeneratorControlAuthenticationHandler>(_serviceLocator);
+
+        static_assert(std::derived_from<GeneratorControlAuthenticationHandler, GeneratorControlRequestHandlerT<api::AuthenticationRequest>>);
+
+        AddHandlerToRouter(a);
     }
 
     void GeneratorControlAPIGatewayServer::OnAccept(Session& session)
     {
         auto strand = std::make_shared<Strand>(GetExecutor().SharedFromThis());
 
-        auto connection = std::make_shared<Connection>();
+        auto connection = std::make_shared<GeneratorControlAPIGatewayConnection>();
         connection->strand = strand;
-        connection->state = Connection::State::Connected;
+        connection->state = GeneratorControlAPIGatewayConnection::State::Connected;
         connection->session = session.shared_from_this();
         connection->level = -1;
 
@@ -48,14 +58,14 @@ namespace sunlight
         Delay(std::chrono::seconds(3)).Then(*strand,
             [holder = shared_from_this(), this, id = session.GetId()]()
             {
-                const SharedPtrNotNull<Connection>& connection = FindConnection(id);
+                const SharedPtrNotNull<GeneratorControlAPIGatewayConnection>& connection = FindConnection(id);
 
                 if (!connection)
                 {
                     return;
                 }
 
-                if (connection->state == Connection::State::Connected)
+                if (connection->state == GeneratorControlAPIGatewayConnection::State::Connected)
                 {
                     connection->session->Close();
                 }
@@ -64,7 +74,7 @@ namespace sunlight
 
     void GeneratorControlAPIGatewayServer::OnReceive(Session& session, Buffer buffer)
     {
-        const SharedPtrNotNull<Connection>& connection = FindConnection(session.GetId());
+        const SharedPtrNotNull<GeneratorControlAPIGatewayConnection>& connection = FindConnection(session.GetId());
 
         Post(*connection->strand, [holder = shared_from_this(), this, connection, buffer = std::move(buffer)]() mutable
             {
@@ -105,32 +115,28 @@ namespace sunlight
                 ZeroCopyInputStream inputStream(packetBuffer);
                 google::protobuf::io::CodedInputStream codedInputStream(&inputStream);
 
-                // temp test code
                 api::Request request;
 
                 if (request.ParseFromCodedStream(&codedInputStream))
                 {
-                    api::Response response;
-                    response.set_request_id(request.request_id());
+                    const int32_t requestId = request.request_id();
 
-                    api::AuthenticationResponse* authentication = response.mutable_authentication();
-                    authentication->set_success(false);
+                    _router->Route(connection, std::move(request)).ContinuationWith(GetExecutor(),
+                        [holder = std::move(holder), this, requestId, connection](Future<void>& future)
+                        {
+                            try
+                            {
+                                future.Get();
+                            }
+                            catch (const std::exception& e)
+                            {
+                                SUNLIGHT_LOG_ERROR(_serviceLocator,
+                                    fmt::format("[{}] fail to handle request. session: {}, request_id: {}, exception: {}",
+                                        GetName(), connection->session->GetId(), requestId, e.what()));
 
-                    const int32_t bodySize = static_cast<int32_t>(response.ByteSizeLong());
-
-                    buffer::Fragment body = buffer::Fragment::Create(bodySize);
-                    response.SerializeToArray(body.GetData(), bodySize);
-
-                    Buffer sendBuffer;
-                    sendBuffer.Add(buffer::Fragment::Create(4));
-                    sendBuffer.Add(std::move(body));
-
-                    BufferWriter writer(sendBuffer);
-                    writer.Write<int32_t>(bodySize + 4);
-
-                    connection->session->Send(std::move(sendBuffer));
-
-                    SUNLIGHT_LOG_INFO(_serviceLocator, fmt::format("[{}] parse success", GetName()));
+                                connection->session->Close();
+                            }
+                        });
                 }
                 else
                 {
@@ -154,7 +160,7 @@ namespace sunlight
         return "generator_control_server";
     }
 
-    auto GeneratorControlAPIGatewayServer::FindConnection(session::id_type id) -> SharedPtrNotNull<Connection>
+    auto GeneratorControlAPIGatewayServer::FindConnection(session::id_type id) -> SharedPtrNotNull<GeneratorControlAPIGatewayConnection>
     {
         decltype(_connections)::const_accessor accessor;
 
@@ -166,7 +172,7 @@ namespace sunlight
         return {};
     }
 
-    auto GeneratorControlAPIGatewayServer::FindConnection(session::id_type id) const -> SharedPtrNotNull<const Connection>
+    auto GeneratorControlAPIGatewayServer::FindConnection(session::id_type id) const -> SharedPtrNotNull<const GeneratorControlAPIGatewayConnection>
     {
         decltype(_connections)::const_accessor accessor;
 
@@ -176,5 +182,17 @@ namespace sunlight
         }
 
         return {};
+    }
+
+    template <typename T>
+    void GeneratorControlAPIGatewayServer::AddHandlerToRouter(SharedPtrNotNull<T> handler)
+    {
+        static_assert(std::derived_from<T, IGeneratorControlRequestHandler>);
+
+        [[maybe_unused]]
+        const bool added = _router->AddHandler(std::dynamic_pointer_cast<GeneratorControlRequestHandlerT<typename T::request_type>>(handler));
+        assert(added);
+
+        _handlers.emplace_back(std::move(handler));
     }
 }

@@ -301,6 +301,7 @@ namespace sunlight
 
         _uniqueNameService->InitializeName(*_databaseService).Get();
 
+        _generatorControlService->Initialize();
         _generatorControlService->StartGatewayServer(8989);
 
         SUNLIGHT_LOG_INFO(GetServiceLocator(),

@@ -3,6 +3,14 @@
 
 namespace sunlight
 {
+    struct GeneratorControlAPIGatewayConnection;
+
+    class GeneratorControlRequestRouter;
+    class IGeneratorControlRequestHandler;
+}
+
+namespace sunlight
+{
     class GeneratorControlAPIGatewayServer final : public Server
     {
     public:
@@ -18,30 +26,19 @@ namespace sunlight
         static auto GetName() -> std::string_view;
 
     private:
-        struct Connection
-        {
-            enum class State
-            {
-                Connected,
-                Authenticated,
-            };
+        auto FindConnection(session::id_type id) -> SharedPtrNotNull<GeneratorControlAPIGatewayConnection>;
+        auto FindConnection(session::id_type id) const ->SharedPtrNotNull<const GeneratorControlAPIGatewayConnection>;
 
-            SharedPtrNotNull<Strand> strand;
-
-            State state = State::Connected;
-            SharedPtrNotNull<Session> session;
-
-            int32_t level = 0;
-
-            Buffer receiveBuffer;
-        };
-
-        auto FindConnection(session::id_type id) -> SharedPtrNotNull<Connection>;
-        auto FindConnection(session::id_type id) const ->SharedPtrNotNull<const Connection>;
+    private:
+        template <typename T>
+        void AddHandlerToRouter(SharedPtrNotNull<T> handler);
 
     private:
         ServiceLocator _serviceLocator;
 
-        tbb::concurrent_hash_map<session::id_type, SharedPtrNotNull<Connection>> _connections;
+        tbb::concurrent_hash_map<session::id_type, SharedPtrNotNull<GeneratorControlAPIGatewayConnection>> _connections;
+
+        SharedPtrNotNull<GeneratorControlRequestRouter> _router;
+        std::vector<SharedPtrNotNull<IGeneratorControlRequestHandler>> _handlers;
     };
 }

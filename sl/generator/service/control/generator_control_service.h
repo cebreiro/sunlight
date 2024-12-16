@@ -18,8 +18,9 @@ namespace sunlight
     {
     public:
         GeneratorControlService() = delete;
-        GeneratorControlService(const ServiceLocator& serviceLocator, execution::AsioExecutor& executor);
+        GeneratorControlService(ServiceLocator& serviceLocator, execution::AsioExecutor& executor);
 
+        void Initialize();
         void StartGatewayServer(uint16_t port);
 
         auto Authenticate(std::string id, std::string password) -> Future<std::optional<int32_t>>;
@@ -27,7 +28,7 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
 
     private:
-        const ServiceLocator& _serviceLocator;
+        ServiceLocator& _serviceLocator;
 
         SharedPtrNotNull<GeneratorControlAPIGatewayServer> _apiGatewayServer;
     };
