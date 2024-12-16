@@ -17,6 +17,14 @@ public partial class LoginWindow
         DataContext = this;
 
         InitializeComponent();
+
+        Closed += ((sender, args) =>
+        {
+            if (viewModel is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        });
     }
 
     private void LoginWindow_OnInitialized(object? sender, EventArgs e)

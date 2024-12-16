@@ -5,12 +5,14 @@ using Microsoft.Extensions.Hosting;
 using Sunlight.ManagementStudio.Helpers;
 using Sunlight.ManagementStudio.Models.Controller;
 using Sunlight.ManagementStudio.Models.Controller.Tcp;
+using Sunlight.ManagementStudio.Models.Event;
 using Sunlight.ManagementStudio.Models.Setting;
 using Sunlight.ManagementStudio.ViewModels.Pages;
 using Sunlight.ManagementStudio.ViewModels.Windows;
 using Sunlight.ManagementStudio.Views.Pages;
 using Sunlight.ManagementStudio.Views.Windows;
 using Wpf.Ui;
+using EventManager = Sunlight.ManagementStudio.Models.Event.EventManager;
 
 namespace Sunlight.ManagementStudio;
 
@@ -33,6 +35,9 @@ public partial class App
                 _ = services.AddSingleton<IContentDialogService, ContentDialogService>();
 
                 _ = services.AddSingleton<ISunlightController, SunlightTcpController>();
+                _ = services.AddSingleton<EventManager, EventManager>();
+                _ = services.AddSingleton<IEventProducer>(serviceProvider => serviceProvider.GetRequired<EventManager>());
+                _ = services.AddSingleton<IEventListener>(serviceProvider => serviceProvider.GetRequired<EventManager>());
 
                 _ = services.AddSingleton<MainWindowViewModel>();
                 _ = services.AddSingleton<MainWindow>();

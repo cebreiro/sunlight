@@ -1,10 +1,12 @@
 using System.Collections.Concurrent;
 using Nito.AsyncEx;
 using Sunlight.Api;
+using Sunlight.ManagementStudio.Models.Event;
+using Sunlight.ManagementStudio.Models.Event.Args;
 
 namespace Sunlight.ManagementStudio.Models.Controller.Tcp;
 
-public class SunlightTcpController : ISunlightController
+public class SunlightTcpController(IEventProducer eventProducer) : ISunlightController
 {
     private readonly AsyncLock _mutex = new();
 
@@ -135,5 +137,7 @@ public class SunlightTcpController : ISunlightController
         {
             handler.FailureHandler.Invoke();
         }
+
+        eventProducer.Produce(new DisconnectionEventArgs());
     }
 }
