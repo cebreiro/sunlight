@@ -1,3 +1,5 @@
+using Sunlight.Api;
+
 namespace Sunlight.ManagementStudio.Models.Controller;
 
 public interface ISunlightController

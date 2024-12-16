@@ -52,12 +52,14 @@ struct TableStruct_request_2eproto {
 extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_request_2eproto;
 namespace sunlight {
+namespace api {
 class AuthenticationRequest;
 struct AuthenticationRequestDefaultTypeInternal;
 extern AuthenticationRequestDefaultTypeInternal _AuthenticationRequest_default_instance_;
 class Request;
 struct RequestDefaultTypeInternal;
 extern RequestDefaultTypeInternal _Request_default_instance_;
+}  // namespace api
 }  // namespace sunlight
 namespace google {
 namespace protobuf {
@@ -65,6 +67,7 @@ namespace protobuf {
 }  // namespace google
 
 namespace sunlight {
+namespace api {
 
 // ===================================================================
 
@@ -73,7 +76,7 @@ namespace sunlight {
 
 class AuthenticationRequest final
     : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:sunlight.AuthenticationRequest) */ {
+/* @@protoc_insertion_point(class_definition:sunlight.api.AuthenticationRequest) */ {
  public:
   inline AuthenticationRequest() : AuthenticationRequest(nullptr) {}
   ~AuthenticationRequest() PROTOBUF_FINAL;
@@ -197,7 +200,7 @@ class AuthenticationRequest final
   template <typename T>
   friend ::absl::string_view(
       ::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "sunlight.AuthenticationRequest"; }
+  static ::absl::string_view FullMessageName() { return "sunlight.api.AuthenticationRequest"; }
 
  protected:
   explicit AuthenticationRequest(::google::protobuf::Arena* arena);
@@ -253,13 +256,13 @@ class AuthenticationRequest final
   std::string* _internal_mutable_password();
 
   public:
-  // @@protoc_insertion_point(class_scope:sunlight.AuthenticationRequest)
+  // @@protoc_insertion_point(class_scope:sunlight.api.AuthenticationRequest)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
       1, 2, 0,
-      49, 2>
+      53, 2>
       _table_;
 
   friend class ::google::protobuf::MessageLite;
@@ -288,7 +291,7 @@ class AuthenticationRequest final
 
 class Request final
     : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:sunlight.Request) */ {
+/* @@protoc_insertion_point(class_definition:sunlight.api.Request) */ {
  public:
   inline Request() : Request(nullptr) {}
   ~Request() PROTOBUF_FINAL;
@@ -416,7 +419,7 @@ class Request final
   template <typename T>
   friend ::absl::string_view(
       ::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "sunlight.Request"; }
+  static ::absl::string_view FullMessageName() { return "sunlight.api.Request"; }
 
  protected:
   explicit Request(::google::protobuf::Arena* arena);
@@ -450,28 +453,28 @@ class Request final
   void _internal_set_request_id(::int32_t value);
 
   public:
-  // .sunlight.AuthenticationRequest authentication = 100;
+  // .sunlight.api.AuthenticationRequest authentication = 100;
   bool has_authentication() const;
   private:
   bool _internal_has_authentication() const;
 
   public:
   void clear_authentication() ;
-  const ::sunlight::AuthenticationRequest& authentication() const;
-  PROTOBUF_NODISCARD ::sunlight::AuthenticationRequest* release_authentication();
-  ::sunlight::AuthenticationRequest* mutable_authentication();
-  void set_allocated_authentication(::sunlight::AuthenticationRequest* value);
-  void unsafe_arena_set_allocated_authentication(::sunlight::AuthenticationRequest* value);
-  ::sunlight::AuthenticationRequest* unsafe_arena_release_authentication();
+  const ::sunlight::api::AuthenticationRequest& authentication() const;
+  PROTOBUF_NODISCARD ::sunlight::api::AuthenticationRequest* release_authentication();
+  ::sunlight::api::AuthenticationRequest* mutable_authentication();
+  void set_allocated_authentication(::sunlight::api::AuthenticationRequest* value);
+  void unsafe_arena_set_allocated_authentication(::sunlight::api::AuthenticationRequest* value);
+  ::sunlight::api::AuthenticationRequest* unsafe_arena_release_authentication();
 
   private:
-  const ::sunlight::AuthenticationRequest& _internal_authentication() const;
-  ::sunlight::AuthenticationRequest* _internal_mutable_authentication();
+  const ::sunlight::api::AuthenticationRequest& _internal_authentication() const;
+  ::sunlight::api::AuthenticationRequest* _internal_mutable_authentication();
 
   public:
   void clear_payload();
   PayloadCase payload_case() const;
-  // @@protoc_insertion_point(class_scope:sunlight.Request)
+  // @@protoc_insertion_point(class_scope:sunlight.api.Request)
  private:
   class _Internal;
   void set_has_authentication();
@@ -501,7 +504,7 @@ class Request final
     union PayloadUnion {
       constexpr PayloadUnion() : _constinit_{} {}
       ::google::protobuf::internal::ConstantInitialized _constinit_;
-      ::sunlight::AuthenticationRequest* authentication_;
+      ::sunlight::api::AuthenticationRequest* authentication_;
     } payload_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -534,7 +537,7 @@ inline void AuthenticationRequest::clear_id() {
 }
 inline const std::string& AuthenticationRequest::id() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:sunlight.AuthenticationRequest.id)
+  // @@protoc_insertion_point(field_get:sunlight.api.AuthenticationRequest.id)
   return _internal_id();
 }
 template <typename Arg_, typename... Args_>
@@ -542,11 +545,11 @@ inline PROTOBUF_ALWAYS_INLINE void AuthenticationRequest::set_id(Arg_&& arg,
                                                      Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.id_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:sunlight.AuthenticationRequest.id)
+  // @@protoc_insertion_point(field_set:sunlight.api.AuthenticationRequest.id)
 }
 inline std::string* AuthenticationRequest::mutable_id() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   std::string* _s = _internal_mutable_id();
-  // @@protoc_insertion_point(field_mutable:sunlight.AuthenticationRequest.id)
+  // @@protoc_insertion_point(field_mutable:sunlight.api.AuthenticationRequest.id)
   return _s;
 }
 inline const std::string& AuthenticationRequest::_internal_id() const {
@@ -563,7 +566,7 @@ inline std::string* AuthenticationRequest::_internal_mutable_id() {
 }
 inline std::string* AuthenticationRequest::release_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:sunlight.AuthenticationRequest.id)
+  // @@protoc_insertion_point(field_release:sunlight.api.AuthenticationRequest.id)
   return _impl_.id_.Release();
 }
 inline void AuthenticationRequest::set_allocated_id(std::string* value) {
@@ -572,7 +575,7 @@ inline void AuthenticationRequest::set_allocated_id(std::string* value) {
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.id_.IsDefault()) {
     _impl_.id_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:sunlight.AuthenticationRequest.id)
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.AuthenticationRequest.id)
 }
 
 // string password = 2;
@@ -582,7 +585,7 @@ inline void AuthenticationRequest::clear_password() {
 }
 inline const std::string& AuthenticationRequest::password() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:sunlight.AuthenticationRequest.password)
+  // @@protoc_insertion_point(field_get:sunlight.api.AuthenticationRequest.password)
   return _internal_password();
 }
 template <typename Arg_, typename... Args_>
@@ -590,11 +593,11 @@ inline PROTOBUF_ALWAYS_INLINE void AuthenticationRequest::set_password(Arg_&& ar
                                                      Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.password_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:sunlight.AuthenticationRequest.password)
+  // @@protoc_insertion_point(field_set:sunlight.api.AuthenticationRequest.password)
 }
 inline std::string* AuthenticationRequest::mutable_password() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   std::string* _s = _internal_mutable_password();
-  // @@protoc_insertion_point(field_mutable:sunlight.AuthenticationRequest.password)
+  // @@protoc_insertion_point(field_mutable:sunlight.api.AuthenticationRequest.password)
   return _s;
 }
 inline const std::string& AuthenticationRequest::_internal_password() const {
@@ -611,7 +614,7 @@ inline std::string* AuthenticationRequest::_internal_mutable_password() {
 }
 inline std::string* AuthenticationRequest::release_password() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:sunlight.AuthenticationRequest.password)
+  // @@protoc_insertion_point(field_release:sunlight.api.AuthenticationRequest.password)
   return _impl_.password_.Release();
 }
 inline void AuthenticationRequest::set_allocated_password(std::string* value) {
@@ -620,7 +623,7 @@ inline void AuthenticationRequest::set_allocated_password(std::string* value) {
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.password_.IsDefault()) {
     _impl_.password_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:sunlight.AuthenticationRequest.password)
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.AuthenticationRequest.password)
 }
 
 // -------------------------------------------------------------------
@@ -633,12 +636,12 @@ inline void Request::clear_request_id() {
   _impl_.request_id_ = 0;
 }
 inline ::int32_t Request::request_id() const {
-  // @@protoc_insertion_point(field_get:sunlight.Request.request_id)
+  // @@protoc_insertion_point(field_get:sunlight.api.Request.request_id)
   return _internal_request_id();
 }
 inline void Request::set_request_id(::int32_t value) {
   _internal_set_request_id(value);
-  // @@protoc_insertion_point(field_set:sunlight.Request.request_id)
+  // @@protoc_insertion_point(field_set:sunlight.api.Request.request_id)
 }
 inline ::int32_t Request::_internal_request_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
@@ -649,7 +652,7 @@ inline void Request::_internal_set_request_id(::int32_t value) {
   _impl_.request_id_ = value;
 }
 
-// .sunlight.AuthenticationRequest authentication = 100;
+// .sunlight.api.AuthenticationRequest authentication = 100;
 inline bool Request::has_authentication() const {
   return payload_case() == kAuthentication;
 }
@@ -670,8 +673,8 @@ inline void Request::clear_authentication() {
     clear_has_payload();
   }
 }
-inline ::sunlight::AuthenticationRequest* Request::release_authentication() {
-  // @@protoc_insertion_point(field_release:sunlight.Request.authentication)
+inline ::sunlight::api::AuthenticationRequest* Request::release_authentication() {
+  // @@protoc_insertion_point(field_release:sunlight.api.Request.authentication)
   if (payload_case() == kAuthentication) {
     clear_has_payload();
     auto* temp = _impl_.payload_.authentication_;
@@ -684,15 +687,15 @@ inline ::sunlight::AuthenticationRequest* Request::release_authentication() {
     return nullptr;
   }
 }
-inline const ::sunlight::AuthenticationRequest& Request::_internal_authentication() const {
-  return payload_case() == kAuthentication ? *_impl_.payload_.authentication_ : reinterpret_cast<::sunlight::AuthenticationRequest&>(::sunlight::_AuthenticationRequest_default_instance_);
+inline const ::sunlight::api::AuthenticationRequest& Request::_internal_authentication() const {
+  return payload_case() == kAuthentication ? *_impl_.payload_.authentication_ : reinterpret_cast<::sunlight::api::AuthenticationRequest&>(::sunlight::api::_AuthenticationRequest_default_instance_);
 }
-inline const ::sunlight::AuthenticationRequest& Request::authentication() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:sunlight.Request.authentication)
+inline const ::sunlight::api::AuthenticationRequest& Request::authentication() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.Request.authentication)
   return _internal_authentication();
 }
-inline ::sunlight::AuthenticationRequest* Request::unsafe_arena_release_authentication() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:sunlight.Request.authentication)
+inline ::sunlight::api::AuthenticationRequest* Request::unsafe_arena_release_authentication() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:sunlight.api.Request.authentication)
   if (payload_case() == kAuthentication) {
     clear_has_payload();
     auto* temp = _impl_.payload_.authentication_;
@@ -702,7 +705,7 @@ inline ::sunlight::AuthenticationRequest* Request::unsafe_arena_release_authenti
     return nullptr;
   }
 }
-inline void Request::unsafe_arena_set_allocated_authentication(::sunlight::AuthenticationRequest* value) {
+inline void Request::unsafe_arena_set_allocated_authentication(::sunlight::api::AuthenticationRequest* value) {
   // We rely on the oneof clear method to free the earlier contents
   // of this oneof. We can directly use the pointer we're given to
   // set the new value.
@@ -711,20 +714,20 @@ inline void Request::unsafe_arena_set_allocated_authentication(::sunlight::Authe
     set_has_authentication();
     _impl_.payload_.authentication_ = value;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sunlight.Request.authentication)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sunlight.api.Request.authentication)
 }
-inline ::sunlight::AuthenticationRequest* Request::_internal_mutable_authentication() {
+inline ::sunlight::api::AuthenticationRequest* Request::_internal_mutable_authentication() {
   if (payload_case() != kAuthentication) {
     clear_payload();
     set_has_authentication();
     _impl_.payload_.authentication_ =
-        ::google::protobuf::Message::DefaultConstruct<::sunlight::AuthenticationRequest>(GetArena());
+        ::google::protobuf::Message::DefaultConstruct<::sunlight::api::AuthenticationRequest>(GetArena());
   }
   return _impl_.payload_.authentication_;
 }
-inline ::sunlight::AuthenticationRequest* Request::mutable_authentication() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::sunlight::AuthenticationRequest* _msg = _internal_mutable_authentication();
-  // @@protoc_insertion_point(field_mutable:sunlight.Request.authentication)
+inline ::sunlight::api::AuthenticationRequest* Request::mutable_authentication() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::sunlight::api::AuthenticationRequest* _msg = _internal_mutable_authentication();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.Request.authentication)
   return _msg;
 }
 
@@ -742,6 +745,7 @@ inline Request::PayloadCase Request::payload_case() const {
 #endif  // __GNUC__
 
 // @@protoc_insertion_point(namespace_scope)
+}  // namespace api
 }  // namespace sunlight
 
 

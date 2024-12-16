@@ -52,12 +52,14 @@ struct TableStruct_response_2eproto {
 extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_response_2eproto;
 namespace sunlight {
+namespace api {
 class AuthenticationResponse;
 struct AuthenticationResponseDefaultTypeInternal;
 extern AuthenticationResponseDefaultTypeInternal _AuthenticationResponse_default_instance_;
 class Response;
 struct ResponseDefaultTypeInternal;
 extern ResponseDefaultTypeInternal _Response_default_instance_;
+}  // namespace api
 }  // namespace sunlight
 namespace google {
 namespace protobuf {
@@ -65,6 +67,7 @@ namespace protobuf {
 }  // namespace google
 
 namespace sunlight {
+namespace api {
 
 // ===================================================================
 
@@ -73,7 +76,7 @@ namespace sunlight {
 
 class AuthenticationResponse final
     : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:sunlight.AuthenticationResponse) */ {
+/* @@protoc_insertion_point(class_definition:sunlight.api.AuthenticationResponse) */ {
  public:
   inline AuthenticationResponse() : AuthenticationResponse(nullptr) {}
   ~AuthenticationResponse() PROTOBUF_FINAL;
@@ -197,7 +200,7 @@ class AuthenticationResponse final
   template <typename T>
   friend ::absl::string_view(
       ::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "sunlight.AuthenticationResponse"; }
+  static ::absl::string_view FullMessageName() { return "sunlight.api.AuthenticationResponse"; }
 
  protected:
   explicit AuthenticationResponse(::google::protobuf::Arena* arena);
@@ -230,7 +233,7 @@ class AuthenticationResponse final
   void _internal_set_success(::int32_t value);
 
   public:
-  // @@protoc_insertion_point(class_scope:sunlight.AuthenticationResponse)
+  // @@protoc_insertion_point(class_scope:sunlight.api.AuthenticationResponse)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
@@ -264,7 +267,7 @@ class AuthenticationResponse final
 
 class Response final
     : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:sunlight.Response) */ {
+/* @@protoc_insertion_point(class_definition:sunlight.api.Response) */ {
  public:
   inline Response() : Response(nullptr) {}
   ~Response() PROTOBUF_FINAL;
@@ -392,7 +395,7 @@ class Response final
   template <typename T>
   friend ::absl::string_view(
       ::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "sunlight.Response"; }
+  static ::absl::string_view FullMessageName() { return "sunlight.api.Response"; }
 
  protected:
   explicit Response(::google::protobuf::Arena* arena);
@@ -426,28 +429,28 @@ class Response final
   void _internal_set_request_id(::int32_t value);
 
   public:
-  // .sunlight.AuthenticationResponse authentication = 100;
+  // .sunlight.api.AuthenticationResponse authentication = 100;
   bool has_authentication() const;
   private:
   bool _internal_has_authentication() const;
 
   public:
   void clear_authentication() ;
-  const ::sunlight::AuthenticationResponse& authentication() const;
-  PROTOBUF_NODISCARD ::sunlight::AuthenticationResponse* release_authentication();
-  ::sunlight::AuthenticationResponse* mutable_authentication();
-  void set_allocated_authentication(::sunlight::AuthenticationResponse* value);
-  void unsafe_arena_set_allocated_authentication(::sunlight::AuthenticationResponse* value);
-  ::sunlight::AuthenticationResponse* unsafe_arena_release_authentication();
+  const ::sunlight::api::AuthenticationResponse& authentication() const;
+  PROTOBUF_NODISCARD ::sunlight::api::AuthenticationResponse* release_authentication();
+  ::sunlight::api::AuthenticationResponse* mutable_authentication();
+  void set_allocated_authentication(::sunlight::api::AuthenticationResponse* value);
+  void unsafe_arena_set_allocated_authentication(::sunlight::api::AuthenticationResponse* value);
+  ::sunlight::api::AuthenticationResponse* unsafe_arena_release_authentication();
 
   private:
-  const ::sunlight::AuthenticationResponse& _internal_authentication() const;
-  ::sunlight::AuthenticationResponse* _internal_mutable_authentication();
+  const ::sunlight::api::AuthenticationResponse& _internal_authentication() const;
+  ::sunlight::api::AuthenticationResponse* _internal_mutable_authentication();
 
   public:
   void clear_payload();
   PayloadCase payload_case() const;
-  // @@protoc_insertion_point(class_scope:sunlight.Response)
+  // @@protoc_insertion_point(class_scope:sunlight.api.Response)
  private:
   class _Internal;
   void set_has_authentication();
@@ -477,7 +480,7 @@ class Response final
     union PayloadUnion {
       constexpr PayloadUnion() : _constinit_{} {}
       ::google::protobuf::internal::ConstantInitialized _constinit_;
-      ::sunlight::AuthenticationResponse* authentication_;
+      ::sunlight::api::AuthenticationResponse* authentication_;
     } payload_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -509,12 +512,12 @@ inline void AuthenticationResponse::clear_success() {
   _impl_.success_ = 0;
 }
 inline ::int32_t AuthenticationResponse::success() const {
-  // @@protoc_insertion_point(field_get:sunlight.AuthenticationResponse.success)
+  // @@protoc_insertion_point(field_get:sunlight.api.AuthenticationResponse.success)
   return _internal_success();
 }
 inline void AuthenticationResponse::set_success(::int32_t value) {
   _internal_set_success(value);
-  // @@protoc_insertion_point(field_set:sunlight.AuthenticationResponse.success)
+  // @@protoc_insertion_point(field_set:sunlight.api.AuthenticationResponse.success)
 }
 inline ::int32_t AuthenticationResponse::_internal_success() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
@@ -535,12 +538,12 @@ inline void Response::clear_request_id() {
   _impl_.request_id_ = 0;
 }
 inline ::int32_t Response::request_id() const {
-  // @@protoc_insertion_point(field_get:sunlight.Response.request_id)
+  // @@protoc_insertion_point(field_get:sunlight.api.Response.request_id)
   return _internal_request_id();
 }
 inline void Response::set_request_id(::int32_t value) {
   _internal_set_request_id(value);
-  // @@protoc_insertion_point(field_set:sunlight.Response.request_id)
+  // @@protoc_insertion_point(field_set:sunlight.api.Response.request_id)
 }
 inline ::int32_t Response::_internal_request_id() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
@@ -551,7 +554,7 @@ inline void Response::_internal_set_request_id(::int32_t value) {
   _impl_.request_id_ = value;
 }
 
-// .sunlight.AuthenticationResponse authentication = 100;
+// .sunlight.api.AuthenticationResponse authentication = 100;
 inline bool Response::has_authentication() const {
   return payload_case() == kAuthentication;
 }
@@ -572,8 +575,8 @@ inline void Response::clear_authentication() {
     clear_has_payload();
   }
 }
-inline ::sunlight::AuthenticationResponse* Response::release_authentication() {
-  // @@protoc_insertion_point(field_release:sunlight.Response.authentication)
+inline ::sunlight::api::AuthenticationResponse* Response::release_authentication() {
+  // @@protoc_insertion_point(field_release:sunlight.api.Response.authentication)
   if (payload_case() == kAuthentication) {
     clear_has_payload();
     auto* temp = _impl_.payload_.authentication_;
@@ -586,15 +589,15 @@ inline ::sunlight::AuthenticationResponse* Response::release_authentication() {
     return nullptr;
   }
 }
-inline const ::sunlight::AuthenticationResponse& Response::_internal_authentication() const {
-  return payload_case() == kAuthentication ? *_impl_.payload_.authentication_ : reinterpret_cast<::sunlight::AuthenticationResponse&>(::sunlight::_AuthenticationResponse_default_instance_);
+inline const ::sunlight::api::AuthenticationResponse& Response::_internal_authentication() const {
+  return payload_case() == kAuthentication ? *_impl_.payload_.authentication_ : reinterpret_cast<::sunlight::api::AuthenticationResponse&>(::sunlight::api::_AuthenticationResponse_default_instance_);
 }
-inline const ::sunlight::AuthenticationResponse& Response::authentication() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:sunlight.Response.authentication)
+inline const ::sunlight::api::AuthenticationResponse& Response::authentication() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.Response.authentication)
   return _internal_authentication();
 }
-inline ::sunlight::AuthenticationResponse* Response::unsafe_arena_release_authentication() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:sunlight.Response.authentication)
+inline ::sunlight::api::AuthenticationResponse* Response::unsafe_arena_release_authentication() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:sunlight.api.Response.authentication)
   if (payload_case() == kAuthentication) {
     clear_has_payload();
     auto* temp = _impl_.payload_.authentication_;
@@ -604,7 +607,7 @@ inline ::sunlight::AuthenticationResponse* Response::unsafe_arena_release_authen
     return nullptr;
   }
 }
-inline void Response::unsafe_arena_set_allocated_authentication(::sunlight::AuthenticationResponse* value) {
+inline void Response::unsafe_arena_set_allocated_authentication(::sunlight::api::AuthenticationResponse* value) {
   // We rely on the oneof clear method to free the earlier contents
   // of this oneof. We can directly use the pointer we're given to
   // set the new value.
@@ -613,20 +616,20 @@ inline void Response::unsafe_arena_set_allocated_authentication(::sunlight::Auth
     set_has_authentication();
     _impl_.payload_.authentication_ = value;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sunlight.Response.authentication)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sunlight.api.Response.authentication)
 }
-inline ::sunlight::AuthenticationResponse* Response::_internal_mutable_authentication() {
+inline ::sunlight::api::AuthenticationResponse* Response::_internal_mutable_authentication() {
   if (payload_case() != kAuthentication) {
     clear_payload();
     set_has_authentication();
     _impl_.payload_.authentication_ =
-        ::google::protobuf::Message::DefaultConstruct<::sunlight::AuthenticationResponse>(GetArena());
+        ::google::protobuf::Message::DefaultConstruct<::sunlight::api::AuthenticationResponse>(GetArena());
   }
   return _impl_.payload_.authentication_;
 }
-inline ::sunlight::AuthenticationResponse* Response::mutable_authentication() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::sunlight::AuthenticationResponse* _msg = _internal_mutable_authentication();
-  // @@protoc_insertion_point(field_mutable:sunlight.Response.authentication)
+inline ::sunlight::api::AuthenticationResponse* Response::mutable_authentication() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::sunlight::api::AuthenticationResponse* _msg = _internal_mutable_authentication();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.Response.authentication)
   return _msg;
 }
 
@@ -644,6 +647,7 @@ inline Response::PayloadCase Response::payload_case() const {
 #endif  // __GNUC__
 
 // @@protoc_insertion_point(namespace_scope)
+}  // namespace api
 }  // namespace sunlight
 
 

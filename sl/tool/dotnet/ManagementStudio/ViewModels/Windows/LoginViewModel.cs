@@ -2,6 +2,7 @@ using System.Net;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Sunlight.Api;
 using Sunlight.ManagementStudio.Helpers;
 using Sunlight.ManagementStudio.Models.Controller;
 using Sunlight.ManagementStudio.Views.Windows;

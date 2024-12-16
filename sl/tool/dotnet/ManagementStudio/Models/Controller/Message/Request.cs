@@ -9,7 +9,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Sunlight {
+namespace Sunlight.Api {
 
   /// <summary>Holder for reflection information generated from request.proto</summary>
   public static partial class RequestReflection {
@@ -24,16 +24,16 @@ namespace Sunlight {
     static RequestReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg1yZXF1ZXN0LnByb3RvEghzdW5saWdodCI1ChVBdXRoZW50aWNhdGlvblJl",
-            "cXVlc3QSCgoCaWQYASABKAkSEAoIcGFzc3dvcmQYAiABKAkiYwoHUmVxdWVz",
-            "dBISCgpyZXF1ZXN0X2lkGAEgASgFEjkKDmF1dGhlbnRpY2F0aW9uGGQgASgL",
-            "Mh8uc3VubGlnaHQuQXV0aGVudGljYXRpb25SZXF1ZXN0SABCCQoHcGF5bG9h",
-            "ZGIGcHJvdG8z"));
+            "Cg1yZXF1ZXN0LnByb3RvEgxzdW5saWdodC5hcGkiNQoVQXV0aGVudGljYXRp",
+            "b25SZXF1ZXN0EgoKAmlkGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJImcKB1Jl",
+            "cXVlc3QSEgoKcmVxdWVzdF9pZBgBIAEoBRI9Cg5hdXRoZW50aWNhdGlvbhhk",
+            "IAEoCzIjLnN1bmxpZ2h0LmFwaS5BdXRoZW50aWNhdGlvblJlcXVlc3RIAEIJ",
+            "CgdwYXlsb2FkYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.AuthenticationRequest), global::Sunlight.AuthenticationRequest.Parser, new[]{ "Id", "Password" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Request), global::Sunlight.Request.Parser, new[]{ "RequestId", "Authentication" }, new[]{ "Payload" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.AuthenticationRequest), global::Sunlight.Api.AuthenticationRequest.Parser, new[]{ "Id", "Password" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Request), global::Sunlight.Api.Request.Parser, new[]{ "RequestId", "Authentication" }, new[]{ "Payload" }, null, null, null)
           }));
     }
     #endregion
@@ -55,7 +55,7 @@ namespace Sunlight {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Sunlight.RequestReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -290,7 +290,7 @@ namespace Sunlight {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Sunlight.RequestReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -342,8 +342,8 @@ namespace Sunlight {
     public const int AuthenticationFieldNumber = 100;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::Sunlight.AuthenticationRequest Authentication {
-      get { return payloadCase_ == PayloadOneofCase.Authentication ? (global::Sunlight.AuthenticationRequest) payload_ : null; }
+    public global::Sunlight.Api.AuthenticationRequest Authentication {
+      get { return payloadCase_ == PayloadOneofCase.Authentication ? (global::Sunlight.Api.AuthenticationRequest) payload_ : null; }
       set {
         payload_ = value;
         payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.Authentication;
@@ -476,7 +476,7 @@ namespace Sunlight {
       switch (other.PayloadCase) {
         case PayloadOneofCase.Authentication:
           if (Authentication == null) {
-            Authentication = new global::Sunlight.AuthenticationRequest();
+            Authentication = new global::Sunlight.Api.AuthenticationRequest();
           }
           Authentication.MergeFrom(other.Authentication);
           break;
@@ -506,7 +506,7 @@ namespace Sunlight {
             break;
           }
           case 802: {
-            global::Sunlight.AuthenticationRequest subBuilder = new global::Sunlight.AuthenticationRequest();
+            global::Sunlight.Api.AuthenticationRequest subBuilder = new global::Sunlight.Api.AuthenticationRequest();
             if (payloadCase_ == PayloadOneofCase.Authentication) {
               subBuilder.MergeFrom(Authentication);
             }
@@ -538,7 +538,7 @@ namespace Sunlight {
             break;
           }
           case 802: {
-            global::Sunlight.AuthenticationRequest subBuilder = new global::Sunlight.AuthenticationRequest();
+            global::Sunlight.Api.AuthenticationRequest subBuilder = new global::Sunlight.Api.AuthenticationRequest();
             if (payloadCase_ == PayloadOneofCase.Authentication) {
               subBuilder.MergeFrom(Authentication);
             }

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package sunlight;
+package sunlight.api;
 
 message AuthenticationResponse
 {

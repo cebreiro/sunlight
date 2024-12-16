@@ -106,14 +106,14 @@ namespace sunlight
                 google::protobuf::io::CodedInputStream codedInputStream(&inputStream);
 
                 // temp test code
-                Request request;
+                api::Request request;
 
                 if (request.ParseFromCodedStream(&codedInputStream))
                 {
-                    Response response;
+                    api::Response response;
                     response.set_request_id(request.request_id());
 
-                    AuthenticationResponse* authentication = response.mutable_authentication();
+                    api::AuthenticationResponse* authentication = response.mutable_authentication();
                     authentication->set_success(false);
 
                     const int32_t bodySize = static_cast<int32_t>(response.ByteSizeLong());

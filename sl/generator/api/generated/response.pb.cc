@@ -25,6 +25,7 @@ namespace _pb = ::google::protobuf;
 namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace sunlight {
+namespace api {
 
 inline constexpr AuthenticationResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -77,6 +78,7 @@ struct ResponseDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ResponseDefaultTypeInternal _Response_default_instance_;
+}  // namespace api
 }  // namespace sunlight
 static constexpr const ::_pb::EnumDescriptor**
     file_level_enum_descriptors_response_2eproto = nullptr;
@@ -86,49 +88,49 @@ const ::uint32_t
     TableStruct_response_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::sunlight::AuthenticationResponse, _internal_metadata_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::AuthenticationResponse, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
         ~0u,  // no _weak_field_map_
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::sunlight::AuthenticationResponse, _impl_.success_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::AuthenticationResponse, _impl_.success_),
         ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::sunlight::Response, _internal_metadata_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _internal_metadata_),
         ~0u,  // no _extensions_
-        PROTOBUF_FIELD_OFFSET(::sunlight::Response, _impl_._oneof_case_[0]),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_._oneof_case_[0]),
         ~0u,  // no _weak_field_map_
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::sunlight::Response, _impl_.request_id_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_.request_id_),
         ::_pbi::kInvalidFieldOffsetTag,
-        PROTOBUF_FIELD_OFFSET(::sunlight::Response, _impl_.payload_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_.payload_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::sunlight::AuthenticationResponse)},
-        {9, -1, -1, sizeof(::sunlight::Response)},
+        {0, -1, -1, sizeof(::sunlight::api::AuthenticationResponse)},
+        {9, -1, -1, sizeof(::sunlight::api::Response)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
-    &::sunlight::_AuthenticationResponse_default_instance_._instance,
-    &::sunlight::_Response_default_instance_._instance,
+    &::sunlight::api::_AuthenticationResponse_default_instance_._instance,
+    &::sunlight::api::_Response_default_instance_._instance,
 };
 const char descriptor_table_protodef_response_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\016response.proto\022\010sunlight\")\n\026Authentica"
-    "tionResponse\022\017\n\007success\030\001 \001(\005\"e\n\010Respons"
-    "e\022\022\n\nrequest_id\030\001 \001(\005\022:\n\016authentication\030"
-    "d \001(\0132 .sunlight.AuthenticationResponseH"
-    "\000B\t\n\007payloadb\006proto3"
+    "\n\016response.proto\022\014sunlight.api\")\n\026Authen"
+    "ticationResponse\022\017\n\007success\030\001 \001(\005\"i\n\010Res"
+    "ponse\022\022\n\nrequest_id\030\001 \001(\005\022>\n\016authenticat"
+    "ion\030d \001(\0132$.sunlight.api.AuthenticationR"
+    "esponseH\000B\t\n\007payloadb\006proto3"
 };
 static ::absl::once_flag descriptor_table_response_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_response_2eproto = {
     false,
     false,
-    180,
+    188,
     descriptor_table_protodef_response_2eproto,
     "response.proto",
     &descriptor_table_response_2eproto_once,
@@ -142,6 +144,7 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_response_2epro
     file_level_service_descriptors_response_2eproto,
 };
 namespace sunlight {
+namespace api {
 // ===================================================================
 
 class AuthenticationResponse::_Internal {
@@ -155,7 +158,7 @@ AuthenticationResponse::AuthenticationResponse(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:sunlight.AuthenticationResponse)
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.AuthenticationResponse)
 }
 AuthenticationResponse::AuthenticationResponse(
     ::google::protobuf::Arena* arena, const AuthenticationResponse& from)
@@ -172,7 +175,7 @@ inline void AuthenticationResponse::SharedCtor(::_pb::Arena* arena) {
   _impl_.success_ = {};
 }
 AuthenticationResponse::~AuthenticationResponse() {
-  // @@protoc_insertion_point(destructor:sunlight.AuthenticationResponse)
+  // @@protoc_insertion_point(destructor:sunlight.api.AuthenticationResponse)
   SharedDtor(*this);
 }
 inline void AuthenticationResponse::SharedDtor(MessageLite& self) {
@@ -233,7 +236,7 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> AuthenticationResponse::_table_ = {
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::sunlight::AuthenticationResponse>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::sunlight::api::AuthenticationResponse>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     // int32 success = 1;
@@ -252,7 +255,7 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> AuthenticationResponse::_table_ = {
 };
 
 PROTOBUF_NOINLINE void AuthenticationResponse::Clear() {
-// @@protoc_insertion_point(message_clear_start:sunlight.AuthenticationResponse)
+// @@protoc_insertion_point(message_clear_start:sunlight.api.AuthenticationResponse)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
@@ -273,7 +276,7 @@ PROTOBUF_NOINLINE void AuthenticationResponse::Clear() {
             ::google::protobuf::io::EpsCopyOutputStream* stream) const {
           const AuthenticationResponse& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          // @@protoc_insertion_point(serialize_to_array_start:sunlight.AuthenticationResponse)
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.AuthenticationResponse)
           ::uint32_t cached_has_bits = 0;
           (void)cached_has_bits;
 
@@ -289,7 +292,7 @@ PROTOBUF_NOINLINE void AuthenticationResponse::Clear() {
                 ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
                     this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
           }
-          // @@protoc_insertion_point(serialize_to_array_end:sunlight.AuthenticationResponse)
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.AuthenticationResponse)
           return target;
         }
 
@@ -300,7 +303,7 @@ PROTOBUF_NOINLINE void AuthenticationResponse::Clear() {
         ::size_t AuthenticationResponse::ByteSizeLong() const {
           const AuthenticationResponse& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          // @@protoc_insertion_point(message_byte_size_start:sunlight.AuthenticationResponse)
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.AuthenticationResponse)
           ::size_t total_size = 0;
 
           ::uint32_t cached_has_bits = 0;
@@ -321,7 +324,7 @@ PROTOBUF_NOINLINE void AuthenticationResponse::Clear() {
 void AuthenticationResponse::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
   auto* const _this = static_cast<AuthenticationResponse*>(&to_msg);
   auto& from = static_cast<const AuthenticationResponse&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.AuthenticationResponse)
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.AuthenticationResponse)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -333,7 +336,7 @@ void AuthenticationResponse::MergeImpl(::google::protobuf::MessageLite& to_msg, 
 }
 
 void AuthenticationResponse::CopyFrom(const AuthenticationResponse& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.AuthenticationResponse)
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.AuthenticationResponse)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -354,10 +357,10 @@ void AuthenticationResponse::InternalSwap(AuthenticationResponse* PROTOBUF_RESTR
 class Response::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
-      PROTOBUF_FIELD_OFFSET(::sunlight::Response, _impl_._oneof_case_);
+      PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_._oneof_case_);
 };
 
-void Response::set_allocated_authentication(::sunlight::AuthenticationResponse* authentication) {
+void Response::set_allocated_authentication(::sunlight::api::AuthenticationResponse* authentication) {
   ::google::protobuf::Arena* message_arena = GetArena();
   clear_payload();
   if (authentication) {
@@ -368,7 +371,7 @@ void Response::set_allocated_authentication(::sunlight::AuthenticationResponse* 
     set_has_authentication();
     _impl_.payload_.authentication_ = authentication;
   }
-  // @@protoc_insertion_point(field_set_allocated:sunlight.Response.authentication)
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.authentication)
 }
 Response::Response(::google::protobuf::Arena* arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -377,11 +380,11 @@ Response::Response(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:sunlight.Response)
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.Response)
 }
 inline PROTOBUF_NDEBUG_INLINE Response::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
-    const Impl_& from, const ::sunlight::Response& from_msg)
+    const Impl_& from, const ::sunlight::api::Response& from_msg)
       : payload_{},
         _cached_size_{0},
         _oneof_case_{from._oneof_case_[0]} {}
@@ -404,11 +407,11 @@ Response::Response(
     case PAYLOAD_NOT_SET:
       break;
       case kAuthentication:
-        _impl_.payload_.authentication_ = ::google::protobuf::Message::CopyConstruct<::sunlight::AuthenticationResponse>(arena, *from._impl_.payload_.authentication_);
+        _impl_.payload_.authentication_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::AuthenticationResponse>(arena, *from._impl_.payload_.authentication_);
         break;
   }
 
-  // @@protoc_insertion_point(copy_constructor:sunlight.Response)
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.Response)
 }
 inline PROTOBUF_NDEBUG_INLINE Response::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
@@ -422,7 +425,7 @@ inline void Response::SharedCtor(::_pb::Arena* arena) {
   _impl_.request_id_ = {};
 }
 Response::~Response() {
-  // @@protoc_insertion_point(destructor:sunlight.Response)
+  // @@protoc_insertion_point(destructor:sunlight.api.Response)
   SharedDtor(*this);
 }
 inline void Response::SharedDtor(MessageLite& self) {
@@ -436,7 +439,7 @@ inline void Response::SharedDtor(MessageLite& self) {
 }
 
 void Response::clear_payload() {
-// @@protoc_insertion_point(one_of_clear_start:sunlight.Response)
+// @@protoc_insertion_point(one_of_clear_start:sunlight.api.Response)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   switch (payload_case()) {
     case kAuthentication: {
@@ -506,7 +509,7 @@ const ::_pbi::TcParseTable<0, 2, 1, 0, 7> Response::_table_ = {
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::sunlight::Response>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::sunlight::api::Response>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     // int32 request_id = 1;
@@ -520,17 +523,17 @@ const ::_pbi::TcParseTable<0, 2, 1, 0, 7> Response::_table_ = {
     // int32 request_id = 1;
     {PROTOBUF_FIELD_OFFSET(Response, _impl_.request_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // .sunlight.AuthenticationResponse authentication = 100;
+    // .sunlight.api.AuthenticationResponse authentication = 100;
     {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.authentication_), _Internal::kOneofCaseOffset + 0, 0,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
-    {::_pbi::TcParser::GetTable<::sunlight::AuthenticationResponse>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::AuthenticationResponse>()},
   }}, {{
   }},
 };
 
 PROTOBUF_NOINLINE void Response::Clear() {
-// @@protoc_insertion_point(message_clear_start:sunlight.Response)
+// @@protoc_insertion_point(message_clear_start:sunlight.api.Response)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
@@ -552,7 +555,7 @@ PROTOBUF_NOINLINE void Response::Clear() {
             ::google::protobuf::io::EpsCopyOutputStream* stream) const {
           const Response& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          // @@protoc_insertion_point(serialize_to_array_start:sunlight.Response)
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.Response)
           ::uint32_t cached_has_bits = 0;
           (void)cached_has_bits;
 
@@ -563,7 +566,7 @@ PROTOBUF_NOINLINE void Response::Clear() {
                     stream, this_._internal_request_id(), target);
           }
 
-          // .sunlight.AuthenticationResponse authentication = 100;
+          // .sunlight.api.AuthenticationResponse authentication = 100;
           if (this_.payload_case() == kAuthentication) {
             target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
                 100, *this_._impl_.payload_.authentication_, this_._impl_.payload_.authentication_->GetCachedSize(), target,
@@ -575,7 +578,7 @@ PROTOBUF_NOINLINE void Response::Clear() {
                 ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
                     this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
           }
-          // @@protoc_insertion_point(serialize_to_array_end:sunlight.Response)
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.Response)
           return target;
         }
 
@@ -586,7 +589,7 @@ PROTOBUF_NOINLINE void Response::Clear() {
         ::size_t Response::ByteSizeLong() const {
           const Response& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          // @@protoc_insertion_point(message_byte_size_start:sunlight.Response)
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.Response)
           ::size_t total_size = 0;
 
           ::uint32_t cached_has_bits = 0;
@@ -601,7 +604,7 @@ PROTOBUF_NOINLINE void Response::Clear() {
             }
           }
           switch (this_.payload_case()) {
-            // .sunlight.AuthenticationResponse authentication = 100;
+            // .sunlight.api.AuthenticationResponse authentication = 100;
             case kAuthentication: {
               total_size += 2 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.authentication_);
@@ -619,7 +622,7 @@ void Response::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google
   auto* const _this = static_cast<Response*>(&to_msg);
   auto& from = static_cast<const Response&>(from_msg);
   ::google::protobuf::Arena* arena = _this->GetArena();
-  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.Response)
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.Response)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -641,7 +644,7 @@ void Response::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google
       case kAuthentication: {
         if (oneof_needs_init) {
           _this->_impl_.payload_.authentication_ =
-              ::google::protobuf::Message::CopyConstruct<::sunlight::AuthenticationResponse>(arena, *from._impl_.payload_.authentication_);
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::AuthenticationResponse>(arena, *from._impl_.payload_.authentication_);
         } else {
           _this->_impl_.payload_.authentication_->MergeFrom(from._internal_authentication());
         }
@@ -655,7 +658,7 @@ void Response::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google
 }
 
 void Response::CopyFrom(const Response& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.Response)
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.Response)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -674,6 +677,7 @@ void Response::InternalSwap(Response* PROTOBUF_RESTRICT other) {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
+}  // namespace api
 }  // namespace sunlight
 namespace google {
 namespace protobuf {

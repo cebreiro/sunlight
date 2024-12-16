@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Nito.AsyncEx;
+using Sunlight.Api;
 
 namespace Sunlight.ManagementStudio.Models.Controller.Tcp;
 
