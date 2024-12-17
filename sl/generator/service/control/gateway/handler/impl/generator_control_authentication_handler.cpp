@@ -1,7 +1,7 @@
 #include "generator_control_authentication_handler.h"
 
-#include "shared/network/session/session.h"
 #include "sl/generator/api/generated/response.pb.h"
+#include "sl/generator/service/control/generator_control_service.h"
 #include "sl/generator/service/control/gateway/generator_control_api_gateway_connection.h"
 
 namespace sunlight
@@ -14,28 +14,22 @@ namespace sunlight
     auto GeneratorControlAuthenticationHandler::HandleRequest(GeneratorControlAPIGatewayConnection& connection,
         int32_t requestId, const api::AuthenticationRequest& request) -> Future<void>
     {
-        SUNLIGHT_LOG_INFO(_serviceLocator,
-            fmt::format("req: {}, {}, {}", requestId, request.id(), request.password()));
+        std::optional<int32_t> result =
+            co_await _serviceLocator.Get<GeneratorControlService>().Authenticate(request.id(), request.password());
+
+        if (result.has_value())
+        {
+            connection.state = GeneratorControlAPIGatewayConnection::State::Authenticated;
+            connection.level = *result;
+        }
 
         api::Response response;
         response.set_request_id(requestId);
 
         api::AuthenticationResponse* authentication = response.mutable_authentication();
-        authentication->set_success(false);
+        authentication->set_success(result.has_value());
 
-        const int32_t bodySize = static_cast<int32_t>(response.ByteSizeLong());
-
-        buffer::Fragment body = buffer::Fragment::Create(bodySize);
-        response.SerializeToArray(body.GetData(), bodySize);
-
-        Buffer sendBuffer;
-        sendBuffer.Add(buffer::Fragment::Create(4));
-        sendBuffer.Add(std::move(body));
-
-        BufferWriter writer(sendBuffer);
-        writer.Write<int32_t>(bodySize + 4);
-
-        connection.session->Send(std::move(sendBuffer));
+        connection.Send(std::move(response));
 
         co_return;
     }

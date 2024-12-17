@@ -1,5 +1,10 @@
 #pragma once
 
+namespace sunlight::api
+{
+    class Response;
+}
+
 namespace sunlight
 {
     class Session;
@@ -23,5 +28,10 @@ namespace sunlight
         int32_t level = 0;
 
         Buffer receiveBuffer;
+
+        auto Send(api::Response response) -> Future<void>;
+
+    private:
+        Buffer bufferPool;
     };
 }
