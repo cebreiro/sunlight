@@ -10,6 +10,7 @@ public class SettingsProvider
     private Settings _settings = new();
 
     public AppearanceSetting AppearanceSetting => _settings.AppearanceSetting;
+    public ConnectionSetting ConnectionSetting => _settings.ConnectionSetting;
 
     public void LoadFromFileAsync()
     {

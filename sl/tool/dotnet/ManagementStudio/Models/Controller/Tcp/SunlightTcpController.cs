@@ -118,7 +118,6 @@ public class SunlightTcpController : ISunlightController
         {
             oldCollection = _receiveHandlers;
 
-            _nextRequestId = 1;
             _receiveHandlers = new ConcurrentDictionary<int, ReceiveHandler>();
         }
 

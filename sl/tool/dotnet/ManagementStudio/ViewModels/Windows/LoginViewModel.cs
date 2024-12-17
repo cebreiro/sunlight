@@ -7,6 +7,7 @@ using Sunlight.Api;
 using Sunlight.ManagementStudio.Helpers;
 using Sunlight.ManagementStudio.Models.Controller;
 using Sunlight.ManagementStudio.Models.Event;
+using Sunlight.ManagementStudio.Models.Setting;
 using Sunlight.ManagementStudio.Views.Windows;
 
 namespace Sunlight.ManagementStudio.ViewModels.Windows;
@@ -58,6 +59,23 @@ public partial class LoginViewModel : ObservableObject, IDisposable
                 OnPropertyChanged(nameof(IsActive));
             });
         });
+
+        ConnectionSetting connectionSetting = _serviceProvider.GetRequired<SettingsProvider>().ConnectionSetting;
+
+        if (!string.IsNullOrEmpty(connectionSetting.Address))
+        {
+            Address = connectionSetting.Address;
+        }
+
+        if (!string.IsNullOrEmpty(connectionSetting.Port))
+        {
+            Port = connectionSetting.Port;
+        }
+
+        if (!string.IsNullOrEmpty(connectionSetting.Id))
+        {
+            Id = connectionSetting.Id;
+        }
     }
 
     ~LoginViewModel()
@@ -128,6 +146,20 @@ public partial class LoginViewModel : ObservableObject, IDisposable
                 });
             }
         });
+    }
+
+    [RelayCommand]
+    private void OnSaveButtonClicked(object sender)
+    {
+        if (sender is not LoginWindow loginWindow)
+        {
+            return;
+        }
+
+        ConnectionSetting connectionSetting = _serviceProvider.GetRequired<SettingsProvider>().ConnectionSetting;
+        connectionSetting.Address = Address;
+        connectionSetting.Port = Port;
+        connectionSetting.Id = Id;
     }
 
     public void Dispose()
