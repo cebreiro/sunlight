@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -6,8 +7,11 @@ using Sunlight.Api;
 using Sunlight.ManagementStudio.Helpers;
 using Sunlight.ManagementStudio.Models.Controller;
 using Sunlight.ManagementStudio.Models.Event;
+using Sunlight.ManagementStudio.Models.Event.Args;
 using Sunlight.ManagementStudio.Models.Setting;
 using Sunlight.ManagementStudio.Views.Windows;
+using Wpf.Ui.Controls;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Sunlight.ManagementStudio.ViewModels.Windows;
 
@@ -21,6 +25,8 @@ public partial class LoginViewModel : ObservableObject, IDisposable
 
     private bool _isPendingConnection = false;
     private bool _isConnected = false;
+
+    public bool IsAuthenticated { get; private set; } = false;
 
     public bool IsActive
     {
@@ -44,20 +50,15 @@ public partial class LoginViewModel : ObservableObject, IDisposable
     public string Port { get; set; } = "8989";
     public string Id { get; set; } = string.Empty;
 
+    public LoginWindow? LoginWindow { get; set; } = null;
+
     public LoginViewModel(IServiceProvider serviceProvider, ISunlightController sunlightController, IEventListener eventListener)
     {
         _serviceProvider = serviceProvider;
         _sunlightController = sunlightController;
         _eventListener = eventListener;
 
-        _disconnectionEventKey = _eventListener.Listen((args) =>
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _isConnected = false;
-                OnPropertyChanged(nameof(IsActive));
-            });
-        });
+        _disconnectionEventKey = _eventListener.Listen(OnDisconnected);
 
         ConnectionSetting connectionSetting = _serviceProvider.GetRequired<SettingsProvider>().ConnectionSetting;
 
@@ -97,7 +98,15 @@ public partial class LoginViewModel : ObservableObject, IDisposable
 
         if (!IPAddress.TryParse(Address, out _))
         {
-            MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), "invalid ip address", "error");
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                _isPendingConnection = false;
+
+                OnPropertyChanged(nameof(IsActive));
+
+                LoginWindow?.ShowErrorDialogAsync($"invalid ip-address. {Address}");
+            });
+            
 
             return;
         }
@@ -108,15 +117,20 @@ public partial class LoginViewModel : ObservableObject, IDisposable
             {
                 bool connect = await _sunlightController.Connect(Address, ushort.Parse(Port));
 
-                Application.Current.Dispatcher.Invoke(() =>
+                if (!connect)
                 {
-                    _isPendingConnection = false;
-                    _isConnected = connect;
+                    Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        _isPendingConnection = false;
+                        _isConnected = false;
 
-                    OnPropertyChanged(nameof(IsActive));
+                        OnPropertyChanged(nameof(IsActive));
 
-                    MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), $"connected: {connect}", "error");
-                });
+                        LoginWindow?.ShowErrorDialogAsync($"fail to connect to {Address}:{Port}");
+                    });
+
+                    return;
+                }
 
                 AuthenticationRequest request = new();
                 request.Id = Id;
@@ -124,22 +138,28 @@ public partial class LoginViewModel : ObservableObject, IDisposable
 
                 AuthenticationResponse response = await _sunlightController.Authenticate(request);
 
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    if (response.Success != 0)
+                    if (response.Success == 0)
                     {
-                        MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), "auth success", "error");
+                        _isPendingConnection = false;
+                        _isConnected = false;
+
+                        OnPropertyChanged(nameof(IsActive));
+
+                        LoginWindow?.ShowErrorDialogAsync("fail to authenticate.");
                     }
                     else
                     {
-                        MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), "auth fail", "error");
+                        IsAuthenticated = true;
+
+                        loginWindow.Close();
                     }
                 });
-
             }
             catch (Exception e)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), $"{e.Message}", "error");
                 });
@@ -148,17 +168,21 @@ public partial class LoginViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    private void OnSaveButtonClicked(object sender)
+    private void OnSaveButtonClicked(object _)
     {
-        if (sender is not LoginWindow loginWindow)
-        {
-            return;
-        }
-
         ConnectionSetting connectionSetting = _serviceProvider.GetRequired<SettingsProvider>().ConnectionSetting;
         connectionSetting.Address = Address;
         connectionSetting.Port = Port;
         connectionSetting.Id = Id;
+    }
+
+    private void OnDisconnected(DisconnectionEventArgs args)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            _isConnected = false;
+            OnPropertyChanged(nameof(IsActive));
+        });
     }
 
     public void Dispose()

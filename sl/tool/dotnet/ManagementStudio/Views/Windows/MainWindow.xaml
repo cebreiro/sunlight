@@ -22,6 +22,7 @@
         <ContentPresenter x:Name="RootContentDialog" Grid.Row="0" />
 
         <ui:TitleBar Grid.Row="0"
+                     x:Name="TitleBar"
                      Title="Sunlight Management Studio" />
         <ui:NavigationView
             x:Name="NavigationView"

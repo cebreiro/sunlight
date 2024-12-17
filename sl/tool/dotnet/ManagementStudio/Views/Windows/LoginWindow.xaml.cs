@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Sunlight.ManagementStudio.ViewModels.Windows;
@@ -16,6 +17,8 @@ public partial class LoginWindow
         ViewModel = viewModel;
         DataContext = this;
 
+        viewModel.LoginWindow = this;
+
         InitializeComponent();
 
         Closed += ((sender, args) =>
@@ -27,6 +30,19 @@ public partial class LoginWindow
         });
     }
 
+    public async Task ShowErrorDialogAsync(string content)
+    {
+        Wpf.Ui.Controls.MessageBox messageBox = new();
+        messageBox.Title = "Error";
+        messageBox.Margin = new Thickness(20.0, 20.0, 5.0, 50.0);
+        messageBox.Content = content;
+        messageBox.CloseButtonText = "Ok";
+        messageBox.Owner = this;
+        messageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+        _ = await messageBox.ShowDialogAsync();
+    }
+
     private void LoginWindow_OnInitialized(object? sender, EventArgs e)
     {
         ApplicationThemeManager.Changed += OnApplicationThemeChanged;
@@ -35,6 +51,11 @@ public partial class LoginWindow
     private void LoginWindow_OnClosed(object? sender, EventArgs e)
     {
         ApplicationThemeManager.Changed -= OnApplicationThemeChanged;
+
+        if (!ViewModel.IsAuthenticated)
+        {
+            Application.Current.Shutdown();
+        }
     }
 
     private void OnApplicationThemeChanged(ApplicationTheme theme, Color systemAccent)
