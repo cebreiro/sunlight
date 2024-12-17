@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using System.IO;
-using System.Windows;
 using Wpf.Ui.Appearance;
 
 namespace Sunlight.ManagementStudio.Models.Setting;

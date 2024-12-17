@@ -1,37 +1,31 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Sunlight.ManagementStudio.Models.Event
+namespace Sunlight.ManagementStudio.Models.Event;
+
+public class EventDictionary<T>
 {
-    public class EventDictionary<T>
+    private long _nextKey = 1;
+    private readonly ConcurrentDictionary<long, T> _dictionary = new();
+
+    public long Add(T item)
     {
-        private long _nextKey = 1;
-        private readonly ConcurrentDictionary<long, T> _dictionary = new();
+        long key = Interlocked.Increment(ref _nextKey);
 
-        public long Add(T item)
+        _dictionary[key] = item;
+
+        return key;
+    }
+
+    public bool TryRemove(long key, out T? item)
+    {
+        return _dictionary.TryRemove(key, out item);
+    }
+
+    public void Visit(Action<T> visitor)
+    {
+        foreach (var (_, item) in _dictionary)
         {
-            long key = Interlocked.Increment(ref _nextKey);
-
-            _dictionary[key] = item;
-
-            return key;
-        }
-
-        public bool TryRemove(long key, out T? item)
-        {
-            return _dictionary.TryRemove(key, out item);
-        }
-
-        public void Visit(Action<T> visitor)
-        {
-            foreach (var (_, item) in _dictionary)
-            {
-                visitor.Invoke(item);
-            }
+            visitor.Invoke(item);
         }
     }
 }

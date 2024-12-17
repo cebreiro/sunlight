@@ -2,7 +2,6 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sunlight.ManagementStudio.Models.Setting;
-using Sunlight.ManagementStudio.Views.Pages;
 using Sunlight.ManagementStudio.Views.Windows;
 using Wpf.Ui.Appearance;
 
