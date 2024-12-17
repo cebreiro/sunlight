@@ -87,35 +87,46 @@ public partial class LoginViewModel : ObservableObject, IDisposable
 
         Task.Run(async () =>
         {
-            bool connect = await _sunlightController.Connect(Address, ushort.Parse(Port));
-
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                _isPendingConnection = false;
-                _isConnected = connect;
+                bool connect = await _sunlightController.Connect(Address, ushort.Parse(Port));
 
-                OnPropertyChanged(nameof(IsActive));
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _isPendingConnection = false;
+                    _isConnected = connect;
 
-                MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), $"connected: {connect}", "error");
-            });
+                    OnPropertyChanged(nameof(IsActive));
 
-            AuthenticationRequest request = new();
-            request.Id = Id;
-            request.Password = password;
+                    MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), $"connected: {connect}", "error");
+                });
 
-            AuthenticationResponse response = await _sunlightController.Authenticate(request);
+                AuthenticationRequest request = new();
+                request.Id = Id;
+                request.Password = password;
 
-            Application.Current.Dispatcher.Invoke(() =>
+                AuthenticationResponse response = await _sunlightController.Authenticate(request);
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (response.Success != 0)
+                    {
+                        MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), "auth success", "error");
+                    }
+                    else
+                    {
+                        MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), "auth fail", "error");
+                    }
+                });
+
+            }
+            catch (Exception e)
             {
-                if (response.Success != 0)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), "auth success", "error");
-                }
-                else
-                {
-                    MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), "auth fail", "error");
-                }
-            });
+                    MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), $"{e.Message}", "error");
+                });
+            }
         });
     }
 

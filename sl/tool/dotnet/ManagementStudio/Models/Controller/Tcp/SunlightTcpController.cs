@@ -6,16 +6,24 @@ using Sunlight.ManagementStudio.Models.Event.Args;
 
 namespace Sunlight.ManagementStudio.Models.Controller.Tcp;
 
-public class SunlightTcpController(IEventProducer eventProducer) : ISunlightController
+public class SunlightTcpController : ISunlightController
 {
     private readonly AsyncLock _mutex = new();
 
-    private SunlightTcpClient? _tcpClient = null;
-    private bool _pendingConnection = false;
+    private SunlightTcpClient _tcpClient = new();
 
     private int _nextRequestId = 1;
 
     private ConcurrentDictionary<int, ReceiveHandler> _receiveHandlers = new();
+    private readonly IEventProducer _eventProducer;
+
+    public SunlightTcpController(IEventProducer eventProducer)
+    {
+        _eventProducer = eventProducer;
+
+        _tcpClient.SetReceiveHandler(OnReceiveResponse);
+        _tcpClient.SetDisconnectHandler(OnDisconnected);
+    }
 
     private struct ReceiveHandler(Action<Response> successHandler, Action failureHandler)
     {
@@ -23,44 +31,28 @@ public class SunlightTcpController(IEventProducer eventProducer) : ISunlightCont
         public readonly Action FailureHandler = failureHandler;
     }
 
-    public Task<bool> Connect(string address, ushort port)
+    public async Task<bool> Connect(string address, ushort port)
     {
-        TaskCompletionSource<bool> completionSource = new();
-
-        using (_mutex.Lock())
+        if (_tcpClient.IsConnected())
         {
-            if (_pendingConnection)
-            {
-                completionSource.SetException(new Exception("connection is pending"));
-
-                return completionSource.Task;
-            }
-
-            _pendingConnection = true;
-
-            SunlightTcpClient tcpClient = new(address, port);
-
-            tcpClient.Connect().ContinueWith(task =>
-            {
-                bool connected = task.Result;
-
-                using (_mutex.Lock())
-                {
-                    if (connected)
-                    {
-                        _tcpClient = tcpClient;
-                        _tcpClient.SetReceiveHandler(OnReceiveResponse);
-                        _tcpClient.SetDisconnectHandler(OnDisconnected);
-                    }
-
-                    _pendingConnection = false;
-                }
-
-                completionSource.SetResult(connected);
-            });
+            return false;
         }
 
-        return completionSource.Task;
+        try
+        {
+            if (await _tcpClient.ConnectAsync(address, port))
+            {
+                _tcpClient.StartReceive();
+
+                return true;
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+
+        return false;
     }
 
     public Task<AuthenticationResponse> Authenticate(AuthenticationRequest authentication)
@@ -69,13 +61,6 @@ public class SunlightTcpController(IEventProducer eventProducer) : ISunlightCont
 
         using (_mutex.Lock())
         {
-            if (_tcpClient == null)
-            {
-                completionSource.SetException(new Exception("tcp client is not connected"));
-
-                return completionSource.Task;
-            }
-
             int requestId = _nextRequestId++;
 
             System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
@@ -93,10 +78,24 @@ public class SunlightTcpController(IEventProducer eventProducer) : ISunlightCont
                 Authentication = authentication
             };
 
-            _tcpClient.Send(request);
+            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
         }
 
         return completionSource.Task;
+    }
+
+    private void ConfigureSendFailHandler(Task task, int requestId)
+    {
+        task.ContinueWith(t =>
+        {
+            if (t.IsFaulted)
+            {
+                if (_receiveHandlers.TryRemove(requestId, out ReceiveHandler receiveHandler))
+                {
+                    receiveHandler.FailureHandler.Invoke();
+                }
+            }
+        });
     }
 
     private void OnReceiveResponse(Response response)
@@ -113,31 +112,21 @@ public class SunlightTcpController(IEventProducer eventProducer) : ISunlightCont
 
     private void OnDisconnected()
     {
-        ConcurrentDictionary<int, ReceiveHandler> oldCollection = null;
-        SunlightTcpClient tcpClient = null;
-
+        ConcurrentDictionary<int, ReceiveHandler>? oldCollection = null;
+ 
         using (_mutex.Lock())
         {
-            if (_tcpClient == null)
-            {
-                return;
-            }
-
-            tcpClient = _tcpClient;
             oldCollection = _receiveHandlers;
 
             _nextRequestId = 1;
-            _tcpClient = null;
             _receiveHandlers = new ConcurrentDictionary<int, ReceiveHandler>();
         }
-
-        tcpClient.Dispose();
 
         foreach (var (_, handler) in oldCollection)
         {
             handler.FailureHandler.Invoke();
         }
 
-        eventProducer.Produce(new DisconnectionEventArgs());
+        _eventProducer.Produce(new DisconnectionEventArgs());
     }
 }
