@@ -53,7 +53,7 @@ namespace sunlight
         co_return std::string(encoded.begin(), encoded.end());
     }
 
-    auto SafeHashService::Compare(std::string hash, std::string pwd) -> Future<bool>
+    auto SafeHashService::Compare(std::string hashed, std::string raw) -> Future<bool>
     {
         [[maybe_unused]]
         const auto self = shared_from_this();
@@ -61,7 +61,7 @@ namespace sunlight
         co_await *_strand;
         assert(ExecutionContext::IsEqualTo(*_strand));
 
-        co_return argon2id_verify(hash.c_str(), pwd.c_str(), pwd.size()) == ARGON2_OK;
+        co_return argon2id_verify(hashed.c_str(), raw.c_str(), raw.size()) == ARGON2_OK;
     }
 
     auto SafeHashService::MakeSalt() -> std::array<char, 16>

@@ -13,7 +13,7 @@ namespace sunlight
 
     public:
         auto Hash(std::string pwd) -> Future<std::string>;
-        auto Compare(std::string hash, std::string pwd) -> Future<bool>;
+        auto Compare(std::string hashed, std::string raw) -> Future<bool>;
 
     private:
         auto MakeSalt() -> std::array<char, 16>;
