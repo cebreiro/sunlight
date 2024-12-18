@@ -23,11 +23,8 @@ namespace sunlight
 
         _serviceLocator = serviceLocator;
 
-        auto a = std::make_shared<GeneratorControlAuthenticationHandler>(_serviceLocator);
-
-        static_assert(std::derived_from<GeneratorControlAuthenticationHandler, GeneratorControlRequestHandlerT<api::AuthenticationRequest>>);
-
-        AddHandlerToRouter(a);
+        AddHandlerToRouter(std::make_shared<GeneratorControlAuthenticationHandler>(_serviceLocator));
+        AddHandlerToRouter(std::make_shared<GeneratorControlAccountCreationHandler>(_serviceLocator));
     }
 
     void GeneratorControlAPIGatewayServer::OnAccept(Session& session)

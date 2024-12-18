@@ -25,15 +25,19 @@ namespace Sunlight.Api {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg5yZXNwb25zZS5wcm90bxIMc3VubGlnaHQuYXBpIikKFkF1dGhlbnRpY2F0",
-            "aW9uUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoBSJpCghSZXNwb25zZRISCgpy",
-            "ZXF1ZXN0X2lkGAEgASgFEj4KDmF1dGhlbnRpY2F0aW9uGGQgASgLMiQuc3Vu",
-            "bGlnaHQuYXBpLkF1dGhlbnRpY2F0aW9uUmVzcG9uc2VIAEIJCgdwYXlsb2Fk",
+            "aW9uUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoBSJBChdBY2NvdW50Q3JlYXRp",
+            "b25SZXNwb25zZRIPCgdzdWNjZXNzGAEgASgFEhUKDWVycm9yX21lc3NhZ2UY",
+            "AiABKAkirAEKCFJlc3BvbnNlEhIKCnJlcXVlc3RfaWQYASABKAUSPgoOYXV0",
+            "aGVudGljYXRpb24YZCABKAsyJC5zdW5saWdodC5hcGkuQXV0aGVudGljYXRp",
+            "b25SZXNwb25zZUgAEkEKEGFjY291bnRfY3JlYXRpb24YZSABKAsyJS5zdW5s",
+            "aWdodC5hcGkuQWNjb3VudENyZWF0aW9uUmVzcG9uc2VIAEIJCgdwYXlsb2Fk",
             "YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.AuthenticationResponse), global::Sunlight.Api.AuthenticationResponse.Parser, new[]{ "Success" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Response), global::Sunlight.Api.Response.Parser, new[]{ "RequestId", "Authentication" }, new[]{ "Payload" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.AccountCreationResponse), global::Sunlight.Api.AccountCreationResponse.Parser, new[]{ "Success", "ErrorMessage" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Response), global::Sunlight.Api.Response.Parser, new[]{ "RequestId", "Authentication", "AccountCreation" }, new[]{ "Payload" }, null, null, null)
           }));
     }
     #endregion
@@ -239,6 +243,241 @@ namespace Sunlight.Api {
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class AccountCreationResponse : pb::IMessage<AccountCreationResponse>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<AccountCreationResponse> _parser = new pb::MessageParser<AccountCreationResponse>(() => new AccountCreationResponse());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<AccountCreationResponse> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AccountCreationResponse() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AccountCreationResponse(AccountCreationResponse other) : this() {
+      success_ = other.success_;
+      errorMessage_ = other.errorMessage_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AccountCreationResponse Clone() {
+      return new AccountCreationResponse(this);
+    }
+
+    /// <summary>Field number for the "success" field.</summary>
+    public const int SuccessFieldNumber = 1;
+    private int success_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Success {
+      get { return success_; }
+      set {
+        success_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "error_message" field.</summary>
+    public const int ErrorMessageFieldNumber = 2;
+    private string errorMessage_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ErrorMessage {
+      get { return errorMessage_; }
+      set {
+        errorMessage_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as AccountCreationResponse);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(AccountCreationResponse other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Success != other.Success) return false;
+      if (ErrorMessage != other.ErrorMessage) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Success != 0) hash ^= Success.GetHashCode();
+      if (ErrorMessage.Length != 0) hash ^= ErrorMessage.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Success != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Success);
+      }
+      if (ErrorMessage.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(ErrorMessage);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Success != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Success);
+      }
+      if (ErrorMessage.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(ErrorMessage);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Success != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Success);
+      }
+      if (ErrorMessage.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ErrorMessage);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(AccountCreationResponse other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Success != 0) {
+        Success = other.Success;
+      }
+      if (other.ErrorMessage.Length != 0) {
+        ErrorMessage = other.ErrorMessage;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Success = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            ErrorMessage = input.ReadString();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Success = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            ErrorMessage = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class Response : pb::IMessage<Response>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -253,7 +492,7 @@ namespace Sunlight.Api {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -277,6 +516,9 @@ namespace Sunlight.Api {
       switch (other.PayloadCase) {
         case PayloadOneofCase.Authentication:
           Authentication = other.Authentication.Clone();
+          break;
+        case PayloadOneofCase.AccountCreation:
+          AccountCreation = other.AccountCreation.Clone();
           break;
       }
 
@@ -313,11 +555,24 @@ namespace Sunlight.Api {
       }
     }
 
+    /// <summary>Field number for the "account_creation" field.</summary>
+    public const int AccountCreationFieldNumber = 101;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Sunlight.Api.AccountCreationResponse AccountCreation {
+      get { return payloadCase_ == PayloadOneofCase.AccountCreation ? (global::Sunlight.Api.AccountCreationResponse) payload_ : null; }
+      set {
+        payload_ = value;
+        payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.AccountCreation;
+      }
+    }
+
     private object payload_;
     /// <summary>Enum of possible cases for the "payload" oneof.</summary>
     public enum PayloadOneofCase {
       None = 0,
       Authentication = 100,
+      AccountCreation = 101,
     }
     private PayloadOneofCase payloadCase_ = PayloadOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -350,6 +605,7 @@ namespace Sunlight.Api {
       }
       if (RequestId != other.RequestId) return false;
       if (!object.Equals(Authentication, other.Authentication)) return false;
+      if (!object.Equals(AccountCreation, other.AccountCreation)) return false;
       if (PayloadCase != other.PayloadCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -360,6 +616,7 @@ namespace Sunlight.Api {
       int hash = 1;
       if (RequestId != 0) hash ^= RequestId.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.Authentication) hash ^= Authentication.GetHashCode();
+      if (payloadCase_ == PayloadOneofCase.AccountCreation) hash ^= AccountCreation.GetHashCode();
       hash ^= (int) payloadCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -387,6 +644,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(162, 6);
         output.WriteMessage(Authentication);
       }
+      if (payloadCase_ == PayloadOneofCase.AccountCreation) {
+        output.WriteRawTag(170, 6);
+        output.WriteMessage(AccountCreation);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -405,6 +666,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(162, 6);
         output.WriteMessage(Authentication);
       }
+      if (payloadCase_ == PayloadOneofCase.AccountCreation) {
+        output.WriteRawTag(170, 6);
+        output.WriteMessage(AccountCreation);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -420,6 +685,9 @@ namespace Sunlight.Api {
       }
       if (payloadCase_ == PayloadOneofCase.Authentication) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(Authentication);
+      }
+      if (payloadCase_ == PayloadOneofCase.AccountCreation) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(AccountCreation);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -442,6 +710,12 @@ namespace Sunlight.Api {
             Authentication = new global::Sunlight.Api.AuthenticationResponse();
           }
           Authentication.MergeFrom(other.Authentication);
+          break;
+        case PayloadOneofCase.AccountCreation:
+          if (AccountCreation == null) {
+            AccountCreation = new global::Sunlight.Api.AccountCreationResponse();
+          }
+          AccountCreation.MergeFrom(other.AccountCreation);
           break;
       }
 
@@ -477,6 +751,15 @@ namespace Sunlight.Api {
             Authentication = subBuilder;
             break;
           }
+          case 810: {
+            global::Sunlight.Api.AccountCreationResponse subBuilder = new global::Sunlight.Api.AccountCreationResponse();
+            if (payloadCase_ == PayloadOneofCase.AccountCreation) {
+              subBuilder.MergeFrom(AccountCreation);
+            }
+            input.ReadMessage(subBuilder);
+            AccountCreation = subBuilder;
+            break;
+          }
         }
       }
     #endif
@@ -507,6 +790,15 @@ namespace Sunlight.Api {
             }
             input.ReadMessage(subBuilder);
             Authentication = subBuilder;
+            break;
+          }
+          case 810: {
+            global::Sunlight.Api.AccountCreationResponse subBuilder = new global::Sunlight.Api.AccountCreationResponse();
+            if (payloadCase_ == PayloadOneofCase.AccountCreation) {
+              subBuilder.MergeFrom(AccountCreation);
+            }
+            input.ReadMessage(subBuilder);
+            AccountCreation = subBuilder;
             break;
           }
         }

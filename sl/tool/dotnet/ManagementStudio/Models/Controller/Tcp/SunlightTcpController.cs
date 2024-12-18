@@ -55,11 +55,11 @@ public class SunlightTcpController : ISunlightController
         return false;
     }
 
-    public Task<AuthenticationResponse> Authenticate(AuthenticationRequest authentication)
+    public async Task<AuthenticationResponse> Authenticate(AuthenticationRequest authentication)
     {
         TaskCompletionSource<AuthenticationResponse> completionSource = new();
 
-        using (_mutex.Lock())
+        using (await _mutex.LockAsync())
         {
             int requestId = _nextRequestId++;
 
@@ -81,7 +81,36 @@ public class SunlightTcpController : ISunlightController
             ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
         }
 
-        return completionSource.Task;
+        return await completionSource.Task;
+    }
+
+    public async Task<AccountCreationResponse> CreateAccount(AccountCreationReuqest accountCreation)
+    {
+        TaskCompletionSource<AccountCreationResponse> completionSource = new();
+
+        using (await _mutex.LockAsync())
+        {
+            int requestId = _nextRequestId++;
+
+            System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
+
+            _receiveHandlers[requestId] = new ReceiveHandler(
+                response =>
+                {
+                    completionSource.SetResult(response.AccountCreation);
+                },
+                () => completionSource.SetException(new Exception("operation aborted")));
+
+            Request request = new()
+            {
+                RequestId = requestId,
+                AccountCreation = accountCreation
+            };
+
+            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
+        }
+
+        return await completionSource.Task;
     }
 
     private void ConfigureSendFailHandler(Task task, int requestId)

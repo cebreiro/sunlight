@@ -23,7 +23,7 @@ namespace sunlight
     {
         assert(requestHandler);
 
-        const google::protobuf::Descriptor* descriptor = api::AuthenticationRequest::GetDescriptor();
+        const google::protobuf::Descriptor* descriptor = T::GetDescriptor();
         assert(descriptor);
 
         auto handler = [](SharedPtrNotNull<GeneratorControlAPIGatewayConnection> connection, int32_t requestId, const google::protobuf::Message& message,

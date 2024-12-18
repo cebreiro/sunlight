@@ -4,6 +4,7 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:page="clr-namespace:Sunlight.ManagementStudio.Views.Pages"
+                 xmlns:local="clr-namespace:Sunlight.ManagementStudio.Views.Windows"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  mc:Ignorable="d"
                  Title="MainWindow"
@@ -11,12 +12,16 @@
                  MinHeight="768"
                  d:DesignHeight="768"
                  d:DesignWidth="1366"
+                 WindowStartupLocation="CenterScreen"
+                 d:DataContext="{d:DesignInstance local:MainWindow,
+                                     IsDesignTimeCreatable=False}"
+                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+                 ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                  >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <ContentPresenter x:Name="RootContentDialog" Grid.Row="0" />
@@ -26,9 +31,10 @@
                      Title="Sunlight Management Studio" />
         <ui:NavigationView
             x:Name="NavigationView"
-            Grid.Row="2"
+            Grid.Row="1"
             MinHeight="300"
             Margin="0"
+            Padding="0"
             IsBackButtonVisible="Collapsed"
             IsPaneToggleVisible="False"
             PaneDisplayMode="LeftFluent">
@@ -37,6 +43,14 @@
                     Content="Home"
                     Icon="{ui:SymbolIcon Home24}"
                     TargetPageType="{x:Type page:HomePage}" />
+                <ui:NavigationViewItem
+                    Icon="{ui:SymbolIcon PersonAccounts24}"
+                    TargetPageType="{x:Type page:AccountPage}">
+                    <ui:NavigationViewItem.Content>
+                        <TextBlock FontSize="13"
+                                   Text="Account"/>
+                    </ui:NavigationViewItem.Content>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem
                     Content="Settings"
                     Icon="{ui:SymbolIcon Settings24}"

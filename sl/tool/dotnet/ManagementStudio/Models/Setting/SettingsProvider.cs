@@ -11,7 +11,7 @@ public class SettingsProvider
     public AppearanceSetting AppearanceSetting => _settings.AppearanceSetting;
     public ConnectionSetting ConnectionSetting => _settings.ConnectionSetting;
 
-    public void LoadFromFileAsync()
+    public void LoadFromFile()
     {
         string filePath = GetSettingFilePath();
 

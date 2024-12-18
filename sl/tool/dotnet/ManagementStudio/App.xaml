@@ -10,13 +10,17 @@
         <ResourceDictionary>
 
             <ResourceDictionary.MergedDictionaries>
-                <ui:ThemesDictionary Theme="Light" />
+                <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
 
             </ResourceDictionary.MergedDictionaries>
 
             <helpers:ThemeToIndexConverter x:Key="ThemeToIndexConverter" />
             <helpers:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+
+            <Style x:Key="TabItemColorStyle" TargetType="TabItem">
+                <Setter Property="Background" Value="{ui:ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+            </Style>
 
         </ResourceDictionary>
     </Application.Resources>

@@ -45,6 +45,9 @@ public partial class App
                 _ = services.AddSingleton<SettingsViewModel>();
                 _ = services.AddSingleton<SettingsPage>();
 
+                _ = services.AddSingleton<AccountPageViewModel>();
+                _ = services.AddSingleton<AccountPage>();
+
                 _ = services.AddSingleton<HomePage>();
 
                 _ = services.AddTransient<LoginViewModel>();

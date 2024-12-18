@@ -52,6 +52,34 @@ struct AuthenticationResponseDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AuthenticationResponseDefaultTypeInternal _AuthenticationResponse_default_instance_;
 
+inline constexpr AccountCreationResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : error_message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        success_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR AccountCreationResponse::AccountCreationResponse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct AccountCreationResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AccountCreationResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AccountCreationResponseDefaultTypeInternal() {}
+  union {
+    AccountCreationResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AccountCreationResponseDefaultTypeInternal _AccountCreationResponse_default_instance_;
+
 inline constexpr Response::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : request_id_{0},
@@ -97,6 +125,16 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::AuthenticationResponse, _impl_.success_),
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::AccountCreationResponse, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::AccountCreationResponse, _impl_.success_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::AccountCreationResponse, _impl_.error_message_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_._oneof_case_[0]),
@@ -106,37 +144,44 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_.request_id_),
         ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_.payload_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::sunlight::api::AuthenticationResponse)},
-        {9, -1, -1, sizeof(::sunlight::api::Response)},
+        {9, -1, -1, sizeof(::sunlight::api::AccountCreationResponse)},
+        {19, -1, -1, sizeof(::sunlight::api::Response)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_AuthenticationResponse_default_instance_._instance,
+    &::sunlight::api::_AccountCreationResponse_default_instance_._instance,
     &::sunlight::api::_Response_default_instance_._instance,
 };
 const char descriptor_table_protodef_response_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\016response.proto\022\014sunlight.api\")\n\026Authen"
-    "ticationResponse\022\017\n\007success\030\001 \001(\005\"i\n\010Res"
-    "ponse\022\022\n\nrequest_id\030\001 \001(\005\022>\n\016authenticat"
-    "ion\030d \001(\0132$.sunlight.api.AuthenticationR"
-    "esponseH\000B\t\n\007payloadb\006proto3"
+    "ticationResponse\022\017\n\007success\030\001 \001(\005\"A\n\027Acc"
+    "ountCreationResponse\022\017\n\007success\030\001 \001(\005\022\025\n"
+    "\rerror_message\030\002 \001(\t\"\254\001\n\010Response\022\022\n\nreq"
+    "uest_id\030\001 \001(\005\022>\n\016authentication\030d \001(\0132$."
+    "sunlight.api.AuthenticationResponseH\000\022A\n"
+    "\020account_creation\030e \001(\0132%.sunlight.api.A"
+    "ccountCreationResponseH\000B\t\n\007payloadb\006pro"
+    "to3"
 };
 static ::absl::once_flag descriptor_table_response_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_response_2eproto = {
     false,
     false,
-    188,
+    323,
     descriptor_table_protodef_response_2eproto,
     "response.proto",
     &descriptor_table_response_2eproto_once,
     nullptr,
     0,
-    2,
+    3,
     schemas,
     file_default_instances,
     TableStruct_response_2eproto::offsets,
@@ -354,6 +399,263 @@ void AuthenticationResponse::InternalSwap(AuthenticationResponse* PROTOBUF_RESTR
 }
 // ===================================================================
 
+class AccountCreationResponse::_Internal {
+ public:
+};
+
+AccountCreationResponse::AccountCreationResponse(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.AccountCreationResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE AccountCreationResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::sunlight::api::AccountCreationResponse& from_msg)
+      : error_message_(arena, from.error_message_),
+        _cached_size_{0} {}
+
+AccountCreationResponse::AccountCreationResponse(
+    ::google::protobuf::Arena* arena,
+    const AccountCreationResponse& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  AccountCreationResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.success_ = from._impl_.success_;
+
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.AccountCreationResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE AccountCreationResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : error_message_(arena),
+        _cached_size_{0} {}
+
+inline void AccountCreationResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.success_ = {};
+}
+AccountCreationResponse::~AccountCreationResponse() {
+  // @@protoc_insertion_point(destructor:sunlight.api.AccountCreationResponse)
+  SharedDtor(*this);
+}
+inline void AccountCreationResponse::SharedDtor(MessageLite& self) {
+  AccountCreationResponse& this_ = static_cast<AccountCreationResponse&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.error_message_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* AccountCreationResponse::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) AccountCreationResponse(arena);
+}
+constexpr auto AccountCreationResponse::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(AccountCreationResponse),
+                                            alignof(AccountCreationResponse));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull AccountCreationResponse::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_AccountCreationResponse_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &AccountCreationResponse::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<AccountCreationResponse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &AccountCreationResponse::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<AccountCreationResponse>(), &AccountCreationResponse::ByteSizeLong,
+            &AccountCreationResponse::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(AccountCreationResponse, _impl_._cached_size_),
+        false,
+    },
+    &AccountCreationResponse::kDescriptorMethods,
+    &descriptor_table_response_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* AccountCreationResponse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 58, 2> AccountCreationResponse::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::AccountCreationResponse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string error_message = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(AccountCreationResponse, _impl_.error_message_)}},
+    // int32 success = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(AccountCreationResponse, _impl_.success_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(AccountCreationResponse, _impl_.success_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 success = 1;
+    {PROTOBUF_FIELD_OFFSET(AccountCreationResponse, _impl_.success_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string error_message = 2;
+    {PROTOBUF_FIELD_OFFSET(AccountCreationResponse, _impl_.error_message_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\44\0\15\0\0\0\0\0"
+    "sunlight.api.AccountCreationResponse"
+    "error_message"
+  }},
+};
+
+PROTOBUF_NOINLINE void AccountCreationResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.AccountCreationResponse)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.error_message_.ClearToEmpty();
+  _impl_.success_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* AccountCreationResponse::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const AccountCreationResponse& this_ = static_cast<const AccountCreationResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* AccountCreationResponse::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const AccountCreationResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.AccountCreationResponse)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int32 success = 1;
+          if (this_._internal_success() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<1>(
+                    stream, this_._internal_success(), target);
+          }
+
+          // string error_message = 2;
+          if (!this_._internal_error_message().empty()) {
+            const std::string& _s = this_._internal_error_message();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "sunlight.api.AccountCreationResponse.error_message");
+            target = stream->WriteStringMaybeAliased(2, _s, target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.AccountCreationResponse)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t AccountCreationResponse::ByteSizeLong(const MessageLite& base) {
+          const AccountCreationResponse& this_ = static_cast<const AccountCreationResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t AccountCreationResponse::ByteSizeLong() const {
+          const AccountCreationResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.AccountCreationResponse)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // string error_message = 2;
+            if (!this_._internal_error_message().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_error_message());
+            }
+            // int32 success = 1;
+            if (this_._internal_success() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_success());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void AccountCreationResponse::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<AccountCreationResponse*>(&to_msg);
+  auto& from = static_cast<const AccountCreationResponse&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.AccountCreationResponse)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_error_message().empty()) {
+    _this->_internal_set_error_message(from._internal_error_message());
+  }
+  if (from._internal_success() != 0) {
+    _this->_impl_.success_ = from._impl_.success_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void AccountCreationResponse::CopyFrom(const AccountCreationResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.AccountCreationResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void AccountCreationResponse::InternalSwap(AccountCreationResponse* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_message_, &other->_impl_.error_message_, arena);
+        swap(_impl_.success_, other->_impl_.success_);
+}
+
+::google::protobuf::Metadata AccountCreationResponse::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class Response::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -372,6 +674,19 @@ void Response::set_allocated_authentication(::sunlight::api::AuthenticationRespo
     _impl_.payload_.authentication_ = authentication;
   }
   // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.authentication)
+}
+void Response::set_allocated_account_creation(::sunlight::api::AccountCreationResponse* account_creation) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_payload();
+  if (account_creation) {
+    ::google::protobuf::Arena* submessage_arena = account_creation->GetArena();
+    if (message_arena != submessage_arena) {
+      account_creation = ::google::protobuf::internal::GetOwnedMessage(message_arena, account_creation, submessage_arena);
+    }
+    set_has_account_creation();
+    _impl_.payload_.account_creation_ = account_creation;
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.account_creation)
 }
 Response::Response(::google::protobuf::Arena* arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -408,6 +723,9 @@ Response::Response(
       break;
       case kAuthentication:
         _impl_.payload_.authentication_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::AuthenticationResponse>(arena, *from._impl_.payload_.authentication_);
+        break;
+      case kAccountCreation:
+        _impl_.payload_.account_creation_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::AccountCreationResponse>(arena, *from._impl_.payload_.account_creation_);
         break;
   }
 
@@ -447,6 +765,14 @@ void Response::clear_payload() {
         delete _impl_.payload_.authentication_;
       } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
         ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.authentication_);
+      }
+      break;
+    }
+    case kAccountCreation: {
+      if (GetArena() == nullptr) {
+        delete _impl_.payload_.account_creation_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.account_creation_);
       }
       break;
     }
@@ -494,16 +820,16 @@ const ::google::protobuf::internal::ClassData* Response::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 2, 1, 0, 7> Response::_table_ = {
+const ::_pbi::TcParseTable<0, 3, 2, 0, 7> Response::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    100, 0,  // max_field_number, fast_idx_mask
+    101, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
-    1,  // num_aux_entries
+    3,  // num_field_entries
+    2,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     _class_data_.base(),
     nullptr,  // post_loop_handler
@@ -517,7 +843,7 @@ const ::_pbi::TcParseTable<0, 2, 1, 0, 7> Response::_table_ = {
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(Response, _impl_.request_id_)}},
   }}, {{
     100, 0, 1,
-    65534, 1,
+    65532, 1,
     65535, 65535
   }}, {{
     // int32 request_id = 1;
@@ -526,8 +852,12 @@ const ::_pbi::TcParseTable<0, 2, 1, 0, 7> Response::_table_ = {
     // .sunlight.api.AuthenticationResponse authentication = 100;
     {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.authentication_), _Internal::kOneofCaseOffset + 0, 0,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .sunlight.api.AccountCreationResponse account_creation = 101;
+    {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.account_creation_), _Internal::kOneofCaseOffset + 0, 1,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::sunlight::api::AuthenticationResponse>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::AccountCreationResponse>()},
   }}, {{
   }},
 };
@@ -566,13 +896,22 @@ PROTOBUF_NOINLINE void Response::Clear() {
                     stream, this_._internal_request_id(), target);
           }
 
-          // .sunlight.api.AuthenticationResponse authentication = 100;
-          if (this_.payload_case() == kAuthentication) {
-            target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-                100, *this_._impl_.payload_.authentication_, this_._impl_.payload_.authentication_->GetCachedSize(), target,
-                stream);
+          switch (this_.payload_case()) {
+            case kAuthentication: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  100, *this_._impl_.payload_.authentication_, this_._impl_.payload_.authentication_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
+            case kAccountCreation: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  101, *this_._impl_.payload_.account_creation_, this_._impl_.payload_.account_creation_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
+            default:
+              break;
           }
-
           if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
             target =
                 ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -608,6 +947,12 @@ PROTOBUF_NOINLINE void Response::Clear() {
             case kAuthentication: {
               total_size += 2 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.authentication_);
+              break;
+            }
+            // .sunlight.api.AccountCreationResponse account_creation = 101;
+            case kAccountCreation: {
+              total_size += 2 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.account_creation_);
               break;
             }
             case PAYLOAD_NOT_SET: {
@@ -647,6 +992,15 @@ void Response::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google
               ::google::protobuf::Message::CopyConstruct<::sunlight::api::AuthenticationResponse>(arena, *from._impl_.payload_.authentication_);
         } else {
           _this->_impl_.payload_.authentication_->MergeFrom(from._internal_authentication());
+        }
+        break;
+      }
+      case kAccountCreation: {
+        if (oneof_needs_init) {
+          _this->_impl_.payload_.account_creation_ =
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::AccountCreationResponse>(arena, *from._impl_.payload_.account_creation_);
+        } else {
+          _this->_impl_.payload_.account_creation_->MergeFrom(from._internal_account_creation());
         }
         break;
       }

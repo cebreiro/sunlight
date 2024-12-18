@@ -1,7 +1,6 @@
 using Sunlight.ManagementStudio.ViewModels.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
-using Wpf.Ui.Controls;
 
 namespace Sunlight.ManagementStudio.Views.Windows;
 
@@ -14,6 +13,8 @@ public partial class MainWindow
         ISnackbarService snackBarService,
         IContentDialogService contentDialogService)
     {
+        SystemThemeWatcher.Watch(this);
+
         ViewModel = viewModel;
         DataContext = this;
 
@@ -22,7 +23,5 @@ public partial class MainWindow
         snackBarService.SetSnackbarPresenter(SnackBarPresenter);
         navigationService.SetNavigationControl(NavigationView);
         contentDialogService.SetDialogHost(RootContentDialog);
-
-        SystemThemeWatcher.Watch(this);
     }
 }

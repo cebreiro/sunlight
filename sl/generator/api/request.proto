@@ -8,6 +8,13 @@ message AuthenticationRequest
     string password = 2;
 }
 
+message AccountCreationReuqest
+{
+    string id = 1;
+    string password = 2;
+    int32 gm_level = 3;
+}
+
 message Request
 {
     int32 request_id = 1;
@@ -15,6 +22,7 @@ message Request
     oneof payload
     {
         AuthenticationRequest authentication = 100;
+        AccountCreationReuqest account_creation = 101;
 
     }
 }

@@ -21,7 +21,7 @@ public class ApplicationHostService(IServiceProvider serviceProvider) : IHostedS
             return Task.CompletedTask;
         }
 
-        serviceProvider.GetRequiredService<SettingsProvider>().LoadFromFileAsync();
+        serviceProvider.GetRequiredService<SettingsProvider>().LoadFromFile();
 
         MainWindow mainWindow = serviceProvider.GetRequiredService<MainWindow>();
         mainWindow.Loaded += OnMainWindowLoaded;
@@ -46,6 +46,8 @@ public class ApplicationHostService(IServiceProvider serviceProvider) : IHostedS
 
         ApplyApplicationTheme();
         OpenLoginWindow(mainWindow);
+
+        //mainWindow.NavigationView.Navigate(typeof(AccountPage));
     }
 
     private void ApplyApplicationTheme()

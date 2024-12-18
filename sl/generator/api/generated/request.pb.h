@@ -53,6 +53,9 @@ extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_request_2eproto;
 namespace sunlight {
 namespace api {
+class AccountCreationReuqest;
+struct AccountCreationReuqestDefaultTypeInternal;
+extern AccountCreationReuqestDefaultTypeInternal _AccountCreationReuqest_default_instance_;
 class AuthenticationRequest;
 struct AuthenticationRequestDefaultTypeInternal;
 extern AuthenticationRequestDefaultTypeInternal _AuthenticationRequest_default_instance_;
@@ -289,6 +292,233 @@ class AuthenticationRequest final
 };
 // -------------------------------------------------------------------
 
+class AccountCreationReuqest final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sunlight.api.AccountCreationReuqest) */ {
+ public:
+  inline AccountCreationReuqest() : AccountCreationReuqest(nullptr) {}
+  ~AccountCreationReuqest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(AccountCreationReuqest* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(AccountCreationReuqest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR AccountCreationReuqest(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline AccountCreationReuqest(const AccountCreationReuqest& from) : AccountCreationReuqest(nullptr, from) {}
+  inline AccountCreationReuqest(AccountCreationReuqest&& from) noexcept
+      : AccountCreationReuqest(nullptr, std::move(from)) {}
+  inline AccountCreationReuqest& operator=(const AccountCreationReuqest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AccountCreationReuqest& operator=(AccountCreationReuqest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const AccountCreationReuqest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AccountCreationReuqest* internal_default_instance() {
+    return reinterpret_cast<const AccountCreationReuqest*>(
+        &_AccountCreationReuqest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(AccountCreationReuqest& a, AccountCreationReuqest& b) { a.Swap(&b); }
+  inline void Swap(AccountCreationReuqest* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AccountCreationReuqest* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  AccountCreationReuqest* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<AccountCreationReuqest>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const AccountCreationReuqest& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const AccountCreationReuqest& from) { AccountCreationReuqest::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(AccountCreationReuqest* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sunlight.api.AccountCreationReuqest"; }
+
+ protected:
+  explicit AccountCreationReuqest(::google::protobuf::Arena* arena);
+  AccountCreationReuqest(::google::protobuf::Arena* arena, const AccountCreationReuqest& from);
+  AccountCreationReuqest(::google::protobuf::Arena* arena, AccountCreationReuqest&& from) noexcept
+      : AccountCreationReuqest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kIdFieldNumber = 1,
+    kPasswordFieldNumber = 2,
+    kGmLevelFieldNumber = 3,
+  };
+  // string id = 1;
+  void clear_id() ;
+  const std::string& id() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_id(Arg_&& arg, Args_... args);
+  std::string* mutable_id();
+  PROTOBUF_NODISCARD std::string* release_id();
+  void set_allocated_id(std::string* value);
+
+  private:
+  const std::string& _internal_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_id(
+      const std::string& value);
+  std::string* _internal_mutable_id();
+
+  public:
+  // string password = 2;
+  void clear_password() ;
+  const std::string& password() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_password(Arg_&& arg, Args_... args);
+  std::string* mutable_password();
+  PROTOBUF_NODISCARD std::string* release_password();
+  void set_allocated_password(std::string* value);
+
+  private:
+  const std::string& _internal_password() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_password(
+      const std::string& value);
+  std::string* _internal_mutable_password();
+
+  public:
+  // int32 gm_level = 3;
+  void clear_gm_level() ;
+  ::int32_t gm_level() const;
+  void set_gm_level(::int32_t value);
+
+  private:
+  ::int32_t _internal_gm_level() const;
+  void _internal_set_gm_level(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:sunlight.api.AccountCreationReuqest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 0,
+      54, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const AccountCreationReuqest& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr id_;
+    ::google::protobuf::internal::ArenaStringPtr password_;
+    ::int32_t gm_level_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_request_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Request final
     : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:sunlight.api.Request) */ {
@@ -347,13 +577,14 @@ class Request final
   }
   enum PayloadCase {
     kAuthentication = 100,
+    kAccountCreation = 101,
     PAYLOAD_NOT_SET = 0,
   };
   static inline const Request* internal_default_instance() {
     return reinterpret_cast<const Request*>(
         &_Request_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(Request& a, Request& b) { a.Swap(&b); }
   inline void Swap(Request* other) {
     if (other == this) return;
@@ -442,6 +673,7 @@ class Request final
   enum : int {
     kRequestIdFieldNumber = 1,
     kAuthenticationFieldNumber = 100,
+    kAccountCreationFieldNumber = 101,
   };
   // int32 request_id = 1;
   void clear_request_id() ;
@@ -472,17 +704,37 @@ class Request final
   ::sunlight::api::AuthenticationRequest* _internal_mutable_authentication();
 
   public:
+  // .sunlight.api.AccountCreationReuqest account_creation = 101;
+  bool has_account_creation() const;
+  private:
+  bool _internal_has_account_creation() const;
+
+  public:
+  void clear_account_creation() ;
+  const ::sunlight::api::AccountCreationReuqest& account_creation() const;
+  PROTOBUF_NODISCARD ::sunlight::api::AccountCreationReuqest* release_account_creation();
+  ::sunlight::api::AccountCreationReuqest* mutable_account_creation();
+  void set_allocated_account_creation(::sunlight::api::AccountCreationReuqest* value);
+  void unsafe_arena_set_allocated_account_creation(::sunlight::api::AccountCreationReuqest* value);
+  ::sunlight::api::AccountCreationReuqest* unsafe_arena_release_account_creation();
+
+  private:
+  const ::sunlight::api::AccountCreationReuqest& _internal_account_creation() const;
+  ::sunlight::api::AccountCreationReuqest* _internal_mutable_account_creation();
+
+  public:
   void clear_payload();
   PayloadCase payload_case() const;
   // @@protoc_insertion_point(class_scope:sunlight.api.Request)
  private:
   class _Internal;
   void set_has_authentication();
+  void set_has_account_creation();
   inline bool has_payload() const;
   inline void clear_has_payload();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 2, 1,
+      0, 3, 2,
       0, 7>
       _table_;
 
@@ -505,6 +757,7 @@ class Request final
       constexpr PayloadUnion() : _constinit_{} {}
       ::google::protobuf::internal::ConstantInitialized _constinit_;
       ::sunlight::api::AuthenticationRequest* authentication_;
+      ::sunlight::api::AccountCreationReuqest* account_creation_;
     } payload_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -628,6 +881,128 @@ inline void AuthenticationRequest::set_allocated_password(std::string* value) {
 
 // -------------------------------------------------------------------
 
+// AccountCreationReuqest
+
+// string id = 1;
+inline void AccountCreationReuqest::clear_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_.ClearToEmpty();
+}
+inline const std::string& AccountCreationReuqest::id() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.AccountCreationReuqest.id)
+  return _internal_id();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void AccountCreationReuqest::set_id(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sunlight.api.AccountCreationReuqest.id)
+}
+inline std::string* AccountCreationReuqest::mutable_id() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_id();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.AccountCreationReuqest.id)
+  return _s;
+}
+inline const std::string& AccountCreationReuqest::_internal_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.id_.Get();
+}
+inline void AccountCreationReuqest::_internal_set_id(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_.Set(value, GetArena());
+}
+inline std::string* AccountCreationReuqest::_internal_mutable_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.id_.Mutable( GetArena());
+}
+inline std::string* AccountCreationReuqest::release_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sunlight.api.AccountCreationReuqest.id)
+  return _impl_.id_.Release();
+}
+inline void AccountCreationReuqest::set_allocated_id(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.id_.IsDefault()) {
+    _impl_.id_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.AccountCreationReuqest.id)
+}
+
+// string password = 2;
+inline void AccountCreationReuqest::clear_password() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.password_.ClearToEmpty();
+}
+inline const std::string& AccountCreationReuqest::password() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.AccountCreationReuqest.password)
+  return _internal_password();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void AccountCreationReuqest::set_password(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.password_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sunlight.api.AccountCreationReuqest.password)
+}
+inline std::string* AccountCreationReuqest::mutable_password() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_password();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.AccountCreationReuqest.password)
+  return _s;
+}
+inline const std::string& AccountCreationReuqest::_internal_password() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.password_.Get();
+}
+inline void AccountCreationReuqest::_internal_set_password(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.password_.Set(value, GetArena());
+}
+inline std::string* AccountCreationReuqest::_internal_mutable_password() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.password_.Mutable( GetArena());
+}
+inline std::string* AccountCreationReuqest::release_password() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sunlight.api.AccountCreationReuqest.password)
+  return _impl_.password_.Release();
+}
+inline void AccountCreationReuqest::set_allocated_password(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.password_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.password_.IsDefault()) {
+    _impl_.password_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.AccountCreationReuqest.password)
+}
+
+// int32 gm_level = 3;
+inline void AccountCreationReuqest::clear_gm_level() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.gm_level_ = 0;
+}
+inline ::int32_t AccountCreationReuqest::gm_level() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.AccountCreationReuqest.gm_level)
+  return _internal_gm_level();
+}
+inline void AccountCreationReuqest::set_gm_level(::int32_t value) {
+  _internal_set_gm_level(value);
+  // @@protoc_insertion_point(field_set:sunlight.api.AccountCreationReuqest.gm_level)
+}
+inline ::int32_t AccountCreationReuqest::_internal_gm_level() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.gm_level_;
+}
+inline void AccountCreationReuqest::_internal_set_gm_level(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.gm_level_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // Request
 
 // int32 request_id = 1;
@@ -728,6 +1103,85 @@ inline ::sunlight::api::AuthenticationRequest* Request::_internal_mutable_authen
 inline ::sunlight::api::AuthenticationRequest* Request::mutable_authentication() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::sunlight::api::AuthenticationRequest* _msg = _internal_mutable_authentication();
   // @@protoc_insertion_point(field_mutable:sunlight.api.Request.authentication)
+  return _msg;
+}
+
+// .sunlight.api.AccountCreationReuqest account_creation = 101;
+inline bool Request::has_account_creation() const {
+  return payload_case() == kAccountCreation;
+}
+inline bool Request::_internal_has_account_creation() const {
+  return payload_case() == kAccountCreation;
+}
+inline void Request::set_has_account_creation() {
+  _impl_._oneof_case_[0] = kAccountCreation;
+}
+inline void Request::clear_account_creation() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (payload_case() == kAccountCreation) {
+    if (GetArena() == nullptr) {
+      delete _impl_.payload_.account_creation_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.account_creation_);
+    }
+    clear_has_payload();
+  }
+}
+inline ::sunlight::api::AccountCreationReuqest* Request::release_account_creation() {
+  // @@protoc_insertion_point(field_release:sunlight.api.Request.account_creation)
+  if (payload_case() == kAccountCreation) {
+    clear_has_payload();
+    auto* temp = _impl_.payload_.account_creation_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.payload_.account_creation_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::sunlight::api::AccountCreationReuqest& Request::_internal_account_creation() const {
+  return payload_case() == kAccountCreation ? *_impl_.payload_.account_creation_ : reinterpret_cast<::sunlight::api::AccountCreationReuqest&>(::sunlight::api::_AccountCreationReuqest_default_instance_);
+}
+inline const ::sunlight::api::AccountCreationReuqest& Request::account_creation() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.Request.account_creation)
+  return _internal_account_creation();
+}
+inline ::sunlight::api::AccountCreationReuqest* Request::unsafe_arena_release_account_creation() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:sunlight.api.Request.account_creation)
+  if (payload_case() == kAccountCreation) {
+    clear_has_payload();
+    auto* temp = _impl_.payload_.account_creation_;
+    _impl_.payload_.account_creation_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Request::unsafe_arena_set_allocated_account_creation(::sunlight::api::AccountCreationReuqest* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_payload();
+  if (value) {
+    set_has_account_creation();
+    _impl_.payload_.account_creation_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sunlight.api.Request.account_creation)
+}
+inline ::sunlight::api::AccountCreationReuqest* Request::_internal_mutable_account_creation() {
+  if (payload_case() != kAccountCreation) {
+    clear_payload();
+    set_has_account_creation();
+    _impl_.payload_.account_creation_ =
+        ::google::protobuf::Message::DefaultConstruct<::sunlight::api::AccountCreationReuqest>(GetArena());
+  }
+  return _impl_.payload_.account_creation_;
+}
+inline ::sunlight::api::AccountCreationReuqest* Request::mutable_account_creation() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::sunlight::api::AccountCreationReuqest* _msg = _internal_mutable_account_creation();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.Request.account_creation)
   return _msg;
 }
 

@@ -7,6 +7,12 @@ message AuthenticationResponse
     int32 success = 1;
 }
 
+message AccountCreationResponse
+{
+    int32 success = 1;
+    string error_message = 2;
+}
+
 message Response
 {
     int32 request_id = 1;
@@ -14,5 +20,6 @@ message Response
     oneof payload
     {
         AuthenticationResponse authentication = 100;
+        AccountCreationResponse account_creation = 101;
     }
 }
