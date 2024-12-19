@@ -40,6 +40,35 @@ namespace sunlight
         co_return result->gmLevel;*/
     }
 
+    auto GeneratorControlService::CreateAccount(std::string id, std::string password, int8_t gmLevel, std::string* optOutError) -> Future<bool>
+    {
+        bool success = false;
+
+        try
+        {
+            std::string encoded = co_await _serviceLocator.Get<SafeHashService>().Hash(password);
+
+            std::optional<db::dto::Account> result = co_await _serviceLocator.Get<DatabaseService>().CreateAccount(
+                id, std::move(encoded), gmLevel);
+
+            success = result.has_value();
+
+            if (optOutError && !success)
+            {
+                *optOutError = "fail to add account to database";
+            }
+        }
+        catch (const std::exception& e)
+        {
+            if (optOutError)
+            {
+                *optOutError = e.what();
+            }
+        }
+
+        co_return success;
+    }
+
     auto GeneratorControlService::GetName() const -> std::string_view
     {
         return "generator_control_service";
