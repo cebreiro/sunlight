@@ -10,6 +10,7 @@ using Sunlight.ManagementStudio.Models.Event.Args;
 using Sunlight.ManagementStudio.Models.Setting;
 using Sunlight.ManagementStudio.Views.Pages;
 using Sunlight.ManagementStudio.Views.Windows;
+using Wpf.Ui.Controls;
 
 namespace Sunlight.ManagementStudio.ViewModels.Windows;
 
@@ -155,6 +156,12 @@ public partial class LoginViewModel : ObservableObject
                         mainWindow.Activate();
 
                         _ = mainWindow.NavigationView.Navigate(typeof(HomePage));
+
+                        mainWindow.Notify(
+                            title: "Connection is successfully established",
+                            message: $"id: {Id}, EndPoint: {Address}:{Port}",
+                            seconds:3.0,
+                            appearance: ControlAppearance.Success);
                     }
                 });
             }

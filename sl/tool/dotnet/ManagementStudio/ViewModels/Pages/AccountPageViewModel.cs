@@ -7,6 +7,7 @@ using Sunlight.ManagementStudio.Models.Controller;
 using Sunlight.ManagementStudio.ViewModels.Pages.Account;
 using Sunlight.ManagementStudio.Views.Pages;
 using Sunlight.ManagementStudio.Views.Windows;
+using Wpf.Ui.Controls;
 
 namespace Sunlight.ManagementStudio.ViewModels.Pages;
 
@@ -33,16 +34,12 @@ public partial class AccountPageViewModel(IServiceProvider serviceProvider) : Ob
 
         Task.Run(async () =>
         {
+            AccountCreationResponse? response = null;
+
             try
             {
-                AccountCreationResponse response =
+                response =
                     await serviceProvider.GetRequired<ISunlightController>().CreateAccount(request);
-
-                if (response != null)
-                {
-                    MessageBox.Show(serviceProvider.GetRequired<MainWindow>(),
-                        $"success: {response.Success}, error: {response.ErrorMessage}", "result");
-                }
             }
             catch
             {
@@ -53,6 +50,28 @@ public partial class AccountPageViewModel(IServiceProvider serviceProvider) : Ob
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     CreateViewModel.IsActive = true;
+
+                    if (response != null)
+                    {
+                        MainWindow mainWindow = serviceProvider.GetRequired<MainWindow>();
+
+                        if (response.Success != 0)
+                        {
+                            mainWindow.Notify(
+                                title: "Success to Account Creation",
+                                message: $"id: {request.Id}, GM: {request.GmLevel}",
+                                seconds: 3.0,
+                                ControlAppearance.Success);
+                        }
+                        else
+                        {
+                            mainWindow.Notify(
+                                title: "Failure to Account Creation",
+                                message: $"id: {request.Id}, GM: {request.GmLevel}, Error: {response.ErrorMessage}",
+                                seconds: 3.0,
+                                ControlAppearance.Danger);
+                        }
+                    }
                 });
             }
         });

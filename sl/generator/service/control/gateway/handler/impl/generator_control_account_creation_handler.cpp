@@ -45,6 +45,11 @@ namespace sunlight
                 request.id(), std::move(encoded), static_cast<int8_t>(request.gm_level()));
 
             success = result.has_value();
+
+            if (!success)
+            {
+                error = fmt::format("fail to add account to database");
+            }
         }
         catch (const std::exception& e)
         {
