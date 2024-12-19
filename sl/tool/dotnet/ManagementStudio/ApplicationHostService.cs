@@ -1,4 +1,3 @@
-using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -6,7 +5,6 @@ using Sunlight.ManagementStudio.Helpers;
 using Sunlight.ManagementStudio.Models.Event;
 using Sunlight.ManagementStudio.Models.Event.Args;
 using Sunlight.ManagementStudio.Models.Setting;
-using Sunlight.ManagementStudio.Views.Pages;
 using Sunlight.ManagementStudio.Views.Windows;
 using Wpf.Ui.Appearance;
 
@@ -20,6 +18,8 @@ public class ApplicationHostService(IServiceProvider serviceProvider) : IHostedS
         {
             return Task.CompletedTask;
         }
+
+        serviceProvider.GetRequired<IEventListener>().Listen(OnDisconnected);
 
         serviceProvider.GetRequiredService<SettingsProvider>().LoadFromFile();
 
@@ -42,12 +42,8 @@ public class ApplicationHostService(IServiceProvider serviceProvider) : IHostedS
             return;
         }
 
-        serviceProvider.GetRequired<IEventListener>().Listen(OnDisconnected);
-
         ApplyApplicationTheme();
         OpenLoginWindow(mainWindow);
-
-        //mainWindow.NavigationView.Navigate(typeof(AccountPage));
     }
 
     private void ApplyApplicationTheme()
@@ -69,25 +65,11 @@ public class ApplicationHostService(IServiceProvider serviceProvider) : IHostedS
 
         LoginWindow loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
         loginWindow.Owner = mainWindow;
-        loginWindow.Closed += (sender, args) =>
-        {
-            Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                mainWindow.IsEnabled = true;
-                mainWindow.TitleBar.ShowMinimize = true;
-                mainWindow.TitleBar.ShowMaximize = true;
-                mainWindow.TitleBar.ShowClose = true;
-
-                mainWindow.Activate();
-
-                _ = mainWindow.NavigationView.Navigate(typeof(HomePage));
-            });
-        };
 
         loginWindow.Show();
     }
 
-    void OnDisconnected(DisconnectionEventArgs args)
+    private void OnDisconnected(DisconnectionEventArgs args)
     {
         Application.Current.Dispatcher.InvokeAsync(() =>
         {

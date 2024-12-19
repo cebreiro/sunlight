@@ -20,14 +20,6 @@ public partial class LoginWindow
         viewModel.LoginWindow = this;
 
         InitializeComponent();
-
-        Closed += ((sender, args) =>
-        {
-            if (viewModel is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        });
     }
 
     public async Task ShowErrorDialogAsync(string content)
@@ -52,10 +44,7 @@ public partial class LoginWindow
     {
         ApplicationThemeManager.Changed -= OnApplicationThemeChanged;
 
-        if (!ViewModel.IsAuthenticated)
-        {
-            Application.Current.Shutdown();
-        }
+        Application.Current.Shutdown();
     }
 
     private void OnApplicationThemeChanged(ApplicationTheme theme, Color systemAccent)

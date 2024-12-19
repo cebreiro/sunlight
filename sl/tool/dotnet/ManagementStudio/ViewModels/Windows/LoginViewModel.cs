@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,19 +8,15 @@ using Sunlight.ManagementStudio.Models.Controller;
 using Sunlight.ManagementStudio.Models.Event;
 using Sunlight.ManagementStudio.Models.Event.Args;
 using Sunlight.ManagementStudio.Models.Setting;
+using Sunlight.ManagementStudio.Views.Pages;
 using Sunlight.ManagementStudio.Views.Windows;
-using Wpf.Ui.Controls;
-using MessageBox = System.Windows.MessageBox;
 
 namespace Sunlight.ManagementStudio.ViewModels.Windows;
 
-public partial class LoginViewModel : ObservableObject, IDisposable
+public partial class LoginViewModel : ObservableObject
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ISunlightController _sunlightController;
-    private readonly IEventListener _eventListener;
-
-    private long? _disconnectionEventKey = null;
 
     private bool _isPendingConnection = false;
     private bool _isConnected = false;
@@ -56,9 +51,8 @@ public partial class LoginViewModel : ObservableObject, IDisposable
     {
         _serviceProvider = serviceProvider;
         _sunlightController = sunlightController;
-        _eventListener = eventListener;
 
-        _disconnectionEventKey = _eventListener.Listen(OnDisconnected);
+        _ = eventListener.Listen(OnDisconnected);
 
         ConnectionSetting connectionSetting = _serviceProvider.GetRequired<SettingsProvider>().ConnectionSetting;
 
@@ -78,23 +72,18 @@ public partial class LoginViewModel : ObservableObject, IDisposable
         }
     }
 
-    ~LoginViewModel()
-    {
-        Dispose();
-    }
-
     [RelayCommand]
     private void OnConnectButtonClicked(object sender)
     {
-        if (sender is not LoginWindow loginWindow)
+        _isPendingConnection = true;
+        OnPropertyChanged(nameof(IsActive));
+
+        if (LoginWindow == null)
         {
             return;
         }
 
-        _isPendingConnection = true;
-        OnPropertyChanged(nameof(IsActive));
-
-        string password = loginWindow.PasswordBox.Password;
+        string password = LoginWindow.PasswordBox.Password;
 
         if (!IPAddress.TryParse(Address, out _))
         {
@@ -140,11 +129,11 @@ public partial class LoginViewModel : ObservableObject, IDisposable
 
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    _isPendingConnection = false;
+
                     if (response.Success == 0)
                     {
-                        _isPendingConnection = false;
                         _isConnected = false;
-
                         OnPropertyChanged(nameof(IsActive));
 
                         LoginWindow?.ShowErrorDialogAsync("fail to authenticate.");
@@ -152,8 +141,20 @@ public partial class LoginViewModel : ObservableObject, IDisposable
                     else
                     {
                         IsAuthenticated = true;
+                        OnPropertyChanged(nameof(IsActive));
 
-                        loginWindow.Close();
+                        LoginWindow?.Hide();
+
+                        MainWindow mainWindow = _serviceProvider.GetRequired<MainWindow>();
+
+                        mainWindow.IsEnabled = true;
+                        mainWindow.TitleBar.ShowMinimize = true;
+                        mainWindow.TitleBar.ShowMaximize = true;
+                        mainWindow.TitleBar.ShowClose = true;
+
+                        mainWindow.Activate();
+
+                        _ = mainWindow.NavigationView.Navigate(typeof(HomePage));
                     }
                 });
             }
@@ -161,7 +162,7 @@ public partial class LoginViewModel : ObservableObject, IDisposable
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    MessageBox.Show(_serviceProvider.GetRequired<MainWindow>(), $"{e.Message}", "error");
+                    LoginWindow?.ShowErrorDialogAsync($"{e.Message}");
                 });
             }
         });
@@ -178,24 +179,11 @@ public partial class LoginViewModel : ObservableObject, IDisposable
 
     private void OnDisconnected(DisconnectionEventArgs args)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current.Dispatcher.InvokeAsync(() =>
         {
+            _isPendingConnection = false;
             _isConnected = false;
             OnPropertyChanged(nameof(IsActive));
         });
-    }
-
-    public void Dispose()
-    {
-        if (_disconnectionEventKey == null)
-        {
-            return;
-        }
-
-        _eventListener.RemoveDisconnectionEventListener(_disconnectionEventKey.Value);
-
-        _disconnectionEventKey = null;
-
-        GC.SuppressFinalize(this);
     }
 }

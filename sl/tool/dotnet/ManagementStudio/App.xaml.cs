@@ -50,7 +50,7 @@ public partial class App
 
                 _ = services.AddSingleton<HomePage>();
 
-                _ = services.AddTransient<LoginViewModel>();
+                _ = services.AddSingleton<LoginViewModel>();
                 _ = services.AddTransient<LoginWindow>();
 
             })
