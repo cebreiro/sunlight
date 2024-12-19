@@ -30,14 +30,12 @@ namespace sunlight
             co_return std::nullopt;
         }
 
-        co_return 1;
-
-        /*if (!co_await _serviceLocator.Get<SafeHashService>().Compare(result->password, password))
+        if (!co_await _serviceLocator.Get<SafeHashService>().Compare(result->password, password))
         {
             co_return std::nullopt;
         }
 
-        co_return result->gmLevel;*/
+        co_return result->gmLevel;
     }
 
     auto GeneratorControlService::CreateAccount(std::string id, std::string password, int8_t gmLevel, std::string* optOutError) -> Future<bool>
