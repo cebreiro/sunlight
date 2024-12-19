@@ -156,6 +156,13 @@ namespace sunlight
 
         reader.ReadBuffer(buffer.data(), bufferSize);
 
-        return std::string(buffer.begin(), buffer.end());
+        std::string result(buffer.begin(), buffer.end());
+
+        while (!result.empty() && result.back() == '\0')
+        {
+            result.pop_back();
+        }
+
+        return result;
     }
 }
