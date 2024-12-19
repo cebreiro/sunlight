@@ -1,6 +1,7 @@
 #pragma once
 #include "sl/generator/service/database/stored_procedure/impl/account_add.h"
 #include "sl/generator/service/database/stored_procedure/impl/account_get.h"
+#include "sl/generator/service/database/stored_procedure/impl/account_password_change.h"
 #include "sl/generator/service/database/stored_procedure/impl/account_storage_get.h"
 #include "sl/generator/service/database/stored_procedure/impl/characters_name_get.h"
 #include "sl/generator/service/database/stored_procedure/impl/character_create.h"

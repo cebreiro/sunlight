@@ -113,6 +113,35 @@ public class SunlightTcpController : ISunlightController
         return await completionSource.Task;
     }
 
+    public async Task<AccountPasswordChangeResponse> ChangeAccountPassword(AccountPasswordChangeRequest accountPasswordChange)
+    {
+        TaskCompletionSource<AccountPasswordChangeResponse> completionSource = new();
+
+        using (await _mutex.LockAsync())
+        {
+            int requestId = _nextRequestId++;
+
+            System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
+
+            _receiveHandlers[requestId] = new ReceiveHandler(
+                response =>
+                {
+                    completionSource.SetResult(response.AccountPasswordChange);
+                },
+                () => completionSource.SetException(new Exception("operation aborted")));
+
+            Request request = new()
+            {
+                RequestId = requestId,
+                AccountPasswordChange = accountPasswordChange
+            };
+
+            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
+        }
+
+        return await completionSource.Task;
+    }
+
     private void ConfigureSendFailHandler(Task task, int requestId)
     {
         task.ContinueWith(t =>

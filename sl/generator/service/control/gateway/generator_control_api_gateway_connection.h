@@ -25,7 +25,7 @@ namespace sunlight
         State state = State::Connected;
         SharedPtrNotNull<Session> session;
 
-        int32_t level = 0;
+        int8_t level = 0;
 
         Buffer receiveBuffer;
 

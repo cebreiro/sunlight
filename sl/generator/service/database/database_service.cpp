@@ -56,6 +56,27 @@ namespace sunlight
         co_return procedure.GetResult();
     }
 
+    auto DatabaseService::ChangeAccountPassword(std::string account, std::string password) -> Future<bool>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_executor;
+        assert(ExecutionContext::IsEqualTo(*_executor));
+
+        db::ConnectionPool::Borrowed conn = co_await _connectionPool->Borrow();
+        db::sp::AccountPasswordChange procedure(conn, std::move(account), std::move(password));
+
+        if (const DatabaseError error = co_await procedure.ExecuteAsync(); error)
+        {
+            LogError(__FUNCTION__, error);
+
+            co_return false;
+        }
+
+        co_return true;
+    }
+
     auto DatabaseService::FindAccount(std::string account) -> Future<std::optional<db::dto::Account>>
     {
         [[maybe_unused]]

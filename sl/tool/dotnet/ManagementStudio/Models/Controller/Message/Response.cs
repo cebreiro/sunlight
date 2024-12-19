@@ -27,17 +27,21 @@ namespace Sunlight.Api {
             "Cg5yZXNwb25zZS5wcm90bxIMc3VubGlnaHQuYXBpIikKFkF1dGhlbnRpY2F0",
             "aW9uUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoBSJBChdBY2NvdW50Q3JlYXRp",
             "b25SZXNwb25zZRIPCgdzdWNjZXNzGAEgASgFEhUKDWVycm9yX21lc3NhZ2UY",
-            "AiABKAkirAEKCFJlc3BvbnNlEhIKCnJlcXVlc3RfaWQYASABKAUSPgoOYXV0",
-            "aGVudGljYXRpb24YZCABKAsyJC5zdW5saWdodC5hcGkuQXV0aGVudGljYXRp",
-            "b25SZXNwb25zZUgAEkEKEGFjY291bnRfY3JlYXRpb24YZSABKAsyJS5zdW5s",
-            "aWdodC5hcGkuQWNjb3VudENyZWF0aW9uUmVzcG9uc2VIAEIJCgdwYXlsb2Fk",
-            "YgZwcm90bzM="));
+            "AiABKAkiRwodQWNjb3VudFBhc3N3b3JkQ2hhbmdlUmVzcG9uc2USDwoHc3Vj",
+            "Y2VzcxgBIAEoBRIVCg1lcnJvcl9tZXNzYWdlGAIgASgJIvwBCghSZXNwb25z",
+            "ZRISCgpyZXF1ZXN0X2lkGAEgASgFEj4KDmF1dGhlbnRpY2F0aW9uGGQgASgL",
+            "MiQuc3VubGlnaHQuYXBpLkF1dGhlbnRpY2F0aW9uUmVzcG9uc2VIABJBChBh",
+            "Y2NvdW50X2NyZWF0aW9uGGUgASgLMiUuc3VubGlnaHQuYXBpLkFjY291bnRD",
+            "cmVhdGlvblJlc3BvbnNlSAASTgoXYWNjb3VudF9wYXNzd29yZF9jaGFuZ2UY",
+            "ZiABKAsyKy5zdW5saWdodC5hcGkuQWNjb3VudFBhc3N3b3JkQ2hhbmdlUmVz",
+            "cG9uc2VIAEIJCgdwYXlsb2FkYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.AuthenticationResponse), global::Sunlight.Api.AuthenticationResponse.Parser, new[]{ "Success" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.AccountCreationResponse), global::Sunlight.Api.AccountCreationResponse.Parser, new[]{ "Success", "ErrorMessage" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Response), global::Sunlight.Api.Response.Parser, new[]{ "RequestId", "Authentication", "AccountCreation" }, new[]{ "Payload" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.AccountPasswordChangeResponse), global::Sunlight.Api.AccountPasswordChangeResponse.Parser, new[]{ "Success", "ErrorMessage" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Response), global::Sunlight.Api.Response.Parser, new[]{ "RequestId", "Authentication", "AccountCreation", "AccountPasswordChange" }, new[]{ "Payload" }, null, null, null)
           }));
     }
     #endregion
@@ -478,6 +482,241 @@ namespace Sunlight.Api {
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class AccountPasswordChangeResponse : pb::IMessage<AccountPasswordChangeResponse>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<AccountPasswordChangeResponse> _parser = new pb::MessageParser<AccountPasswordChangeResponse>(() => new AccountPasswordChangeResponse());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<AccountPasswordChangeResponse> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[2]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AccountPasswordChangeResponse() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AccountPasswordChangeResponse(AccountPasswordChangeResponse other) : this() {
+      success_ = other.success_;
+      errorMessage_ = other.errorMessage_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public AccountPasswordChangeResponse Clone() {
+      return new AccountPasswordChangeResponse(this);
+    }
+
+    /// <summary>Field number for the "success" field.</summary>
+    public const int SuccessFieldNumber = 1;
+    private int success_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Success {
+      get { return success_; }
+      set {
+        success_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "error_message" field.</summary>
+    public const int ErrorMessageFieldNumber = 2;
+    private string errorMessage_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ErrorMessage {
+      get { return errorMessage_; }
+      set {
+        errorMessage_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as AccountPasswordChangeResponse);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(AccountPasswordChangeResponse other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Success != other.Success) return false;
+      if (ErrorMessage != other.ErrorMessage) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Success != 0) hash ^= Success.GetHashCode();
+      if (ErrorMessage.Length != 0) hash ^= ErrorMessage.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (Success != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Success);
+      }
+      if (ErrorMessage.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(ErrorMessage);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (Success != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(Success);
+      }
+      if (ErrorMessage.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(ErrorMessage);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (Success != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Success);
+      }
+      if (ErrorMessage.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ErrorMessage);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(AccountPasswordChangeResponse other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Success != 0) {
+        Success = other.Success;
+      }
+      if (other.ErrorMessage.Length != 0) {
+        ErrorMessage = other.ErrorMessage;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            Success = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            ErrorMessage = input.ReadString();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            Success = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            ErrorMessage = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class Response : pb::IMessage<Response>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -492,7 +731,7 @@ namespace Sunlight.Api {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[2]; }
+      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -519,6 +758,9 @@ namespace Sunlight.Api {
           break;
         case PayloadOneofCase.AccountCreation:
           AccountCreation = other.AccountCreation.Clone();
+          break;
+        case PayloadOneofCase.AccountPasswordChange:
+          AccountPasswordChange = other.AccountPasswordChange.Clone();
           break;
       }
 
@@ -567,12 +809,25 @@ namespace Sunlight.Api {
       }
     }
 
+    /// <summary>Field number for the "account_password_change" field.</summary>
+    public const int AccountPasswordChangeFieldNumber = 102;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Sunlight.Api.AccountPasswordChangeResponse AccountPasswordChange {
+      get { return payloadCase_ == PayloadOneofCase.AccountPasswordChange ? (global::Sunlight.Api.AccountPasswordChangeResponse) payload_ : null; }
+      set {
+        payload_ = value;
+        payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.AccountPasswordChange;
+      }
+    }
+
     private object payload_;
     /// <summary>Enum of possible cases for the "payload" oneof.</summary>
     public enum PayloadOneofCase {
       None = 0,
       Authentication = 100,
       AccountCreation = 101,
+      AccountPasswordChange = 102,
     }
     private PayloadOneofCase payloadCase_ = PayloadOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -606,6 +861,7 @@ namespace Sunlight.Api {
       if (RequestId != other.RequestId) return false;
       if (!object.Equals(Authentication, other.Authentication)) return false;
       if (!object.Equals(AccountCreation, other.AccountCreation)) return false;
+      if (!object.Equals(AccountPasswordChange, other.AccountPasswordChange)) return false;
       if (PayloadCase != other.PayloadCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -617,6 +873,7 @@ namespace Sunlight.Api {
       if (RequestId != 0) hash ^= RequestId.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.Authentication) hash ^= Authentication.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.AccountCreation) hash ^= AccountCreation.GetHashCode();
+      if (payloadCase_ == PayloadOneofCase.AccountPasswordChange) hash ^= AccountPasswordChange.GetHashCode();
       hash ^= (int) payloadCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -648,6 +905,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(170, 6);
         output.WriteMessage(AccountCreation);
       }
+      if (payloadCase_ == PayloadOneofCase.AccountPasswordChange) {
+        output.WriteRawTag(178, 6);
+        output.WriteMessage(AccountPasswordChange);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -670,6 +931,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(170, 6);
         output.WriteMessage(AccountCreation);
       }
+      if (payloadCase_ == PayloadOneofCase.AccountPasswordChange) {
+        output.WriteRawTag(178, 6);
+        output.WriteMessage(AccountPasswordChange);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -688,6 +953,9 @@ namespace Sunlight.Api {
       }
       if (payloadCase_ == PayloadOneofCase.AccountCreation) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(AccountCreation);
+      }
+      if (payloadCase_ == PayloadOneofCase.AccountPasswordChange) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(AccountPasswordChange);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -716,6 +984,12 @@ namespace Sunlight.Api {
             AccountCreation = new global::Sunlight.Api.AccountCreationResponse();
           }
           AccountCreation.MergeFrom(other.AccountCreation);
+          break;
+        case PayloadOneofCase.AccountPasswordChange:
+          if (AccountPasswordChange == null) {
+            AccountPasswordChange = new global::Sunlight.Api.AccountPasswordChangeResponse();
+          }
+          AccountPasswordChange.MergeFrom(other.AccountPasswordChange);
           break;
       }
 
@@ -760,6 +1034,15 @@ namespace Sunlight.Api {
             AccountCreation = subBuilder;
             break;
           }
+          case 818: {
+            global::Sunlight.Api.AccountPasswordChangeResponse subBuilder = new global::Sunlight.Api.AccountPasswordChangeResponse();
+            if (payloadCase_ == PayloadOneofCase.AccountPasswordChange) {
+              subBuilder.MergeFrom(AccountPasswordChange);
+            }
+            input.ReadMessage(subBuilder);
+            AccountPasswordChange = subBuilder;
+            break;
+          }
         }
       }
     #endif
@@ -799,6 +1082,15 @@ namespace Sunlight.Api {
             }
             input.ReadMessage(subBuilder);
             AccountCreation = subBuilder;
+            break;
+          }
+          case 818: {
+            global::Sunlight.Api.AccountPasswordChangeResponse subBuilder = new global::Sunlight.Api.AccountPasswordChangeResponse();
+            if (payloadCase_ == PayloadOneofCase.AccountPasswordChange) {
+              subBuilder.MergeFrom(AccountPasswordChange);
+            }
+            input.ReadMessage(subBuilder);
+            AccountPasswordChange = subBuilder;
             break;
           }
         }

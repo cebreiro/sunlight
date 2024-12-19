@@ -20,7 +20,7 @@ namespace sunlight
         if (result.has_value())
         {
             connection.state = GeneratorControlAPIGatewayConnection::State::Authenticated;
-            connection.level = *result;
+            connection.level = static_cast<int8_t>(*result);
         }
 
         api::Response response;

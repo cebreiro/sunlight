@@ -91,14 +91,50 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon Margin="0,0,6,0" Symbol="StoreMicrosoft16" />
+                        <ui:SymbolIcon Margin="0,0,6,0" Symbol="Password16" />
                         <TextBlock Text="Change Password" />
                     </StackPanel>
                 </TabItem.Header>
-                <StackPanel>
-                    <TextBlock Margin="12" Text="Is a lie." />
-                    <TextBox />
-                </StackPanel>
+                <Grid HorizontalAlignment="Left" VerticalAlignment="Top"
+                      Margin="10, 0, 0, 0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource AccountPageTextBlockStyle}" Text="Id"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource AccountPageTextBlockStyle}" Text="Password"/>
+
+                    <ui:TextBox Grid.Row="0" Grid.Column="1"
+                                BorderThickness="0"
+                                Margin="20, 10, 10, 0"
+                                Width ="200" Height="35"
+                                Text="{Binding ViewModel.ChangePasswordViewModel.Id}"
+                    />
+                    <ui:TextBox Grid.Row="1" Grid.Column="1"
+                                BorderThickness="0"
+                                Margin="20, 10, 10, 0"
+                                Width ="200" Height="35"
+                                Text="{Binding ViewModel.ChangePasswordViewModel.Password}"
+                    />
+
+                    <ui:Button Grid.Row="2" Grid.Column="2" Content="Ok"
+                               BorderThickness="0"
+                               Margin="10, 10, 10, 0"
+                               Width ="50" Height="35"
+                               IsEnabled="{Binding ViewModel.ChangePasswordViewModel.IsActive}"
+                               Command="{Binding ViewModel.ChangePasswordOkButtonClickedCommand}"
+                               CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Page}}}"
+                    />
+
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

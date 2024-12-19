@@ -35,6 +35,7 @@ namespace sunlight
 
     public:
         auto CreateAccount(std::string account, std::string password, int8_t gmLevel) -> Future<std::optional<db::dto::Account>>;
+        auto ChangeAccountPassword(std::string account, std::string password) -> Future<bool>;
         auto FindAccount(std::string account) -> Future<std::optional<db::dto::Account>>;
 
         auto GetCharacterNamesAll() -> Future<std::vector<std::string>>;

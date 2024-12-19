@@ -25,6 +25,7 @@ namespace sunlight
 
         auto Authenticate(std::string id, std::string password) -> Future<std::optional<int32_t>>;
         auto CreateAccount(std::string id, std::string password, int8_t gmLevel, std::string* optOutError) -> Future<bool>;
+        auto ChangeAccountPassword(std::string id, std::string password, std::optional<int8_t> optRequesterLevel, std::string* optOutError) -> Future<bool>;
 
         auto GetName() const -> std::string_view override;
 

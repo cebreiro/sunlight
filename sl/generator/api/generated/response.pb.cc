@@ -52,6 +52,34 @@ struct AuthenticationResponseDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AuthenticationResponseDefaultTypeInternal _AuthenticationResponse_default_instance_;
 
+inline constexpr AccountPasswordChangeResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : error_message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        success_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR AccountPasswordChangeResponse::AccountPasswordChangeResponse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct AccountPasswordChangeResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AccountPasswordChangeResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AccountPasswordChangeResponseDefaultTypeInternal() {}
+  union {
+    AccountPasswordChangeResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AccountPasswordChangeResponseDefaultTypeInternal _AccountPasswordChangeResponse_default_instance_;
+
 inline constexpr AccountCreationResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : error_message_(
@@ -135,6 +163,16 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::sunlight::api::AccountCreationResponse, _impl_.success_),
         PROTOBUF_FIELD_OFFSET(::sunlight::api::AccountCreationResponse, _impl_.error_message_),
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::AccountPasswordChangeResponse, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::AccountPasswordChangeResponse, _impl_.success_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::AccountPasswordChangeResponse, _impl_.error_message_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_._oneof_case_[0]),
@@ -145,6 +183,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_.request_id_),
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_.payload_),
 };
 
@@ -152,11 +191,13 @@ static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::sunlight::api::AuthenticationResponse)},
         {9, -1, -1, sizeof(::sunlight::api::AccountCreationResponse)},
-        {19, -1, -1, sizeof(::sunlight::api::Response)},
+        {19, -1, -1, sizeof(::sunlight::api::AccountPasswordChangeResponse)},
+        {29, -1, -1, sizeof(::sunlight::api::Response)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_AuthenticationResponse_default_instance_._instance,
     &::sunlight::api::_AccountCreationResponse_default_instance_._instance,
+    &::sunlight::api::_AccountPasswordChangeResponse_default_instance_._instance,
     &::sunlight::api::_Response_default_instance_._instance,
 };
 const char descriptor_table_protodef_response_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -164,24 +205,27 @@ const char descriptor_table_protodef_response_2eproto[] ABSL_ATTRIBUTE_SECTION_V
     "\n\016response.proto\022\014sunlight.api\")\n\026Authen"
     "ticationResponse\022\017\n\007success\030\001 \001(\005\"A\n\027Acc"
     "ountCreationResponse\022\017\n\007success\030\001 \001(\005\022\025\n"
-    "\rerror_message\030\002 \001(\t\"\254\001\n\010Response\022\022\n\nreq"
-    "uest_id\030\001 \001(\005\022>\n\016authentication\030d \001(\0132$."
-    "sunlight.api.AuthenticationResponseH\000\022A\n"
-    "\020account_creation\030e \001(\0132%.sunlight.api.A"
-    "ccountCreationResponseH\000B\t\n\007payloadb\006pro"
-    "to3"
+    "\rerror_message\030\002 \001(\t\"G\n\035AccountPasswordC"
+    "hangeResponse\022\017\n\007success\030\001 \001(\005\022\025\n\rerror_"
+    "message\030\002 \001(\t\"\374\001\n\010Response\022\022\n\nrequest_id"
+    "\030\001 \001(\005\022>\n\016authentication\030d \001(\0132$.sunligh"
+    "t.api.AuthenticationResponseH\000\022A\n\020accoun"
+    "t_creation\030e \001(\0132%.sunlight.api.AccountC"
+    "reationResponseH\000\022N\n\027account_password_ch"
+    "ange\030f \001(\0132+.sunlight.api.AccountPasswor"
+    "dChangeResponseH\000B\t\n\007payloadb\006proto3"
 };
 static ::absl::once_flag descriptor_table_response_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_response_2eproto = {
     false,
     false,
-    323,
+    476,
     descriptor_table_protodef_response_2eproto,
     "response.proto",
     &descriptor_table_response_2eproto_once,
     nullptr,
     0,
-    3,
+    4,
     schemas,
     file_default_instances,
     TableStruct_response_2eproto::offsets,
@@ -656,6 +700,263 @@ void AccountCreationResponse::InternalSwap(AccountCreationResponse* PROTOBUF_RES
 }
 // ===================================================================
 
+class AccountPasswordChangeResponse::_Internal {
+ public:
+};
+
+AccountPasswordChangeResponse::AccountPasswordChangeResponse(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.AccountPasswordChangeResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE AccountPasswordChangeResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::sunlight::api::AccountPasswordChangeResponse& from_msg)
+      : error_message_(arena, from.error_message_),
+        _cached_size_{0} {}
+
+AccountPasswordChangeResponse::AccountPasswordChangeResponse(
+    ::google::protobuf::Arena* arena,
+    const AccountPasswordChangeResponse& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  AccountPasswordChangeResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.success_ = from._impl_.success_;
+
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.AccountPasswordChangeResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE AccountPasswordChangeResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : error_message_(arena),
+        _cached_size_{0} {}
+
+inline void AccountPasswordChangeResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.success_ = {};
+}
+AccountPasswordChangeResponse::~AccountPasswordChangeResponse() {
+  // @@protoc_insertion_point(destructor:sunlight.api.AccountPasswordChangeResponse)
+  SharedDtor(*this);
+}
+inline void AccountPasswordChangeResponse::SharedDtor(MessageLite& self) {
+  AccountPasswordChangeResponse& this_ = static_cast<AccountPasswordChangeResponse&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.error_message_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* AccountPasswordChangeResponse::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) AccountPasswordChangeResponse(arena);
+}
+constexpr auto AccountPasswordChangeResponse::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(AccountPasswordChangeResponse),
+                                            alignof(AccountPasswordChangeResponse));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull AccountPasswordChangeResponse::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_AccountPasswordChangeResponse_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &AccountPasswordChangeResponse::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<AccountPasswordChangeResponse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &AccountPasswordChangeResponse::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<AccountPasswordChangeResponse>(), &AccountPasswordChangeResponse::ByteSizeLong,
+            &AccountPasswordChangeResponse::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(AccountPasswordChangeResponse, _impl_._cached_size_),
+        false,
+    },
+    &AccountPasswordChangeResponse::kDescriptorMethods,
+    &descriptor_table_response_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* AccountPasswordChangeResponse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 64, 2> AccountPasswordChangeResponse::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::AccountPasswordChangeResponse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string error_message = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(AccountPasswordChangeResponse, _impl_.error_message_)}},
+    // int32 success = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(AccountPasswordChangeResponse, _impl_.success_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(AccountPasswordChangeResponse, _impl_.success_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 success = 1;
+    {PROTOBUF_FIELD_OFFSET(AccountPasswordChangeResponse, _impl_.success_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string error_message = 2;
+    {PROTOBUF_FIELD_OFFSET(AccountPasswordChangeResponse, _impl_.error_message_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\52\0\15\0\0\0\0\0"
+    "sunlight.api.AccountPasswordChangeResponse"
+    "error_message"
+  }},
+};
+
+PROTOBUF_NOINLINE void AccountPasswordChangeResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.AccountPasswordChangeResponse)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.error_message_.ClearToEmpty();
+  _impl_.success_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* AccountPasswordChangeResponse::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const AccountPasswordChangeResponse& this_ = static_cast<const AccountPasswordChangeResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* AccountPasswordChangeResponse::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const AccountPasswordChangeResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.AccountPasswordChangeResponse)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int32 success = 1;
+          if (this_._internal_success() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<1>(
+                    stream, this_._internal_success(), target);
+          }
+
+          // string error_message = 2;
+          if (!this_._internal_error_message().empty()) {
+            const std::string& _s = this_._internal_error_message();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "sunlight.api.AccountPasswordChangeResponse.error_message");
+            target = stream->WriteStringMaybeAliased(2, _s, target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.AccountPasswordChangeResponse)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t AccountPasswordChangeResponse::ByteSizeLong(const MessageLite& base) {
+          const AccountPasswordChangeResponse& this_ = static_cast<const AccountPasswordChangeResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t AccountPasswordChangeResponse::ByteSizeLong() const {
+          const AccountPasswordChangeResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.AccountPasswordChangeResponse)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // string error_message = 2;
+            if (!this_._internal_error_message().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_error_message());
+            }
+            // int32 success = 1;
+            if (this_._internal_success() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_success());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void AccountPasswordChangeResponse::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<AccountPasswordChangeResponse*>(&to_msg);
+  auto& from = static_cast<const AccountPasswordChangeResponse&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.AccountPasswordChangeResponse)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_error_message().empty()) {
+    _this->_internal_set_error_message(from._internal_error_message());
+  }
+  if (from._internal_success() != 0) {
+    _this->_impl_.success_ = from._impl_.success_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void AccountPasswordChangeResponse::CopyFrom(const AccountPasswordChangeResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.AccountPasswordChangeResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void AccountPasswordChangeResponse::InternalSwap(AccountPasswordChangeResponse* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_message_, &other->_impl_.error_message_, arena);
+        swap(_impl_.success_, other->_impl_.success_);
+}
+
+::google::protobuf::Metadata AccountPasswordChangeResponse::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class Response::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -687,6 +988,19 @@ void Response::set_allocated_account_creation(::sunlight::api::AccountCreationRe
     _impl_.payload_.account_creation_ = account_creation;
   }
   // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.account_creation)
+}
+void Response::set_allocated_account_password_change(::sunlight::api::AccountPasswordChangeResponse* account_password_change) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_payload();
+  if (account_password_change) {
+    ::google::protobuf::Arena* submessage_arena = account_password_change->GetArena();
+    if (message_arena != submessage_arena) {
+      account_password_change = ::google::protobuf::internal::GetOwnedMessage(message_arena, account_password_change, submessage_arena);
+    }
+    set_has_account_password_change();
+    _impl_.payload_.account_password_change_ = account_password_change;
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.account_password_change)
 }
 Response::Response(::google::protobuf::Arena* arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -726,6 +1040,9 @@ Response::Response(
         break;
       case kAccountCreation:
         _impl_.payload_.account_creation_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::AccountCreationResponse>(arena, *from._impl_.payload_.account_creation_);
+        break;
+      case kAccountPasswordChange:
+        _impl_.payload_.account_password_change_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::AccountPasswordChangeResponse>(arena, *from._impl_.payload_.account_password_change_);
         break;
   }
 
@@ -776,6 +1093,14 @@ void Response::clear_payload() {
       }
       break;
     }
+    case kAccountPasswordChange: {
+      if (GetArena() == nullptr) {
+        delete _impl_.payload_.account_password_change_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.account_password_change_);
+      }
+      break;
+    }
     case PAYLOAD_NOT_SET: {
       break;
     }
@@ -820,16 +1145,16 @@ const ::google::protobuf::internal::ClassData* Response::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 3, 2, 0, 7> Response::_table_ = {
+const ::_pbi::TcParseTable<0, 4, 3, 0, 7> Response::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    101, 0,  // max_field_number, fast_idx_mask
+    102, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
-    2,  // num_aux_entries
+    4,  // num_field_entries
+    3,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     _class_data_.base(),
     nullptr,  // post_loop_handler
@@ -843,7 +1168,7 @@ const ::_pbi::TcParseTable<0, 3, 2, 0, 7> Response::_table_ = {
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(Response, _impl_.request_id_)}},
   }}, {{
     100, 0, 1,
-    65532, 1,
+    65528, 1,
     65535, 65535
   }}, {{
     // int32 request_id = 1;
@@ -855,9 +1180,13 @@ const ::_pbi::TcParseTable<0, 3, 2, 0, 7> Response::_table_ = {
     // .sunlight.api.AccountCreationResponse account_creation = 101;
     {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.account_creation_), _Internal::kOneofCaseOffset + 0, 1,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .sunlight.api.AccountPasswordChangeResponse account_password_change = 102;
+    {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.account_password_change_), _Internal::kOneofCaseOffset + 0, 2,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::sunlight::api::AuthenticationResponse>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::AccountCreationResponse>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::AccountPasswordChangeResponse>()},
   }}, {{
   }},
 };
@@ -909,6 +1238,12 @@ PROTOBUF_NOINLINE void Response::Clear() {
                   stream);
               break;
             }
+            case kAccountPasswordChange: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  102, *this_._impl_.payload_.account_password_change_, this_._impl_.payload_.account_password_change_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
             default:
               break;
           }
@@ -953,6 +1288,12 @@ PROTOBUF_NOINLINE void Response::Clear() {
             case kAccountCreation: {
               total_size += 2 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.account_creation_);
+              break;
+            }
+            // .sunlight.api.AccountPasswordChangeResponse account_password_change = 102;
+            case kAccountPasswordChange: {
+              total_size += 2 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.account_password_change_);
               break;
             }
             case PAYLOAD_NOT_SET: {
@@ -1001,6 +1342,15 @@ void Response::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google
               ::google::protobuf::Message::CopyConstruct<::sunlight::api::AccountCreationResponse>(arena, *from._impl_.payload_.account_creation_);
         } else {
           _this->_impl_.payload_.account_creation_->MergeFrom(from._internal_account_creation());
+        }
+        break;
+      }
+      case kAccountPasswordChange: {
+        if (oneof_needs_init) {
+          _this->_impl_.payload_.account_password_change_ =
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::AccountPasswordChangeResponse>(arena, *from._impl_.payload_.account_password_change_);
+        } else {
+          _this->_impl_.payload_.account_password_change_->MergeFrom(from._internal_account_password_change());
         }
         break;
       }

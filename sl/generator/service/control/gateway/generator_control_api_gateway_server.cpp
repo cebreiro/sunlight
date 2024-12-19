@@ -24,6 +24,7 @@ namespace sunlight
         _serviceLocator = serviceLocator;
 
         AddHandlerToRouter(std::make_shared<GeneratorControlAuthenticationHandler>(_serviceLocator));
+        AddHandlerToRouter(std::make_shared<GeneratorControlAccountPasswordChangeHandler>(_serviceLocator));
         AddHandlerToRouter(std::make_shared<GeneratorControlAccountCreationHandler>(_serviceLocator));
     }
 
