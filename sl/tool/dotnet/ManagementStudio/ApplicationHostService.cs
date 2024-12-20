@@ -43,7 +43,16 @@ public class ApplicationHostService(IServiceProvider serviceProvider) : IHostedS
         }
 
         ApplyApplicationTheme();
-        OpenLoginWindow(mainWindow);
+
+        mainWindow.IsEnabled = false;
+        mainWindow.TitleBar.ShowMinimize = false;
+        mainWindow.TitleBar.ShowMaximize = false;
+        mainWindow.TitleBar.ShowClose = false;
+
+        LoginWindow loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
+        loginWindow.Owner = mainWindow;
+
+        loginWindow.Show();
     }
 
     private void ApplyApplicationTheme()
@@ -56,24 +65,23 @@ public class ApplicationHostService(IServiceProvider serviceProvider) : IHostedS
         }
     }
 
-    private void OpenLoginWindow(MainWindow mainWindow)
-    {
-        mainWindow.IsEnabled = false;
-        mainWindow.TitleBar.ShowMinimize = false;
-        mainWindow.TitleBar.ShowMaximize = false;
-        mainWindow.TitleBar.ShowClose = false;
-
-        LoginWindow loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
-        loginWindow.Owner = mainWindow;
-
-        loginWindow.Show();
-    }
-
     private void OnDisconnected(DisconnectionEventArgs args)
     {
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            OpenLoginWindow(serviceProvider.GetRequired<MainWindow>());
+            LoginWindow loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
+            if (loginWindow.Visibility == Visibility.Hidden)
+            {
+                MainWindow mainWindow = serviceProvider.GetRequired<MainWindow>();
+
+                mainWindow.IsEnabled = false;
+                mainWindow.TitleBar.ShowMinimize = false;
+                mainWindow.TitleBar.ShowMaximize = false;
+                mainWindow.TitleBar.ShowClose = false;
+
+                loginWindow.Owner = mainWindow;
+                loginWindow.Show();
+            }
         });
     }
 }
