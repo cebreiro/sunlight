@@ -1,0 +1,53 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Directories
+.vs/
+build/
+bin/
+obj/
+logs/
+cheat/
+asset/
+codec/
+
+# Config
+*.config
+server_constant.cpp
+sl_packet_writer.h
+sl_packet_writer.cpp
+sl_packet_reader.h
+sl_packet_reader.cpp
+sl_packet_value_traits.h
+app_config.json
+game_config.json

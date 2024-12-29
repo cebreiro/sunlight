@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+import "dto.proto";
+
+package sunlight.api;
+
+message AuthenticationResponse
+{
+    int32 success = 1;
+}
+
+message AccountCreationResponse
+{
+    int32 success = 1;
+    string error_message = 2;
+}
+
+message AccountPasswordChangeResponse
+{
+    int32 success = 1;
+    string error_message = 2;
+}
+
+message UserCountResponse
+{
+    int32 user_count = 1;
+}
+
+message SystemResourceInfoResponse
+{
+    int32 cpu_load_percentage = 1;
+    double free_memory_gb = 2;
+}
+
+message WorldInfoResponse
+{
+    repeated WorldInfo world_info_list = 1;
+}
+
+message Response
+{
+    int32 request_id = 1;
+
+    oneof payload
+    {
+        AuthenticationResponse authentication = 100;
+        AccountCreationResponse account_creation = 101;
+        AccountPasswordChangeResponse account_password_change = 102;
+        UserCountResponse user_count = 103;
+        SystemResourceInfoResponse system_resource_info = 104;
+        WorldInfoResponse world_info = 105;
+    }
+}

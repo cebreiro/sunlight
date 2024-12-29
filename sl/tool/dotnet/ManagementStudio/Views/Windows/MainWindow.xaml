@@ -1,0 +1,76 @@
+<ui:FluentWindow x:Class="Sunlight.ManagementStudio.Views.Windows.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:page="clr-namespace:Sunlight.ManagementStudio.Views.Pages"
+                 xmlns:local="clr-namespace:Sunlight.ManagementStudio.Views.Windows"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 mc:Ignorable="d"
+                 Title="MainWindow"
+                 MinWidth="1024"
+                 MinHeight="768"
+                 d:DesignWidth="768"
+                 d:DesignHeight="768"
+                 WindowStartupLocation="CenterScreen"
+                 d:DataContext="{d:DesignInstance local:MainWindow,
+                                     IsDesignTimeCreatable=False}"
+                 ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+                 ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                 >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ContentPresenter x:Name="RootContentDialog" Grid.Row="0" />
+
+        <ui:TitleBar Grid.Row="0"
+                     x:Name="TitleBar"
+                     Title="Sunlight Management Studio" />
+        <ui:NavigationView
+            x:Name="NavigationView"
+            Grid.Row="1"
+            MinHeight="300"
+            Margin="0"
+            Padding="0"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleVisible="False"
+            PaneDisplayMode="LeftFluent">
+            <ui:NavigationView.MenuItems>
+
+                <ui:NavigationViewItem
+                    Icon="{ui:SymbolIcon DesktopSignal24}"
+                    TargetPageType="{x:Type page:DashBoardPage}" >
+                    <ui:NavigationViewItem.Content>
+                        <TextBlock FontSize="10"
+                                   Text="Dash&#10;Board"/>
+                    </ui:NavigationViewItem.Content>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    Icon="{ui:SymbolIcon PersonAccounts24}"
+                    TargetPageType="{x:Type page:AccountPage}">
+                    <ui:NavigationViewItem.Content>
+                        <TextBlock FontSize="13"
+                                   Text="Account"/>
+                    </ui:NavigationViewItem.Content>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
+                    Content="Settings"
+                    Icon="{ui:SymbolIcon Settings24}"
+                    TargetPageType="{x:Type page:SettingsPage}" />
+
+            </ui:NavigationView.MenuItems>
+            <ui:NavigationView.ContentOverlay>
+                <Grid>
+                    <ui:SnackbarPresenter x:Name="SnackBarPresenter" />
+                </Grid>
+            </ui:NavigationView.ContentOverlay>
+        </ui:NavigationView>
+
+
+    </Grid>
+</ui:FluentWindow>

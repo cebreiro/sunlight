@@ -1,0 +1,5 @@
+add_subdirectory(pch)
+add_subdirectory(lib)
+add_subdirectory(data)
+add_subdirectory(tool)
+add_subdirectory(generator)

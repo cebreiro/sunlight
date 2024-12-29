@@ -1,0 +1,103 @@
+<ui:FluentWindow x:Class="Sunlight.ManagementStudio.Views.Windows.LoginWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:local="clr-namespace:Sunlight.ManagementStudio.Views.Windows"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 mc:Ignorable="d"
+                 Width="400"
+                 Height="300"
+                 d:DesignWidth="400"
+                 d:DesignHeight="300"
+                 ResizeMode="NoResize"
+                 WindowStyle="None"
+                 WindowCornerPreference="Round"
+                 WindowStartupLocation="CenterOwner"
+                 Initialized="LoginWindow_OnInitialized"
+                 Closed="LoginWindow_OnClosed"
+                 >
+    <Window.Resources>
+
+        <Style x:Key="LoginWindowTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="5, 20, 0, 10"/>
+        </Style>
+
+    </Window.Resources>
+
+    <StackPanel>
+        <ui:TitleBar Title="Connect to Sunlight Generator"
+                     Height="33"
+                     ShowMinimize="False"
+                     ShowMaximize="False" />
+        <Grid Margin="20, 20, 20, 20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="2.1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Address" />
+            <TextBlock Grid.Row="0"  Grid.Column="2" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Port" />
+            <TextBlock Grid.Row="1"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Id" />
+            <TextBlock Grid.Row="2"  Grid.Column="0" Style="{StaticResource LoginWindowTextBlockStyle}" Text="Password" />
+
+
+            <ui:TextBox  Grid.Row="0"  Grid.Column="1"
+                         Margin="10, 20, 10, 10"
+                         MaxHeight="33"
+                         IsEnabled="{Binding ViewModel.IsActive}"
+                         Text="{Binding ViewModel.Address}"
+                         />
+            <ui:TextBox Grid.Row="0" Grid.Column="3"
+                        Margin="10, 20, 5, 10"
+                        MaxHeight="33"
+                        PreviewTextInput="OnPortTextBoxPreviewTextInput"
+                        IsEnabled="{Binding ViewModel.IsActive}"
+                        Text="{Binding ViewModel.Port}"/>
+            <ui:TextBox  Grid.Row="1"  Grid.Column="1"
+                         Margin="10, 20, 10, 10"
+                         MaxHeight="33"
+                         IsEnabled="{Binding ViewModel.IsActive}"
+                         Text="{Binding ViewModel.Id}"/>
+            <ui:PasswordBox Grid.Row="2"  Grid.Column="1"
+                            Icon="Password24"
+                            Margin="10, 20, 10, 10"
+                            MaxHeight="33"
+                            IsEnabled="{Binding ViewModel.IsActive}"
+                            x:Name="PasswordBox"/>
+
+            <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4"
+                        Margin="0, 5, 0, 0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <ui:Button Content="Save"
+                           Margin="0, 10, 15, 10"
+                           MaxHeight="33"
+                           IsEnabled="{Binding ViewModel.IsActive}"
+                           Command="{Binding ViewModel.SaveButtonClickedCommand}"
+                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                <ui:Button Content="Connect"
+                           Margin="0, 10, 10, 10"
+                           MaxHeight="33"
+                           IsEnabled="{Binding ViewModel.IsActive}"
+                           Command="{Binding ViewModel.ConnectButtonClickedCommand}"
+                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+            </StackPanel>
+
+        </Grid>
+    </StackPanel>
+
+</ui:FluentWindow>

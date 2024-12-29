@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package sunlight.api;
+
+message AuthenticationRequest
+{
+    string id = 1;
+    string password = 2;
+}
+
+message AccountCreationReuqest
+{
+    string id = 1;
+    string password = 2;
+    int32 gm_level = 3;
+}
+
+message AccountPasswordChangeRequest
+{
+    string id = 1;
+    string password = 2;
+}
+
+message UserCountRequest
+{
+}
+
+message SystemResourceInfoRequest
+{
+}
+
+message WorldInfoRequest
+{
+}
+
+message Request
+{
+    int32 request_id = 1;
+
+    oneof payload
+    {
+        AuthenticationRequest authentication = 100;
+        AccountCreationReuqest account_creation = 101;
+        AccountPasswordChangeRequest account_password_change = 102;
+        UserCountRequest user_count = 103;
+        SystemResourceInfoRequest system_resource_info = 104;
+        WorldInfoRequest world_info = 105;
+    }
+}

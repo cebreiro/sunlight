@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package sunlight.api;
+
+message ZoneInfo
+{
+    int32 id = 1;
+    int32 port = 2;
+}
+
+message WorldInfo
+{
+    int32 id = 1;
+    int32 user_count = 2;
+    repeated ZoneInfo open_zone_list = 3;
+}
