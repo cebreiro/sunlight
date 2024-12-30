@@ -10,6 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ViewModels\Pages\NewFolder1\**" />
+    <EmbeddedResource Remove="ViewModels\Pages\NewFolder1\**" />
+    <None Remove="ViewModels\Pages\NewFolder1\**" />
+    <Page Remove="ViewModels\Pages\NewFolder1\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Google.Protobuf" Version="3.29.0" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc4.5" />

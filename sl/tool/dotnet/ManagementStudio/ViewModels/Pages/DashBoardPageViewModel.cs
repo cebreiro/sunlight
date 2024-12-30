@@ -1,12 +1,17 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView.Extensions;
 using Sunlight.Api;
 using Sunlight.ManagementStudio.Models.Controller;
 using Sunlight.ManagementStudio.Models.Event;
 using Sunlight.ManagementStudio.Models.Event.Args;
+using Sunlight.ManagementStudio.ViewModels.Pages.LogViewer;
+using Wpf.Ui.Controls;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Sunlight.ManagementStudio.ViewModels.Pages;
 
@@ -42,6 +47,16 @@ public partial class DashBoardPageViewModel(ISunlightController sunlightControll
                     series.DataLabelsSize = 50;
                 }));
 
+    [ObservableProperty]
+    private ObservableCollection<LogItem> _logs = new ObservableCollection<LogItem>();
+
+    [RelayCommand]
+    private void OnLogConsoleCloseButtonClicked(object sender)
+    {
+
+        Logs.Clear();
+    }
+
     public void ListenEvent(IEventListener eventListener)
     {
         _ = eventListener.Listen(OnAuthenticated);
@@ -61,6 +76,12 @@ public partial class DashBoardPageViewModel(ISunlightController sunlightControll
 
             Application.Current.Dispatcher.InvokeAsync(() =>
             {
+                Logs.Add(new LogItem(DateTime.Now, LogLevel.Critical, "test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0test0"));
+                Logs.Add(new LogItem(DateTime.Now, LogLevel.Debug, "test1"));
+                Logs.Add(new LogItem(DateTime.Now, LogLevel.Info, "test2"));
+                Logs.Add(new LogItem(DateTime.Now, LogLevel.Warning, "test3"));
+                Logs.Add(new LogItem(DateTime.Now, LogLevel.Error, "test4"));
+
                 UserCount = response.UserCount.ToString();
             });
 

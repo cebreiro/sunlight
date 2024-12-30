@@ -13,14 +13,32 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <Style x:Key="DashBoardStatusMessageStyle" TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Margin" Value="0, 20, 20, 0"/>
+        <Style x:Key="DashBoardItemTileTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Margin" Value="0, 5, 0, 5"/>
         </Style>
-        <Style x:Key="DashBoardStatusTextStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Margin" Value="0, 20, 20, 0"/>
+        <Style x:Key="LogViewerTextBlockStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding LogLevel}" Value="Critical">
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding LogLevel}" Value="Error">
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding LogLevel}" Value="Warning">
+                    <Setter Property="Foreground" Value="Black"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding LogLevel}" Value="Info">
+                    <Setter Property="Foreground" Value="Black"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding LogLevel}" Value="Debug">
+                    <Setter Property="Foreground" Value="Black"/>
+                </DataTrigger>
+            </Style.Triggers>
+            <Setter Property="Margin" Value="3, 0, 0, 3"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
     </Page.Resources>
 
@@ -42,29 +60,126 @@
                        HorizontalAlignment="Center"
                        Text="Dash Board" />
 
-        <Grid Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
+        <Grid Grid.Row="1" Grid.RowSpan="2" Grid.Column="1"
+              VerticalAlignment="Top"
+              Height="600"
+              Margin="0, 10, 0, 0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="650"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
 
+            <Border Grid.Row="0" Grid.Column="0"
+                    Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+                    CornerRadius="16,16,0,0"/>
+
+            <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="0"
+                    Background="{ui:ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+
             <TextBlock Grid.Row="0" Grid.Column="0"
-                       Style="{StaticResource DashBoardStatusMessageStyle}"
-                       Text="user count:"
+                       Style="{StaticResource DashBoardItemTileTextBlockStyle}"
+                       Text="Log Console"
                        />
-            <TextBlock Grid.Row="0" Grid.Column="1"
-                       Style="{StaticResource DashBoardStatusTextStyle}"
-                       Text="{Binding ViewModel.UserCount}"
-                       />
+            <StackPanel Grid.Row="1" Grid.Column="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+
+                <StackPanel.Resources>
+                    <ScaleTransform x:Key="CheckBoxScaleTransform" ScaleX="0.9" ScaleY="0.9" />
+                </StackPanel.Resources>
+
+                <CheckBox LayoutTransform="{StaticResource CheckBoxScaleTransform}">
+                    <TextBlock Text="Debug"
+                               Width="50"
+                               Padding="0"
+                               Margin="0 0 0 0"/>
+                </CheckBox>
+                <CheckBox Content="Info"
+                          Margin="0, 0, 0, 0"
+                          LayoutTransform="{StaticResource CheckBoxScaleTransform}"/>
+                <CheckBox Content="Warning"
+                          Margin="0, 0, 0, 0"
+                          LayoutTransform="{StaticResource CheckBoxScaleTransform}"/>
+                <CheckBox Content="Error"
+                          Margin="0, 0, 0, 0"
+                          LayoutTransform="{StaticResource CheckBoxScaleTransform}"/>
+                <CheckBox Content="Critical"
+                          Margin="0, 0, 0, 0"
+                          LayoutTransform="{StaticResource CheckBoxScaleTransform}"/>
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="2" Grid.Column="0"
+                          Margin="10, 10, 10, 10"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Visible">
+                <ItemsControl ItemsSource="{Binding ViewModel.Logs}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border>
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding LogLevel}" Value="Critical">
+                                                <Setter Property="Background" Value="Crimson"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding LogLevel}" Value="Error">
+                                                <Setter Property="Background" Value="LightCoral"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding LogLevel}" Value="Warning">
+                                                <Setter Property="Background" Value="Khaki"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding LogLevel}" Value="Info">
+                                                <Setter Property="Background" Value="DarkSeaGreen"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding LogLevel}" Value="Debug">
+                                                <Setter Property="Background" Value="LightGray"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Style="{StaticResource LogViewerTextBlockStyle}"
+                                               Text="{Binding DateTime, StringFormat=yyyy-MM-dd HH:mm:ss}"/>
+                                    <TextBlock Grid.Column="1"
+                                               Style="{StaticResource LogViewerTextBlockStyle}"
+                                               Text="{Binding LogLevel}"/>
+                                    <TextBlock Grid.Column="2"
+                                               Width="450"
+                                               Style="{StaticResource LogViewerTextBlockStyle}"
+                                               Text="{Binding Message}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="3" Grid.Column="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="10, 10, 10, 10">
+
+                <ui:Button Content="Clear"
+                           Command="{Binding ViewModel.LogConsoleCloseButtonClickedCommand}"/>
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1" Grid.RowSpan="2" Grid.Column="0"
-                Margin="30, 10, 0, 0"
-              >
+                Margin="30, 10, 0, 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
@@ -100,9 +215,7 @@
                     Background="{ui:ThemeResource CardBackgroundFillColorDefaultBrush}"/>
 
             <TextBlock Grid.Row="0" Grid.Column="0"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Margin="0, 5, 0, 5"
+                       Style="{StaticResource DashBoardItemTileTextBlockStyle}"
                        Text="User Count"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0"
@@ -112,9 +225,7 @@
                        Text="{Binding ViewModel.UserCount}"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Margin="0, 5, 0, 5"
+                       Style="{StaticResource DashBoardItemTileTextBlockStyle}"
                        Text="CPU Load Percentage"/>
 
             <lvc:PieChart Grid.Row="4" Grid.Column="0"
@@ -127,8 +238,7 @@
             </lvc:PieChart>
 
             <TextBlock Grid.Row="6" Grid.Column="0"
-                       Margin="0, 5, 0, 5"
-                       HorizontalAlignment="Center"
+                       Style="{StaticResource DashBoardItemTileTextBlockStyle}"
                        Text="Free Memory(GB)"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0"
