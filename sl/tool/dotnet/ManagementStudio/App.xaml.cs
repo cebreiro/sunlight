@@ -8,6 +8,7 @@ using Sunlight.ManagementStudio.Models.Controller.Tcp;
 using Sunlight.ManagementStudio.Models.Event;
 using Sunlight.ManagementStudio.Models.Setting;
 using Sunlight.ManagementStudio.ViewModels.Pages;
+using Sunlight.ManagementStudio.ViewModels.Pages.LogViewer;
 using Sunlight.ManagementStudio.ViewModels.Windows;
 using Sunlight.ManagementStudio.Views.Pages;
 using Sunlight.ManagementStudio.Views.Windows;
@@ -48,6 +49,7 @@ public partial class App
                 _ = services.AddSingleton<AccountPageViewModel>();
                 _ = services.AddSingleton<AccountPage>();
 
+                _ = services.AddSingleton<LogViewerViewModel>();
                 _ = services.AddSingleton<DashBoardPageViewModel>();
                 _ = services.AddSingleton<DashBoardPage>();
 

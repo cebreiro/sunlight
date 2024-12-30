@@ -84,7 +84,7 @@
 
             <TextBlock Grid.Row="0" Grid.Column="0"
                        Style="{StaticResource DashBoardItemTileTextBlockStyle}"
-                       Text="Log Console"
+                       Text="Log View"
                        />
             <StackPanel Grid.Row="1" Grid.Column="0"
                         Orientation="Horizontal"
@@ -118,7 +118,7 @@
                           Margin="10, 10, 10, 10"
                           HorizontalScrollBarVisibility="Disabled"
                           VerticalScrollBarVisibility="Visible">
-                <ItemsControl ItemsSource="{Binding ViewModel.Logs}">
+                <ItemsControl ItemsSource="{Binding ViewModel.LogViewer.Logs}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border>
@@ -174,7 +174,7 @@
                         Margin="10, 10, 10, 10">
 
                 <ui:Button Content="Clear"
-                           Command="{Binding ViewModel.LogConsoleCloseButtonClickedCommand}"/>
+                           Command="{Binding ViewModel.LogViewer.LogConsoleCloseButtonClickedCommand}"/>
             </StackPanel>
         </Grid>
 
