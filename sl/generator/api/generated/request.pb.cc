@@ -81,6 +81,34 @@ struct SystemResourceInfoRequestDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SystemResourceInfoRequestDefaultTypeInternal _SystemResourceInfoRequest_default_instance_;
 
+inline constexpr LogGetRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        log_level_{},
+        _log_level_cached_byte_size_{0},
+        start_date_time_{::int64_t{0}},
+        last_date_time_{::int64_t{0}} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR LogGetRequest::LogGetRequest(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct LogGetRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LogGetRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LogGetRequestDefaultTypeInternal() {}
+  union {
+    LogGetRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LogGetRequestDefaultTypeInternal _LogGetRequest_default_instance_;
+
 inline constexpr AuthenticationRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : id_(
@@ -262,6 +290,20 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogGetRequest, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogGetRequest, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogGetRequest, _impl_.log_level_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogGetRequest, _impl_.start_date_time_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogGetRequest, _impl_.last_date_time_),
+        ~0u,
+        0,
+        1,
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Request, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -271,6 +313,7 @@ const ::uint32_t
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Request, _impl_.request_id_),
+        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
@@ -288,7 +331,8 @@ static const ::_pbi::MigrationSchema
         {31, -1, -1, sizeof(::sunlight::api::UserCountRequest)},
         {39, -1, -1, sizeof(::sunlight::api::SystemResourceInfoRequest)},
         {47, -1, -1, sizeof(::sunlight::api::WorldInfoRequest)},
-        {55, -1, -1, sizeof(::sunlight::api::Request)},
+        {55, 66, -1, sizeof(::sunlight::api::LogGetRequest)},
+        {69, -1, -1, sizeof(::sunlight::api::Request)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_AuthenticationRequest_default_instance_._instance,
@@ -297,6 +341,7 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_UserCountRequest_default_instance_._instance,
     &::sunlight::api::_SystemResourceInfoRequest_default_instance_._instance,
     &::sunlight::api::_WorldInfoRequest_default_instance_._instance,
+    &::sunlight::api::_LogGetRequest_default_instance_._instance,
     &::sunlight::api::_Request_default_instance_._instance,
 };
 const char descriptor_table_protodef_request_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -308,30 +353,34 @@ const char descriptor_table_protodef_request_2eproto[] ABSL_ATTRIBUTE_SECTION_VA
     "\n\034AccountPasswordChangeRequest\022\n\n\002id\030\001 \001"
     "(\t\022\020\n\010password\030\002 \001(\t\"\022\n\020UserCountRequest"
     "\"\033\n\031SystemResourceInfoRequest\"\022\n\020WorldIn"
-    "foRequest\"\255\003\n\007Request\022\022\n\nrequest_id\030\001 \001("
-    "\005\022=\n\016authentication\030d \001(\0132#.sunlight.api"
-    ".AuthenticationRequestH\000\022@\n\020account_crea"
-    "tion\030e \001(\0132$.sunlight.api.AccountCreatio"
-    "nReuqestH\000\022M\n\027account_password_change\030f "
-    "\001(\0132*.sunlight.api.AccountPasswordChange"
-    "RequestH\000\0224\n\nuser_count\030g \001(\0132\036.sunlight"
-    ".api.UserCountRequestH\000\022G\n\024system_resour"
-    "ce_info\030h \001(\0132\'.sunlight.api.SystemResou"
-    "rceInfoRequestH\000\0224\n\nworld_info\030i \001(\0132\036.s"
-    "unlight.api.WorldInfoRequestH\000B\t\n\007payloa"
-    "db\006proto3"
+    "foRequest\"\204\001\n\rLogGetRequest\022\021\n\tlog_level"
+    "\030\001 \003(\005\022\034\n\017start_date_time\030\002 \001(\003H\000\210\001\001\022\033\n\016"
+    "last_date_time\030\003 \001(\003H\001\210\001\001B\022\n\020_start_date"
+    "_timeB\021\n\017_last_date_time\"\335\003\n\007Request\022\022\n\n"
+    "request_id\030\001 \001(\005\022=\n\016authentication\030d \001(\013"
+    "2#.sunlight.api.AuthenticationRequestH\000\022"
+    "@\n\020account_creation\030e \001(\0132$.sunlight.api"
+    ".AccountCreationReuqestH\000\022M\n\027account_pas"
+    "sword_change\030f \001(\0132*.sunlight.api.Accoun"
+    "tPasswordChangeRequestH\000\0224\n\nuser_count\030g"
+    " \001(\0132\036.sunlight.api.UserCountRequestH\000\022G"
+    "\n\024system_resource_info\030h \001(\0132\'.sunlight."
+    "api.SystemResourceInfoRequestH\000\0224\n\nworld"
+    "_info\030i \001(\0132\036.sunlight.api.WorldInfoRequ"
+    "estH\000\022.\n\007log_get\030j \001(\0132\033.sunlight.api.Lo"
+    "gGetRequestH\000B\t\n\007payloadb\006proto3"
 };
 static ::absl::once_flag descriptor_table_request_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_request_2eproto = {
     false,
     false,
-    729,
+    912,
     descriptor_table_protodef_request_2eproto,
     "request.proto",
     &descriptor_table_request_2eproto_once,
     nullptr,
     0,
-    7,
+    8,
     schemas,
     file_default_instances,
     TableStruct_request_2eproto::offsets,
@@ -1457,6 +1506,330 @@ const ::_pbi::TcParseTable<0, 0, 0, 0, 2> WorldInfoRequest::_table_ = {
 }
 // ===================================================================
 
+class LogGetRequest::_Internal {
+ public:
+  using HasBits =
+      decltype(std::declval<LogGetRequest>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_._has_bits_);
+};
+
+LogGetRequest::LogGetRequest(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.LogGetRequest)
+}
+inline PROTOBUF_NDEBUG_INLINE LogGetRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::sunlight::api::LogGetRequest& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        log_level_{visibility, arena, from.log_level_},
+        _log_level_cached_byte_size_{0} {}
+
+LogGetRequest::LogGetRequest(
+    ::google::protobuf::Arena* arena,
+    const LogGetRequest& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  LogGetRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, start_date_time_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, start_date_time_),
+           offsetof(Impl_, last_date_time_) -
+               offsetof(Impl_, start_date_time_) +
+               sizeof(Impl_::last_date_time_));
+
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.LogGetRequest)
+}
+inline PROTOBUF_NDEBUG_INLINE LogGetRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        log_level_{visibility, arena},
+        _log_level_cached_byte_size_{0} {}
+
+inline void LogGetRequest::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, start_date_time_),
+           0,
+           offsetof(Impl_, last_date_time_) -
+               offsetof(Impl_, start_date_time_) +
+               sizeof(Impl_::last_date_time_));
+}
+LogGetRequest::~LogGetRequest() {
+  // @@protoc_insertion_point(destructor:sunlight.api.LogGetRequest)
+  SharedDtor(*this);
+}
+inline void LogGetRequest::SharedDtor(MessageLite& self) {
+  LogGetRequest& this_ = static_cast<LogGetRequest&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* LogGetRequest::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) LogGetRequest(arena);
+}
+constexpr auto LogGetRequest::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.log_level_) +
+          decltype(LogGetRequest::_impl_.log_level_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::ZeroInit(
+        sizeof(LogGetRequest), alignof(LogGetRequest), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&LogGetRequest::PlacementNew_,
+                                 sizeof(LogGetRequest),
+                                 alignof(LogGetRequest));
+  }
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull LogGetRequest::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_LogGetRequest_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &LogGetRequest::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<LogGetRequest>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &LogGetRequest::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<LogGetRequest>(), &LogGetRequest::ByteSizeLong,
+            &LogGetRequest::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_._cached_size_),
+        false,
+    },
+    &LogGetRequest::kDescriptorMethods,
+    &descriptor_table_request_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* LogGetRequest::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 0, 0, 2> LogGetRequest::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_._has_bits_),
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::LogGetRequest>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // repeated int32 log_level = 1;
+    {::_pbi::TcParser::FastV32P1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.log_level_)}},
+    // optional int64 start_date_time = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LogGetRequest, _impl_.start_date_time_), 0>(),
+     {16, 0, 0, PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.start_date_time_)}},
+    // optional int64 last_date_time = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LogGetRequest, _impl_.last_date_time_), 1>(),
+     {24, 1, 0, PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.last_date_time_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated int32 log_level = 1;
+    {PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.log_level_), -1, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
+    // optional int64 start_date_time = 2;
+    {PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.start_date_time_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+    // optional int64 last_date_time = 3;
+    {PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.last_date_time_), _Internal::kHasBitsOffset + 1, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void LogGetRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.LogGetRequest)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.log_level_.Clear();
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    ::memset(&_impl_.start_date_time_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.last_date_time_) -
+        reinterpret_cast<char*>(&_impl_.start_date_time_)) + sizeof(_impl_.last_date_time_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* LogGetRequest::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const LogGetRequest& this_ = static_cast<const LogGetRequest&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* LogGetRequest::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const LogGetRequest& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.LogGetRequest)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // repeated int32 log_level = 1;
+          {
+            int byte_size = this_._impl_._log_level_cached_byte_size_.Get();
+            if (byte_size > 0) {
+              target = stream->WriteInt32Packed(
+                  1, this_._internal_log_level(), byte_size, target);
+            }
+          }
+
+          cached_has_bits = this_._impl_._has_bits_[0];
+          // optional int64 start_date_time = 2;
+          if (cached_has_bits & 0x00000001u) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt64ToArrayWithField<2>(
+                    stream, this_._internal_start_date_time(), target);
+          }
+
+          // optional int64 last_date_time = 3;
+          if (cached_has_bits & 0x00000002u) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt64ToArrayWithField<3>(
+                    stream, this_._internal_last_date_time(), target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.LogGetRequest)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t LogGetRequest::ByteSizeLong(const MessageLite& base) {
+          const LogGetRequest& this_ = static_cast<const LogGetRequest&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t LogGetRequest::ByteSizeLong() const {
+          const LogGetRequest& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.LogGetRequest)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // repeated int32 log_level = 1;
+            {
+              total_size +=
+                  ::_pbi::WireFormatLite::Int32SizeWithPackedTagSize(
+                      this_._internal_log_level(), 1,
+                      this_._impl_._log_level_cached_byte_size_);
+            }
+          }
+          cached_has_bits = this_._impl_._has_bits_[0];
+          if (cached_has_bits & 0x00000003u) {
+            // optional int64 start_date_time = 2;
+            if (cached_has_bits & 0x00000001u) {
+              total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+                  this_._internal_start_date_time());
+            }
+            // optional int64 last_date_time = 3;
+            if (cached_has_bits & 0x00000002u) {
+              total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+                  this_._internal_last_date_time());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void LogGetRequest::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<LogGetRequest*>(&to_msg);
+  auto& from = static_cast<const LogGetRequest&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.LogGetRequest)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_log_level()->MergeFrom(from._internal_log_level());
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_impl_.start_date_time_ = from._impl_.start_date_time_;
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_impl_.last_date_time_ = from._impl_.last_date_time_;
+    }
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void LogGetRequest::CopyFrom(const LogGetRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.LogGetRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void LogGetRequest::InternalSwap(LogGetRequest* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  _impl_.log_level_.InternalSwap(&other->_impl_.log_level_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.last_date_time_)
+      + sizeof(LogGetRequest::_impl_.last_date_time_)
+      - PROTOBUF_FIELD_OFFSET(LogGetRequest, _impl_.start_date_time_)>(
+          reinterpret_cast<char*>(&_impl_.start_date_time_),
+          reinterpret_cast<char*>(&other->_impl_.start_date_time_));
+}
+
+::google::protobuf::Metadata LogGetRequest::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class Request::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -1541,6 +1914,19 @@ void Request::set_allocated_world_info(::sunlight::api::WorldInfoRequest* world_
   }
   // @@protoc_insertion_point(field_set_allocated:sunlight.api.Request.world_info)
 }
+void Request::set_allocated_log_get(::sunlight::api::LogGetRequest* log_get) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_payload();
+  if (log_get) {
+    ::google::protobuf::Arena* submessage_arena = log_get->GetArena();
+    if (message_arena != submessage_arena) {
+      log_get = ::google::protobuf::internal::GetOwnedMessage(message_arena, log_get, submessage_arena);
+    }
+    set_has_log_get();
+    _impl_.payload_.log_get_ = log_get;
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Request.log_get)
+}
 Request::Request(::google::protobuf::Arena* arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, _class_data_.base()) {
@@ -1591,6 +1977,9 @@ Request::Request(
         break;
       case kWorldInfo:
         _impl_.payload_.world_info_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::WorldInfoRequest>(arena, *from._impl_.payload_.world_info_);
+        break;
+      case kLogGet:
+        _impl_.payload_.log_get_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::LogGetRequest>(arena, *from._impl_.payload_.log_get_);
         break;
   }
 
@@ -1673,6 +2062,14 @@ void Request::clear_payload() {
       }
       break;
     }
+    case kLogGet: {
+      if (GetArena() == nullptr) {
+        delete _impl_.payload_.log_get_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.log_get_);
+      }
+      break;
+    }
     case PAYLOAD_NOT_SET: {
       break;
     }
@@ -1717,16 +2114,16 @@ const ::google::protobuf::internal::ClassData* Request::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 7, 6, 0, 7> Request::_table_ = {
+const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Request::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    105, 0,  // max_field_number, fast_idx_mask
+    106, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    7,  // num_field_entries
-    6,  // num_aux_entries
+    8,  // num_field_entries
+    7,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     _class_data_.base(),
     nullptr,  // post_loop_handler
@@ -1740,7 +2137,7 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> Request::_table_ = {
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(Request, _impl_.request_id_)}},
   }}, {{
     100, 0, 1,
-    65472, 1,
+    65408, 1,
     65535, 65535
   }}, {{
     // int32 request_id = 1;
@@ -1764,6 +2161,9 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> Request::_table_ = {
     // .sunlight.api.WorldInfoRequest world_info = 105;
     {PROTOBUF_FIELD_OFFSET(Request, _impl_.payload_.world_info_), _Internal::kOneofCaseOffset + 0, 5,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .sunlight.api.LogGetRequest log_get = 106;
+    {PROTOBUF_FIELD_OFFSET(Request, _impl_.payload_.log_get_), _Internal::kOneofCaseOffset + 0, 6,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::sunlight::api::AuthenticationRequest>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::AccountCreationReuqest>()},
@@ -1771,6 +2171,7 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> Request::_table_ = {
     {::_pbi::TcParser::GetTable<::sunlight::api::UserCountRequest>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::SystemResourceInfoRequest>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::WorldInfoRequest>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::LogGetRequest>()},
   }}, {{
   }},
 };
@@ -1846,6 +2247,12 @@ PROTOBUF_NOINLINE void Request::Clear() {
                   stream);
               break;
             }
+            case kLogGet: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  106, *this_._impl_.payload_.log_get_, this_._impl_.payload_.log_get_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
             default:
               break;
           }
@@ -1914,6 +2321,12 @@ PROTOBUF_NOINLINE void Request::Clear() {
             case kWorldInfo: {
               total_size += 2 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.world_info_);
+              break;
+            }
+            // .sunlight.api.LogGetRequest log_get = 106;
+            case kLogGet: {
+              total_size += 2 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.log_get_);
               break;
             }
             case PAYLOAD_NOT_SET: {
@@ -1998,6 +2411,15 @@ void Request::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google:
               ::google::protobuf::Message::CopyConstruct<::sunlight::api::WorldInfoRequest>(arena, *from._impl_.payload_.world_info_);
         } else {
           _this->_impl_.payload_.world_info_->MergeFrom(from._internal_world_info());
+        }
+        break;
+      }
+      case kLogGet: {
+        if (oneof_needs_init) {
+          _this->_impl_.payload_.log_get_ =
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::LogGetRequest>(arena, *from._impl_.payload_.log_get_);
+        } else {
+          _this->_impl_.payload_.log_get_->MergeFrom(from._internal_log_get());
         }
         break;
       }

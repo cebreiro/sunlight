@@ -21,4 +21,19 @@ namespace sunlight
 
         return static_cast<LogLevel>(std::clamp<int64_t>(value, min, max));
     }
+
+    inline bool IsValidLogLevel(int32_t value)
+    {
+        switch (static_cast<LogLevel>(value))
+        {
+        case LogLevel::Debug:
+        case LogLevel::Info:
+        case LogLevel::Warn:
+        case LogLevel::Error:
+        case LogLevel::Critical:
+            return true;
+        }
+
+        return false;
+    }
 }

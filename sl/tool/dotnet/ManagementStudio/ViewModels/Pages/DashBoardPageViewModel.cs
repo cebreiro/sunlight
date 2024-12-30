@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
@@ -9,6 +9,10 @@ using Sunlight.ManagementStudio.Models.Controller;
 using Sunlight.ManagementStudio.Models.Event;
 using Sunlight.ManagementStudio.Models.Event.Args;
 using Sunlight.ManagementStudio.ViewModels.Pages.LogViewer;
+using Sunlight.ManagementStudio.Views.Pages;
+using Sunlight.ManagementStudio.Views.Windows;
+using Wpf.Ui.Controls;
+using LogItem = Sunlight.ManagementStudio.ViewModels.Pages.LogViewer.LogItem;
 
 namespace Sunlight.ManagementStudio.ViewModels.Pages;
 
@@ -18,15 +22,18 @@ public partial class DashBoardPageViewModel(IServiceProvider serviceProvider, IS
     {
         UserCount,
         SystemInfo,
+        LogViewer,
     }
 
     class UpdateContext
     {
-        public int interval { get; set; } = 10;
-        public CancellationTokenSource? Cts { get; set; } = null;
+        public int Interval { get; set; } = 10;
+        public CancellationTokenSource Cts { get; set; } = null;
+        public Func<UpdateContext, Task> Func { get; set; } = null;
     }
 
     private Dictionary<UpdateType, UpdateContext> _updateContexts = new();
+    private long? _lastLogUpdateTime = null;
 
     [ObservableProperty]
     private string _userCount = "0";
@@ -52,12 +59,9 @@ public partial class DashBoardPageViewModel(IServiceProvider serviceProvider, IS
         _ = eventListener.Listen(OnDisconnect);
     }
 
-    private async Task RunUserCountRequest()
+    private async Task RunUserCountRequest(UpdateContext context)
     {
         UserCountRequest request = new();
-
-        UpdateContext context = _updateContexts[UpdateType.UserCount];
-        Debug.Assert(context.Cts != null);
 
         while (!context.Cts.IsCancellationRequested)
         {
@@ -68,16 +72,13 @@ public partial class DashBoardPageViewModel(IServiceProvider serviceProvider, IS
                 UserCount = response.UserCount.ToString();
             });
 
-            await Task.Delay(TimeSpan.FromSeconds(context.interval));
+            await Task.Delay(TimeSpan.FromSeconds(context.Interval));
         }
     }
 
-    private async Task RunSystemInfoRequest()
+    private async Task RunSystemInfoRequest(UpdateContext context)
     {
         SystemResourceInfoRequest request = new();
-
-        UpdateContext context = _updateContexts[UpdateType.SystemInfo];
-        Debug.Assert(context.Cts != null);
 
         while (!context.Cts.IsCancellationRequested)
         {
@@ -98,7 +99,53 @@ public partial class DashBoardPageViewModel(IServiceProvider serviceProvider, IS
                 FreeMemoryGB = $"{response.FreeMemoryGb:F2}";
             });
 
-            await Task.Delay(TimeSpan.FromSeconds(context.interval));
+            await Task.Delay(TimeSpan.FromSeconds(context.Interval));
+        }
+    }
+
+    private async Task RunLogGetRequest(UpdateContext context)
+    {
+        LogLevel[] logLevels = [LogLevel.Debug, LogLevel.Info, LogLevel.Warning, LogLevel.Error, LogLevel.Critical];
+
+        LogGetRequest request = new();
+        request.LogLevel.Add(logLevels.Select(level => (int)level));
+
+        while (!context.Cts.IsCancellationRequested)
+        {
+            if (_lastLogUpdateTime != null)
+            {
+                request.StartDateTime = (long)(_lastLogUpdateTime + 1);
+            }
+            else
+            {
+                request.ClearStartDateTime();
+            }
+
+            LogGetResponse response = await sunlightController.GetLog(request);
+
+            List<Api.LogItem> received = response.LogItemList.OrderBy(item => item.DateTime).ToList();
+
+            if (received.Count > 0)
+            {
+                _lastLogUpdateTime = received[^1].DateTime;
+            }
+
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                Encoding eucKrEncoding = Encoding.GetEncoding("EUC-KR");
+
+                foreach (var receivedLog in received)
+                {
+                    LogViewer.Logs.Add(new LogItem()
+                    {
+                        DateTime = DateTimeOffset.FromUnixTimeMilliseconds((receivedLog.DateTime / 1000000)).DateTime,
+                        LogLevel = (LogLevel)receivedLog.LogLevel,
+                        Message = eucKrEncoding.GetString(receivedLog.Message.ToByteArray()),
+                    });
+                }
+            });
+
+            await Task.Delay(TimeSpan.FromSeconds(context.Interval));
         }
     }
 
@@ -106,23 +153,42 @@ public partial class DashBoardPageViewModel(IServiceProvider serviceProvider, IS
     {
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            System.Diagnostics.Debug.Assert(!_updateContexts.ContainsKey(UpdateType.UserCount));
-            System.Diagnostics.Debug.Assert(!_updateContexts.ContainsKey(UpdateType.SystemInfo));
+            System.Diagnostics.Debug.Assert(_updateContexts.Count == 0);
 
             _updateContexts.Add(UpdateType.UserCount, new UpdateContext()
             {
                 Cts = new CancellationTokenSource(),
+                Func = RunUserCountRequest
             });
 
             _updateContexts.Add(UpdateType.SystemInfo, new UpdateContext()
             {
-                interval = 30,
+                Interval = 30,
                 Cts = new CancellationTokenSource(),
+                Func = RunSystemInfoRequest
             });
 
+            _updateContexts.Add(UpdateType.LogViewer, new UpdateContext()
+            {
+                Interval = 10,
+                Cts = new CancellationTokenSource(),
+                Func = RunLogGetRequest
+            });
 
-            Task.Run(RunUserCountRequest);
-            Task.Run(RunSystemInfoRequest);
+            foreach (var (_, context) in _updateContexts)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await context.Func(context);
+                    }
+                    catch (Exception e)
+                    {
+                        serviceProvider.GetRequired<MainWindow>().Notify("Async Operation Error", e.Message, 5.0, ControlAppearance.Danger);
+                    }
+                });
+            }
         });
     }
 
@@ -130,16 +196,14 @@ public partial class DashBoardPageViewModel(IServiceProvider serviceProvider, IS
     {
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            System.Diagnostics.Debug.Assert(_updateContexts.ContainsKey(UpdateType.UserCount));
-            System.Diagnostics.Debug.Assert(_updateContexts.ContainsKey(UpdateType.SystemInfo));
+            System.Diagnostics.Debug.Assert(_updateContexts.Count != 0);
 
+            foreach (var (_, context) in _updateContexts)
+            {
+                context.Cts.Cancel();
+            }
 
-            _updateContexts[UpdateType.UserCount].Cts?.Cancel();
-            _updateContexts.Remove(UpdateType.UserCount);
-
-            _updateContexts[UpdateType.SystemInfo].Cts?.Cancel();
-            _updateContexts.Remove(UpdateType.SystemInfo);
-
+            _updateContexts.Clear();
         });
     }
 }

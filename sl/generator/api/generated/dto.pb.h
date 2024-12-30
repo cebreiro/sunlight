@@ -53,6 +53,9 @@ extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_dto_2eproto;
 namespace sunlight {
 namespace api {
+class LogItem;
+struct LogItemDefaultTypeInternal;
+extern LogItemDefaultTypeInternal _LogItem_default_instance_;
 class WorldInfo;
 struct WorldInfoDefaultTypeInternal;
 extern WorldInfoDefaultTypeInternal _WorldInfo_default_instance_;
@@ -269,6 +272,227 @@ class ZoneInfo final
                           const ZoneInfo& from_msg);
     ::int32_t id_;
     ::int32_t port_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_dto_2eproto;
+};
+// -------------------------------------------------------------------
+
+class LogItem final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sunlight.api.LogItem) */ {
+ public:
+  inline LogItem() : LogItem(nullptr) {}
+  ~LogItem() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(LogItem* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(LogItem));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR LogItem(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline LogItem(const LogItem& from) : LogItem(nullptr, from) {}
+  inline LogItem(LogItem&& from) noexcept
+      : LogItem(nullptr, std::move(from)) {}
+  inline LogItem& operator=(const LogItem& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline LogItem& operator=(LogItem&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const LogItem& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const LogItem* internal_default_instance() {
+    return reinterpret_cast<const LogItem*>(
+        &_LogItem_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 2;
+  friend void swap(LogItem& a, LogItem& b) { a.Swap(&b); }
+  inline void Swap(LogItem* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(LogItem* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  LogItem* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<LogItem>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const LogItem& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const LogItem& from) { LogItem::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(LogItem* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sunlight.api.LogItem"; }
+
+ protected:
+  explicit LogItem(::google::protobuf::Arena* arena);
+  LogItem(::google::protobuf::Arena* arena, const LogItem& from);
+  LogItem(::google::protobuf::Arena* arena, LogItem&& from) noexcept
+      : LogItem(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kMessageFieldNumber = 3,
+    kDateTimeFieldNumber = 1,
+    kLogLevelFieldNumber = 2,
+  };
+  // bytes message = 3;
+  void clear_message() ;
+  const std::string& message() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_message(Arg_&& arg, Args_... args);
+  std::string* mutable_message();
+  PROTOBUF_NODISCARD std::string* release_message();
+  void set_allocated_message(std::string* value);
+
+  private:
+  const std::string& _internal_message() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_message(
+      const std::string& value);
+  std::string* _internal_mutable_message();
+
+  public:
+  // int64 date_time = 1;
+  void clear_date_time() ;
+  ::int64_t date_time() const;
+  void set_date_time(::int64_t value);
+
+  private:
+  ::int64_t _internal_date_time() const;
+  void _internal_set_date_time(::int64_t value);
+
+  public:
+  // int32 log_level = 2;
+  void clear_log_level() ;
+  ::int32_t log_level() const;
+  void set_log_level(::int32_t value);
+
+  private:
+  ::int32_t _internal_log_level() const;
+  void _internal_set_log_level(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:sunlight.api.LogItem)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 0,
+      0, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const LogItem& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr message_;
+    ::int64_t date_time_;
+    ::int32_t log_level_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -653,6 +877,102 @@ inline ::google::protobuf::RepeatedPtrField<::sunlight::api::ZoneInfo>*
 WorldInfo::_internal_mutable_open_zone_list() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.open_zone_list_;
+}
+
+// -------------------------------------------------------------------
+
+// LogItem
+
+// int64 date_time = 1;
+inline void LogItem::clear_date_time() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.date_time_ = ::int64_t{0};
+}
+inline ::int64_t LogItem::date_time() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.LogItem.date_time)
+  return _internal_date_time();
+}
+inline void LogItem::set_date_time(::int64_t value) {
+  _internal_set_date_time(value);
+  // @@protoc_insertion_point(field_set:sunlight.api.LogItem.date_time)
+}
+inline ::int64_t LogItem::_internal_date_time() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.date_time_;
+}
+inline void LogItem::_internal_set_date_time(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.date_time_ = value;
+}
+
+// int32 log_level = 2;
+inline void LogItem::clear_log_level() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.log_level_ = 0;
+}
+inline ::int32_t LogItem::log_level() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.LogItem.log_level)
+  return _internal_log_level();
+}
+inline void LogItem::set_log_level(::int32_t value) {
+  _internal_set_log_level(value);
+  // @@protoc_insertion_point(field_set:sunlight.api.LogItem.log_level)
+}
+inline ::int32_t LogItem::_internal_log_level() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.log_level_;
+}
+inline void LogItem::_internal_set_log_level(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.log_level_ = value;
+}
+
+// bytes message = 3;
+inline void LogItem::clear_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.ClearToEmpty();
+}
+inline const std::string& LogItem::message() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.LogItem.message)
+  return _internal_message();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void LogItem::set_message(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.SetBytes(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sunlight.api.LogItem.message)
+}
+inline std::string* LogItem::mutable_message() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_message();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.LogItem.message)
+  return _s;
+}
+inline const std::string& LogItem::_internal_message() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.message_.Get();
+}
+inline void LogItem::_internal_set_message(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.Set(value, GetArena());
+}
+inline std::string* LogItem::_internal_mutable_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.message_.Mutable( GetArena());
+}
+inline std::string* LogItem::release_message() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sunlight.api.LogItem.message)
+  return _impl_.message_.Release();
+}
+inline void LogItem::set_allocated_message(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.message_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.message_.IsDefault()) {
+    _impl_.message_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.LogItem.message)
 }
 
 #ifdef __GNUC__

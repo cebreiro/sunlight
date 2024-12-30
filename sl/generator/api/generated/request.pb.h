@@ -63,6 +63,9 @@ extern AccountPasswordChangeRequestDefaultTypeInternal _AccountPasswordChangeReq
 class AuthenticationRequest;
 struct AuthenticationRequestDefaultTypeInternal;
 extern AuthenticationRequestDefaultTypeInternal _AuthenticationRequest_default_instance_;
+class LogGetRequest;
+struct LogGetRequestDefaultTypeInternal;
+extern LogGetRequestDefaultTypeInternal _LogGetRequest_default_instance_;
 class Request;
 struct RequestDefaultTypeInternal;
 extern RequestDefaultTypeInternal _Request_default_instance_;
@@ -524,6 +527,233 @@ class SystemResourceInfoRequest final
                           const SystemResourceInfoRequest& from_msg);
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
+  friend struct ::TableStruct_request_2eproto;
+};
+// -------------------------------------------------------------------
+
+class LogGetRequest final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sunlight.api.LogGetRequest) */ {
+ public:
+  inline LogGetRequest() : LogGetRequest(nullptr) {}
+  ~LogGetRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(LogGetRequest* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(LogGetRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR LogGetRequest(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline LogGetRequest(const LogGetRequest& from) : LogGetRequest(nullptr, from) {}
+  inline LogGetRequest(LogGetRequest&& from) noexcept
+      : LogGetRequest(nullptr, std::move(from)) {}
+  inline LogGetRequest& operator=(const LogGetRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline LogGetRequest& operator=(LogGetRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const LogGetRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const LogGetRequest* internal_default_instance() {
+    return reinterpret_cast<const LogGetRequest*>(
+        &_LogGetRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 6;
+  friend void swap(LogGetRequest& a, LogGetRequest& b) { a.Swap(&b); }
+  inline void Swap(LogGetRequest* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(LogGetRequest* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  LogGetRequest* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<LogGetRequest>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const LogGetRequest& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const LogGetRequest& from) { LogGetRequest::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(LogGetRequest* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sunlight.api.LogGetRequest"; }
+
+ protected:
+  explicit LogGetRequest(::google::protobuf::Arena* arena);
+  LogGetRequest(::google::protobuf::Arena* arena, const LogGetRequest& from);
+  LogGetRequest(::google::protobuf::Arena* arena, LogGetRequest&& from) noexcept
+      : LogGetRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kLogLevelFieldNumber = 1,
+    kStartDateTimeFieldNumber = 2,
+    kLastDateTimeFieldNumber = 3,
+  };
+  // repeated int32 log_level = 1;
+  int log_level_size() const;
+  private:
+  int _internal_log_level_size() const;
+
+  public:
+  void clear_log_level() ;
+  ::int32_t log_level(int index) const;
+  void set_log_level(int index, ::int32_t value);
+  void add_log_level(::int32_t value);
+  const ::google::protobuf::RepeatedField<::int32_t>& log_level() const;
+  ::google::protobuf::RepeatedField<::int32_t>* mutable_log_level();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int32_t>& _internal_log_level() const;
+  ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_log_level();
+
+  public:
+  // optional int64 start_date_time = 2;
+  bool has_start_date_time() const;
+  void clear_start_date_time() ;
+  ::int64_t start_date_time() const;
+  void set_start_date_time(::int64_t value);
+
+  private:
+  ::int64_t _internal_start_date_time() const;
+  void _internal_set_start_date_time(::int64_t value);
+
+  public:
+  // optional int64 last_date_time = 3;
+  bool has_last_date_time() const;
+  void clear_last_date_time() ;
+  ::int64_t last_date_time() const;
+  void set_last_date_time(::int64_t value);
+
+  private:
+  ::int64_t _internal_last_date_time() const;
+  void _internal_set_last_date_time(::int64_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:sunlight.api.LogGetRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 0,
+      0, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const LogGetRequest& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedField<::int32_t> log_level_;
+    ::google::protobuf::internal::CachedSize _log_level_cached_byte_size_;
+    ::int64_t start_date_time_;
+    ::int64_t last_date_time_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
   friend struct ::TableStruct_request_2eproto;
 };
 // -------------------------------------------------------------------
@@ -1248,13 +1478,14 @@ class Request final
     kUserCount = 103,
     kSystemResourceInfo = 104,
     kWorldInfo = 105,
+    kLogGet = 106,
     PAYLOAD_NOT_SET = 0,
   };
   static inline const Request* internal_default_instance() {
     return reinterpret_cast<const Request*>(
         &_Request_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(Request& a, Request& b) { a.Swap(&b); }
   inline void Swap(Request* other) {
     if (other == this) return;
@@ -1348,6 +1579,7 @@ class Request final
     kUserCountFieldNumber = 103,
     kSystemResourceInfoFieldNumber = 104,
     kWorldInfoFieldNumber = 105,
+    kLogGetFieldNumber = 106,
   };
   // int32 request_id = 1;
   void clear_request_id() ;
@@ -1473,6 +1705,25 @@ class Request final
   ::sunlight::api::WorldInfoRequest* _internal_mutable_world_info();
 
   public:
+  // .sunlight.api.LogGetRequest log_get = 106;
+  bool has_log_get() const;
+  private:
+  bool _internal_has_log_get() const;
+
+  public:
+  void clear_log_get() ;
+  const ::sunlight::api::LogGetRequest& log_get() const;
+  PROTOBUF_NODISCARD ::sunlight::api::LogGetRequest* release_log_get();
+  ::sunlight::api::LogGetRequest* mutable_log_get();
+  void set_allocated_log_get(::sunlight::api::LogGetRequest* value);
+  void unsafe_arena_set_allocated_log_get(::sunlight::api::LogGetRequest* value);
+  ::sunlight::api::LogGetRequest* unsafe_arena_release_log_get();
+
+  private:
+  const ::sunlight::api::LogGetRequest& _internal_log_get() const;
+  ::sunlight::api::LogGetRequest* _internal_mutable_log_get();
+
+  public:
   void clear_payload();
   PayloadCase payload_case() const;
   // @@protoc_insertion_point(class_scope:sunlight.api.Request)
@@ -1484,11 +1735,12 @@ class Request final
   void set_has_user_count();
   void set_has_system_resource_info();
   void set_has_world_info();
+  void set_has_log_get();
   inline bool has_payload() const;
   inline void clear_has_payload();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 7, 6,
+      0, 8, 7,
       0, 7>
       _table_;
 
@@ -1516,6 +1768,7 @@ class Request final
       ::sunlight::api::UserCountRequest* user_count_;
       ::sunlight::api::SystemResourceInfoRequest* system_resource_info_;
       ::sunlight::api::WorldInfoRequest* world_info_;
+      ::sunlight::api::LogGetRequest* log_get_;
     } payload_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -1870,6 +2123,111 @@ inline void AccountPasswordChangeRequest::set_allocated_password(std::string* va
 // -------------------------------------------------------------------
 
 // WorldInfoRequest
+
+// -------------------------------------------------------------------
+
+// LogGetRequest
+
+// repeated int32 log_level = 1;
+inline int LogGetRequest::_internal_log_level_size() const {
+  return _internal_log_level().size();
+}
+inline int LogGetRequest::log_level_size() const {
+  return _internal_log_level_size();
+}
+inline void LogGetRequest::clear_log_level() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.log_level_.Clear();
+}
+inline ::int32_t LogGetRequest::log_level(int index) const {
+  // @@protoc_insertion_point(field_get:sunlight.api.LogGetRequest.log_level)
+  return _internal_log_level().Get(index);
+}
+inline void LogGetRequest::set_log_level(int index, ::int32_t value) {
+  _internal_mutable_log_level()->Set(index, value);
+  // @@protoc_insertion_point(field_set:sunlight.api.LogGetRequest.log_level)
+}
+inline void LogGetRequest::add_log_level(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _internal_mutable_log_level()->Add(value);
+  // @@protoc_insertion_point(field_add:sunlight.api.LogGetRequest.log_level)
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>& LogGetRequest::log_level() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:sunlight.api.LogGetRequest.log_level)
+  return _internal_log_level();
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* LogGetRequest::mutable_log_level()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:sunlight.api.LogGetRequest.log_level)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_log_level();
+}
+inline const ::google::protobuf::RepeatedField<::int32_t>&
+LogGetRequest::_internal_log_level() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.log_level_;
+}
+inline ::google::protobuf::RepeatedField<::int32_t>* LogGetRequest::_internal_mutable_log_level() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.log_level_;
+}
+
+// optional int64 start_date_time = 2;
+inline bool LogGetRequest::has_start_date_time() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline void LogGetRequest::clear_start_date_time() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.start_date_time_ = ::int64_t{0};
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline ::int64_t LogGetRequest::start_date_time() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.LogGetRequest.start_date_time)
+  return _internal_start_date_time();
+}
+inline void LogGetRequest::set_start_date_time(::int64_t value) {
+  _internal_set_start_date_time(value);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  // @@protoc_insertion_point(field_set:sunlight.api.LogGetRequest.start_date_time)
+}
+inline ::int64_t LogGetRequest::_internal_start_date_time() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.start_date_time_;
+}
+inline void LogGetRequest::_internal_set_start_date_time(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.start_date_time_ = value;
+}
+
+// optional int64 last_date_time = 3;
+inline bool LogGetRequest::has_last_date_time() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline void LogGetRequest::clear_last_date_time() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.last_date_time_ = ::int64_t{0};
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline ::int64_t LogGetRequest::last_date_time() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.LogGetRequest.last_date_time)
+  return _internal_last_date_time();
+}
+inline void LogGetRequest::set_last_date_time(::int64_t value) {
+  _internal_set_last_date_time(value);
+  _impl_._has_bits_[0] |= 0x00000002u;
+  // @@protoc_insertion_point(field_set:sunlight.api.LogGetRequest.last_date_time)
+}
+inline ::int64_t LogGetRequest::_internal_last_date_time() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.last_date_time_;
+}
+inline void LogGetRequest::_internal_set_last_date_time(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.last_date_time_ = value;
+}
 
 // -------------------------------------------------------------------
 
@@ -2368,6 +2726,85 @@ inline ::sunlight::api::WorldInfoRequest* Request::_internal_mutable_world_info(
 inline ::sunlight::api::WorldInfoRequest* Request::mutable_world_info() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::sunlight::api::WorldInfoRequest* _msg = _internal_mutable_world_info();
   // @@protoc_insertion_point(field_mutable:sunlight.api.Request.world_info)
+  return _msg;
+}
+
+// .sunlight.api.LogGetRequest log_get = 106;
+inline bool Request::has_log_get() const {
+  return payload_case() == kLogGet;
+}
+inline bool Request::_internal_has_log_get() const {
+  return payload_case() == kLogGet;
+}
+inline void Request::set_has_log_get() {
+  _impl_._oneof_case_[0] = kLogGet;
+}
+inline void Request::clear_log_get() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (payload_case() == kLogGet) {
+    if (GetArena() == nullptr) {
+      delete _impl_.payload_.log_get_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.log_get_);
+    }
+    clear_has_payload();
+  }
+}
+inline ::sunlight::api::LogGetRequest* Request::release_log_get() {
+  // @@protoc_insertion_point(field_release:sunlight.api.Request.log_get)
+  if (payload_case() == kLogGet) {
+    clear_has_payload();
+    auto* temp = _impl_.payload_.log_get_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.payload_.log_get_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::sunlight::api::LogGetRequest& Request::_internal_log_get() const {
+  return payload_case() == kLogGet ? *_impl_.payload_.log_get_ : reinterpret_cast<::sunlight::api::LogGetRequest&>(::sunlight::api::_LogGetRequest_default_instance_);
+}
+inline const ::sunlight::api::LogGetRequest& Request::log_get() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.Request.log_get)
+  return _internal_log_get();
+}
+inline ::sunlight::api::LogGetRequest* Request::unsafe_arena_release_log_get() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:sunlight.api.Request.log_get)
+  if (payload_case() == kLogGet) {
+    clear_has_payload();
+    auto* temp = _impl_.payload_.log_get_;
+    _impl_.payload_.log_get_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Request::unsafe_arena_set_allocated_log_get(::sunlight::api::LogGetRequest* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_payload();
+  if (value) {
+    set_has_log_get();
+    _impl_.payload_.log_get_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sunlight.api.Request.log_get)
+}
+inline ::sunlight::api::LogGetRequest* Request::_internal_mutable_log_get() {
+  if (payload_case() != kLogGet) {
+    clear_payload();
+    set_has_log_get();
+    _impl_.payload_.log_get_ =
+        ::google::protobuf::Message::DefaultConstruct<::sunlight::api::LogGetRequest>(GetArena());
+  }
+  return _impl_.payload_.log_get_;
+}
+inline ::sunlight::api::LogGetRequest* Request::mutable_log_get() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::sunlight::api::LogGetRequest* _msg = _internal_mutable_log_get();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.Request.log_get)
   return _msg;
 }
 

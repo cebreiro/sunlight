@@ -33,17 +33,19 @@ namespace Sunlight.Api {
             "eXN0ZW1SZXNvdXJjZUluZm9SZXNwb25zZRIbChNjcHVfbG9hZF9wZXJjZW50",
             "YWdlGAEgASgFEhYKDmZyZWVfbWVtb3J5X2diGAIgASgBIkUKEVdvcmxkSW5m",
             "b1Jlc3BvbnNlEjAKD3dvcmxkX2luZm9fbGlzdBgBIAMoCzIXLnN1bmxpZ2h0",
-            "LmFwaS5Xb3JsZEluZm8itAMKCFJlc3BvbnNlEhIKCnJlcXVlc3RfaWQYASAB",
-            "KAUSPgoOYXV0aGVudGljYXRpb24YZCABKAsyJC5zdW5saWdodC5hcGkuQXV0",
-            "aGVudGljYXRpb25SZXNwb25zZUgAEkEKEGFjY291bnRfY3JlYXRpb24YZSAB",
-            "KAsyJS5zdW5saWdodC5hcGkuQWNjb3VudENyZWF0aW9uUmVzcG9uc2VIABJO",
-            "ChdhY2NvdW50X3Bhc3N3b3JkX2NoYW5nZRhmIAEoCzIrLnN1bmxpZ2h0LmFw",
-            "aS5BY2NvdW50UGFzc3dvcmRDaGFuZ2VSZXNwb25zZUgAEjUKCnVzZXJfY291",
-            "bnQYZyABKAsyHy5zdW5saWdodC5hcGkuVXNlckNvdW50UmVzcG9uc2VIABJI",
-            "ChRzeXN0ZW1fcmVzb3VyY2VfaW5mbxhoIAEoCzIoLnN1bmxpZ2h0LmFwaS5T",
-            "eXN0ZW1SZXNvdXJjZUluZm9SZXNwb25zZUgAEjUKCndvcmxkX2luZm8YaSAB",
-            "KAsyHy5zdW5saWdodC5hcGkuV29ybGRJbmZvUmVzcG9uc2VIAEIJCgdwYXls",
-            "b2FkYgZwcm90bzM="));
+            "LmFwaS5Xb3JsZEluZm8iPgoOTG9nR2V0UmVzcG9uc2USLAoNbG9nX2l0ZW1f",
+            "bGlzdBgBIAMoCzIVLnN1bmxpZ2h0LmFwaS5Mb2dJdGVtIuUDCghSZXNwb25z",
+            "ZRISCgpyZXF1ZXN0X2lkGAEgASgFEj4KDmF1dGhlbnRpY2F0aW9uGGQgASgL",
+            "MiQuc3VubGlnaHQuYXBpLkF1dGhlbnRpY2F0aW9uUmVzcG9uc2VIABJBChBh",
+            "Y2NvdW50X2NyZWF0aW9uGGUgASgLMiUuc3VubGlnaHQuYXBpLkFjY291bnRD",
+            "cmVhdGlvblJlc3BvbnNlSAASTgoXYWNjb3VudF9wYXNzd29yZF9jaGFuZ2UY",
+            "ZiABKAsyKy5zdW5saWdodC5hcGkuQWNjb3VudFBhc3N3b3JkQ2hhbmdlUmVz",
+            "cG9uc2VIABI1Cgp1c2VyX2NvdW50GGcgASgLMh8uc3VubGlnaHQuYXBpLlVz",
+            "ZXJDb3VudFJlc3BvbnNlSAASSAoUc3lzdGVtX3Jlc291cmNlX2luZm8YaCAB",
+            "KAsyKC5zdW5saWdodC5hcGkuU3lzdGVtUmVzb3VyY2VJbmZvUmVzcG9uc2VI",
+            "ABI1Cgp3b3JsZF9pbmZvGGkgASgLMh8uc3VubGlnaHQuYXBpLldvcmxkSW5m",
+            "b1Jlc3BvbnNlSAASLwoHbG9nX2dldBhqIAEoCzIcLnN1bmxpZ2h0LmFwaS5M",
+            "b2dHZXRSZXNwb25zZUgAQgkKB3BheWxvYWRiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Sunlight.Api.DtoReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -53,7 +55,8 @@ namespace Sunlight.Api {
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.UserCountResponse), global::Sunlight.Api.UserCountResponse.Parser, new[]{ "UserCount" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.SystemResourceInfoResponse), global::Sunlight.Api.SystemResourceInfoResponse.Parser, new[]{ "CpuLoadPercentage", "FreeMemoryGb" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.WorldInfoResponse), global::Sunlight.Api.WorldInfoResponse.Parser, new[]{ "WorldInfoList" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Response), global::Sunlight.Api.Response.Parser, new[]{ "RequestId", "Authentication", "AccountCreation", "AccountPasswordChange", "UserCount", "SystemResourceInfo", "WorldInfo" }, new[]{ "Payload" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.LogGetResponse), global::Sunlight.Api.LogGetResponse.Parser, new[]{ "LogItemList" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Response), global::Sunlight.Api.Response.Parser, new[]{ "RequestId", "Authentication", "AccountCreation", "AccountPasswordChange", "UserCount", "SystemResourceInfo", "WorldInfo", "LogGet" }, new[]{ "Payload" }, null, null, null)
           }));
     }
     #endregion
@@ -1349,6 +1352,193 @@ namespace Sunlight.Api {
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class LogGetResponse : pb::IMessage<LogGetResponse>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<LogGetResponse> _parser = new pb::MessageParser<LogGetResponse>(() => new LogGetResponse());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<LogGetResponse> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[6]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public LogGetResponse() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public LogGetResponse(LogGetResponse other) : this() {
+      logItemList_ = other.logItemList_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public LogGetResponse Clone() {
+      return new LogGetResponse(this);
+    }
+
+    /// <summary>Field number for the "log_item_list" field.</summary>
+    public const int LogItemListFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::Sunlight.Api.LogItem> _repeated_logItemList_codec
+        = pb::FieldCodec.ForMessage(10, global::Sunlight.Api.LogItem.Parser);
+    private readonly pbc::RepeatedField<global::Sunlight.Api.LogItem> logItemList_ = new pbc::RepeatedField<global::Sunlight.Api.LogItem>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<global::Sunlight.Api.LogItem> LogItemList {
+      get { return logItemList_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as LogGetResponse);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(LogGetResponse other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!logItemList_.Equals(other.logItemList_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= logItemList_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      logItemList_.WriteTo(output, _repeated_logItemList_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      logItemList_.WriteTo(ref output, _repeated_logItemList_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += logItemList_.CalculateSize(_repeated_logItemList_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(LogGetResponse other) {
+      if (other == null) {
+        return;
+      }
+      logItemList_.Add(other.logItemList_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            logItemList_.AddEntriesFrom(input, _repeated_logItemList_codec);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            logItemList_.AddEntriesFrom(ref input, _repeated_logItemList_codec);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class Response : pb::IMessage<Response>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1363,7 +1553,7 @@ namespace Sunlight.Api {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[6]; }
+      get { return global::Sunlight.Api.ResponseReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1402,6 +1592,9 @@ namespace Sunlight.Api {
           break;
         case PayloadOneofCase.WorldInfo:
           WorldInfo = other.WorldInfo.Clone();
+          break;
+        case PayloadOneofCase.LogGet:
+          LogGet = other.LogGet.Clone();
           break;
       }
 
@@ -1498,6 +1691,18 @@ namespace Sunlight.Api {
       }
     }
 
+    /// <summary>Field number for the "log_get" field.</summary>
+    public const int LogGetFieldNumber = 106;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Sunlight.Api.LogGetResponse LogGet {
+      get { return payloadCase_ == PayloadOneofCase.LogGet ? (global::Sunlight.Api.LogGetResponse) payload_ : null; }
+      set {
+        payload_ = value;
+        payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.LogGet;
+      }
+    }
+
     private object payload_;
     /// <summary>Enum of possible cases for the "payload" oneof.</summary>
     public enum PayloadOneofCase {
@@ -1508,6 +1713,7 @@ namespace Sunlight.Api {
       UserCount = 103,
       SystemResourceInfo = 104,
       WorldInfo = 105,
+      LogGet = 106,
     }
     private PayloadOneofCase payloadCase_ = PayloadOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1545,6 +1751,7 @@ namespace Sunlight.Api {
       if (!object.Equals(UserCount, other.UserCount)) return false;
       if (!object.Equals(SystemResourceInfo, other.SystemResourceInfo)) return false;
       if (!object.Equals(WorldInfo, other.WorldInfo)) return false;
+      if (!object.Equals(LogGet, other.LogGet)) return false;
       if (PayloadCase != other.PayloadCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -1560,6 +1767,7 @@ namespace Sunlight.Api {
       if (payloadCase_ == PayloadOneofCase.UserCount) hash ^= UserCount.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.SystemResourceInfo) hash ^= SystemResourceInfo.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.WorldInfo) hash ^= WorldInfo.GetHashCode();
+      if (payloadCase_ == PayloadOneofCase.LogGet) hash ^= LogGet.GetHashCode();
       hash ^= (int) payloadCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -1607,6 +1815,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(202, 6);
         output.WriteMessage(WorldInfo);
       }
+      if (payloadCase_ == PayloadOneofCase.LogGet) {
+        output.WriteRawTag(210, 6);
+        output.WriteMessage(LogGet);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1645,6 +1857,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(202, 6);
         output.WriteMessage(WorldInfo);
       }
+      if (payloadCase_ == PayloadOneofCase.LogGet) {
+        output.WriteRawTag(210, 6);
+        output.WriteMessage(LogGet);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1675,6 +1891,9 @@ namespace Sunlight.Api {
       }
       if (payloadCase_ == PayloadOneofCase.WorldInfo) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(WorldInfo);
+      }
+      if (payloadCase_ == PayloadOneofCase.LogGet) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(LogGet);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1727,6 +1946,12 @@ namespace Sunlight.Api {
             WorldInfo = new global::Sunlight.Api.WorldInfoResponse();
           }
           WorldInfo.MergeFrom(other.WorldInfo);
+          break;
+        case PayloadOneofCase.LogGet:
+          if (LogGet == null) {
+            LogGet = new global::Sunlight.Api.LogGetResponse();
+          }
+          LogGet.MergeFrom(other.LogGet);
           break;
       }
 
@@ -1807,6 +2032,15 @@ namespace Sunlight.Api {
             WorldInfo = subBuilder;
             break;
           }
+          case 850: {
+            global::Sunlight.Api.LogGetResponse subBuilder = new global::Sunlight.Api.LogGetResponse();
+            if (payloadCase_ == PayloadOneofCase.LogGet) {
+              subBuilder.MergeFrom(LogGet);
+            }
+            input.ReadMessage(subBuilder);
+            LogGet = subBuilder;
+            break;
+          }
         }
       }
     #endif
@@ -1882,6 +2116,15 @@ namespace Sunlight.Api {
             }
             input.ReadMessage(subBuilder);
             WorldInfo = subBuilder;
+            break;
+          }
+          case 850: {
+            global::Sunlight.Api.LogGetResponse subBuilder = new global::Sunlight.Api.LogGetResponse();
+            if (payloadCase_ == PayloadOneofCase.LogGet) {
+              subBuilder.MergeFrom(LogGet);
+            }
+            input.ReadMessage(subBuilder);
+            LogGet = subBuilder;
             break;
           }
         }

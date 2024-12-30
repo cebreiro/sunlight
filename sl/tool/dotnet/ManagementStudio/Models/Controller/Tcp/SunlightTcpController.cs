@@ -201,6 +201,34 @@ public class SunlightTcpController : ISunlightController
         return await completionSource.Task;
     }
 
+    public async Task<LogGetResponse> GetLog(LogGetRequest logRequest)
+    {
+        TaskCompletionSource<LogGetResponse> completionSource = new();
+        using (await _mutex.LockAsync())
+        {
+            int requestId = _nextRequestId++;
+
+            System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
+
+            _receiveHandlers[requestId] = new ReceiveHandler(
+                response =>
+                {
+                    completionSource.SetResult(response.LogGet);
+                },
+                () => completionSource.SetException(new Exception("operation aborted")));
+
+            Request request = new()
+            {
+                RequestId = requestId,
+                LogGet = logRequest
+            };
+
+            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
+        }
+
+        return await completionSource.Task;
+    }
+
     private void ConfigureSendFailHandler(Task task, int requestId)
     {
         task.ContinueWith(t =>

@@ -37,6 +37,11 @@ message WorldInfoResponse
     repeated WorldInfo world_info_list = 1;
 }
 
+message LogGetResponse
+{
+    repeated LogItem log_item_list = 1;
+}
+
 message Response
 {
     int32 request_id = 1;
@@ -49,5 +54,6 @@ message Response
         UserCountResponse user_count = 103;
         SystemResourceInfoResponse system_resource_info = 104;
         WorldInfoResponse world_info = 105;
+        LogGetResponse log_get = 106;
     }
 }

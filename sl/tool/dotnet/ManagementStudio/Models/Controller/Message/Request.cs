@@ -30,7 +30,10 @@ namespace Sunlight.Api {
             "AiABKAkSEAoIZ21fbGV2ZWwYAyABKAUiPAocQWNjb3VudFBhc3N3b3JkQ2hh",
             "bmdlUmVxdWVzdBIKCgJpZBgBIAEoCRIQCghwYXNzd29yZBgCIAEoCSISChBV",
             "c2VyQ291bnRSZXF1ZXN0IhsKGVN5c3RlbVJlc291cmNlSW5mb1JlcXVlc3Qi",
-            "EgoQV29ybGRJbmZvUmVxdWVzdCKtAwoHUmVxdWVzdBISCgpyZXF1ZXN0X2lk",
+            "EgoQV29ybGRJbmZvUmVxdWVzdCKEAQoNTG9nR2V0UmVxdWVzdBIRCglsb2df",
+            "bGV2ZWwYASADKAUSHAoPc3RhcnRfZGF0ZV90aW1lGAIgASgDSACIAQESGwoO",
+            "bGFzdF9kYXRlX3RpbWUYAyABKANIAYgBAUISChBfc3RhcnRfZGF0ZV90aW1l",
+            "QhEKD19sYXN0X2RhdGVfdGltZSLdAwoHUmVxdWVzdBISCgpyZXF1ZXN0X2lk",
             "GAEgASgFEj0KDmF1dGhlbnRpY2F0aW9uGGQgASgLMiMuc3VubGlnaHQuYXBp",
             "LkF1dGhlbnRpY2F0aW9uUmVxdWVzdEgAEkAKEGFjY291bnRfY3JlYXRpb24Y",
             "ZSABKAsyJC5zdW5saWdodC5hcGkuQWNjb3VudENyZWF0aW9uUmV1cWVzdEgA",
@@ -39,8 +42,9 @@ namespace Sunlight.Api {
             "dW50GGcgASgLMh4uc3VubGlnaHQuYXBpLlVzZXJDb3VudFJlcXVlc3RIABJH",
             "ChRzeXN0ZW1fcmVzb3VyY2VfaW5mbxhoIAEoCzInLnN1bmxpZ2h0LmFwaS5T",
             "eXN0ZW1SZXNvdXJjZUluZm9SZXF1ZXN0SAASNAoKd29ybGRfaW5mbxhpIAEo",
-            "CzIeLnN1bmxpZ2h0LmFwaS5Xb3JsZEluZm9SZXF1ZXN0SABCCQoHcGF5bG9h",
-            "ZGIGcHJvdG8z"));
+            "CzIeLnN1bmxpZ2h0LmFwaS5Xb3JsZEluZm9SZXF1ZXN0SAASLgoHbG9nX2dl",
+            "dBhqIAEoCzIbLnN1bmxpZ2h0LmFwaS5Mb2dHZXRSZXF1ZXN0SABCCQoHcGF5",
+            "bG9hZGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -50,7 +54,8 @@ namespace Sunlight.Api {
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.UserCountRequest), global::Sunlight.Api.UserCountRequest.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.SystemResourceInfoRequest), global::Sunlight.Api.SystemResourceInfoRequest.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.WorldInfoRequest), global::Sunlight.Api.WorldInfoRequest.Parser, null, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Request), global::Sunlight.Api.Request.Parser, new[]{ "RequestId", "Authentication", "AccountCreation", "AccountPasswordChange", "UserCount", "SystemResourceInfo", "WorldInfo" }, new[]{ "Payload" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.LogGetRequest), global::Sunlight.Api.LogGetRequest.Parser, new[]{ "LogLevel", "StartDateTime", "LastDateTime" }, new[]{ "StartDateTime", "LastDateTime" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Request), global::Sunlight.Api.Request.Parser, new[]{ "RequestId", "Authentication", "AccountCreation", "AccountPasswordChange", "UserCount", "SystemResourceInfo", "WorldInfo", "LogGet" }, new[]{ "Payload" }, null, null, null)
           }));
     }
     #endregion
@@ -1283,6 +1288,301 @@ namespace Sunlight.Api {
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class LogGetRequest : pb::IMessage<LogGetRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<LogGetRequest> _parser = new pb::MessageParser<LogGetRequest>(() => new LogGetRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<LogGetRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[6]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public LogGetRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public LogGetRequest(LogGetRequest other) : this() {
+      _hasBits0 = other._hasBits0;
+      logLevel_ = other.logLevel_.Clone();
+      startDateTime_ = other.startDateTime_;
+      lastDateTime_ = other.lastDateTime_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public LogGetRequest Clone() {
+      return new LogGetRequest(this);
+    }
+
+    /// <summary>Field number for the "log_level" field.</summary>
+    public const int LogLevelFieldNumber = 1;
+    private static readonly pb::FieldCodec<int> _repeated_logLevel_codec
+        = pb::FieldCodec.ForInt32(10);
+    private readonly pbc::RepeatedField<int> logLevel_ = new pbc::RepeatedField<int>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pbc::RepeatedField<int> LogLevel {
+      get { return logLevel_; }
+    }
+
+    /// <summary>Field number for the "start_date_time" field.</summary>
+    public const int StartDateTimeFieldNumber = 2;
+    private readonly static long StartDateTimeDefaultValue = 0L;
+
+    private long startDateTime_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long StartDateTime {
+      get { if ((_hasBits0 & 1) != 0) { return startDateTime_; } else { return StartDateTimeDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        startDateTime_ = value;
+      }
+    }
+    /// <summary>Gets whether the "start_date_time" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasStartDateTime {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "start_date_time" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearStartDateTime() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "last_date_time" field.</summary>
+    public const int LastDateTimeFieldNumber = 3;
+    private readonly static long LastDateTimeDefaultValue = 0L;
+
+    private long lastDateTime_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long LastDateTime {
+      get { if ((_hasBits0 & 2) != 0) { return lastDateTime_; } else { return LastDateTimeDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        lastDateTime_ = value;
+      }
+    }
+    /// <summary>Gets whether the "last_date_time" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasLastDateTime {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "last_date_time" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void ClearLastDateTime() {
+      _hasBits0 &= ~2;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as LogGetRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(LogGetRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!logLevel_.Equals(other.logLevel_)) return false;
+      if (StartDateTime != other.StartDateTime) return false;
+      if (LastDateTime != other.LastDateTime) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= logLevel_.GetHashCode();
+      if (HasStartDateTime) hash ^= StartDateTime.GetHashCode();
+      if (HasLastDateTime) hash ^= LastDateTime.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      logLevel_.WriteTo(output, _repeated_logLevel_codec);
+      if (HasStartDateTime) {
+        output.WriteRawTag(16);
+        output.WriteInt64(StartDateTime);
+      }
+      if (HasLastDateTime) {
+        output.WriteRawTag(24);
+        output.WriteInt64(LastDateTime);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      logLevel_.WriteTo(ref output, _repeated_logLevel_codec);
+      if (HasStartDateTime) {
+        output.WriteRawTag(16);
+        output.WriteInt64(StartDateTime);
+      }
+      if (HasLastDateTime) {
+        output.WriteRawTag(24);
+        output.WriteInt64(LastDateTime);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      size += logLevel_.CalculateSize(_repeated_logLevel_codec);
+      if (HasStartDateTime) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(StartDateTime);
+      }
+      if (HasLastDateTime) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(LastDateTime);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(LogGetRequest other) {
+      if (other == null) {
+        return;
+      }
+      logLevel_.Add(other.logLevel_);
+      if (other.HasStartDateTime) {
+        StartDateTime = other.StartDateTime;
+      }
+      if (other.HasLastDateTime) {
+        LastDateTime = other.LastDateTime;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10:
+          case 8: {
+            logLevel_.AddEntriesFrom(input, _repeated_logLevel_codec);
+            break;
+          }
+          case 16: {
+            StartDateTime = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            LastDateTime = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10:
+          case 8: {
+            logLevel_.AddEntriesFrom(ref input, _repeated_logLevel_codec);
+            break;
+          }
+          case 16: {
+            StartDateTime = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            LastDateTime = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class Request : pb::IMessage<Request>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1297,7 +1597,7 @@ namespace Sunlight.Api {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[6]; }
+      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1336,6 +1636,9 @@ namespace Sunlight.Api {
           break;
         case PayloadOneofCase.WorldInfo:
           WorldInfo = other.WorldInfo.Clone();
+          break;
+        case PayloadOneofCase.LogGet:
+          LogGet = other.LogGet.Clone();
           break;
       }
 
@@ -1432,6 +1735,18 @@ namespace Sunlight.Api {
       }
     }
 
+    /// <summary>Field number for the "log_get" field.</summary>
+    public const int LogGetFieldNumber = 106;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Sunlight.Api.LogGetRequest LogGet {
+      get { return payloadCase_ == PayloadOneofCase.LogGet ? (global::Sunlight.Api.LogGetRequest) payload_ : null; }
+      set {
+        payload_ = value;
+        payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.LogGet;
+      }
+    }
+
     private object payload_;
     /// <summary>Enum of possible cases for the "payload" oneof.</summary>
     public enum PayloadOneofCase {
@@ -1442,6 +1757,7 @@ namespace Sunlight.Api {
       UserCount = 103,
       SystemResourceInfo = 104,
       WorldInfo = 105,
+      LogGet = 106,
     }
     private PayloadOneofCase payloadCase_ = PayloadOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1479,6 +1795,7 @@ namespace Sunlight.Api {
       if (!object.Equals(UserCount, other.UserCount)) return false;
       if (!object.Equals(SystemResourceInfo, other.SystemResourceInfo)) return false;
       if (!object.Equals(WorldInfo, other.WorldInfo)) return false;
+      if (!object.Equals(LogGet, other.LogGet)) return false;
       if (PayloadCase != other.PayloadCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -1494,6 +1811,7 @@ namespace Sunlight.Api {
       if (payloadCase_ == PayloadOneofCase.UserCount) hash ^= UserCount.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.SystemResourceInfo) hash ^= SystemResourceInfo.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.WorldInfo) hash ^= WorldInfo.GetHashCode();
+      if (payloadCase_ == PayloadOneofCase.LogGet) hash ^= LogGet.GetHashCode();
       hash ^= (int) payloadCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -1541,6 +1859,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(202, 6);
         output.WriteMessage(WorldInfo);
       }
+      if (payloadCase_ == PayloadOneofCase.LogGet) {
+        output.WriteRawTag(210, 6);
+        output.WriteMessage(LogGet);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1579,6 +1901,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(202, 6);
         output.WriteMessage(WorldInfo);
       }
+      if (payloadCase_ == PayloadOneofCase.LogGet) {
+        output.WriteRawTag(210, 6);
+        output.WriteMessage(LogGet);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1609,6 +1935,9 @@ namespace Sunlight.Api {
       }
       if (payloadCase_ == PayloadOneofCase.WorldInfo) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(WorldInfo);
+      }
+      if (payloadCase_ == PayloadOneofCase.LogGet) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(LogGet);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1661,6 +1990,12 @@ namespace Sunlight.Api {
             WorldInfo = new global::Sunlight.Api.WorldInfoRequest();
           }
           WorldInfo.MergeFrom(other.WorldInfo);
+          break;
+        case PayloadOneofCase.LogGet:
+          if (LogGet == null) {
+            LogGet = new global::Sunlight.Api.LogGetRequest();
+          }
+          LogGet.MergeFrom(other.LogGet);
           break;
       }
 
@@ -1741,6 +2076,15 @@ namespace Sunlight.Api {
             WorldInfo = subBuilder;
             break;
           }
+          case 850: {
+            global::Sunlight.Api.LogGetRequest subBuilder = new global::Sunlight.Api.LogGetRequest();
+            if (payloadCase_ == PayloadOneofCase.LogGet) {
+              subBuilder.MergeFrom(LogGet);
+            }
+            input.ReadMessage(subBuilder);
+            LogGet = subBuilder;
+            break;
+          }
         }
       }
     #endif
@@ -1816,6 +2160,15 @@ namespace Sunlight.Api {
             }
             input.ReadMessage(subBuilder);
             WorldInfo = subBuilder;
+            break;
+          }
+          case 850: {
+            global::Sunlight.Api.LogGetRequest subBuilder = new global::Sunlight.Api.LogGetRequest();
+            if (payloadCase_ == PayloadOneofCase.LogGet) {
+              subBuilder.MergeFrom(LogGet);
+            }
+            input.ReadMessage(subBuilder);
+            LogGet = subBuilder;
             break;
           }
         }

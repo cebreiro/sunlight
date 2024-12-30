@@ -30,6 +30,9 @@ namespace sunlight
 
         auto GetSystemResourceInfo(std::optional<int32_t>& outCpuLoadPercentage, std::optional<double>& outFreeMemoryGB) -> Future<void>;
         auto GetWorldInfo() -> Future<std::vector<api::WorldInfo>>;
+        auto GetLog(std::vector<api::LogItem>& result, std::vector<LogLevel> logLevels,
+            std::optional<std::chrono::system_clock::time_point> start,
+            std::optional<std::chrono::system_clock::time_point> last) -> Future<void>;
 
         auto GetName() const -> std::string_view override;
 

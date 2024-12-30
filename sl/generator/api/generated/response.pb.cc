@@ -159,6 +159,31 @@ struct AccountCreationResponseDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AccountCreationResponseDefaultTypeInternal _AccountCreationResponse_default_instance_;
 
+inline constexpr LogGetResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : log_item_list_{},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR LogGetResponse::LogGetResponse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct LogGetResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LogGetResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LogGetResponseDefaultTypeInternal() {}
+  union {
+    LogGetResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LogGetResponseDefaultTypeInternal _LogGetResponse_default_instance_;
+
 inline constexpr WorldInfoResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : world_info_list_{},
@@ -277,6 +302,15 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::WorldInfoResponse, _impl_.world_info_list_),
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogGetResponse, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogGetResponse, _impl_.log_item_list_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_._oneof_case_[0]),
@@ -285,6 +319,7 @@ const ::uint32_t
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_.request_id_),
+        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
@@ -302,7 +337,8 @@ static const ::_pbi::MigrationSchema
         {29, -1, -1, sizeof(::sunlight::api::UserCountResponse)},
         {38, -1, -1, sizeof(::sunlight::api::SystemResourceInfoResponse)},
         {48, -1, -1, sizeof(::sunlight::api::WorldInfoResponse)},
-        {57, -1, -1, sizeof(::sunlight::api::Response)},
+        {57, -1, -1, sizeof(::sunlight::api::LogGetResponse)},
+        {66, -1, -1, sizeof(::sunlight::api::Response)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_AuthenticationResponse_default_instance_._instance,
@@ -311,6 +347,7 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_UserCountResponse_default_instance_._instance,
     &::sunlight::api::_SystemResourceInfoResponse_default_instance_._instance,
     &::sunlight::api::_WorldInfoResponse_default_instance_._instance,
+    &::sunlight::api::_LogGetResponse_default_instance_._instance,
     &::sunlight::api::_Response_default_instance_._instance,
 };
 const char descriptor_table_protodef_response_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -325,18 +362,21 @@ const char descriptor_table_protodef_response_2eproto[] ABSL_ATTRIBUTE_SECTION_V
     "rceInfoResponse\022\033\n\023cpu_load_percentage\030\001"
     " \001(\005\022\026\n\016free_memory_gb\030\002 \001(\001\"E\n\021WorldInf"
     "oResponse\0220\n\017world_info_list\030\001 \003(\0132\027.sun"
-    "light.api.WorldInfo\"\264\003\n\010Response\022\022\n\nrequ"
-    "est_id\030\001 \001(\005\022>\n\016authentication\030d \001(\0132$.s"
-    "unlight.api.AuthenticationResponseH\000\022A\n\020"
-    "account_creation\030e \001(\0132%.sunlight.api.Ac"
-    "countCreationResponseH\000\022N\n\027account_passw"
-    "ord_change\030f \001(\0132+.sunlight.api.AccountP"
-    "asswordChangeResponseH\000\0225\n\nuser_count\030g "
-    "\001(\0132\037.sunlight.api.UserCountResponseH\000\022H"
-    "\n\024system_resource_info\030h \001(\0132(.sunlight."
-    "api.SystemResourceInfoResponseH\000\0225\n\nworl"
-    "d_info\030i \001(\0132\037.sunlight.api.WorldInfoRes"
-    "ponseH\000B\t\n\007payloadb\006proto3"
+    "light.api.WorldInfo\">\n\016LogGetResponse\022,\n"
+    "\rlog_item_list\030\001 \003(\0132\025.sunlight.api.LogI"
+    "tem\"\345\003\n\010Response\022\022\n\nrequest_id\030\001 \001(\005\022>\n\016"
+    "authentication\030d \001(\0132$.sunlight.api.Auth"
+    "enticationResponseH\000\022A\n\020account_creation"
+    "\030e \001(\0132%.sunlight.api.AccountCreationRes"
+    "ponseH\000\022N\n\027account_password_change\030f \001(\013"
+    "2+.sunlight.api.AccountPasswordChangeRes"
+    "ponseH\000\0225\n\nuser_count\030g \001(\0132\037.sunlight.a"
+    "pi.UserCountResponseH\000\022H\n\024system_resourc"
+    "e_info\030h \001(\0132(.sunlight.api.SystemResour"
+    "ceInfoResponseH\000\0225\n\nworld_info\030i \001(\0132\037.s"
+    "unlight.api.WorldInfoResponseH\000\022/\n\007log_g"
+    "et\030j \001(\0132\034.sunlight.api.LogGetResponseH\000"
+    "B\t\n\007payloadb\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_response_2eproto_deps[1] =
     {
@@ -346,13 +386,13 @@ static ::absl::once_flag descriptor_table_response_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_response_2eproto = {
     false,
     false,
-    866,
+    979,
     descriptor_table_protodef_response_2eproto,
     "response.proto",
     &descriptor_table_response_2eproto_once,
     descriptor_table_response_2eproto_deps,
     1,
-    7,
+    8,
     schemas,
     file_default_instances,
     TableStruct_response_2eproto::offsets,
@@ -1777,6 +1817,252 @@ void WorldInfoResponse::InternalSwap(WorldInfoResponse* PROTOBUF_RESTRICT other)
 }
 // ===================================================================
 
+class LogGetResponse::_Internal {
+ public:
+};
+
+void LogGetResponse::clear_log_item_list() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.log_item_list_.Clear();
+}
+LogGetResponse::LogGetResponse(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.LogGetResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE LogGetResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::sunlight::api::LogGetResponse& from_msg)
+      : log_item_list_{visibility, arena, from.log_item_list_},
+        _cached_size_{0} {}
+
+LogGetResponse::LogGetResponse(
+    ::google::protobuf::Arena* arena,
+    const LogGetResponse& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  LogGetResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.LogGetResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE LogGetResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : log_item_list_{visibility, arena},
+        _cached_size_{0} {}
+
+inline void LogGetResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+LogGetResponse::~LogGetResponse() {
+  // @@protoc_insertion_point(destructor:sunlight.api.LogGetResponse)
+  SharedDtor(*this);
+}
+inline void LogGetResponse::SharedDtor(MessageLite& self) {
+  LogGetResponse& this_ = static_cast<LogGetResponse&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* LogGetResponse::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) LogGetResponse(arena);
+}
+constexpr auto LogGetResponse::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(LogGetResponse, _impl_.log_item_list_) +
+          decltype(LogGetResponse::_impl_.log_item_list_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::ZeroInit(
+        sizeof(LogGetResponse), alignof(LogGetResponse), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&LogGetResponse::PlacementNew_,
+                                 sizeof(LogGetResponse),
+                                 alignof(LogGetResponse));
+  }
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull LogGetResponse::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_LogGetResponse_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &LogGetResponse::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<LogGetResponse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &LogGetResponse::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<LogGetResponse>(), &LogGetResponse::ByteSizeLong,
+            &LogGetResponse::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(LogGetResponse, _impl_._cached_size_),
+        false,
+    },
+    &LogGetResponse::kDescriptorMethods,
+    &descriptor_table_response_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* LogGetResponse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2> LogGetResponse::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::LogGetResponse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated .sunlight.api.LogItem log_item_list = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(LogGetResponse, _impl_.log_item_list_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .sunlight.api.LogItem log_item_list = 1;
+    {PROTOBUF_FIELD_OFFSET(LogGetResponse, _impl_.log_item_list_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::sunlight::api::LogItem>()},
+  }}, {{
+  }},
+};
+
+PROTOBUF_NOINLINE void LogGetResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.LogGetResponse)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.log_item_list_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* LogGetResponse::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const LogGetResponse& this_ = static_cast<const LogGetResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* LogGetResponse::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const LogGetResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.LogGetResponse)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // repeated .sunlight.api.LogItem log_item_list = 1;
+          for (unsigned i = 0, n = static_cast<unsigned>(
+                                   this_._internal_log_item_list_size());
+               i < n; i++) {
+            const auto& repfield = this_._internal_log_item_list().Get(i);
+            target =
+                ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                    1, repfield, repfield.GetCachedSize(),
+                    target, stream);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.LogGetResponse)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t LogGetResponse::ByteSizeLong(const MessageLite& base) {
+          const LogGetResponse& this_ = static_cast<const LogGetResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t LogGetResponse::ByteSizeLong() const {
+          const LogGetResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.LogGetResponse)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // repeated .sunlight.api.LogItem log_item_list = 1;
+            {
+              total_size += 1UL * this_._internal_log_item_list_size();
+              for (const auto& msg : this_._internal_log_item_list()) {
+                total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+              }
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void LogGetResponse::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<LogGetResponse*>(&to_msg);
+  auto& from = static_cast<const LogGetResponse&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.LogGetResponse)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_log_item_list()->MergeFrom(
+      from._internal_log_item_list());
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void LogGetResponse::CopyFrom(const LogGetResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.LogGetResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void LogGetResponse::InternalSwap(LogGetResponse* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.log_item_list_.InternalSwap(&other->_impl_.log_item_list_);
+}
+
+::google::protobuf::Metadata LogGetResponse::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class Response::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -1861,6 +2147,19 @@ void Response::set_allocated_world_info(::sunlight::api::WorldInfoResponse* worl
   }
   // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.world_info)
 }
+void Response::set_allocated_log_get(::sunlight::api::LogGetResponse* log_get) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_payload();
+  if (log_get) {
+    ::google::protobuf::Arena* submessage_arena = log_get->GetArena();
+    if (message_arena != submessage_arena) {
+      log_get = ::google::protobuf::internal::GetOwnedMessage(message_arena, log_get, submessage_arena);
+    }
+    set_has_log_get();
+    _impl_.payload_.log_get_ = log_get;
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.log_get)
+}
 Response::Response(::google::protobuf::Arena* arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, _class_data_.base()) {
@@ -1911,6 +2210,9 @@ Response::Response(
         break;
       case kWorldInfo:
         _impl_.payload_.world_info_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::WorldInfoResponse>(arena, *from._impl_.payload_.world_info_);
+        break;
+      case kLogGet:
+        _impl_.payload_.log_get_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::LogGetResponse>(arena, *from._impl_.payload_.log_get_);
         break;
   }
 
@@ -1993,6 +2295,14 @@ void Response::clear_payload() {
       }
       break;
     }
+    case kLogGet: {
+      if (GetArena() == nullptr) {
+        delete _impl_.payload_.log_get_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.log_get_);
+      }
+      break;
+    }
     case PAYLOAD_NOT_SET: {
       break;
     }
@@ -2037,16 +2347,16 @@ const ::google::protobuf::internal::ClassData* Response::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 7, 6, 0, 7> Response::_table_ = {
+const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Response::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    105, 0,  // max_field_number, fast_idx_mask
+    106, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    7,  // num_field_entries
-    6,  // num_aux_entries
+    8,  // num_field_entries
+    7,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     _class_data_.base(),
     nullptr,  // post_loop_handler
@@ -2060,7 +2370,7 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> Response::_table_ = {
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(Response, _impl_.request_id_)}},
   }}, {{
     100, 0, 1,
-    65472, 1,
+    65408, 1,
     65535, 65535
   }}, {{
     // int32 request_id = 1;
@@ -2084,6 +2394,9 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> Response::_table_ = {
     // .sunlight.api.WorldInfoResponse world_info = 105;
     {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.world_info_), _Internal::kOneofCaseOffset + 0, 5,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .sunlight.api.LogGetResponse log_get = 106;
+    {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.log_get_), _Internal::kOneofCaseOffset + 0, 6,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::sunlight::api::AuthenticationResponse>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::AccountCreationResponse>()},
@@ -2091,6 +2404,7 @@ const ::_pbi::TcParseTable<0, 7, 6, 0, 7> Response::_table_ = {
     {::_pbi::TcParser::GetTable<::sunlight::api::UserCountResponse>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::SystemResourceInfoResponse>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::WorldInfoResponse>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::LogGetResponse>()},
   }}, {{
   }},
 };
@@ -2166,6 +2480,12 @@ PROTOBUF_NOINLINE void Response::Clear() {
                   stream);
               break;
             }
+            case kLogGet: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  106, *this_._impl_.payload_.log_get_, this_._impl_.payload_.log_get_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
             default:
               break;
           }
@@ -2234,6 +2554,12 @@ PROTOBUF_NOINLINE void Response::Clear() {
             case kWorldInfo: {
               total_size += 2 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.world_info_);
+              break;
+            }
+            // .sunlight.api.LogGetResponse log_get = 106;
+            case kLogGet: {
+              total_size += 2 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.log_get_);
               break;
             }
             case PAYLOAD_NOT_SET: {
@@ -2318,6 +2644,15 @@ void Response::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google
               ::google::protobuf::Message::CopyConstruct<::sunlight::api::WorldInfoResponse>(arena, *from._impl_.payload_.world_info_);
         } else {
           _this->_impl_.payload_.world_info_->MergeFrom(from._internal_world_info());
+        }
+        break;
+      }
+      case kLogGet: {
+        if (oneof_needs_init) {
+          _this->_impl_.payload_.log_get_ =
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::LogGetResponse>(arena, *from._impl_.payload_.log_get_);
+        } else {
+          _this->_impl_.payload_.log_get_->MergeFrom(from._internal_log_get());
         }
         break;
       }

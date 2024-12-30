@@ -53,6 +53,35 @@ struct ZoneInfoDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ZoneInfoDefaultTypeInternal _ZoneInfo_default_instance_;
 
+inline constexpr LogItem::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        date_time_{::int64_t{0}},
+        log_level_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR LogItem::LogItem(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct LogItemDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LogItemDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LogItemDefaultTypeInternal() {}
+  union {
+    LogItem _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LogItemDefaultTypeInternal _LogItem_default_instance_;
+
 inline constexpr WorldInfo::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : open_zone_list_{},
@@ -109,36 +138,50 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::sunlight::api::WorldInfo, _impl_.id_),
         PROTOBUF_FIELD_OFFSET(::sunlight::api::WorldInfo, _impl_.user_count_),
         PROTOBUF_FIELD_OFFSET(::sunlight::api::WorldInfo, _impl_.open_zone_list_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogItem, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogItem, _impl_.date_time_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogItem, _impl_.log_level_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::LogItem, _impl_.message_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::sunlight::api::ZoneInfo)},
         {10, -1, -1, sizeof(::sunlight::api::WorldInfo)},
+        {21, -1, -1, sizeof(::sunlight::api::LogItem)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_ZoneInfo_default_instance_._instance,
     &::sunlight::api::_WorldInfo_default_instance_._instance,
+    &::sunlight::api::_LogItem_default_instance_._instance,
 };
 const char descriptor_table_protodef_dto_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\tdto.proto\022\014sunlight.api\"$\n\010ZoneInfo\022\n\n"
     "\002id\030\001 \001(\005\022\014\n\004port\030\002 \001(\005\"[\n\tWorldInfo\022\n\n\002"
     "id\030\001 \001(\005\022\022\n\nuser_count\030\002 \001(\005\022.\n\016open_zon"
-    "e_list\030\003 \003(\0132\026.sunlight.api.ZoneInfob\006pr"
-    "oto3"
+    "e_list\030\003 \003(\0132\026.sunlight.api.ZoneInfo\"@\n\007"
+    "LogItem\022\021\n\tdate_time\030\001 \001(\003\022\021\n\tlog_level\030"
+    "\002 \001(\005\022\017\n\007message\030\003 \001(\014b\006proto3"
 };
 static ::absl::once_flag descriptor_table_dto_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_dto_2eproto = {
     false,
     false,
-    164,
+    230,
     descriptor_table_protodef_dto_2eproto,
     "dto.proto",
     &descriptor_table_dto_2eproto_once,
     nullptr,
     0,
-    2,
+    3,
     schemas,
     file_default_instances,
     TableStruct_dto_2eproto::offsets,
@@ -695,6 +738,298 @@ void WorldInfo::InternalSwap(WorldInfo* PROTOBUF_RESTRICT other) {
 }
 
 ::google::protobuf::Metadata WorldInfo::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class LogItem::_Internal {
+ public:
+};
+
+LogItem::LogItem(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.LogItem)
+}
+inline PROTOBUF_NDEBUG_INLINE LogItem::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::sunlight::api::LogItem& from_msg)
+      : message_(arena, from.message_),
+        _cached_size_{0} {}
+
+LogItem::LogItem(
+    ::google::protobuf::Arena* arena,
+    const LogItem& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  LogItem* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, date_time_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, date_time_),
+           offsetof(Impl_, log_level_) -
+               offsetof(Impl_, date_time_) +
+               sizeof(Impl_::log_level_));
+
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.LogItem)
+}
+inline PROTOBUF_NDEBUG_INLINE LogItem::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : message_(arena),
+        _cached_size_{0} {}
+
+inline void LogItem::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, date_time_),
+           0,
+           offsetof(Impl_, log_level_) -
+               offsetof(Impl_, date_time_) +
+               sizeof(Impl_::log_level_));
+}
+LogItem::~LogItem() {
+  // @@protoc_insertion_point(destructor:sunlight.api.LogItem)
+  SharedDtor(*this);
+}
+inline void LogItem::SharedDtor(MessageLite& self) {
+  LogItem& this_ = static_cast<LogItem&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.message_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* LogItem::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) LogItem(arena);
+}
+constexpr auto LogItem::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(LogItem),
+                                            alignof(LogItem));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull LogItem::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_LogItem_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &LogItem::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<LogItem>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &LogItem::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<LogItem>(), &LogItem::ByteSizeLong,
+            &LogItem::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(LogItem, _impl_._cached_size_),
+        false,
+    },
+    &LogItem::kDescriptorMethods,
+    &descriptor_table_dto_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* LogItem::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 0, 0, 2> LogItem::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::LogItem>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int64 date_time = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(LogItem, _impl_.date_time_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(LogItem, _impl_.date_time_)}},
+    // int32 log_level = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(LogItem, _impl_.log_level_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(LogItem, _impl_.log_level_)}},
+    // bytes message = 3;
+    {::_pbi::TcParser::FastBS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(LogItem, _impl_.message_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int64 date_time = 1;
+    {PROTOBUF_FIELD_OFFSET(LogItem, _impl_.date_time_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt64)},
+    // int32 log_level = 2;
+    {PROTOBUF_FIELD_OFFSET(LogItem, _impl_.log_level_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bytes message = 3;
+    {PROTOBUF_FIELD_OFFSET(LogItem, _impl_.message_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBytes | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void LogItem::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.LogItem)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.message_.ClearToEmpty();
+  ::memset(&_impl_.date_time_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.log_level_) -
+      reinterpret_cast<char*>(&_impl_.date_time_)) + sizeof(_impl_.log_level_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* LogItem::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const LogItem& this_ = static_cast<const LogItem&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* LogItem::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const LogItem& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.LogItem)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int64 date_time = 1;
+          if (this_._internal_date_time() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt64ToArrayWithField<1>(
+                    stream, this_._internal_date_time(), target);
+          }
+
+          // int32 log_level = 2;
+          if (this_._internal_log_level() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<2>(
+                    stream, this_._internal_log_level(), target);
+          }
+
+          // bytes message = 3;
+          if (!this_._internal_message().empty()) {
+            const std::string& _s = this_._internal_message();
+            target = stream->WriteBytesMaybeAliased(3, _s, target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.LogItem)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t LogItem::ByteSizeLong(const MessageLite& base) {
+          const LogItem& this_ = static_cast<const LogItem&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t LogItem::ByteSizeLong() const {
+          const LogItem& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.LogItem)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // bytes message = 3;
+            if (!this_._internal_message().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
+                                              this_._internal_message());
+            }
+            // int64 date_time = 1;
+            if (this_._internal_date_time() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int64SizePlusOne(
+                  this_._internal_date_time());
+            }
+            // int32 log_level = 2;
+            if (this_._internal_log_level() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_log_level());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void LogItem::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<LogItem*>(&to_msg);
+  auto& from = static_cast<const LogItem&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.LogItem)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_message().empty()) {
+    _this->_internal_set_message(from._internal_message());
+  }
+  if (from._internal_date_time() != 0) {
+    _this->_impl_.date_time_ = from._impl_.date_time_;
+  }
+  if (from._internal_log_level() != 0) {
+    _this->_impl_.log_level_ = from._impl_.log_level_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void LogItem::CopyFrom(const LogItem& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.LogItem)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void LogItem::InternalSwap(LogItem* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, &other->_impl_.message_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(LogItem, _impl_.log_level_)
+      + sizeof(LogItem::_impl_.log_level_)
+      - PROTOBUF_FIELD_OFFSET(LogItem, _impl_.date_time_)>(
+          reinterpret_cast<char*>(&_impl_.date_time_),
+          reinterpret_cast<char*>(&other->_impl_.date_time_));
+}
+
+::google::protobuf::Metadata LogItem::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

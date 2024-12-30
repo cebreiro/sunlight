@@ -34,6 +34,18 @@ namespace sunlight
         AddLog(shared_from_this(), logLevel, std::move(log));
     }
 
+    auto LogMemCacheService::GetLog(std::vector<LogMemCacheQueryResult>& result, const LogMemCacheQueryOption& option) -> Future<void>
+    {
+        [[maybe_unused]]
+        const auto self = shared_from_this();
+
+        co_await *_strand;
+
+        _ringBuffer->Get(result, option);
+
+        co_return;
+    }
+
     void LogMemCacheService::AddLog(SharedPtrNotNull<LogMemCacheService> logMemCacheService, LogLevel logLevel, std::string log)
     {
         Strand& strand = *logMemCacheService->_strand;

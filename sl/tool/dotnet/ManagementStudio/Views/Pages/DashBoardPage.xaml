@@ -115,6 +115,7 @@
             </StackPanel>
 
             <ScrollViewer Grid.Row="2" Grid.Column="0"
+                          x:Name="LogScrollViewer"
                           Margin="10, 10, 10, 10"
                           HorizontalScrollBarVisibility="Disabled"
                           VerticalScrollBarVisibility="Visible">

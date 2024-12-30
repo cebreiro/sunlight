@@ -33,6 +33,13 @@ message WorldInfoRequest
 {
 }
 
+message LogGetRequest
+{
+    repeated int32 log_level = 1;
+    optional int64 start_date_time = 2;
+    optional int64 last_date_time = 3;
+}
+
 message Request
 {
     int32 request_id = 1;
@@ -45,5 +52,6 @@ message Request
         UserCountRequest user_count = 103;
         SystemResourceInfoRequest system_resource_info = 104;
         WorldInfoRequest world_info = 105;
+        LogGetRequest log_get = 106;
     }
 }

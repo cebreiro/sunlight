@@ -12,6 +12,11 @@ public partial class DashBoardPage : INavigableView<DashBoardPageViewModel>
         ViewModel = viewModel;
         DataContext = this;
 
+        ViewModel.LogViewer.Logs.CollectionChanged += (s, e) =>
+        {
+            LogScrollViewer.ScrollToEnd();
+        };
+
         InitializeComponent();
     }
 }

@@ -14,3 +14,10 @@ message WorldInfo
     int32 user_count = 2;
     repeated ZoneInfo open_zone_list = 3;
 }
+
+message LogItem
+{
+    int64 date_time = 1;
+    int32 log_level = 2;
+    bytes message = 3;
+}

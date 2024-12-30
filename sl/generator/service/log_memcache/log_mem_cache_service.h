@@ -1,7 +1,9 @@
 #pragma once
+#include "sl/generator/service/log_memcache/log_mem_cache_query_result.h"
 
 namespace sunlight
 {
+    struct LogMemCacheQueryOption;
     class LogRingBuffer;
     class LogMemCacheLogger;
 }
@@ -20,8 +22,8 @@ namespace sunlight
         auto GetName() const -> std::string_view override;
 
     public:
-
         void AddLog(LogLevel logLevel, std::string log);
+        auto GetLog(std::vector<LogMemCacheQueryResult>& result, const LogMemCacheQueryOption& option) -> Future<void>;
 
         static void AddLog(SharedPtrNotNull<LogMemCacheService> logMemCacheService, LogLevel logLevel, std::string log);
 

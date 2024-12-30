@@ -6,6 +6,9 @@
 #include "sl/generator/service/control/gateway/generator_control_api_gateway_server.h"
 #include "sl/generator/service/database/database_service.h"
 #include "sl/generator/service/hash/safe_hash_service.h"
+#include "sl/generator/service/log_memcache/log_mem_cache_query_option.h"
+#include "sl/generator/service/log_memcache/log_mem_cache_query_result.h"
+#include "sl/generator/service/log_memcache/log_mem_cache_service.h"
 #include "sl/generator/service/world/world_service.h"
 
 namespace sunlight
@@ -157,6 +160,37 @@ namespace sunlight
     auto GeneratorControlService::GetWorldInfo() -> Future<std::vector<api::WorldInfo>>
     {
         co_return co_await _serviceLocator.Get<WorldService>().GetWorldInfo();
+    }
+
+    auto GeneratorControlService::GetLog(std::vector<api::LogItem>& result,
+        std::vector<LogLevel> logLevels,
+        std::optional<std::chrono::system_clock::time_point> start,
+        std::optional<std::chrono::system_clock::time_point> last) -> Future<void>
+    {
+        std::vector<LogMemCacheQueryResult> queryResultSet;
+
+        for (LogLevel logLevel : logLevels)
+        {
+            queryResultSet.clear();
+
+            LogMemCacheQueryOption option;
+            option.logLevel = logLevel;
+            option.dateLowerBound = start;
+            option.dateUpperBound = last;
+
+            co_await _serviceLocator.Get<LogMemCacheService>().GetLog(queryResultSet, option);
+
+            for (LogMemCacheQueryResult& queryResult : queryResultSet)
+            {
+                api::LogItem& logItem = result.emplace_back();
+
+                logItem.set_date_time(queryResult.dateTime.time_since_epoch().count());
+                logItem.set_log_level(static_cast<int32_t>(queryResult.logLevel));
+                logItem.set_message(std::move(queryResult.log));
+            }
+        }
+
+        co_return;
     }
 
     auto GeneratorControlService::GetName() const -> std::string_view
