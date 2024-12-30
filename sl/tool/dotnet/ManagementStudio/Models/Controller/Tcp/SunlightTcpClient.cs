@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Windows;
 using Google.Protobuf;
 using Nito.AsyncEx;
 using Sunlight.Api;
@@ -125,7 +126,7 @@ public class SunlightTcpClient : IDisposable
             return;
         }
 
-        _socket?.ReceiveAsync(new ArraySegment<byte>(_receiveBuffer, (int)_receiveSize, (int)_receiveBufferSize))
+        _socket?.ReceiveAsync(new ArraySegment<byte>(_receiveBuffer, (int)_receiveSize, (int)(_receiveBufferSize - _receiveSize)))
             .ContinueWith(async (task) =>
             {
                 try
@@ -133,11 +134,7 @@ public class SunlightTcpClient : IDisposable
                     int bytes = await task;
                     if (bytes != 0)
                     {
-                        if (HandleReceived(bytes))
-                        {
-                            StartReceive();
-                        }
-                        else
+                        if (!HandleReceived(bytes))
                         {
                             Disconnect();
                             OnDisconnect();
@@ -230,18 +227,6 @@ public class SunlightTcpClient : IDisposable
 
     private bool HandleReceived(long size)
     {
-        long requiredBufferSize = _receiveSize + size;
-
-        if (requiredBufferSize > _receiveBufferSize)
-        {
-            var newReceiveBuffer = new byte[requiredBufferSize];
-
-            Array.Copy(_receiveBuffer, 0, newReceiveBuffer, 0, _receiveSize);
-
-            _receiveBuffer = newReceiveBuffer;
-            _receiveBufferSize = requiredBufferSize;
-        }
-
         _receiveSize += size;
 
         while (_receiveSize > PacketHeadSize)
@@ -250,6 +235,16 @@ public class SunlightTcpClient : IDisposable
 
             if (_receiveSize < packetSize)
             {
+                if (packetSize > _receiveBufferSize)
+                {
+                    var newReceiveBuffer = new byte[packetSize];
+
+                    Array.Copy(_receiveBuffer, 0, newReceiveBuffer, 0, _receiveSize);
+
+                    _receiveBuffer = newReceiveBuffer;
+                    _receiveBufferSize = packetSize;
+                }
+
                 break;
             }
 
