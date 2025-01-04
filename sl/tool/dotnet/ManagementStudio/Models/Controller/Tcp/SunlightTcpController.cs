@@ -56,174 +56,77 @@ public class SunlightTcpController : ISunlightController
         return false;
     }
 
-    public async Task<AuthenticationResponse> Authenticate(AuthenticationRequest authentication)
+    public Task<AuthenticationResponse> Authenticate(AuthenticationRequest authentication)
     {
-        TaskCompletionSource<AuthenticationResponse> completionSource = new();
-
-        using (await _mutex.LockAsync())
-        {
-            int requestId = _nextRequestId++;
-
-            System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
-
-            _receiveHandlers[requestId] = new ReceiveHandler(
-                response =>
-                {
-                    completionSource.SetResult(response.Authentication);
-                },
-                () => completionSource.SetException(new Exception("operation aborted")));
-
-            Request request = new()
-            {
-                RequestId = requestId,
-                Authentication = authentication
-            };
-
-            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
-        }
-
-        return await completionSource.Task;
+        return SendRequestAsync(authentication,
+            (request, param) => request.Authentication = param,
+            response => response.Authentication);
     }
 
-    public async Task<AccountCreationResponse> CreateAccount(AccountCreationReuqest accountCreation)
+    public Task<AccountCreationResponse> CreateAccount(AccountCreationReuqest accountCreation)
     {
-        TaskCompletionSource<AccountCreationResponse> completionSource = new();
-
-        using (await _mutex.LockAsync())
-        {
-            int requestId = _nextRequestId++;
-
-            System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
-
-            _receiveHandlers[requestId] = new ReceiveHandler(
-                response =>
-                {
-                    completionSource.SetResult(response.AccountCreation);
-                },
-                () => completionSource.SetException(new Exception("operation aborted")));
-
-            Request request = new()
-            {
-                RequestId = requestId,
-                AccountCreation = accountCreation
-            };
-
-            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
-        }
-
-        return await completionSource.Task;
+        return SendRequestAsync(accountCreation,
+            (request, param) => request.AccountCreation = param,
+            response => response.AccountCreation);
     }
 
-    public async Task<AccountPasswordChangeResponse> ChangeAccountPassword(AccountPasswordChangeRequest accountPasswordChange)
+    public Task<AccountPasswordChangeResponse> ChangeAccountPassword(AccountPasswordChangeRequest accountPasswordChange)
     {
-        TaskCompletionSource<AccountPasswordChangeResponse> completionSource = new();
-
-        using (await _mutex.LockAsync())
-        {
-            int requestId = _nextRequestId++;
-
-            System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
-
-            _receiveHandlers[requestId] = new ReceiveHandler(
-                response =>
-                {
-                    completionSource.SetResult(response.AccountPasswordChange);
-                },
-                () => completionSource.SetException(new Exception("operation aborted")));
-
-            Request request = new()
-            {
-                RequestId = requestId,
-                AccountPasswordChange = accountPasswordChange
-            };
-
-            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
-        }
-
-        return await completionSource.Task;
+        return SendRequestAsync(accountPasswordChange,
+            (request, param) => request.AccountPasswordChange = param,
+            response => response.AccountPasswordChange);
     }
 
-    public async Task<UserCountResponse> GetUserCount(UserCountRequest userCountRequest)
+    public Task<UserCountResponse> GetUserCount(UserCountRequest userCountRequest)
     {
-        TaskCompletionSource<UserCountResponse> completionSource = new();
-
-        using (await _mutex.LockAsync())
-        {
-            int requestId = _nextRequestId++;
-
-            System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
-
-            _receiveHandlers[requestId] = new ReceiveHandler(
-                response =>
-                {
-                    completionSource.SetResult(response.UserCount);
-                },
-                () => completionSource.SetException(new Exception("operation aborted")));
-
-            Request request = new()
-            {
-                RequestId = requestId,
-                UserCount = userCountRequest
-            };
-
-            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
-        }
-
-        return await completionSource.Task;
+        return SendRequestAsync(userCountRequest,
+            (request, param) => request.UserCount = param,
+            response => response.UserCount);
     }
 
-    public async Task<SystemResourceInfoResponse> GetSystemInfo(SystemResourceInfoRequest systemResourceInfoRequest)
+    public Task<SystemResourceInfoResponse> GetSystemInfo(SystemResourceInfoRequest systemResourceInfoRequest)
     {
-        TaskCompletionSource<SystemResourceInfoResponse> completionSource = new();
-
-        using (await _mutex.LockAsync())
-        {
-            int requestId = _nextRequestId++;
-
-            System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
-
-            _receiveHandlers[requestId] = new ReceiveHandler(
-                response =>
-                {
-                    completionSource.SetResult(response.SystemResourceInfo);
-                },
-                () => completionSource.SetException(new Exception("operation aborted")));
-
-            Request request = new()
-            {
-                RequestId = requestId,
-                SystemResourceInfo = systemResourceInfoRequest
-            };
-
-            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
-        }
-
-        return await completionSource.Task;
+        return SendRequestAsync(systemResourceInfoRequest,
+            (request, param) => request.SystemResourceInfo = param,
+            response => response.SystemResourceInfo);
     }
 
-    public async Task<LogGetResponse> GetLog(LogGetRequest logRequest)
+    public Task<LogGetResponse> GetLog(LogGetRequest logRequest)
     {
-        TaskCompletionSource<LogGetResponse> completionSource = new();
+        return SendRequestAsync(logRequest,
+            (request, param) => request.LogGet = param,
+            response => response.LogGet);
+    }
+
+    private async Task<TResponse> SendRequestAsync<TRequest, TResponse>(
+        TRequest request,
+        Action<Request, TRequest> configureRequest,
+        Func<Response, TResponse> configureResponse)
+    {
+        TaskCompletionSource<TResponse> completionSource = new();
+
         using (await _mutex.LockAsync())
         {
             int requestId = _nextRequestId++;
-
             System.Diagnostics.Debug.Assert(!_receiveHandlers.ContainsKey(requestId));
 
             _receiveHandlers[requestId] = new ReceiveHandler(
                 response =>
                 {
-                    completionSource.SetResult(response.LogGet);
+                    completionSource.SetResult(configureResponse(response));
                 },
                 () => completionSource.SetException(new Exception("operation aborted")));
 
-            Request request = new()
+            Request pbRequest = new()
             {
                 RequestId = requestId,
-                LogGet = logRequest
             };
 
-            ConfigureSendFailHandler(_tcpClient.SendAsync(request), requestId);
+            configureRequest(pbRequest, request);
+
+            Task task = _tcpClient.SendAsync(pbRequest);
+
+            ConfigureSendFailHandler(task, requestId);
         }
 
         return await completionSource.Task;
