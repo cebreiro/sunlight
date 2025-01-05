@@ -96,20 +96,24 @@
 
                 <CheckBox LayoutTransform="{StaticResource CheckBoxScaleTransform}">
                     <TextBlock Text="Debug"
-                               Width="50"
+                               Width="40"
                                Padding="0"
                                Margin="0 0 0 0"/>
                 </CheckBox>
                 <CheckBox Content="Info"
+                          IsChecked="{Binding ViewModel.LogViewer.ShowInfo}"
                           Margin="0, 0, 0, 0"
                           LayoutTransform="{StaticResource CheckBoxScaleTransform}"/>
                 <CheckBox Content="Warning"
+                          IsChecked="{Binding ViewModel.LogViewer.ShowWarning}"
                           Margin="0, 0, 0, 0"
                           LayoutTransform="{StaticResource CheckBoxScaleTransform}"/>
                 <CheckBox Content="Error"
+                          IsChecked="{Binding ViewModel.LogViewer.ShowError}"
                           Margin="0, 0, 0, 0"
                           LayoutTransform="{StaticResource CheckBoxScaleTransform}"/>
                 <CheckBox Content="Critical"
+                          IsChecked="{Binding ViewModel.LogViewer.ShowCritical}"
                           Margin="0, 0, 0, 0"
                           LayoutTransform="{StaticResource CheckBoxScaleTransform}"/>
             </StackPanel>

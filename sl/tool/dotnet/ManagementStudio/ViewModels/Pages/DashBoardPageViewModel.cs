@@ -134,15 +134,12 @@ public partial class DashBoardPageViewModel(IServiceProvider serviceProvider, IS
             {
                 Encoding eucKrEncoding = Encoding.GetEncoding("EUC-KR");
 
-                foreach (var receivedLog in received)
+                LogViewer.Add(received.Select(receivedLog => new LogItem()
                 {
-                    LogViewer.Logs.Add(new LogItem()
-                    {
-                        DateTime = DateTimeOffset.FromUnixTimeMilliseconds((receivedLog.DateTime / 1000000)).DateTime,
-                        LogLevel = (LogLevel)receivedLog.LogLevel,
-                        Message = eucKrEncoding.GetString(receivedLog.Message.ToByteArray()),
-                    });
-                }
+                    DateTime = DateTimeOffset.FromUnixTimeMilliseconds((receivedLog.DateTime / 1000000)).DateTime,
+                    LogLevel = (LogLevel)receivedLog.LogLevel,
+                    Message = eucKrEncoding.GetString(receivedLog.Message.ToByteArray()),
+                }));
             });
 
             await Task.Delay(TimeSpan.FromSeconds(context.Interval));
