@@ -50,6 +50,15 @@
                 </ui:NavigationViewItem>
 
                 <ui:NavigationViewItem
+                    Icon="{ui:SymbolIcon Globe20}"
+                    TargetPageType="{x:Type page:WorldPage}">
+                    <ui:NavigationViewItem.Content>
+                        <TextBlock FontSize="13"
+                                   Text="World"/>
+                    </ui:NavigationViewItem.Content>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem
                     Icon="{ui:SymbolIcon PersonAccounts24}"
                     TargetPageType="{x:Type page:AccountPage}">
                     <ui:NavigationViewItem.Content>

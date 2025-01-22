@@ -1,0 +1,112 @@
+<Page x:Class="Sunlight.ManagementStudio.Views.Pages.WorldPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Sunlight.ManagementStudio.Views.Pages"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      d:DataContext="{d:DesignInstance local:WorldPage, IsDesignTimeCreatable=False}"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="WorldPage">
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    FlowDirection="RightToLeft"
+                    Name="WorldListPanel">
+            <RadioButton
+                Content="Option 1"
+                GroupName="radio_group_two"
+                IsChecked="True" />
+            <RadioButton
+                Content="Option 2"
+                GroupName="radio_group_two" />
+            <RadioButton
+                Content="Option 3"
+                GroupName="radio_group_two" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="1" Grid.Column="0"
+                  Margin="20, 0, 0, 150">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0"
+                            Orientation="Horizontal"
+                            FlowDirection="RightToLeft">
+                    <ui:Button
+                        Icon="{ui:SymbolIcon ArrowRepeatAll24}"
+                        Width="50"
+                        Height="30"
+                    />
+                    <Label Width="20"/>
+                    <ui:Button
+                        Icon="{ui:SymbolIcon Delete16}"
+                        Width="50"
+                        Height="30"
+                    />
+                </StackPanel>
+
+                <ui:ListView Grid.Row="1"
+                             BorderThickness="0"
+                             ItemsSource="{Binding ViewModel.ZoneList }">
+                    <ui:ListView.View>
+                        <ui:GridView>
+                            <ui:GridViewColumn
+                                Width="50"
+                                DisplayMemberBinding="{Binding Id}" Header="Id"/>
+                            <ui:GridViewColumn
+                                MinWidth="100"
+                                DisplayMemberBinding="{Binding Port}" Header="Port"/>
+                            <ui:GridViewColumn
+                                MinWidth="100"
+                                DisplayMemberBinding="{Binding Name}" Header="Name"/>
+                        </ui:GridView>
+                    </ui:ListView.View>
+                </ui:ListView>
+
+                <StackPanel Grid.Row="2"
+                            Orientation="Horizontal">
+                    <Label Content="id"
+                           VerticalAlignment="Center"
+                           Margin="0, 0, 10, 0"/>
+                    <ui:TextBox Width="100"
+                                Margin="0, 0, 20, 0"/>
+
+                    <Label Margin="0, 0, 10, 0"
+                           VerticalAlignment="Center"
+                           Content="port"/>
+                    <ui:TextBox Width="100"
+                                Margin="0, 0, 20, 0"/>
+
+                    <ui:Button Icon="{ui:SymbolIcon Add16}"/>
+
+                </StackPanel>
+
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+</Page>

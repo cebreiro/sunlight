@@ -56,6 +56,9 @@ public partial class App
                 _ = services.AddSingleton<DashBoardPageViewModel>();
                 _ = services.AddSingleton<DashBoardPage>();
 
+                _ = services.AddSingleton<WorldPage>();
+                _ = services.AddSingleton<WorldPageViewModel>();
+
                 _ = services.AddSingleton<LoginViewModel>();
                 _ = services.AddSingleton<LoginWindow>();
 
