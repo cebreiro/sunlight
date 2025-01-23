@@ -10,5 +10,6 @@ public interface ISunlightController
     public Task<AccountPasswordChangeResponse> ChangeAccountPassword(AccountPasswordChangeRequest accountPasswordChange);
     public Task<UserCountResponse> GetUserCount(UserCountRequest userCountRequest);
     public Task<SystemResourceInfoResponse> GetSystemInfo(SystemResourceInfoRequest systemResourceInfoRequest);
+    public Task<WorldInfoResponse> GetWorldInfo(WorldInfoRequest worldInfoRequest);
     public Task<LogGetResponse> GetLog(LogGetRequest logRequest);
 }

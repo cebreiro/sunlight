@@ -102,7 +102,7 @@ namespace sunlight
         auto iter = _worlds.find(worldId);
         if (iter == _worlds.end())
         {
-            iter = _worlds.try_emplace(worldId, std::make_unique<World>()).first;
+            iter = _worlds.try_emplace(worldId, std::make_unique<World>(_serviceLocator, worldId)).first;
         }
 
         return *iter->second;

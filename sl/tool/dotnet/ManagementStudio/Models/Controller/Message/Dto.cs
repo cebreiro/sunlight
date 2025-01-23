@@ -24,16 +24,16 @@ namespace Sunlight.Api {
     static DtoReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "CglkdG8ucHJvdG8SDHN1bmxpZ2h0LmFwaSIkCghab25lSW5mbxIKCgJpZBgB",
-            "IAEoBRIMCgRwb3J0GAIgASgFIlsKCVdvcmxkSW5mbxIKCgJpZBgBIAEoBRIS",
-            "Cgp1c2VyX2NvdW50GAIgASgFEi4KDm9wZW5fem9uZV9saXN0GAMgAygLMhYu",
-            "c3VubGlnaHQuYXBpLlpvbmVJbmZvIkAKB0xvZ0l0ZW0SEQoJZGF0ZV90aW1l",
-            "GAEgASgDEhEKCWxvZ19sZXZlbBgCIAEoBRIPCgdtZXNzYWdlGAMgASgMYgZw",
-            "cm90bzM="));
+            "CglkdG8ucHJvdG8SDHN1bmxpZ2h0LmFwaSIyCghab25lSW5mbxIKCgJpZBgB",
+            "IAEoBRIMCgRwb3J0GAIgASgFEgwKBG5hbWUYAyABKAwiWwoJV29ybGRJbmZv",
+            "EgoKAmlkGAEgASgFEhIKCnVzZXJfY291bnQYAiABKAUSLgoOb3Blbl96b25l",
+            "X2xpc3QYAyADKAsyFi5zdW5saWdodC5hcGkuWm9uZUluZm8iQAoHTG9nSXRl",
+            "bRIRCglkYXRlX3RpbWUYASABKAMSEQoJbG9nX2xldmVsGAIgASgFEg8KB21l",
+            "c3NhZ2UYAyABKAxiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.ZoneInfo), global::Sunlight.Api.ZoneInfo.Parser, new[]{ "Id", "Port" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.ZoneInfo), global::Sunlight.Api.ZoneInfo.Parser, new[]{ "Id", "Port", "Name" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.WorldInfo), global::Sunlight.Api.WorldInfo.Parser, new[]{ "Id", "UserCount", "OpenZoneList" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.LogItem), global::Sunlight.Api.LogItem.Parser, new[]{ "DateTime", "LogLevel", "Message" }, null, null, null, null)
           }));
@@ -79,6 +79,7 @@ namespace Sunlight.Api {
     public ZoneInfo(ZoneInfo other) : this() {
       id_ = other.id_;
       port_ = other.port_;
+      name_ = other.name_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -112,6 +113,18 @@ namespace Sunlight.Api {
       }
     }
 
+    /// <summary>Field number for the "name" field.</summary>
+    public const int NameFieldNumber = 3;
+    private pb::ByteString name_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public pb::ByteString Name {
+      get { return name_; }
+      set {
+        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -129,6 +142,7 @@ namespace Sunlight.Api {
       }
       if (Id != other.Id) return false;
       if (Port != other.Port) return false;
+      if (Name != other.Name) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -138,6 +152,7 @@ namespace Sunlight.Api {
       int hash = 1;
       if (Id != 0) hash ^= Id.GetHashCode();
       if (Port != 0) hash ^= Port.GetHashCode();
+      if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -164,6 +179,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(16);
         output.WriteInt32(Port);
       }
+      if (Name.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteBytes(Name);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -182,6 +201,10 @@ namespace Sunlight.Api {
         output.WriteRawTag(16);
         output.WriteInt32(Port);
       }
+      if (Name.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteBytes(Name);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -197,6 +220,9 @@ namespace Sunlight.Api {
       }
       if (Port != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Port);
+      }
+      if (Name.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Name);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -215,6 +241,9 @@ namespace Sunlight.Api {
       }
       if (other.Port != 0) {
         Port = other.Port;
+      }
+      if (other.Name.Length != 0) {
+        Name = other.Name;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -243,6 +272,10 @@ namespace Sunlight.Api {
             Port = input.ReadInt32();
             break;
           }
+          case 26: {
+            Name = input.ReadBytes();
+            break;
+          }
         }
       }
     #endif
@@ -268,6 +301,10 @@ namespace Sunlight.Api {
           }
           case 16: {
             Port = input.ReadInt32();
+            break;
+          }
+          case 26: {
+            Name = input.ReadBytes();
             break;
           }
         }

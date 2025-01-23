@@ -19,18 +19,9 @@
 
         <StackPanel Grid.Row="0"
                     Orientation="Horizontal"
-                    FlowDirection="RightToLeft"
+                    FlowDirection="LeftToRight"
+                    Margin="20, 10, 0, 0"
                     Name="WorldListPanel">
-            <RadioButton
-                Content="Option 1"
-                GroupName="radio_group_two"
-                IsChecked="True" />
-            <RadioButton
-                Content="Option 2"
-                GroupName="radio_group_two" />
-            <RadioButton
-                Content="Option 3"
-                GroupName="radio_group_two" />
         </StackPanel>
 
         <Grid Grid.Row="1">
@@ -48,7 +39,7 @@
                   Margin="20, 0, 0, 150">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="500"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 

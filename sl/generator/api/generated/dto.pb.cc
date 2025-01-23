@@ -29,7 +29,10 @@ namespace api {
 
 inline constexpr ZoneInfo::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : id_{0},
+      : name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        id_{0},
         port_{0},
         _cached_size_{0} {}
 
@@ -127,6 +130,7 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneInfo, _impl_.id_),
         PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneInfo, _impl_.port_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneInfo, _impl_.name_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::WorldInfo, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -154,8 +158,8 @@ const ::uint32_t
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::sunlight::api::ZoneInfo)},
-        {10, -1, -1, sizeof(::sunlight::api::WorldInfo)},
-        {21, -1, -1, sizeof(::sunlight::api::LogItem)},
+        {11, -1, -1, sizeof(::sunlight::api::WorldInfo)},
+        {22, -1, -1, sizeof(::sunlight::api::LogItem)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_ZoneInfo_default_instance_._instance,
@@ -164,18 +168,19 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_dto_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\tdto.proto\022\014sunlight.api\"$\n\010ZoneInfo\022\n\n"
-    "\002id\030\001 \001(\005\022\014\n\004port\030\002 \001(\005\"[\n\tWorldInfo\022\n\n\002"
-    "id\030\001 \001(\005\022\022\n\nuser_count\030\002 \001(\005\022.\n\016open_zon"
-    "e_list\030\003 \003(\0132\026.sunlight.api.ZoneInfo\"@\n\007"
-    "LogItem\022\021\n\tdate_time\030\001 \001(\003\022\021\n\tlog_level\030"
-    "\002 \001(\005\022\017\n\007message\030\003 \001(\014b\006proto3"
+    "\n\tdto.proto\022\014sunlight.api\"2\n\010ZoneInfo\022\n\n"
+    "\002id\030\001 \001(\005\022\014\n\004port\030\002 \001(\005\022\014\n\004name\030\003 \001(\014\"[\n"
+    "\tWorldInfo\022\n\n\002id\030\001 \001(\005\022\022\n\nuser_count\030\002 \001"
+    "(\005\022.\n\016open_zone_list\030\003 \003(\0132\026.sunlight.ap"
+    "i.ZoneInfo\"@\n\007LogItem\022\021\n\tdate_time\030\001 \001(\003"
+    "\022\021\n\tlog_level\030\002 \001(\005\022\017\n\007message\030\003 \001(\014b\006pr"
+    "oto3"
 };
 static ::absl::once_flag descriptor_table_dto_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_dto_2eproto = {
     false,
     false,
-    230,
+    244,
     descriptor_table_protodef_dto_2eproto,
     "dto.proto",
     &descriptor_table_dto_2eproto_once,
@@ -205,15 +210,40 @@ ZoneInfo::ZoneInfo(::google::protobuf::Arena* arena)
   SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:sunlight.api.ZoneInfo)
 }
+inline PROTOBUF_NDEBUG_INLINE ZoneInfo::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::sunlight::api::ZoneInfo& from_msg)
+      : name_(arena, from.name_),
+        _cached_size_{0} {}
+
 ZoneInfo::ZoneInfo(
-    ::google::protobuf::Arena* arena, const ZoneInfo& from)
-    : ZoneInfo(arena) {
-  MergeFrom(from);
+    ::google::protobuf::Arena* arena,
+    const ZoneInfo& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ZoneInfo* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, id_),
+           offsetof(Impl_, port_) -
+               offsetof(Impl_, id_) +
+               sizeof(Impl_::port_));
+
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.ZoneInfo)
 }
 inline PROTOBUF_NDEBUG_INLINE ZoneInfo::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : _cached_size_{0} {}
+      : name_(arena),
+        _cached_size_{0} {}
 
 inline void ZoneInfo::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -232,6 +262,7 @@ inline void ZoneInfo::SharedDtor(MessageLite& self) {
   ZoneInfo& this_ = static_cast<ZoneInfo&>(self);
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.name_.Destroy();
   this_._impl_.~Impl_();
 }
 
@@ -240,7 +271,7 @@ inline void* ZoneInfo::PlacementNew_(const void*, void* mem,
   return ::new (mem) ZoneInfo(arena);
 }
 constexpr auto ZoneInfo::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(ZoneInfo),
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(ZoneInfo),
                                             alignof(ZoneInfo));
 }
 PROTOBUF_CONSTINIT
@@ -271,15 +302,15 @@ const ::google::protobuf::internal::ClassData* ZoneInfo::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 0, 2> ZoneInfo::_table_ = {
+const ::_pbi::TcParseTable<2, 3, 0, 0, 2> ZoneInfo::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    2, 8,  // max_field_number, fast_idx_mask
+    3, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967292,  // skipmap
+    4294967288,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
+    3,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     _class_data_.base(),
@@ -289,12 +320,16 @@ const ::_pbi::TcParseTable<1, 2, 0, 0, 2> ZoneInfo::_table_ = {
     ::_pbi::TcParser::GetTable<::sunlight::api::ZoneInfo>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // int32 port = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneInfo, _impl_.port_), 63>(),
-     {16, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneInfo, _impl_.port_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int32 id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneInfo, _impl_.id_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneInfo, _impl_.id_)}},
+    // int32 port = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneInfo, _impl_.port_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneInfo, _impl_.port_)}},
+    // bytes name = 3;
+    {::_pbi::TcParser::FastBS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneInfo, _impl_.name_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -304,6 +339,9 @@ const ::_pbi::TcParseTable<1, 2, 0, 0, 2> ZoneInfo::_table_ = {
     // int32 port = 2;
     {PROTOBUF_FIELD_OFFSET(ZoneInfo, _impl_.port_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bytes name = 3;
+    {PROTOBUF_FIELD_OFFSET(ZoneInfo, _impl_.name_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBytes | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
@@ -317,6 +355,7 @@ PROTOBUF_NOINLINE void ZoneInfo::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  _impl_.name_.ClearToEmpty();
   ::memset(&_impl_.id_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.port_) -
       reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.port_));
@@ -352,6 +391,12 @@ PROTOBUF_NOINLINE void ZoneInfo::Clear() {
                     stream, this_._internal_port(), target);
           }
 
+          // bytes name = 3;
+          if (!this_._internal_name().empty()) {
+            const std::string& _s = this_._internal_name();
+            target = stream->WriteBytesMaybeAliased(3, _s, target);
+          }
+
           if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
             target =
                 ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -377,6 +422,11 @@ PROTOBUF_NOINLINE void ZoneInfo::Clear() {
 
           ::_pbi::Prefetch5LinesFrom7Lines(&this_);
            {
+            // bytes name = 3;
+            if (!this_._internal_name().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
+                                              this_._internal_name());
+            }
             // int32 id = 1;
             if (this_._internal_id() != 0) {
               total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
@@ -400,6 +450,9 @@ void ZoneInfo::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (!from._internal_name().empty()) {
+    _this->_internal_set_name(from._internal_name());
+  }
   if (from._internal_id() != 0) {
     _this->_impl_.id_ = from._impl_.id_;
   }
@@ -419,7 +472,10 @@ void ZoneInfo::CopyFrom(const ZoneInfo& from) {
 
 void ZoneInfo::InternalSwap(ZoneInfo* PROTOBUF_RESTRICT other) {
   using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ZoneInfo, _impl_.port_)
       + sizeof(ZoneInfo::_impl_.port_)

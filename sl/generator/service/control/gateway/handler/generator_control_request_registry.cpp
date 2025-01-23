@@ -15,6 +15,7 @@ namespace sunlight
         result &= Add(router, std::make_shared<GeneratorControlLogGetHandler>(serviceLocator));
         result &= Add(router, std::make_shared<GeneratorControlSystemResourceInfoHandler>(serviceLocator));
         result &= Add(router, std::make_shared<GeneratorControlUserCountHandler>(serviceLocator));
+        result &= Add(router, std::make_shared<GeneratorControlWorldInfoHandler>(serviceLocator));
 
         _handlers.shrink_to_fit();
 

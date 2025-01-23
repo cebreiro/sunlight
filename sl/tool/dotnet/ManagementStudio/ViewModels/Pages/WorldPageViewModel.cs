@@ -1,6 +1,11 @@
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Sunlight.Api;
+using Sunlight.ManagementStudio.Models.Controller;
+using Sunlight.ManagementStudio.Models.Event;
+using Sunlight.ManagementStudio.Models.Event.Args;
 using Sunlight.ManagementStudio.ViewModels.Pages.World;
 using Wpf.Ui.Abstractions.Controls;
 
@@ -8,21 +13,30 @@ namespace Sunlight.ManagementStudio.ViewModels.Pages;
 
 public partial class WorldPageViewModel : ObservableObject, INavigationAware
 {
-    private bool _isInitialized = false;
+    private bool _initialized = false;
+    private readonly ISunlightController _sunlightController;
+
+    public Action<List<string>>? InitializeHandler { get; set; }
+    public Action? ResetHandler { get; set; }
+
+    [ObservableProperty]
+    private ObservableCollection<WorldInfo> _worldInfos = new();
 
     [ObservableProperty]
     private ObservableCollection<ZoneListViewItem> _zoneList = new();
 
-    public WorldPageViewModel()
+    public WorldPageViewModel(ISunlightController sunlightController, IEventListener eventListener)
     {
-        ZoneList.Add(new ZoneListViewItem(101, 1234, "test1"));
-        ZoneList.Add(new ZoneListViewItem(102, 5678, "test2"));
+        _sunlightController = sunlightController;
+
+        eventListener.Listen(OnDisconnect);
     }
 
     public Task OnNavigatedToAsync()
     {
+        Initialize();
+
         return Task.CompletedTask;
-        //await Application.Current.Dispatcher.InvokeAsync(Initialize);
     }
 
     public Task OnNavigatedFromAsync()
@@ -30,18 +44,79 @@ public partial class WorldPageViewModel : ObservableObject, INavigationAware
         return Task.CompletedTask;
     }
 
-    private async Task Initialize()
+    public void OnWorldSelected(int index)
     {
-        if (_isInitialized)
+        if (index < 0 || index >= WorldInfos.Count)
+        {
+            System.Diagnostics.Debug.Assert(false);
+
+            return;
+        }
+
+        ZoneList.Clear();
+
+        Encoding encoding = Encoding.GetEncoding("EUC-KR");
+
+        foreach (ZoneInfo? zoneInfo in WorldInfos[index].OpenZoneList.OrderBy(info => info.Id))
+        {
+            if (zoneInfo == null)
+            {
+                continue;
+            }
+
+            string name = encoding.GetString(zoneInfo.Name.ToByteArray());
+
+            ZoneList.Add(new ZoneListViewItem(zoneInfo.Id, (ushort)zoneInfo.Port, name));
+        }
+    }
+
+    private void Initialize()
+    {
+        if (_initialized)
         {
             return;
         }
 
-        _isInitialized = true;
+        _initialized = true;
 
-        Application.Current.Dispatcher.InvokeAsync(() =>
+        Task.Run(async () =>
         {
-            
+            WorldInfoResponse response = await _sunlightController.GetWorldInfo(new WorldInfoRequest());
+
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                foreach (WorldInfo? worldInfo in response.WorldInfoList)
+                {
+                    if (worldInfo == null)
+                    {
+                        System.Diagnostics.Debug.Assert(false);
+
+                        continue;
+                    }
+
+                    WorldInfos.Add(worldInfo);
+                }
+
+                if (InitializeHandler != null)
+                {
+                    var worldIds = WorldInfos.Select((worldInfo) => worldInfo.Id.ToString()).ToList();
+
+                    InitializeHandler(worldIds);
+                }
+            });
         });
+    }
+
+    private void OnDisconnect(DisconnectionEventArgs args)
+    {
+        if (!_initialized)
+        {
+            return;
+        }
+
+        _initialized = false;
+        WorldInfos.Clear();
+
+        ResetHandler?.Invoke();
     }
 }

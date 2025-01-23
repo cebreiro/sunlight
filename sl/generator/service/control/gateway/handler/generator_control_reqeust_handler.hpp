@@ -5,3 +5,4 @@
 #include "sl/generator/service/control/gateway/handler/impl/generator_control_log_get_handler.h"
 #include "sl/generator/service/control/gateway/handler/impl/generator_control_system_resource_info_handler.h"
 #include "sl/generator/service/control/gateway/handler/impl/generator_control_user_count_handler.h"
+#include "sl/generator/service/control/gateway/handler/impl/generator_control_world_info_handler.h"

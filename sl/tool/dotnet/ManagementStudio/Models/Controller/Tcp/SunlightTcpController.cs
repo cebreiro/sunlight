@@ -91,6 +91,13 @@ public class SunlightTcpController : ISunlightController
             response => response.SystemResourceInfo);
     }
 
+    public Task<WorldInfoResponse> GetWorldInfo(WorldInfoRequest worldInfoRequest)
+    {
+        return SendRequestAsync(worldInfoRequest,
+            (request, param) => request.WorldInfo = param,
+            response => response.WorldInfo);
+    }
+
     public Task<LogGetResponse> GetLog(LogGetRequest logRequest)
     {
         return SendRequestAsync(logRequest,

@@ -1,10 +1,33 @@
 #include "world.h"
 
+#include <boost/lexical_cast.hpp>
+#include "sl/generator/game/data/sox/zone.h"
 #include "sl/generator/game/zone/zone.h"
 #include "sl/generator/server/zone_server.h"
+#include "sl/generator/service/gamedata/gamedata_provide_service.h"
 
 namespace sunlight
 {
+    World::World(const ServiceLocator& serviceLocator, int32_t id)
+        : _serviceLocator(serviceLocator)
+        , _id(id)
+    {
+        const sox::ZoneTable& zoneTable = _serviceLocator.Get<GameDataProvideService>().Get<sox::ZoneTable>();
+
+        for (const sox::Zone& zoneData : zoneTable.Get())
+        {
+            try
+            {
+                const int32_t zoneId = boost::lexical_cast<int32_t>(zoneData.zoneFilename);
+
+                _zoneNames.try_emplace(zoneId, zoneData.zoneDesc);
+            }
+            catch (...)
+            {
+            }
+        }
+    }
+
     World::~World()
     {
     }
@@ -39,6 +62,11 @@ namespace sunlight
 
             zoneInfo.set_id(zone->GetId());
             zoneInfo.set_port(server->GetListenPort());
+
+            if (const auto iter = _zoneNames.find(zone->GetId()); iter != _zoneNames.end())
+            {
+                zoneInfo.set_name(iter->second);
+            }
         }
 
         return result;

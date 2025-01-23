@@ -224,9 +224,26 @@ class ZoneInfo final
 
   // accessors -------------------------------------------------------
   enum : int {
+    kNameFieldNumber = 3,
     kIdFieldNumber = 1,
     kPortFieldNumber = 2,
   };
+  // bytes name = 3;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
   // int32 id = 1;
   void clear_id() ;
   ::int32_t id() const;
@@ -252,7 +269,7 @@ class ZoneInfo final
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      1, 2, 0,
+      2, 3, 0,
       0, 2>
       _table_;
 
@@ -270,6 +287,7 @@ class ZoneInfo final
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const ZoneInfo& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr name_;
     ::int32_t id_;
     ::int32_t port_;
     ::google::protobuf::internal::CachedSize _cached_size_;
@@ -780,6 +798,54 @@ inline ::int32_t ZoneInfo::_internal_port() const {
 inline void ZoneInfo::_internal_set_port(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.port_ = value;
+}
+
+// bytes name = 3;
+inline void ZoneInfo::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+}
+inline const std::string& ZoneInfo::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.ZoneInfo.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void ZoneInfo::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetBytes(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sunlight.api.ZoneInfo.name)
+}
+inline std::string* ZoneInfo::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.ZoneInfo.name)
+  return _s;
+}
+inline const std::string& ZoneInfo::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void ZoneInfo::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* ZoneInfo::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* ZoneInfo::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sunlight.api.ZoneInfo.name)
+  return _impl_.name_.Release();
+}
+inline void ZoneInfo::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.ZoneInfo.name)
 }
 
 // -------------------------------------------------------------------
