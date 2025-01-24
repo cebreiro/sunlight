@@ -4,14 +4,18 @@
 #include "sl/generator/game/data/sox/zone.h"
 #include "sl/generator/game/zone/zone.h"
 #include "sl/generator/server/zone_server.h"
+#include "sl/generator/service/community/community_service.h"
 #include "sl/generator/service/gamedata/gamedata_provide_service.h"
 
 namespace sunlight
 {
-    World::World(const ServiceLocator& serviceLocator, int32_t id)
+    World::World(const ServiceLocator& serviceLocator, int32_t id, execution::IExecutor& executor)
         : _serviceLocator(serviceLocator)
         , _id(id)
+        , _communityService(std::make_shared<CommunityService>(_serviceLocator, executor))
     {
+        _serviceLocator.Add<CommunityService>(_communityService);
+
         const sox::ZoneTable& zoneTable = _serviceLocator.Get<GameDataProvideService>().Get<sox::ZoneTable>();
 
         for (const sox::Zone& zoneData : zoneTable.Get())
@@ -49,6 +53,16 @@ namespace sunlight
     auto World::GetId() const -> int32_t
     {
         return _id;
+    }
+
+    auto World::GetServiceLocator() -> ServiceLocator&
+    {
+        return _serviceLocator;
+    }
+
+    auto World::GetServiceLocator() const -> const ServiceLocator&
+    {
+        return _serviceLocator;
     }
 
     auto World::GetZoneInfo() const -> std::vector<api::ZoneInfo>

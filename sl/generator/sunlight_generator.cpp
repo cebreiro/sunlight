@@ -53,7 +53,6 @@ namespace sunlight
         , _authenticationService(std::make_shared<AuthenticationService>(GetServiceLocator(), *_ioExecutor))
         , _databaseService(std::make_shared<DatabaseService>(GetServiceLocator(), *_ioExecutor, _connectionPool))
         , _gatewayService(std::make_shared<GatewayService>(GetServiceLocator(), *_ioExecutor))
-        , _communityService(std::make_shared<CommunityService>(GetServiceLocator(), *_ioExecutor))
         , _worldService(std::make_shared<WorldService>(GetServiceLocator(), *_ioExecutor, *_gameExecutor))
         , _loginServer(std::make_shared<LoginServer>(GetServiceLocator(), *_ioExecutor))
         , _lobbyServer(std::make_shared<LobbyServer>(GetServiceLocator(), *_ioExecutor))
@@ -72,7 +71,6 @@ namespace sunlight
         RegisterService(_authenticationService);
         RegisterService(_databaseService);
         RegisterService(_gatewayService);
-        RegisterService(_communityService);
         RegisterService(_worldService);
     }
 

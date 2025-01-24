@@ -2,7 +2,6 @@
 
 #include "shared/process/query_sys_info.h"
 #include "shared/execution/executor/impl/asio_executor.h"
-#include "sl/generator/service/community/community_service.h"
 #include "sl/generator/service/control/gateway/generator_control_api_gateway_server.h"
 #include "sl/generator/service/database/database_service.h"
 #include "sl/generator/service/hash/safe_hash_service.h"
@@ -133,7 +132,7 @@ namespace sunlight
 
     auto GeneratorControlService::GetUserCount() -> Future<int32_t>
     {
-        co_return co_await _serviceLocator.Get<CommunityService>().GetUserCount();
+        co_return co_await _serviceLocator.Get<WorldService>().GetUserCount();
     }
 
     auto GeneratorControlService::GetSystemResourceInfo(std::optional<int32_t>& outCpuLoadPercentage,

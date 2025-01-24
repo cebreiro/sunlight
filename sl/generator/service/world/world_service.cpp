@@ -3,6 +3,7 @@
 #include <boost/scope/scope_exit.hpp>
 #include "sl/generator/game/zone/zone.h"
 #include "sl/generator/server/zone_server.h"
+#include "sl/generator/service/community/community_service.h"
 #include "sl/generator/service/world/world.h"
 
 namespace sunlight
@@ -46,7 +47,9 @@ namespace sunlight
 
         co_await *_strand;
 
-        auto zone = std::make_shared<Zone>(_serviceLocator, _gameExecutor, worldId, zoneId);
+        World& world = AddOrGetWorld(worldId);
+
+        auto zone = std::make_shared<Zone>(world.GetServiceLocator(), _gameExecutor, worldId, zoneId);
         boost::scope::scope_exit exit([&zone]()
             {
                 if (zone)
@@ -57,7 +60,7 @@ namespace sunlight
 
         zone->Initialize();
 
-        auto server = std::make_shared<ZoneServer>(_serviceLocator, _asioExecutor, *zone);
+        auto server = std::make_shared<ZoneServer>(world.GetServiceLocator(), _asioExecutor, *zone);
         if (!server->StartUp(port))
         {
             throw std::runtime_error(fmt::format("[{}] fail to open port: {}. world_id: {}, zone_id: {}",
@@ -66,7 +69,7 @@ namespace sunlight
 
         zone->Start();
 
-        AddOrGetWorld(worldId).Add(std::move(server), std::move(zone));
+        world.Add(std::move(server), std::move(zone));
 
         co_return;
     }
@@ -97,12 +100,38 @@ namespace sunlight
         co_return std::move(result);
     }
 
+    auto WorldService::GetUserCount() -> Future<int32_t>
+    {
+        [[maybe_unused]]
+        auto self = shared_from_this();
+
+        co_await *_strand;
+
+        int32_t result = 0;
+
+        boost::container::small_vector<Future<int32_t>, 4> futures;
+
+        for (const World& world : _worlds | std::views::values | notnull::reference)
+        {
+            futures.emplace_back(world.GetServiceLocator().Get<CommunityService>().GetUserCount());
+        }
+
+        co_await WaitAll(*_strand, futures);
+
+        for (auto& future : futures)
+        {
+            result += future.Get();
+        }
+
+        co_return result;
+    }
+
     auto WorldService::AddOrGetWorld(int32_t worldId) -> World&
     {
         auto iter = _worlds.find(worldId);
         if (iter == _worlds.end())
         {
-            iter = _worlds.try_emplace(worldId, std::make_unique<World>(_serviceLocator, worldId)).first;
+            iter = _worlds.try_emplace(worldId, std::make_unique<World>(_serviceLocator, worldId, _gameExecutor)).first;
         }
 
         return *iter->second;
