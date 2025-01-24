@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
@@ -15,12 +16,10 @@ public partial class WorldPageViewModel : ObservableObject, INavigationAware
 {
     private bool _initialized = false;
     private readonly ISunlightController _sunlightController;
+    private readonly Dictionary<string, WorldInfo> _worldInfo = new();
 
     public Action<List<string>>? InitializeHandler { get; set; }
     public Action? ResetHandler { get; set; }
-
-    [ObservableProperty]
-    private ObservableCollection<WorldInfo> _worldInfos = new();
 
     [ObservableProperty]
     private ObservableCollection<ZoneListViewItem> _zoneList = new();
@@ -44,9 +43,9 @@ public partial class WorldPageViewModel : ObservableObject, INavigationAware
         return Task.CompletedTask;
     }
 
-    public void OnWorldSelected(int index)
+    public void OnWorldSelected(string worldId)
     {
-        if (index < 0 || index >= WorldInfos.Count)
+        if (!_worldInfo.TryGetValue(worldId, out var worldInfo))
         {
             System.Diagnostics.Debug.Assert(false);
 
@@ -57,7 +56,7 @@ public partial class WorldPageViewModel : ObservableObject, INavigationAware
 
         Encoding encoding = Encoding.GetEncoding("EUC-KR");
 
-        foreach (ZoneInfo? zoneInfo in WorldInfos[index].OpenZoneList.OrderBy(info => info.Id))
+        foreach (ZoneInfo? zoneInfo in worldInfo.OpenZoneList.OrderBy(info => info.Id))
         {
             if (zoneInfo == null)
             {
@@ -94,12 +93,12 @@ public partial class WorldPageViewModel : ObservableObject, INavigationAware
                         continue;
                     }
 
-                    WorldInfos.Add(worldInfo);
+                    _worldInfo.Add(worldInfo.Id.ToString(), worldInfo);
                 }
 
                 if (InitializeHandler != null)
                 {
-                    var worldIds = WorldInfos.Select((worldInfo) => worldInfo.Id.ToString()).ToList();
+                    var worldIds = _worldInfo.Values.Select((worldInfo) => worldInfo.Id.ToString()).ToList();
 
                     InitializeHandler(worldIds);
                 }
@@ -115,7 +114,7 @@ public partial class WorldPageViewModel : ObservableObject, INavigationAware
         }
 
         _initialized = false;
-        WorldInfos.Clear();
+        _worldInfo.Clear();
 
         ResetHandler?.Invoke();
     }

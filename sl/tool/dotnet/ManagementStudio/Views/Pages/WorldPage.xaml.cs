@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Controls;
 using Sunlight.ManagementStudio.ViewModels.Pages;
 using Wpf.Ui.Abstractions.Controls;
@@ -6,6 +7,8 @@ namespace Sunlight.ManagementStudio.Views.Pages;
 
 public partial class WorldPage : INavigableView<WorldPageViewModel>
 {
+    private readonly Dictionary<object, string> _worldKeys = new();
+
     public WorldPageViewModel ViewModel { get; }
 
     public WorldPage(WorldPageViewModel viewModel)
@@ -34,16 +37,37 @@ public partial class WorldPage : INavigableView<WorldPageViewModel>
                 Content = $"World {id}",
             };
 
+            radioButton.Checked += OnWorldRadioButtonClicked;
+
             first = false;
 
+            _worldKeys.Add(radioButton, id);
             WorldListPanel.Children.Add(radioButton);
         }
 
-        ViewModel.OnWorldSelected(0);
+        ViewModel.OnWorldSelected(worldIds[0]);
     }
 
     private void Reset()
     {
+        _worldKeys.Clear();
         WorldListPanel.Children.Clear();
+    }
+
+    private void OnWorldRadioButtonClicked(object sender, RoutedEventArgs e)
+    {
+        if (sender is not RadioButton radioButton)
+        {
+            return;
+        }
+
+        if (!_worldKeys.TryGetValue(radioButton, out var key))
+        {
+            System.Diagnostics.Debug.Assert(false);
+
+            return;
+        }
+
+        ViewModel.OnWorldSelected(key);
     }
 }
