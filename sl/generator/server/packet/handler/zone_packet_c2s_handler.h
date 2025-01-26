@@ -5,6 +5,7 @@
 
 namespace sunlight
 {
+    class Zone;
     class ZoneServer;
     class SlPacketReader;
 }
@@ -29,6 +30,7 @@ namespace sunlight
     private:
         const ServiceLocator& _serviceLocator;
         ZoneServer& _zoneServer;
+        SharedPtrNotNull<Zone> _zone;
 
         std::string _name;
     };

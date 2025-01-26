@@ -14,6 +14,14 @@ namespace sunlight
         return GameSystem::GetClassId<PlayerIndexSystem>();
     }
 
+    void PlayerIndexSystem::Visit(const std::function<void(GamePlayer&)>& function)
+    {
+        for (GamePlayer* player : _cidIndex | std::views::values)
+        {
+            function(*player);
+        }
+    }
+
     void PlayerIndexSystem::OnStageEnter(GamePlayer& player)
     {
         assert(!_cidIndex.contains(player.GetCId()));

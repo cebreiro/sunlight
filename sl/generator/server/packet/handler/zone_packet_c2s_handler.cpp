@@ -14,6 +14,7 @@ namespace sunlight
     ZonePacketC2SHandler::ZonePacketC2SHandler(const ServiceLocator& serviceLocator, ZoneServer& zoneServer)
         : _serviceLocator(serviceLocator)
         , _zoneServer(zoneServer)
+        , _zone(_zoneServer.GetZone().shared_from_this())
         , _name(fmt::format("zone_packet_handler_{}", _zoneServer.GetZoneId()))
     {
     }
@@ -53,11 +54,11 @@ namespace sunlight
 
                 SUNLIGHT_LOG_INFO(_serviceLocator,
                     fmt::format("[{}] client logout request. zone: {}",
-                        GetName(), _zoneServer.GetZone().GetId()));
+                        GetName(), _zone->GetId()));
 
                 if (const GameClient* clientPtr = connection.GetGameClientPtr(); clientPtr)
                 {
-                    _zoneServer.GetZone().LogoutPlayer(clientPtr->GetId());
+                    _zone->LogoutPlayer(clientPtr->GetId());
                 }
             }
             break;
@@ -156,7 +157,7 @@ namespace sunlight
             co_return;
         }
 
-        const bool result = co_await _zoneServer.GetZone().SpawnPlayer(client, *dto);
+        const bool result = co_await _zone->SpawnPlayer(client, *dto);
         (void)result;
     }
 
@@ -178,6 +179,6 @@ namespace sunlight
             return;
         }
 
-        _zoneServer.GetZone().HandleNetworkMessage(client->GetId(), opcode, std::move(reader));
+        _zone->HandleNetworkMessage(client->GetId(), opcode, std::move(reader));
     }
 }

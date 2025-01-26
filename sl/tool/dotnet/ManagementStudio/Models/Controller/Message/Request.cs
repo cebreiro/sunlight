@@ -33,18 +33,23 @@ namespace Sunlight.Api {
             "EgoQV29ybGRJbmZvUmVxdWVzdCKEAQoNTG9nR2V0UmVxdWVzdBIRCglsb2df",
             "bGV2ZWwYASADKAUSHAoPc3RhcnRfZGF0ZV90aW1lGAIgASgDSACIAQESGwoO",
             "bGFzdF9kYXRlX3RpbWUYAyABKANIAYgBAUISChBfc3RhcnRfZGF0ZV90aW1l",
-            "QhEKD19sYXN0X2RhdGVfdGltZSLdAwoHUmVxdWVzdBISCgpyZXF1ZXN0X2lk",
-            "GAEgASgFEj0KDmF1dGhlbnRpY2F0aW9uGGQgASgLMiMuc3VubGlnaHQuYXBp",
-            "LkF1dGhlbnRpY2F0aW9uUmVxdWVzdEgAEkAKEGFjY291bnRfY3JlYXRpb24Y",
-            "ZSABKAsyJC5zdW5saWdodC5hcGkuQWNjb3VudENyZWF0aW9uUmV1cWVzdEgA",
-            "Ek0KF2FjY291bnRfcGFzc3dvcmRfY2hhbmdlGGYgASgLMiouc3VubGlnaHQu",
-            "YXBpLkFjY291bnRQYXNzd29yZENoYW5nZVJlcXVlc3RIABI0Cgp1c2VyX2Nv",
-            "dW50GGcgASgLMh4uc3VubGlnaHQuYXBpLlVzZXJDb3VudFJlcXVlc3RIABJH",
-            "ChRzeXN0ZW1fcmVzb3VyY2VfaW5mbxhoIAEoCzInLnN1bmxpZ2h0LmFwaS5T",
-            "eXN0ZW1SZXNvdXJjZUluZm9SZXF1ZXN0SAASNAoKd29ybGRfaW5mbxhpIAEo",
-            "CzIeLnN1bmxpZ2h0LmFwaS5Xb3JsZEluZm9SZXF1ZXN0SAASLgoHbG9nX2dl",
-            "dBhqIAEoCzIbLnN1bmxpZ2h0LmFwaS5Mb2dHZXRSZXF1ZXN0SABCCQoHcGF5",
-            "bG9hZGIGcHJvdG8z"));
+            "QhEKD19sYXN0X2RhdGVfdGltZSJCCg9ab25lT3BlblJlcXVlc3QSEAoId29y",
+            "bGRfaWQYASABKAUSDwoHem9uZV9pZBgCIAEoBRIMCgRwb3J0GAMgASgFIjUK",
+            "EFpvbmVDbG9zZVJlcXVlc3QSEAoId29ybGRfaWQYASABKAUSDwoHem9uZV9p",
+            "ZBgCIAEoBSLHBAoHUmVxdWVzdBISCgpyZXF1ZXN0X2lkGAEgASgFEj0KDmF1",
+            "dGhlbnRpY2F0aW9uGGQgASgLMiMuc3VubGlnaHQuYXBpLkF1dGhlbnRpY2F0",
+            "aW9uUmVxdWVzdEgAEkAKEGFjY291bnRfY3JlYXRpb24YZSABKAsyJC5zdW5s",
+            "aWdodC5hcGkuQWNjb3VudENyZWF0aW9uUmV1cWVzdEgAEk0KF2FjY291bnRf",
+            "cGFzc3dvcmRfY2hhbmdlGGYgASgLMiouc3VubGlnaHQuYXBpLkFjY291bnRQ",
+            "YXNzd29yZENoYW5nZVJlcXVlc3RIABI0Cgp1c2VyX2NvdW50GGcgASgLMh4u",
+            "c3VubGlnaHQuYXBpLlVzZXJDb3VudFJlcXVlc3RIABJHChRzeXN0ZW1fcmVz",
+            "b3VyY2VfaW5mbxhoIAEoCzInLnN1bmxpZ2h0LmFwaS5TeXN0ZW1SZXNvdXJj",
+            "ZUluZm9SZXF1ZXN0SAASNAoKd29ybGRfaW5mbxhpIAEoCzIeLnN1bmxpZ2h0",
+            "LmFwaS5Xb3JsZEluZm9SZXF1ZXN0SAASLgoHbG9nX2dldBhqIAEoCzIbLnN1",
+            "bmxpZ2h0LmFwaS5Mb2dHZXRSZXF1ZXN0SAASMgoJem9uZV9vcGVuGGsgASgL",
+            "Mh0uc3VubGlnaHQuYXBpLlpvbmVPcGVuUmVxdWVzdEgAEjQKCnpvbmVfY2xv",
+            "c2UYbCABKAsyHi5zdW5saWdodC5hcGkuWm9uZUNsb3NlUmVxdWVzdEgAQgkK",
+            "B3BheWxvYWRiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -55,7 +60,9 @@ namespace Sunlight.Api {
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.SystemResourceInfoRequest), global::Sunlight.Api.SystemResourceInfoRequest.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.WorldInfoRequest), global::Sunlight.Api.WorldInfoRequest.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.LogGetRequest), global::Sunlight.Api.LogGetRequest.Parser, new[]{ "LogLevel", "StartDateTime", "LastDateTime" }, new[]{ "StartDateTime", "LastDateTime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Request), global::Sunlight.Api.Request.Parser, new[]{ "RequestId", "Authentication", "AccountCreation", "AccountPasswordChange", "UserCount", "SystemResourceInfo", "WorldInfo", "LogGet" }, new[]{ "Payload" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.ZoneOpenRequest), global::Sunlight.Api.ZoneOpenRequest.Parser, new[]{ "WorldId", "ZoneId", "Port" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.ZoneCloseRequest), global::Sunlight.Api.ZoneCloseRequest.Parser, new[]{ "WorldId", "ZoneId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Sunlight.Api.Request), global::Sunlight.Api.Request.Parser, new[]{ "RequestId", "Authentication", "AccountCreation", "AccountPasswordChange", "UserCount", "SystemResourceInfo", "WorldInfo", "LogGet", "ZoneOpen", "ZoneClose" }, new[]{ "Payload" }, null, null, null)
           }));
     }
     #endregion
@@ -1583,6 +1590,513 @@ namespace Sunlight.Api {
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ZoneOpenRequest : pb::IMessage<ZoneOpenRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ZoneOpenRequest> _parser = new pb::MessageParser<ZoneOpenRequest>(() => new ZoneOpenRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ZoneOpenRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[7]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ZoneOpenRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ZoneOpenRequest(ZoneOpenRequest other) : this() {
+      worldId_ = other.worldId_;
+      zoneId_ = other.zoneId_;
+      port_ = other.port_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ZoneOpenRequest Clone() {
+      return new ZoneOpenRequest(this);
+    }
+
+    /// <summary>Field number for the "world_id" field.</summary>
+    public const int WorldIdFieldNumber = 1;
+    private int worldId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int WorldId {
+      get { return worldId_; }
+      set {
+        worldId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "zone_id" field.</summary>
+    public const int ZoneIdFieldNumber = 2;
+    private int zoneId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int ZoneId {
+      get { return zoneId_; }
+      set {
+        zoneId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "port" field.</summary>
+    public const int PortFieldNumber = 3;
+    private int port_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Port {
+      get { return port_; }
+      set {
+        port_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ZoneOpenRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ZoneOpenRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (WorldId != other.WorldId) return false;
+      if (ZoneId != other.ZoneId) return false;
+      if (Port != other.Port) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (WorldId != 0) hash ^= WorldId.GetHashCode();
+      if (ZoneId != 0) hash ^= ZoneId.GetHashCode();
+      if (Port != 0) hash ^= Port.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (WorldId != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(WorldId);
+      }
+      if (ZoneId != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(ZoneId);
+      }
+      if (Port != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Port);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (WorldId != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(WorldId);
+      }
+      if (ZoneId != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(ZoneId);
+      }
+      if (Port != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Port);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (WorldId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(WorldId);
+      }
+      if (ZoneId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ZoneId);
+      }
+      if (Port != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Port);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ZoneOpenRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.WorldId != 0) {
+        WorldId = other.WorldId;
+      }
+      if (other.ZoneId != 0) {
+        ZoneId = other.ZoneId;
+      }
+      if (other.Port != 0) {
+        Port = other.Port;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            WorldId = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            ZoneId = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            Port = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            WorldId = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            ZoneId = input.ReadInt32();
+            break;
+          }
+          case 24: {
+            Port = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ZoneCloseRequest : pb::IMessage<ZoneCloseRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ZoneCloseRequest> _parser = new pb::MessageParser<ZoneCloseRequest>(() => new ZoneCloseRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ZoneCloseRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[8]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ZoneCloseRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ZoneCloseRequest(ZoneCloseRequest other) : this() {
+      worldId_ = other.worldId_;
+      zoneId_ = other.zoneId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ZoneCloseRequest Clone() {
+      return new ZoneCloseRequest(this);
+    }
+
+    /// <summary>Field number for the "world_id" field.</summary>
+    public const int WorldIdFieldNumber = 1;
+    private int worldId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int WorldId {
+      get { return worldId_; }
+      set {
+        worldId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "zone_id" field.</summary>
+    public const int ZoneIdFieldNumber = 2;
+    private int zoneId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int ZoneId {
+      get { return zoneId_; }
+      set {
+        zoneId_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ZoneCloseRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ZoneCloseRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (WorldId != other.WorldId) return false;
+      if (ZoneId != other.ZoneId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (WorldId != 0) hash ^= WorldId.GetHashCode();
+      if (ZoneId != 0) hash ^= ZoneId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (WorldId != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(WorldId);
+      }
+      if (ZoneId != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(ZoneId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (WorldId != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(WorldId);
+      }
+      if (ZoneId != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(ZoneId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (WorldId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(WorldId);
+      }
+      if (ZoneId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ZoneId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ZoneCloseRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.WorldId != 0) {
+        WorldId = other.WorldId;
+      }
+      if (other.ZoneId != 0) {
+        ZoneId = other.ZoneId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            WorldId = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            ZoneId = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            WorldId = input.ReadInt32();
+            break;
+          }
+          case 16: {
+            ZoneId = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class Request : pb::IMessage<Request>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1597,7 +2111,7 @@ namespace Sunlight.Api {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[7]; }
+      get { return global::Sunlight.Api.RequestReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1639,6 +2153,12 @@ namespace Sunlight.Api {
           break;
         case PayloadOneofCase.LogGet:
           LogGet = other.LogGet.Clone();
+          break;
+        case PayloadOneofCase.ZoneOpen:
+          ZoneOpen = other.ZoneOpen.Clone();
+          break;
+        case PayloadOneofCase.ZoneClose:
+          ZoneClose = other.ZoneClose.Clone();
           break;
       }
 
@@ -1747,6 +2267,30 @@ namespace Sunlight.Api {
       }
     }
 
+    /// <summary>Field number for the "zone_open" field.</summary>
+    public const int ZoneOpenFieldNumber = 107;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Sunlight.Api.ZoneOpenRequest ZoneOpen {
+      get { return payloadCase_ == PayloadOneofCase.ZoneOpen ? (global::Sunlight.Api.ZoneOpenRequest) payload_ : null; }
+      set {
+        payload_ = value;
+        payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.ZoneOpen;
+      }
+    }
+
+    /// <summary>Field number for the "zone_close" field.</summary>
+    public const int ZoneCloseFieldNumber = 108;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Sunlight.Api.ZoneCloseRequest ZoneClose {
+      get { return payloadCase_ == PayloadOneofCase.ZoneClose ? (global::Sunlight.Api.ZoneCloseRequest) payload_ : null; }
+      set {
+        payload_ = value;
+        payloadCase_ = value == null ? PayloadOneofCase.None : PayloadOneofCase.ZoneClose;
+      }
+    }
+
     private object payload_;
     /// <summary>Enum of possible cases for the "payload" oneof.</summary>
     public enum PayloadOneofCase {
@@ -1758,6 +2302,8 @@ namespace Sunlight.Api {
       SystemResourceInfo = 104,
       WorldInfo = 105,
       LogGet = 106,
+      ZoneOpen = 107,
+      ZoneClose = 108,
     }
     private PayloadOneofCase payloadCase_ = PayloadOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1796,6 +2342,8 @@ namespace Sunlight.Api {
       if (!object.Equals(SystemResourceInfo, other.SystemResourceInfo)) return false;
       if (!object.Equals(WorldInfo, other.WorldInfo)) return false;
       if (!object.Equals(LogGet, other.LogGet)) return false;
+      if (!object.Equals(ZoneOpen, other.ZoneOpen)) return false;
+      if (!object.Equals(ZoneClose, other.ZoneClose)) return false;
       if (PayloadCase != other.PayloadCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -1812,6 +2360,8 @@ namespace Sunlight.Api {
       if (payloadCase_ == PayloadOneofCase.SystemResourceInfo) hash ^= SystemResourceInfo.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.WorldInfo) hash ^= WorldInfo.GetHashCode();
       if (payloadCase_ == PayloadOneofCase.LogGet) hash ^= LogGet.GetHashCode();
+      if (payloadCase_ == PayloadOneofCase.ZoneOpen) hash ^= ZoneOpen.GetHashCode();
+      if (payloadCase_ == PayloadOneofCase.ZoneClose) hash ^= ZoneClose.GetHashCode();
       hash ^= (int) payloadCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -1863,6 +2413,14 @@ namespace Sunlight.Api {
         output.WriteRawTag(210, 6);
         output.WriteMessage(LogGet);
       }
+      if (payloadCase_ == PayloadOneofCase.ZoneOpen) {
+        output.WriteRawTag(218, 6);
+        output.WriteMessage(ZoneOpen);
+      }
+      if (payloadCase_ == PayloadOneofCase.ZoneClose) {
+        output.WriteRawTag(226, 6);
+        output.WriteMessage(ZoneClose);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1905,6 +2463,14 @@ namespace Sunlight.Api {
         output.WriteRawTag(210, 6);
         output.WriteMessage(LogGet);
       }
+      if (payloadCase_ == PayloadOneofCase.ZoneOpen) {
+        output.WriteRawTag(218, 6);
+        output.WriteMessage(ZoneOpen);
+      }
+      if (payloadCase_ == PayloadOneofCase.ZoneClose) {
+        output.WriteRawTag(226, 6);
+        output.WriteMessage(ZoneClose);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1938,6 +2504,12 @@ namespace Sunlight.Api {
       }
       if (payloadCase_ == PayloadOneofCase.LogGet) {
         size += 2 + pb::CodedOutputStream.ComputeMessageSize(LogGet);
+      }
+      if (payloadCase_ == PayloadOneofCase.ZoneOpen) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ZoneOpen);
+      }
+      if (payloadCase_ == PayloadOneofCase.ZoneClose) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(ZoneClose);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1996,6 +2568,18 @@ namespace Sunlight.Api {
             LogGet = new global::Sunlight.Api.LogGetRequest();
           }
           LogGet.MergeFrom(other.LogGet);
+          break;
+        case PayloadOneofCase.ZoneOpen:
+          if (ZoneOpen == null) {
+            ZoneOpen = new global::Sunlight.Api.ZoneOpenRequest();
+          }
+          ZoneOpen.MergeFrom(other.ZoneOpen);
+          break;
+        case PayloadOneofCase.ZoneClose:
+          if (ZoneClose == null) {
+            ZoneClose = new global::Sunlight.Api.ZoneCloseRequest();
+          }
+          ZoneClose.MergeFrom(other.ZoneClose);
           break;
       }
 
@@ -2085,6 +2669,24 @@ namespace Sunlight.Api {
             LogGet = subBuilder;
             break;
           }
+          case 858: {
+            global::Sunlight.Api.ZoneOpenRequest subBuilder = new global::Sunlight.Api.ZoneOpenRequest();
+            if (payloadCase_ == PayloadOneofCase.ZoneOpen) {
+              subBuilder.MergeFrom(ZoneOpen);
+            }
+            input.ReadMessage(subBuilder);
+            ZoneOpen = subBuilder;
+            break;
+          }
+          case 866: {
+            global::Sunlight.Api.ZoneCloseRequest subBuilder = new global::Sunlight.Api.ZoneCloseRequest();
+            if (payloadCase_ == PayloadOneofCase.ZoneClose) {
+              subBuilder.MergeFrom(ZoneClose);
+            }
+            input.ReadMessage(subBuilder);
+            ZoneClose = subBuilder;
+            break;
+          }
         }
       }
     #endif
@@ -2169,6 +2771,24 @@ namespace Sunlight.Api {
             }
             input.ReadMessage(subBuilder);
             LogGet = subBuilder;
+            break;
+          }
+          case 858: {
+            global::Sunlight.Api.ZoneOpenRequest subBuilder = new global::Sunlight.Api.ZoneOpenRequest();
+            if (payloadCase_ == PayloadOneofCase.ZoneOpen) {
+              subBuilder.MergeFrom(ZoneOpen);
+            }
+            input.ReadMessage(subBuilder);
+            ZoneOpen = subBuilder;
+            break;
+          }
+          case 866: {
+            global::Sunlight.Api.ZoneCloseRequest subBuilder = new global::Sunlight.Api.ZoneCloseRequest();
+            if (payloadCase_ == PayloadOneofCase.ZoneClose) {
+              subBuilder.MergeFrom(ZoneClose);
+            }
+            input.ReadMessage(subBuilder);
+            ZoneClose = subBuilder;
             break;
           }
         }

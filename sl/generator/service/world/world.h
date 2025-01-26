@@ -18,6 +18,7 @@ namespace sunlight
         ~World();
 
         bool Add(SharedPtrNotNull<ZoneServer> server, SharedPtrNotNull<Zone> zone);
+        bool Remove(int32_t zoneId, SharedPtrNotNull<ZoneServer>& server, SharedPtrNotNull<Zone>& zone);
 
         auto GetId() const -> int32_t;
         auto GetServiceLocator() -> ServiceLocator&;

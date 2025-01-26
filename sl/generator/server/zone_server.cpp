@@ -14,30 +14,33 @@
 
 namespace sunlight
 {
-    ZoneServer::ZoneServer(const ServiceLocator& serviceLocator, execution::AsioExecutor& executor, Zone& zone)
-        : Server(serviceLocator, fmt::format("zone_server_{}_{}", zone.GetWorldId(), zone.GetId()), executor)
-        , _zone(zone)
+    ZoneServer::ZoneServer(const ServiceLocator& serviceLocator, execution::AsioExecutor& executor, SharedPtrNotNull<Zone> zone)
+        : Server(serviceLocator, fmt::format("zone_server_{}_{}", zone->GetWorldId(), zone->GetId()), executor)
+        , _zone(std::move(zone))
         , _handler(std::make_shared<ZonePacketC2SHandler>(serviceLocator, *this))
     {
     }
 
     ZoneServer::~ZoneServer()
     {
+        SUNLIGHT_LOG_INFO(GetServiceLocator(),
+            fmt::format("zone server is destructed. zone_id: {}, port: {}",
+                _zone->GetId(), GetListenPort()));
     }
 
     auto ZoneServer::GetZoneId() const -> int32_t
     {
-        return _zone.GetId();
+        return _zone->GetId();
     }
 
     auto ZoneServer::GetZone() -> Zone&
     {
-        return _zone;
+        return *_zone;
     }
 
     auto ZoneServer::GetZone() const -> const Zone&
     {
-        return _zone;
+        return *_zone;
     }
 
     void ZoneServer::OnAccept(Session& session)
@@ -141,7 +144,7 @@ namespace sunlight
                     GetServiceLocator().Get<AuthenticationService>().Remove(std::move(token));
                 }
 
-                _zone.HandleClientDisconnect(client->GetId());
+                _zone->HandleClientDisconnect(client->GetId());
             }
             break;
             case GameClientState::ZoneChaning:

@@ -35,12 +35,15 @@ namespace sunlight
 
     public:
         auto StartZone(int32_t worldId, int32_t zoneId, uint16_t port) -> Future<void>;
+        auto StopZone(int32_t worldId, int32_t zoneId) -> Future<void>;
 
         auto GetWorldInfo() -> Future<std::vector<api::WorldInfo>>;
         auto GetUserCount() -> Future<int32_t>;
 
     private:
         auto AddOrGetWorld(int32_t worldId) -> World&;
+
+        auto FindWorld(int32_t worldId) -> World*;
 
     private:
         const ServiceLocator& _serviceLocator;

@@ -40,6 +40,19 @@ message LogGetRequest
     optional int64 last_date_time = 3;
 }
 
+message ZoneOpenRequest
+{
+    int32 world_id = 1;
+    int32 zone_id = 2;
+    int32 port = 3;
+}
+
+message ZoneCloseRequest
+{
+    int32 world_id = 1;
+    int32 zone_id = 2;
+}
+
 message Request
 {
     int32 request_id = 1;
@@ -53,5 +66,7 @@ message Request
         SystemResourceInfoRequest system_resource_info = 104;
         WorldInfoRequest world_info = 105;
         LogGetRequest log_get = 106;
+        ZoneOpenRequest zone_open = 107;
+        ZoneCloseRequest zone_close = 108;
     }
 }

@@ -60,7 +60,7 @@ namespace sunlight
 
         zone->Initialize();
 
-        auto server = std::make_shared<ZoneServer>(world.GetServiceLocator(), _asioExecutor, *zone);
+        auto server = std::make_shared<ZoneServer>(world.GetServiceLocator(), _asioExecutor, zone);
         if (!server->StartUp(port))
         {
             throw std::runtime_error(fmt::format("[{}] fail to open port: {}. world_id: {}, zone_id: {}",
@@ -70,6 +70,40 @@ namespace sunlight
         zone->Start();
 
         world.Add(std::move(server), std::move(zone));
+
+        co_return;
+    }
+
+    auto WorldService::StopZone(int32_t worldId, int32_t zoneId) -> Future<void>
+    {
+        [[maybe_unused]]
+        auto self = shared_from_this();
+
+        co_await *_strand;
+
+        World* world = FindWorld(worldId);
+        if (!world)
+        {
+            throw std::runtime_error(fmt::format("[{}] fail to find world. world_id: {}",
+                GetName(), worldId));
+        }
+
+        std::shared_ptr<ZoneServer> server;
+        std::shared_ptr<Zone> zone;
+
+        if (!world->Remove(zoneId, server, zone))
+        {
+            throw std::runtime_error(fmt::format("[{}] zone is not open. world_id: {}, zone_id: {}",
+                GetName(), worldId, zoneId));
+        }
+
+        assert(server);
+        assert(zone);
+
+        server->Shutdown();
+        zone->Shutdown();
+
+        co_await zone->Join();
 
         co_return;
     }
@@ -135,5 +169,12 @@ namespace sunlight
         }
 
         return *iter->second;
+    }
+
+    auto WorldService::FindWorld(int32_t worldId) -> World*
+    {
+        const auto iter = _worlds.find(worldId);
+
+        return iter != _worlds.end() ? iter->second.get() : nullptr;
     }
 }

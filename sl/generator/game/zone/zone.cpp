@@ -6,6 +6,7 @@
 #include "sl/generator/game/entity/game_player.h"
 #include "sl/generator/game/message/creator/normal_message_creator.h"
 #include "sl/generator/game/script/lua_script_engine.h"
+#include "sl/generator/game/system/player_index_system.h"
 #include "sl/generator/game/zone/stage.h"
 #include "sl/generator/game/zone/service/game_community_service.h"
 #include "sl/generator/game/zone/service/game_entity_id_publisher.h"
@@ -58,6 +59,9 @@ namespace sunlight
 
     Zone::~Zone()
     {
+        SUNLIGHT_LOG_INFO(_serviceLocator,
+            fmt::format("zone is destructed. world_id: {}, zone_id: {}",
+                GetWorldId(), GetId()));
     }
 
     void Zone::Initialize()
@@ -87,6 +91,17 @@ namespace sunlight
         _shutdown.store(true);
 
         _gameCommunityService->Shutdown();
+
+        Post(*_strand, [self = shared_from_this()]()
+            {
+                for (Stage& stage : self->_stages | notnull::reference)
+                {
+                    stage.Get<PlayerIndexSystem>().Visit([](GamePlayer& player)
+                        {
+                            player.GetClient().Disconnect(ServerType::Zone);
+                        });
+                }
+            });
     }
 
     auto Zone::Join() -> Future<void>

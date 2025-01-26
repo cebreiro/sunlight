@@ -17,7 +17,7 @@ namespace sunlight
         static constexpr ServerType TYPE = ServerType::Zone;
 
     public:
-        ZoneServer(const ServiceLocator& serviceLocator, execution::AsioExecutor& executor, Zone& zone);
+        ZoneServer(const ServiceLocator& serviceLocator, execution::AsioExecutor& executor, SharedPtrNotNull<Zone> zone);
         ~ZoneServer();
 
     public:
@@ -31,7 +31,7 @@ namespace sunlight
         void OnError(Session& session, const boost::system::error_code& error) override;
 
     private:
-        Zone& _zone;
+        SharedPtrNotNull<Zone> _zone;
 
         SharedPtrNotNull<ZonePacketC2SHandler> _handler;
         tbb::concurrent_hash_map<session::id_type, SharedPtrNotNull<ServerConnection>> _connections;

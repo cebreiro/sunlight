@@ -26,6 +26,59 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace sunlight {
 namespace api {
+
+inline constexpr ZoneOpenRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : world_id_{0},
+        zone_id_{0},
+        port_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ZoneOpenRequest::ZoneOpenRequest(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ZoneOpenRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ZoneOpenRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ZoneOpenRequestDefaultTypeInternal() {}
+  union {
+    ZoneOpenRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ZoneOpenRequestDefaultTypeInternal _ZoneOpenRequest_default_instance_;
+
+inline constexpr ZoneCloseRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : world_id_{0},
+        zone_id_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ZoneCloseRequest::ZoneCloseRequest(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ZoneCloseRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ZoneCloseRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ZoneCloseRequestDefaultTypeInternal() {}
+  union {
+    ZoneCloseRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ZoneCloseRequestDefaultTypeInternal _ZoneCloseRequest_default_instance_;
               template <typename>
 PROTOBUF_CONSTEXPR WorldInfoRequest::WorldInfoRequest(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -305,6 +358,27 @@ const ::uint32_t
         0,
         1,
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneOpenRequest, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneOpenRequest, _impl_.world_id_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneOpenRequest, _impl_.zone_id_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneOpenRequest, _impl_.port_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneCloseRequest, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneCloseRequest, _impl_.world_id_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneCloseRequest, _impl_.zone_id_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Request, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Request, _impl_._oneof_case_[0]),
@@ -313,6 +387,8 @@ const ::uint32_t
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Request, _impl_.request_id_),
+        ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
@@ -332,7 +408,9 @@ static const ::_pbi::MigrationSchema
         {39, -1, -1, sizeof(::sunlight::api::SystemResourceInfoRequest)},
         {47, -1, -1, sizeof(::sunlight::api::WorldInfoRequest)},
         {55, 66, -1, sizeof(::sunlight::api::LogGetRequest)},
-        {69, -1, -1, sizeof(::sunlight::api::Request)},
+        {69, -1, -1, sizeof(::sunlight::api::ZoneOpenRequest)},
+        {80, -1, -1, sizeof(::sunlight::api::ZoneCloseRequest)},
+        {90, -1, -1, sizeof(::sunlight::api::Request)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_AuthenticationRequest_default_instance_._instance,
@@ -342,6 +420,8 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_SystemResourceInfoRequest_default_instance_._instance,
     &::sunlight::api::_WorldInfoRequest_default_instance_._instance,
     &::sunlight::api::_LogGetRequest_default_instance_._instance,
+    &::sunlight::api::_ZoneOpenRequest_default_instance_._instance,
+    &::sunlight::api::_ZoneCloseRequest_default_instance_._instance,
     &::sunlight::api::_Request_default_instance_._instance,
 };
 const char descriptor_table_protodef_request_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -356,31 +436,37 @@ const char descriptor_table_protodef_request_2eproto[] ABSL_ATTRIBUTE_SECTION_VA
     "foRequest\"\204\001\n\rLogGetRequest\022\021\n\tlog_level"
     "\030\001 \003(\005\022\034\n\017start_date_time\030\002 \001(\003H\000\210\001\001\022\033\n\016"
     "last_date_time\030\003 \001(\003H\001\210\001\001B\022\n\020_start_date"
-    "_timeB\021\n\017_last_date_time\"\335\003\n\007Request\022\022\n\n"
-    "request_id\030\001 \001(\005\022=\n\016authentication\030d \001(\013"
-    "2#.sunlight.api.AuthenticationRequestH\000\022"
-    "@\n\020account_creation\030e \001(\0132$.sunlight.api"
-    ".AccountCreationReuqestH\000\022M\n\027account_pas"
-    "sword_change\030f \001(\0132*.sunlight.api.Accoun"
-    "tPasswordChangeRequestH\000\0224\n\nuser_count\030g"
-    " \001(\0132\036.sunlight.api.UserCountRequestH\000\022G"
-    "\n\024system_resource_info\030h \001(\0132\'.sunlight."
-    "api.SystemResourceInfoRequestH\000\0224\n\nworld"
-    "_info\030i \001(\0132\036.sunlight.api.WorldInfoRequ"
-    "estH\000\022.\n\007log_get\030j \001(\0132\033.sunlight.api.Lo"
-    "gGetRequestH\000B\t\n\007payloadb\006proto3"
+    "_timeB\021\n\017_last_date_time\"B\n\017ZoneOpenRequ"
+    "est\022\020\n\010world_id\030\001 \001(\005\022\017\n\007zone_id\030\002 \001(\005\022\014"
+    "\n\004port\030\003 \001(\005\"5\n\020ZoneCloseRequest\022\020\n\010worl"
+    "d_id\030\001 \001(\005\022\017\n\007zone_id\030\002 \001(\005\"\307\004\n\007Request\022"
+    "\022\n\nrequest_id\030\001 \001(\005\022=\n\016authentication\030d "
+    "\001(\0132#.sunlight.api.AuthenticationRequest"
+    "H\000\022@\n\020account_creation\030e \001(\0132$.sunlight."
+    "api.AccountCreationReuqestH\000\022M\n\027account_"
+    "password_change\030f \001(\0132*.sunlight.api.Acc"
+    "ountPasswordChangeRequestH\000\0224\n\nuser_coun"
+    "t\030g \001(\0132\036.sunlight.api.UserCountRequestH"
+    "\000\022G\n\024system_resource_info\030h \001(\0132\'.sunlig"
+    "ht.api.SystemResourceInfoRequestH\000\0224\n\nwo"
+    "rld_info\030i \001(\0132\036.sunlight.api.WorldInfoR"
+    "equestH\000\022.\n\007log_get\030j \001(\0132\033.sunlight.api"
+    ".LogGetRequestH\000\0222\n\tzone_open\030k \001(\0132\035.su"
+    "nlight.api.ZoneOpenRequestH\000\0224\n\nzone_clo"
+    "se\030l \001(\0132\036.sunlight.api.ZoneCloseRequest"
+    "H\000B\t\n\007payloadb\006proto3"
 };
 static ::absl::once_flag descriptor_table_request_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_request_2eproto = {
     false,
     false,
-    912,
+    1141,
     descriptor_table_protodef_request_2eproto,
     "request.proto",
     &descriptor_table_request_2eproto_once,
     nullptr,
     0,
-    8,
+    10,
     schemas,
     file_default_instances,
     TableStruct_request_2eproto::offsets,
@@ -1830,6 +1916,510 @@ void LogGetRequest::InternalSwap(LogGetRequest* PROTOBUF_RESTRICT other) {
 }
 // ===================================================================
 
+class ZoneOpenRequest::_Internal {
+ public:
+};
+
+ZoneOpenRequest::ZoneOpenRequest(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.ZoneOpenRequest)
+}
+ZoneOpenRequest::ZoneOpenRequest(
+    ::google::protobuf::Arena* arena, const ZoneOpenRequest& from)
+    : ZoneOpenRequest(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE ZoneOpenRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void ZoneOpenRequest::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, world_id_),
+           0,
+           offsetof(Impl_, port_) -
+               offsetof(Impl_, world_id_) +
+               sizeof(Impl_::port_));
+}
+ZoneOpenRequest::~ZoneOpenRequest() {
+  // @@protoc_insertion_point(destructor:sunlight.api.ZoneOpenRequest)
+  SharedDtor(*this);
+}
+inline void ZoneOpenRequest::SharedDtor(MessageLite& self) {
+  ZoneOpenRequest& this_ = static_cast<ZoneOpenRequest&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* ZoneOpenRequest::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) ZoneOpenRequest(arena);
+}
+constexpr auto ZoneOpenRequest::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(ZoneOpenRequest),
+                                            alignof(ZoneOpenRequest));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull ZoneOpenRequest::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_ZoneOpenRequest_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &ZoneOpenRequest::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<ZoneOpenRequest>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &ZoneOpenRequest::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<ZoneOpenRequest>(), &ZoneOpenRequest::ByteSizeLong,
+            &ZoneOpenRequest::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_._cached_size_),
+        false,
+    },
+    &ZoneOpenRequest::kDescriptorMethods,
+    &descriptor_table_request_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* ZoneOpenRequest::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 0, 0, 2> ZoneOpenRequest::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::ZoneOpenRequest>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 world_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneOpenRequest, _impl_.world_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_.world_id_)}},
+    // int32 zone_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneOpenRequest, _impl_.zone_id_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_.zone_id_)}},
+    // int32 port = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneOpenRequest, _impl_.port_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_.port_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 world_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_.world_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 zone_id = 2;
+    {PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_.zone_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 port = 3;
+    {PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_.port_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void ZoneOpenRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.ZoneOpenRequest)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&_impl_.world_id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.port_) -
+      reinterpret_cast<char*>(&_impl_.world_id_)) + sizeof(_impl_.port_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* ZoneOpenRequest::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const ZoneOpenRequest& this_ = static_cast<const ZoneOpenRequest&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* ZoneOpenRequest::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const ZoneOpenRequest& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.ZoneOpenRequest)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int32 world_id = 1;
+          if (this_._internal_world_id() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<1>(
+                    stream, this_._internal_world_id(), target);
+          }
+
+          // int32 zone_id = 2;
+          if (this_._internal_zone_id() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<2>(
+                    stream, this_._internal_zone_id(), target);
+          }
+
+          // int32 port = 3;
+          if (this_._internal_port() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<3>(
+                    stream, this_._internal_port(), target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.ZoneOpenRequest)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t ZoneOpenRequest::ByteSizeLong(const MessageLite& base) {
+          const ZoneOpenRequest& this_ = static_cast<const ZoneOpenRequest&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t ZoneOpenRequest::ByteSizeLong() const {
+          const ZoneOpenRequest& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.ZoneOpenRequest)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // int32 world_id = 1;
+            if (this_._internal_world_id() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_world_id());
+            }
+            // int32 zone_id = 2;
+            if (this_._internal_zone_id() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_zone_id());
+            }
+            // int32 port = 3;
+            if (this_._internal_port() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_port());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void ZoneOpenRequest::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<ZoneOpenRequest*>(&to_msg);
+  auto& from = static_cast<const ZoneOpenRequest&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.ZoneOpenRequest)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_world_id() != 0) {
+    _this->_impl_.world_id_ = from._impl_.world_id_;
+  }
+  if (from._internal_zone_id() != 0) {
+    _this->_impl_.zone_id_ = from._impl_.zone_id_;
+  }
+  if (from._internal_port() != 0) {
+    _this->_impl_.port_ = from._impl_.port_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ZoneOpenRequest::CopyFrom(const ZoneOpenRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.ZoneOpenRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ZoneOpenRequest::InternalSwap(ZoneOpenRequest* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_.port_)
+      + sizeof(ZoneOpenRequest::_impl_.port_)
+      - PROTOBUF_FIELD_OFFSET(ZoneOpenRequest, _impl_.world_id_)>(
+          reinterpret_cast<char*>(&_impl_.world_id_),
+          reinterpret_cast<char*>(&other->_impl_.world_id_));
+}
+
+::google::protobuf::Metadata ZoneOpenRequest::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ZoneCloseRequest::_Internal {
+ public:
+};
+
+ZoneCloseRequest::ZoneCloseRequest(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.ZoneCloseRequest)
+}
+ZoneCloseRequest::ZoneCloseRequest(
+    ::google::protobuf::Arena* arena, const ZoneCloseRequest& from)
+    : ZoneCloseRequest(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE ZoneCloseRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void ZoneCloseRequest::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, world_id_),
+           0,
+           offsetof(Impl_, zone_id_) -
+               offsetof(Impl_, world_id_) +
+               sizeof(Impl_::zone_id_));
+}
+ZoneCloseRequest::~ZoneCloseRequest() {
+  // @@protoc_insertion_point(destructor:sunlight.api.ZoneCloseRequest)
+  SharedDtor(*this);
+}
+inline void ZoneCloseRequest::SharedDtor(MessageLite& self) {
+  ZoneCloseRequest& this_ = static_cast<ZoneCloseRequest&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* ZoneCloseRequest::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) ZoneCloseRequest(arena);
+}
+constexpr auto ZoneCloseRequest::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(ZoneCloseRequest),
+                                            alignof(ZoneCloseRequest));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull ZoneCloseRequest::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_ZoneCloseRequest_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &ZoneCloseRequest::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<ZoneCloseRequest>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &ZoneCloseRequest::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<ZoneCloseRequest>(), &ZoneCloseRequest::ByteSizeLong,
+            &ZoneCloseRequest::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(ZoneCloseRequest, _impl_._cached_size_),
+        false,
+    },
+    &ZoneCloseRequest::kDescriptorMethods,
+    &descriptor_table_request_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* ZoneCloseRequest::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 0, 2> ZoneCloseRequest::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::ZoneCloseRequest>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // int32 zone_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneCloseRequest, _impl_.zone_id_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneCloseRequest, _impl_.zone_id_)}},
+    // int32 world_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneCloseRequest, _impl_.world_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneCloseRequest, _impl_.world_id_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 world_id = 1;
+    {PROTOBUF_FIELD_OFFSET(ZoneCloseRequest, _impl_.world_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 zone_id = 2;
+    {PROTOBUF_FIELD_OFFSET(ZoneCloseRequest, _impl_.zone_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void ZoneCloseRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.ZoneCloseRequest)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&_impl_.world_id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.zone_id_) -
+      reinterpret_cast<char*>(&_impl_.world_id_)) + sizeof(_impl_.zone_id_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* ZoneCloseRequest::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const ZoneCloseRequest& this_ = static_cast<const ZoneCloseRequest&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* ZoneCloseRequest::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const ZoneCloseRequest& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.ZoneCloseRequest)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int32 world_id = 1;
+          if (this_._internal_world_id() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<1>(
+                    stream, this_._internal_world_id(), target);
+          }
+
+          // int32 zone_id = 2;
+          if (this_._internal_zone_id() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<2>(
+                    stream, this_._internal_zone_id(), target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.ZoneCloseRequest)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t ZoneCloseRequest::ByteSizeLong(const MessageLite& base) {
+          const ZoneCloseRequest& this_ = static_cast<const ZoneCloseRequest&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t ZoneCloseRequest::ByteSizeLong() const {
+          const ZoneCloseRequest& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.ZoneCloseRequest)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // int32 world_id = 1;
+            if (this_._internal_world_id() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_world_id());
+            }
+            // int32 zone_id = 2;
+            if (this_._internal_zone_id() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_zone_id());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void ZoneCloseRequest::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<ZoneCloseRequest*>(&to_msg);
+  auto& from = static_cast<const ZoneCloseRequest&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.ZoneCloseRequest)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_world_id() != 0) {
+    _this->_impl_.world_id_ = from._impl_.world_id_;
+  }
+  if (from._internal_zone_id() != 0) {
+    _this->_impl_.zone_id_ = from._impl_.zone_id_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ZoneCloseRequest::CopyFrom(const ZoneCloseRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.ZoneCloseRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ZoneCloseRequest::InternalSwap(ZoneCloseRequest* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ZoneCloseRequest, _impl_.zone_id_)
+      + sizeof(ZoneCloseRequest::_impl_.zone_id_)
+      - PROTOBUF_FIELD_OFFSET(ZoneCloseRequest, _impl_.world_id_)>(
+          reinterpret_cast<char*>(&_impl_.world_id_),
+          reinterpret_cast<char*>(&other->_impl_.world_id_));
+}
+
+::google::protobuf::Metadata ZoneCloseRequest::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class Request::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -1927,6 +2517,32 @@ void Request::set_allocated_log_get(::sunlight::api::LogGetRequest* log_get) {
   }
   // @@protoc_insertion_point(field_set_allocated:sunlight.api.Request.log_get)
 }
+void Request::set_allocated_zone_open(::sunlight::api::ZoneOpenRequest* zone_open) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_payload();
+  if (zone_open) {
+    ::google::protobuf::Arena* submessage_arena = zone_open->GetArena();
+    if (message_arena != submessage_arena) {
+      zone_open = ::google::protobuf::internal::GetOwnedMessage(message_arena, zone_open, submessage_arena);
+    }
+    set_has_zone_open();
+    _impl_.payload_.zone_open_ = zone_open;
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Request.zone_open)
+}
+void Request::set_allocated_zone_close(::sunlight::api::ZoneCloseRequest* zone_close) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_payload();
+  if (zone_close) {
+    ::google::protobuf::Arena* submessage_arena = zone_close->GetArena();
+    if (message_arena != submessage_arena) {
+      zone_close = ::google::protobuf::internal::GetOwnedMessage(message_arena, zone_close, submessage_arena);
+    }
+    set_has_zone_close();
+    _impl_.payload_.zone_close_ = zone_close;
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Request.zone_close)
+}
 Request::Request(::google::protobuf::Arena* arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, _class_data_.base()) {
@@ -1980,6 +2596,12 @@ Request::Request(
         break;
       case kLogGet:
         _impl_.payload_.log_get_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::LogGetRequest>(arena, *from._impl_.payload_.log_get_);
+        break;
+      case kZoneOpen:
+        _impl_.payload_.zone_open_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::ZoneOpenRequest>(arena, *from._impl_.payload_.zone_open_);
+        break;
+      case kZoneClose:
+        _impl_.payload_.zone_close_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::ZoneCloseRequest>(arena, *from._impl_.payload_.zone_close_);
         break;
   }
 
@@ -2070,6 +2692,22 @@ void Request::clear_payload() {
       }
       break;
     }
+    case kZoneOpen: {
+      if (GetArena() == nullptr) {
+        delete _impl_.payload_.zone_open_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.zone_open_);
+      }
+      break;
+    }
+    case kZoneClose: {
+      if (GetArena() == nullptr) {
+        delete _impl_.payload_.zone_close_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.zone_close_);
+      }
+      break;
+    }
     case PAYLOAD_NOT_SET: {
       break;
     }
@@ -2114,16 +2752,16 @@ const ::google::protobuf::internal::ClassData* Request::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Request::_table_ = {
+const ::_pbi::TcParseTable<0, 10, 9, 0, 7> Request::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    106, 0,  // max_field_number, fast_idx_mask
+    108, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    8,  // num_field_entries
-    7,  // num_aux_entries
+    10,  // num_field_entries
+    9,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     _class_data_.base(),
     nullptr,  // post_loop_handler
@@ -2137,7 +2775,7 @@ const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Request::_table_ = {
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(Request, _impl_.request_id_)}},
   }}, {{
     100, 0, 1,
-    65408, 1,
+    65024, 1,
     65535, 65535
   }}, {{
     // int32 request_id = 1;
@@ -2164,6 +2802,12 @@ const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Request::_table_ = {
     // .sunlight.api.LogGetRequest log_get = 106;
     {PROTOBUF_FIELD_OFFSET(Request, _impl_.payload_.log_get_), _Internal::kOneofCaseOffset + 0, 6,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .sunlight.api.ZoneOpenRequest zone_open = 107;
+    {PROTOBUF_FIELD_OFFSET(Request, _impl_.payload_.zone_open_), _Internal::kOneofCaseOffset + 0, 7,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .sunlight.api.ZoneCloseRequest zone_close = 108;
+    {PROTOBUF_FIELD_OFFSET(Request, _impl_.payload_.zone_close_), _Internal::kOneofCaseOffset + 0, 8,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::sunlight::api::AuthenticationRequest>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::AccountCreationReuqest>()},
@@ -2172,6 +2816,8 @@ const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Request::_table_ = {
     {::_pbi::TcParser::GetTable<::sunlight::api::SystemResourceInfoRequest>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::WorldInfoRequest>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::LogGetRequest>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::ZoneOpenRequest>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::ZoneCloseRequest>()},
   }}, {{
   }},
 };
@@ -2253,6 +2899,18 @@ PROTOBUF_NOINLINE void Request::Clear() {
                   stream);
               break;
             }
+            case kZoneOpen: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  107, *this_._impl_.payload_.zone_open_, this_._impl_.payload_.zone_open_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
+            case kZoneClose: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  108, *this_._impl_.payload_.zone_close_, this_._impl_.payload_.zone_close_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
             default:
               break;
           }
@@ -2327,6 +2985,18 @@ PROTOBUF_NOINLINE void Request::Clear() {
             case kLogGet: {
               total_size += 2 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.log_get_);
+              break;
+            }
+            // .sunlight.api.ZoneOpenRequest zone_open = 107;
+            case kZoneOpen: {
+              total_size += 2 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.zone_open_);
+              break;
+            }
+            // .sunlight.api.ZoneCloseRequest zone_close = 108;
+            case kZoneClose: {
+              total_size += 2 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.zone_close_);
               break;
             }
             case PAYLOAD_NOT_SET: {
@@ -2420,6 +3090,24 @@ void Request::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google:
               ::google::protobuf::Message::CopyConstruct<::sunlight::api::LogGetRequest>(arena, *from._impl_.payload_.log_get_);
         } else {
           _this->_impl_.payload_.log_get_->MergeFrom(from._internal_log_get());
+        }
+        break;
+      }
+      case kZoneOpen: {
+        if (oneof_needs_init) {
+          _this->_impl_.payload_.zone_open_ =
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::ZoneOpenRequest>(arena, *from._impl_.payload_.zone_open_);
+        } else {
+          _this->_impl_.payload_.zone_open_->MergeFrom(from._internal_zone_open());
+        }
+        break;
+      }
+      case kZoneClose: {
+        if (oneof_needs_init) {
+          _this->_impl_.payload_.zone_close_ =
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::ZoneCloseRequest>(arena, *from._impl_.payload_.zone_close_);
+        } else {
+          _this->_impl_.payload_.zone_close_->MergeFrom(from._internal_zone_close());
         }
         break;
       }

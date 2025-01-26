@@ -6,3 +6,5 @@
 #include "sl/generator/service/control/gateway/handler/impl/generator_control_system_resource_info_handler.h"
 #include "sl/generator/service/control/gateway/handler/impl/generator_control_user_count_handler.h"
 #include "sl/generator/service/control/gateway/handler/impl/generator_control_world_info_handler.h"
+#include "sl/generator/service/control/gateway/handler/impl/generator_control_zone_close_handler.h"
+#include "sl/generator/service/control/gateway/handler/impl/generator_control_zone_open_handler.h"

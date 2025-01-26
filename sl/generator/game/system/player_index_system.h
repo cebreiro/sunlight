@@ -16,6 +16,8 @@ namespace sunlight
         auto GetClassId() const -> game_system_id_type override;
 
     public:
+        void Visit(const std::function<void(GamePlayer&)>& function);
+
         void OnStageEnter(GamePlayer& player);
         void OnStageExit(GamePlayer& player);
 

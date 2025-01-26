@@ -31,6 +31,7 @@ namespace sunlight
         void Send(ServerType type, std::vector<Buffer> buffers);
 
         void Disconnect();
+        void Disconnect(ServerType type);
 
         auto GetId() const -> game_client_id_type;
         auto GetState() const -> GameClientState;

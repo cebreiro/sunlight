@@ -50,6 +50,21 @@ namespace sunlight
         return true;
     }
 
+    bool World::Remove(int32_t zoneId, SharedPtrNotNull<ZoneServer>& server, SharedPtrNotNull<Zone>& zone)
+    {
+        auto iter = _zones.find(zoneId);
+        if (iter == _zones.end())
+        {
+            return false;
+        }
+
+        std::tie(server, zone) = std::move(iter->second);
+
+        _zones.erase(iter);
+
+        return true;
+    }
+
     auto World::GetId() const -> int32_t
     {
         return _id;

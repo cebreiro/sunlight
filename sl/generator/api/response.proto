@@ -42,6 +42,18 @@ message LogGetResponse
     repeated LogItem log_item_list = 1;
 }
 
+message ZoneOpenResponse
+{
+    int32 success = 1;
+    string error_message = 2;
+}
+
+message ZoneCloseResponse
+{
+    int32 success = 1;
+    string error_message = 2;
+}
+
 message Response
 {
     int32 request_id = 1;
@@ -55,5 +67,7 @@ message Response
         SystemResourceInfoResponse system_resource_info = 104;
         WorldInfoResponse world_info = 105;
         LogGetResponse log_get = 106;
+        ZoneOpenResponse zone_open = 107;
+        ZoneCloseResponse zone_close = 108;
     }
 }

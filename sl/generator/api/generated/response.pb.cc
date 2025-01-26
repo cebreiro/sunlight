@@ -27,6 +27,62 @@ namespace _fl = ::google::protobuf::internal::field_layout;
 namespace sunlight {
 namespace api {
 
+inline constexpr ZoneOpenResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : error_message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        success_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ZoneOpenResponse::ZoneOpenResponse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ZoneOpenResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ZoneOpenResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ZoneOpenResponseDefaultTypeInternal() {}
+  union {
+    ZoneOpenResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ZoneOpenResponseDefaultTypeInternal _ZoneOpenResponse_default_instance_;
+
+inline constexpr ZoneCloseResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : error_message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        success_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ZoneCloseResponse::ZoneCloseResponse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ZoneCloseResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ZoneCloseResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ZoneCloseResponseDefaultTypeInternal() {}
+  union {
+    ZoneCloseResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ZoneCloseResponseDefaultTypeInternal _ZoneCloseResponse_default_instance_;
+
 inline constexpr UserCountResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : user_count_{0},
@@ -311,6 +367,26 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::LogGetResponse, _impl_.log_item_list_),
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneOpenResponse, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneOpenResponse, _impl_.success_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneOpenResponse, _impl_.error_message_),
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneCloseResponse, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneCloseResponse, _impl_.success_),
+        PROTOBUF_FIELD_OFFSET(::sunlight::api::ZoneCloseResponse, _impl_.error_message_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_._oneof_case_[0]),
@@ -319,6 +395,8 @@ const ::uint32_t
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::sunlight::api::Response, _impl_.request_id_),
+        ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
@@ -338,7 +416,9 @@ static const ::_pbi::MigrationSchema
         {38, -1, -1, sizeof(::sunlight::api::SystemResourceInfoResponse)},
         {48, -1, -1, sizeof(::sunlight::api::WorldInfoResponse)},
         {57, -1, -1, sizeof(::sunlight::api::LogGetResponse)},
-        {66, -1, -1, sizeof(::sunlight::api::Response)},
+        {66, -1, -1, sizeof(::sunlight::api::ZoneOpenResponse)},
+        {76, -1, -1, sizeof(::sunlight::api::ZoneCloseResponse)},
+        {86, -1, -1, sizeof(::sunlight::api::Response)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_AuthenticationResponse_default_instance_._instance,
@@ -348,6 +428,8 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::sunlight::api::_SystemResourceInfoResponse_default_instance_._instance,
     &::sunlight::api::_WorldInfoResponse_default_instance_._instance,
     &::sunlight::api::_LogGetResponse_default_instance_._instance,
+    &::sunlight::api::_ZoneOpenResponse_default_instance_._instance,
+    &::sunlight::api::_ZoneCloseResponse_default_instance_._instance,
     &::sunlight::api::_Response_default_instance_._instance,
 };
 const char descriptor_table_protodef_response_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -364,19 +446,25 @@ const char descriptor_table_protodef_response_2eproto[] ABSL_ATTRIBUTE_SECTION_V
     "oResponse\0220\n\017world_info_list\030\001 \003(\0132\027.sun"
     "light.api.WorldInfo\">\n\016LogGetResponse\022,\n"
     "\rlog_item_list\030\001 \003(\0132\025.sunlight.api.LogI"
-    "tem\"\345\003\n\010Response\022\022\n\nrequest_id\030\001 \001(\005\022>\n\016"
-    "authentication\030d \001(\0132$.sunlight.api.Auth"
-    "enticationResponseH\000\022A\n\020account_creation"
-    "\030e \001(\0132%.sunlight.api.AccountCreationRes"
-    "ponseH\000\022N\n\027account_password_change\030f \001(\013"
-    "2+.sunlight.api.AccountPasswordChangeRes"
-    "ponseH\000\0225\n\nuser_count\030g \001(\0132\037.sunlight.a"
-    "pi.UserCountResponseH\000\022H\n\024system_resourc"
-    "e_info\030h \001(\0132(.sunlight.api.SystemResour"
-    "ceInfoResponseH\000\0225\n\nworld_info\030i \001(\0132\037.s"
-    "unlight.api.WorldInfoResponseH\000\022/\n\007log_g"
-    "et\030j \001(\0132\034.sunlight.api.LogGetResponseH\000"
-    "B\t\n\007payloadb\006proto3"
+    "tem\":\n\020ZoneOpenResponse\022\017\n\007success\030\001 \001(\005"
+    "\022\025\n\rerror_message\030\002 \001(\t\";\n\021ZoneCloseResp"
+    "onse\022\017\n\007success\030\001 \001(\005\022\025\n\rerror_message\030\002"
+    " \001(\t\"\321\004\n\010Response\022\022\n\nrequest_id\030\001 \001(\005\022>\n"
+    "\016authentication\030d \001(\0132$.sunlight.api.Aut"
+    "henticationResponseH\000\022A\n\020account_creatio"
+    "n\030e \001(\0132%.sunlight.api.AccountCreationRe"
+    "sponseH\000\022N\n\027account_password_change\030f \001("
+    "\0132+.sunlight.api.AccountPasswordChangeRe"
+    "sponseH\000\0225\n\nuser_count\030g \001(\0132\037.sunlight."
+    "api.UserCountResponseH\000\022H\n\024system_resour"
+    "ce_info\030h \001(\0132(.sunlight.api.SystemResou"
+    "rceInfoResponseH\000\0225\n\nworld_info\030i \001(\0132\037."
+    "sunlight.api.WorldInfoResponseH\000\022/\n\007log_"
+    "get\030j \001(\0132\034.sunlight.api.LogGetResponseH"
+    "\000\0223\n\tzone_open\030k \001(\0132\036.sunlight.api.Zone"
+    "OpenResponseH\000\0225\n\nzone_close\030l \001(\0132\037.sun"
+    "light.api.ZoneCloseResponseH\000B\t\n\007payload"
+    "b\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_response_2eproto_deps[1] =
     {
@@ -386,13 +474,13 @@ static ::absl::once_flag descriptor_table_response_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_response_2eproto = {
     false,
     false,
-    979,
+    1208,
     descriptor_table_protodef_response_2eproto,
     "response.proto",
     &descriptor_table_response_2eproto_once,
     descriptor_table_response_2eproto_deps,
     1,
-    8,
+    10,
     schemas,
     file_default_instances,
     TableStruct_response_2eproto::offsets,
@@ -2063,6 +2151,520 @@ void LogGetResponse::InternalSwap(LogGetResponse* PROTOBUF_RESTRICT other) {
 }
 // ===================================================================
 
+class ZoneOpenResponse::_Internal {
+ public:
+};
+
+ZoneOpenResponse::ZoneOpenResponse(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.ZoneOpenResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE ZoneOpenResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::sunlight::api::ZoneOpenResponse& from_msg)
+      : error_message_(arena, from.error_message_),
+        _cached_size_{0} {}
+
+ZoneOpenResponse::ZoneOpenResponse(
+    ::google::protobuf::Arena* arena,
+    const ZoneOpenResponse& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ZoneOpenResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.success_ = from._impl_.success_;
+
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.ZoneOpenResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE ZoneOpenResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : error_message_(arena),
+        _cached_size_{0} {}
+
+inline void ZoneOpenResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.success_ = {};
+}
+ZoneOpenResponse::~ZoneOpenResponse() {
+  // @@protoc_insertion_point(destructor:sunlight.api.ZoneOpenResponse)
+  SharedDtor(*this);
+}
+inline void ZoneOpenResponse::SharedDtor(MessageLite& self) {
+  ZoneOpenResponse& this_ = static_cast<ZoneOpenResponse&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.error_message_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* ZoneOpenResponse::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) ZoneOpenResponse(arena);
+}
+constexpr auto ZoneOpenResponse::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(ZoneOpenResponse),
+                                            alignof(ZoneOpenResponse));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull ZoneOpenResponse::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_ZoneOpenResponse_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &ZoneOpenResponse::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<ZoneOpenResponse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &ZoneOpenResponse::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<ZoneOpenResponse>(), &ZoneOpenResponse::ByteSizeLong,
+            &ZoneOpenResponse::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(ZoneOpenResponse, _impl_._cached_size_),
+        false,
+    },
+    &ZoneOpenResponse::kDescriptorMethods,
+    &descriptor_table_response_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* ZoneOpenResponse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 51, 2> ZoneOpenResponse::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::ZoneOpenResponse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string error_message = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneOpenResponse, _impl_.error_message_)}},
+    // int32 success = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneOpenResponse, _impl_.success_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneOpenResponse, _impl_.success_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 success = 1;
+    {PROTOBUF_FIELD_OFFSET(ZoneOpenResponse, _impl_.success_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string error_message = 2;
+    {PROTOBUF_FIELD_OFFSET(ZoneOpenResponse, _impl_.error_message_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\35\0\15\0\0\0\0\0"
+    "sunlight.api.ZoneOpenResponse"
+    "error_message"
+  }},
+};
+
+PROTOBUF_NOINLINE void ZoneOpenResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.ZoneOpenResponse)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.error_message_.ClearToEmpty();
+  _impl_.success_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* ZoneOpenResponse::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const ZoneOpenResponse& this_ = static_cast<const ZoneOpenResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* ZoneOpenResponse::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const ZoneOpenResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.ZoneOpenResponse)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int32 success = 1;
+          if (this_._internal_success() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<1>(
+                    stream, this_._internal_success(), target);
+          }
+
+          // string error_message = 2;
+          if (!this_._internal_error_message().empty()) {
+            const std::string& _s = this_._internal_error_message();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "sunlight.api.ZoneOpenResponse.error_message");
+            target = stream->WriteStringMaybeAliased(2, _s, target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.ZoneOpenResponse)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t ZoneOpenResponse::ByteSizeLong(const MessageLite& base) {
+          const ZoneOpenResponse& this_ = static_cast<const ZoneOpenResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t ZoneOpenResponse::ByteSizeLong() const {
+          const ZoneOpenResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.ZoneOpenResponse)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // string error_message = 2;
+            if (!this_._internal_error_message().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_error_message());
+            }
+            // int32 success = 1;
+            if (this_._internal_success() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_success());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void ZoneOpenResponse::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<ZoneOpenResponse*>(&to_msg);
+  auto& from = static_cast<const ZoneOpenResponse&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.ZoneOpenResponse)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_error_message().empty()) {
+    _this->_internal_set_error_message(from._internal_error_message());
+  }
+  if (from._internal_success() != 0) {
+    _this->_impl_.success_ = from._impl_.success_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ZoneOpenResponse::CopyFrom(const ZoneOpenResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.ZoneOpenResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ZoneOpenResponse::InternalSwap(ZoneOpenResponse* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_message_, &other->_impl_.error_message_, arena);
+        swap(_impl_.success_, other->_impl_.success_);
+}
+
+::google::protobuf::Metadata ZoneOpenResponse::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ZoneCloseResponse::_Internal {
+ public:
+};
+
+ZoneCloseResponse::ZoneCloseResponse(::google::protobuf::Arena* arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:sunlight.api.ZoneCloseResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE ZoneCloseResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::sunlight::api::ZoneCloseResponse& from_msg)
+      : error_message_(arena, from.error_message_),
+        _cached_size_{0} {}
+
+ZoneCloseResponse::ZoneCloseResponse(
+    ::google::protobuf::Arena* arena,
+    const ZoneCloseResponse& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, _class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ZoneCloseResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.success_ = from._impl_.success_;
+
+  // @@protoc_insertion_point(copy_constructor:sunlight.api.ZoneCloseResponse)
+}
+inline PROTOBUF_NDEBUG_INLINE ZoneCloseResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : error_message_(arena),
+        _cached_size_{0} {}
+
+inline void ZoneCloseResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.success_ = {};
+}
+ZoneCloseResponse::~ZoneCloseResponse() {
+  // @@protoc_insertion_point(destructor:sunlight.api.ZoneCloseResponse)
+  SharedDtor(*this);
+}
+inline void ZoneCloseResponse::SharedDtor(MessageLite& self) {
+  ZoneCloseResponse& this_ = static_cast<ZoneCloseResponse&>(self);
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.error_message_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* ZoneCloseResponse::PlacementNew_(const void*, void* mem,
+                                        ::google::protobuf::Arena* arena) {
+  return ::new (mem) ZoneCloseResponse(arena);
+}
+constexpr auto ZoneCloseResponse::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(ZoneCloseResponse),
+                                            alignof(ZoneCloseResponse));
+}
+PROTOBUF_CONSTINIT
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::google::protobuf::internal::ClassDataFull ZoneCloseResponse::_class_data_ = {
+    ::google::protobuf::internal::ClassData{
+        &_ZoneCloseResponse_default_instance_._instance,
+        &_table_.header,
+        nullptr,  // OnDemandRegisterArenaDtor
+        nullptr,  // IsInitialized
+        &ZoneCloseResponse::MergeImpl,
+        ::google::protobuf::Message::GetNewImpl<ZoneCloseResponse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        &ZoneCloseResponse::SharedDtor,
+        ::google::protobuf::Message::GetClearImpl<ZoneCloseResponse>(), &ZoneCloseResponse::ByteSizeLong,
+            &ZoneCloseResponse::_InternalSerialize,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+        PROTOBUF_FIELD_OFFSET(ZoneCloseResponse, _impl_._cached_size_),
+        false,
+    },
+    &ZoneCloseResponse::kDescriptorMethods,
+    &descriptor_table_response_2eproto,
+    nullptr,  // tracker
+};
+const ::google::protobuf::internal::ClassData* ZoneCloseResponse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
+  return _class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 52, 2> ZoneCloseResponse::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    _class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::sunlight::api::ZoneCloseResponse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string error_message = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneCloseResponse, _impl_.error_message_)}},
+    // int32 success = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ZoneCloseResponse, _impl_.success_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(ZoneCloseResponse, _impl_.success_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 success = 1;
+    {PROTOBUF_FIELD_OFFSET(ZoneCloseResponse, _impl_.success_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string error_message = 2;
+    {PROTOBUF_FIELD_OFFSET(ZoneCloseResponse, _impl_.error_message_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\36\0\15\0\0\0\0\0"
+    "sunlight.api.ZoneCloseResponse"
+    "error_message"
+  }},
+};
+
+PROTOBUF_NOINLINE void ZoneCloseResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:sunlight.api.ZoneCloseResponse)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.error_message_.ClearToEmpty();
+  _impl_.success_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::uint8_t* ZoneCloseResponse::_InternalSerialize(
+            const MessageLite& base, ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) {
+          const ZoneCloseResponse& this_ = static_cast<const ZoneCloseResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::uint8_t* ZoneCloseResponse::_InternalSerialize(
+            ::uint8_t* target,
+            ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+          const ZoneCloseResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(serialize_to_array_start:sunlight.api.ZoneCloseResponse)
+          ::uint32_t cached_has_bits = 0;
+          (void)cached_has_bits;
+
+          // int32 success = 1;
+          if (this_._internal_success() != 0) {
+            target = ::google::protobuf::internal::WireFormatLite::
+                WriteInt32ToArrayWithField<1>(
+                    stream, this_._internal_success(), target);
+          }
+
+          // string error_message = 2;
+          if (!this_._internal_error_message().empty()) {
+            const std::string& _s = this_._internal_error_message();
+            ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+                _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "sunlight.api.ZoneCloseResponse.error_message");
+            target = stream->WriteStringMaybeAliased(2, _s, target);
+          }
+
+          if (PROTOBUF_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
+            target =
+                ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+                    this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+          }
+          // @@protoc_insertion_point(serialize_to_array_end:sunlight.api.ZoneCloseResponse)
+          return target;
+        }
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+        ::size_t ZoneCloseResponse::ByteSizeLong(const MessageLite& base) {
+          const ZoneCloseResponse& this_ = static_cast<const ZoneCloseResponse&>(base);
+#else   // PROTOBUF_CUSTOM_VTABLE
+        ::size_t ZoneCloseResponse::ByteSizeLong() const {
+          const ZoneCloseResponse& this_ = *this;
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          // @@protoc_insertion_point(message_byte_size_start:sunlight.api.ZoneCloseResponse)
+          ::size_t total_size = 0;
+
+          ::uint32_t cached_has_bits = 0;
+          // Prevent compiler warnings about cached_has_bits being unused
+          (void)cached_has_bits;
+
+          ::_pbi::Prefetch5LinesFrom7Lines(&this_);
+           {
+            // string error_message = 2;
+            if (!this_._internal_error_message().empty()) {
+              total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                              this_._internal_error_message());
+            }
+            // int32 success = 1;
+            if (this_._internal_success() != 0) {
+              total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+                  this_._internal_success());
+            }
+          }
+          return this_.MaybeComputeUnknownFieldsSize(total_size,
+                                                     &this_._impl_._cached_size_);
+        }
+
+void ZoneCloseResponse::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<ZoneCloseResponse*>(&to_msg);
+  auto& from = static_cast<const ZoneCloseResponse&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sunlight.api.ZoneCloseResponse)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_error_message().empty()) {
+    _this->_internal_set_error_message(from._internal_error_message());
+  }
+  if (from._internal_success() != 0) {
+    _this->_impl_.success_ = from._impl_.success_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ZoneCloseResponse::CopyFrom(const ZoneCloseResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sunlight.api.ZoneCloseResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ZoneCloseResponse::InternalSwap(ZoneCloseResponse* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.error_message_, &other->_impl_.error_message_, arena);
+        swap(_impl_.success_, other->_impl_.success_);
+}
+
+::google::protobuf::Metadata ZoneCloseResponse::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class Response::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -2160,6 +2762,32 @@ void Response::set_allocated_log_get(::sunlight::api::LogGetResponse* log_get) {
   }
   // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.log_get)
 }
+void Response::set_allocated_zone_open(::sunlight::api::ZoneOpenResponse* zone_open) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_payload();
+  if (zone_open) {
+    ::google::protobuf::Arena* submessage_arena = zone_open->GetArena();
+    if (message_arena != submessage_arena) {
+      zone_open = ::google::protobuf::internal::GetOwnedMessage(message_arena, zone_open, submessage_arena);
+    }
+    set_has_zone_open();
+    _impl_.payload_.zone_open_ = zone_open;
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.zone_open)
+}
+void Response::set_allocated_zone_close(::sunlight::api::ZoneCloseResponse* zone_close) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_payload();
+  if (zone_close) {
+    ::google::protobuf::Arena* submessage_arena = zone_close->GetArena();
+    if (message_arena != submessage_arena) {
+      zone_close = ::google::protobuf::internal::GetOwnedMessage(message_arena, zone_close, submessage_arena);
+    }
+    set_has_zone_close();
+    _impl_.payload_.zone_close_ = zone_close;
+  }
+  // @@protoc_insertion_point(field_set_allocated:sunlight.api.Response.zone_close)
+}
 Response::Response(::google::protobuf::Arena* arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, _class_data_.base()) {
@@ -2213,6 +2841,12 @@ Response::Response(
         break;
       case kLogGet:
         _impl_.payload_.log_get_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::LogGetResponse>(arena, *from._impl_.payload_.log_get_);
+        break;
+      case kZoneOpen:
+        _impl_.payload_.zone_open_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::ZoneOpenResponse>(arena, *from._impl_.payload_.zone_open_);
+        break;
+      case kZoneClose:
+        _impl_.payload_.zone_close_ = ::google::protobuf::Message::CopyConstruct<::sunlight::api::ZoneCloseResponse>(arena, *from._impl_.payload_.zone_close_);
         break;
   }
 
@@ -2303,6 +2937,22 @@ void Response::clear_payload() {
       }
       break;
     }
+    case kZoneOpen: {
+      if (GetArena() == nullptr) {
+        delete _impl_.payload_.zone_open_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.zone_open_);
+      }
+      break;
+    }
+    case kZoneClose: {
+      if (GetArena() == nullptr) {
+        delete _impl_.payload_.zone_close_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.zone_close_);
+      }
+      break;
+    }
     case PAYLOAD_NOT_SET: {
       break;
     }
@@ -2347,16 +2997,16 @@ const ::google::protobuf::internal::ClassData* Response::GetClassData() const {
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Response::_table_ = {
+const ::_pbi::TcParseTable<0, 10, 9, 0, 7> Response::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    106, 0,  // max_field_number, fast_idx_mask
+    108, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    8,  // num_field_entries
-    7,  // num_aux_entries
+    10,  // num_field_entries
+    9,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     _class_data_.base(),
     nullptr,  // post_loop_handler
@@ -2370,7 +3020,7 @@ const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Response::_table_ = {
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(Response, _impl_.request_id_)}},
   }}, {{
     100, 0, 1,
-    65408, 1,
+    65024, 1,
     65535, 65535
   }}, {{
     // int32 request_id = 1;
@@ -2397,6 +3047,12 @@ const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Response::_table_ = {
     // .sunlight.api.LogGetResponse log_get = 106;
     {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.log_get_), _Internal::kOneofCaseOffset + 0, 6,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .sunlight.api.ZoneOpenResponse zone_open = 107;
+    {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.zone_open_), _Internal::kOneofCaseOffset + 0, 7,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .sunlight.api.ZoneCloseResponse zone_close = 108;
+    {PROTOBUF_FIELD_OFFSET(Response, _impl_.payload_.zone_close_), _Internal::kOneofCaseOffset + 0, 8,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::sunlight::api::AuthenticationResponse>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::AccountCreationResponse>()},
@@ -2405,6 +3061,8 @@ const ::_pbi::TcParseTable<0, 8, 7, 0, 7> Response::_table_ = {
     {::_pbi::TcParser::GetTable<::sunlight::api::SystemResourceInfoResponse>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::WorldInfoResponse>()},
     {::_pbi::TcParser::GetTable<::sunlight::api::LogGetResponse>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::ZoneOpenResponse>()},
+    {::_pbi::TcParser::GetTable<::sunlight::api::ZoneCloseResponse>()},
   }}, {{
   }},
 };
@@ -2486,6 +3144,18 @@ PROTOBUF_NOINLINE void Response::Clear() {
                   stream);
               break;
             }
+            case kZoneOpen: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  107, *this_._impl_.payload_.zone_open_, this_._impl_.payload_.zone_open_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
+            case kZoneClose: {
+              target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+                  108, *this_._impl_.payload_.zone_close_, this_._impl_.payload_.zone_close_->GetCachedSize(), target,
+                  stream);
+              break;
+            }
             default:
               break;
           }
@@ -2560,6 +3230,18 @@ PROTOBUF_NOINLINE void Response::Clear() {
             case kLogGet: {
               total_size += 2 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.log_get_);
+              break;
+            }
+            // .sunlight.api.ZoneOpenResponse zone_open = 107;
+            case kZoneOpen: {
+              total_size += 2 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.zone_open_);
+              break;
+            }
+            // .sunlight.api.ZoneCloseResponse zone_close = 108;
+            case kZoneClose: {
+              total_size += 2 +
+                            ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.payload_.zone_close_);
               break;
             }
             case PAYLOAD_NOT_SET: {
@@ -2653,6 +3335,24 @@ void Response::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google
               ::google::protobuf::Message::CopyConstruct<::sunlight::api::LogGetResponse>(arena, *from._impl_.payload_.log_get_);
         } else {
           _this->_impl_.payload_.log_get_->MergeFrom(from._internal_log_get());
+        }
+        break;
+      }
+      case kZoneOpen: {
+        if (oneof_needs_init) {
+          _this->_impl_.payload_.zone_open_ =
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::ZoneOpenResponse>(arena, *from._impl_.payload_.zone_open_);
+        } else {
+          _this->_impl_.payload_.zone_open_->MergeFrom(from._internal_zone_open());
+        }
+        break;
+      }
+      case kZoneClose: {
+        if (oneof_needs_init) {
+          _this->_impl_.payload_.zone_close_ =
+              ::google::protobuf::Message::CopyConstruct<::sunlight::api::ZoneCloseResponse>(arena, *from._impl_.payload_.zone_close_);
+        } else {
+          _this->_impl_.payload_.zone_close_->MergeFrom(from._internal_zone_close());
         }
         break;
       }

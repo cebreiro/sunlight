@@ -78,6 +78,12 @@ extern UserCountRequestDefaultTypeInternal _UserCountRequest_default_instance_;
 class WorldInfoRequest;
 struct WorldInfoRequestDefaultTypeInternal;
 extern WorldInfoRequestDefaultTypeInternal _WorldInfoRequest_default_instance_;
+class ZoneCloseRequest;
+struct ZoneCloseRequestDefaultTypeInternal;
+extern ZoneCloseRequestDefaultTypeInternal _ZoneCloseRequest_default_instance_;
+class ZoneOpenRequest;
+struct ZoneOpenRequestDefaultTypeInternal;
+extern ZoneOpenRequestDefaultTypeInternal _ZoneOpenRequest_default_instance_;
 }  // namespace api
 }  // namespace sunlight
 namespace google {
@@ -91,6 +97,424 @@ namespace api {
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class ZoneOpenRequest final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sunlight.api.ZoneOpenRequest) */ {
+ public:
+  inline ZoneOpenRequest() : ZoneOpenRequest(nullptr) {}
+  ~ZoneOpenRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ZoneOpenRequest* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ZoneOpenRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ZoneOpenRequest(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline ZoneOpenRequest(const ZoneOpenRequest& from) : ZoneOpenRequest(nullptr, from) {}
+  inline ZoneOpenRequest(ZoneOpenRequest&& from) noexcept
+      : ZoneOpenRequest(nullptr, std::move(from)) {}
+  inline ZoneOpenRequest& operator=(const ZoneOpenRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ZoneOpenRequest& operator=(ZoneOpenRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ZoneOpenRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ZoneOpenRequest* internal_default_instance() {
+    return reinterpret_cast<const ZoneOpenRequest*>(
+        &_ZoneOpenRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 7;
+  friend void swap(ZoneOpenRequest& a, ZoneOpenRequest& b) { a.Swap(&b); }
+  inline void Swap(ZoneOpenRequest* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ZoneOpenRequest* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ZoneOpenRequest* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ZoneOpenRequest>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ZoneOpenRequest& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ZoneOpenRequest& from) { ZoneOpenRequest::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ZoneOpenRequest* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sunlight.api.ZoneOpenRequest"; }
+
+ protected:
+  explicit ZoneOpenRequest(::google::protobuf::Arena* arena);
+  ZoneOpenRequest(::google::protobuf::Arena* arena, const ZoneOpenRequest& from);
+  ZoneOpenRequest(::google::protobuf::Arena* arena, ZoneOpenRequest&& from) noexcept
+      : ZoneOpenRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kWorldIdFieldNumber = 1,
+    kZoneIdFieldNumber = 2,
+    kPortFieldNumber = 3,
+  };
+  // int32 world_id = 1;
+  void clear_world_id() ;
+  ::int32_t world_id() const;
+  void set_world_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_world_id() const;
+  void _internal_set_world_id(::int32_t value);
+
+  public:
+  // int32 zone_id = 2;
+  void clear_zone_id() ;
+  ::int32_t zone_id() const;
+  void set_zone_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_zone_id() const;
+  void _internal_set_zone_id(::int32_t value);
+
+  public:
+  // int32 port = 3;
+  void clear_port() ;
+  ::int32_t port() const;
+  void set_port(::int32_t value);
+
+  private:
+  ::int32_t _internal_port() const;
+  void _internal_set_port(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:sunlight.api.ZoneOpenRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 0,
+      0, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const ZoneOpenRequest& from_msg);
+    ::int32_t world_id_;
+    ::int32_t zone_id_;
+    ::int32_t port_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_request_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ZoneCloseRequest final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sunlight.api.ZoneCloseRequest) */ {
+ public:
+  inline ZoneCloseRequest() : ZoneCloseRequest(nullptr) {}
+  ~ZoneCloseRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ZoneCloseRequest* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ZoneCloseRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ZoneCloseRequest(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline ZoneCloseRequest(const ZoneCloseRequest& from) : ZoneCloseRequest(nullptr, from) {}
+  inline ZoneCloseRequest(ZoneCloseRequest&& from) noexcept
+      : ZoneCloseRequest(nullptr, std::move(from)) {}
+  inline ZoneCloseRequest& operator=(const ZoneCloseRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ZoneCloseRequest& operator=(ZoneCloseRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ZoneCloseRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ZoneCloseRequest* internal_default_instance() {
+    return reinterpret_cast<const ZoneCloseRequest*>(
+        &_ZoneCloseRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 8;
+  friend void swap(ZoneCloseRequest& a, ZoneCloseRequest& b) { a.Swap(&b); }
+  inline void Swap(ZoneCloseRequest* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ZoneCloseRequest* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ZoneCloseRequest* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ZoneCloseRequest>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ZoneCloseRequest& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ZoneCloseRequest& from) { ZoneCloseRequest::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ZoneCloseRequest* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sunlight.api.ZoneCloseRequest"; }
+
+ protected:
+  explicit ZoneCloseRequest(::google::protobuf::Arena* arena);
+  ZoneCloseRequest(::google::protobuf::Arena* arena, const ZoneCloseRequest& from);
+  ZoneCloseRequest(::google::protobuf::Arena* arena, ZoneCloseRequest&& from) noexcept
+      : ZoneCloseRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+  static const ::google::protobuf::internal::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kWorldIdFieldNumber = 1,
+    kZoneIdFieldNumber = 2,
+  };
+  // int32 world_id = 1;
+  void clear_world_id() ;
+  ::int32_t world_id() const;
+  void set_world_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_world_id() const;
+  void _internal_set_world_id(::int32_t value);
+
+  public:
+  // int32 zone_id = 2;
+  void clear_zone_id() ;
+  ::int32_t zone_id() const;
+  void set_zone_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_zone_id() const;
+  void _internal_set_zone_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:sunlight.api.ZoneCloseRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 0,
+      0, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const ZoneCloseRequest& from_msg);
+    ::int32_t world_id_;
+    ::int32_t zone_id_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_request_2eproto;
+};
 // -------------------------------------------------------------------
 
 class WorldInfoRequest final
@@ -1479,13 +1903,15 @@ class Request final
     kSystemResourceInfo = 104,
     kWorldInfo = 105,
     kLogGet = 106,
+    kZoneOpen = 107,
+    kZoneClose = 108,
     PAYLOAD_NOT_SET = 0,
   };
   static inline const Request* internal_default_instance() {
     return reinterpret_cast<const Request*>(
         &_Request_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 9;
   friend void swap(Request& a, Request& b) { a.Swap(&b); }
   inline void Swap(Request* other) {
     if (other == this) return;
@@ -1580,6 +2006,8 @@ class Request final
     kSystemResourceInfoFieldNumber = 104,
     kWorldInfoFieldNumber = 105,
     kLogGetFieldNumber = 106,
+    kZoneOpenFieldNumber = 107,
+    kZoneCloseFieldNumber = 108,
   };
   // int32 request_id = 1;
   void clear_request_id() ;
@@ -1724,6 +2152,44 @@ class Request final
   ::sunlight::api::LogGetRequest* _internal_mutable_log_get();
 
   public:
+  // .sunlight.api.ZoneOpenRequest zone_open = 107;
+  bool has_zone_open() const;
+  private:
+  bool _internal_has_zone_open() const;
+
+  public:
+  void clear_zone_open() ;
+  const ::sunlight::api::ZoneOpenRequest& zone_open() const;
+  PROTOBUF_NODISCARD ::sunlight::api::ZoneOpenRequest* release_zone_open();
+  ::sunlight::api::ZoneOpenRequest* mutable_zone_open();
+  void set_allocated_zone_open(::sunlight::api::ZoneOpenRequest* value);
+  void unsafe_arena_set_allocated_zone_open(::sunlight::api::ZoneOpenRequest* value);
+  ::sunlight::api::ZoneOpenRequest* unsafe_arena_release_zone_open();
+
+  private:
+  const ::sunlight::api::ZoneOpenRequest& _internal_zone_open() const;
+  ::sunlight::api::ZoneOpenRequest* _internal_mutable_zone_open();
+
+  public:
+  // .sunlight.api.ZoneCloseRequest zone_close = 108;
+  bool has_zone_close() const;
+  private:
+  bool _internal_has_zone_close() const;
+
+  public:
+  void clear_zone_close() ;
+  const ::sunlight::api::ZoneCloseRequest& zone_close() const;
+  PROTOBUF_NODISCARD ::sunlight::api::ZoneCloseRequest* release_zone_close();
+  ::sunlight::api::ZoneCloseRequest* mutable_zone_close();
+  void set_allocated_zone_close(::sunlight::api::ZoneCloseRequest* value);
+  void unsafe_arena_set_allocated_zone_close(::sunlight::api::ZoneCloseRequest* value);
+  ::sunlight::api::ZoneCloseRequest* unsafe_arena_release_zone_close();
+
+  private:
+  const ::sunlight::api::ZoneCloseRequest& _internal_zone_close() const;
+  ::sunlight::api::ZoneCloseRequest* _internal_mutable_zone_close();
+
+  public:
   void clear_payload();
   PayloadCase payload_case() const;
   // @@protoc_insertion_point(class_scope:sunlight.api.Request)
@@ -1736,11 +2202,13 @@ class Request final
   void set_has_system_resource_info();
   void set_has_world_info();
   void set_has_log_get();
+  void set_has_zone_open();
+  void set_has_zone_close();
   inline bool has_payload() const;
   inline void clear_has_payload();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 8, 7,
+      0, 10, 9,
       0, 7>
       _table_;
 
@@ -1769,6 +2237,8 @@ class Request final
       ::sunlight::api::SystemResourceInfoRequest* system_resource_info_;
       ::sunlight::api::WorldInfoRequest* world_info_;
       ::sunlight::api::LogGetRequest* log_get_;
+      ::sunlight::api::ZoneOpenRequest* zone_open_;
+      ::sunlight::api::ZoneCloseRequest* zone_close_;
     } payload_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -2227,6 +2697,124 @@ inline ::int64_t LogGetRequest::_internal_last_date_time() const {
 inline void LogGetRequest::_internal_set_last_date_time(::int64_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.last_date_time_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ZoneOpenRequest
+
+// int32 world_id = 1;
+inline void ZoneOpenRequest::clear_world_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_id_ = 0;
+}
+inline ::int32_t ZoneOpenRequest::world_id() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.ZoneOpenRequest.world_id)
+  return _internal_world_id();
+}
+inline void ZoneOpenRequest::set_world_id(::int32_t value) {
+  _internal_set_world_id(value);
+  // @@protoc_insertion_point(field_set:sunlight.api.ZoneOpenRequest.world_id)
+}
+inline ::int32_t ZoneOpenRequest::_internal_world_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.world_id_;
+}
+inline void ZoneOpenRequest::_internal_set_world_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_id_ = value;
+}
+
+// int32 zone_id = 2;
+inline void ZoneOpenRequest::clear_zone_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.zone_id_ = 0;
+}
+inline ::int32_t ZoneOpenRequest::zone_id() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.ZoneOpenRequest.zone_id)
+  return _internal_zone_id();
+}
+inline void ZoneOpenRequest::set_zone_id(::int32_t value) {
+  _internal_set_zone_id(value);
+  // @@protoc_insertion_point(field_set:sunlight.api.ZoneOpenRequest.zone_id)
+}
+inline ::int32_t ZoneOpenRequest::_internal_zone_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.zone_id_;
+}
+inline void ZoneOpenRequest::_internal_set_zone_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.zone_id_ = value;
+}
+
+// int32 port = 3;
+inline void ZoneOpenRequest::clear_port() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.port_ = 0;
+}
+inline ::int32_t ZoneOpenRequest::port() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.ZoneOpenRequest.port)
+  return _internal_port();
+}
+inline void ZoneOpenRequest::set_port(::int32_t value) {
+  _internal_set_port(value);
+  // @@protoc_insertion_point(field_set:sunlight.api.ZoneOpenRequest.port)
+}
+inline ::int32_t ZoneOpenRequest::_internal_port() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.port_;
+}
+inline void ZoneOpenRequest::_internal_set_port(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.port_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ZoneCloseRequest
+
+// int32 world_id = 1;
+inline void ZoneCloseRequest::clear_world_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_id_ = 0;
+}
+inline ::int32_t ZoneCloseRequest::world_id() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.ZoneCloseRequest.world_id)
+  return _internal_world_id();
+}
+inline void ZoneCloseRequest::set_world_id(::int32_t value) {
+  _internal_set_world_id(value);
+  // @@protoc_insertion_point(field_set:sunlight.api.ZoneCloseRequest.world_id)
+}
+inline ::int32_t ZoneCloseRequest::_internal_world_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.world_id_;
+}
+inline void ZoneCloseRequest::_internal_set_world_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.world_id_ = value;
+}
+
+// int32 zone_id = 2;
+inline void ZoneCloseRequest::clear_zone_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.zone_id_ = 0;
+}
+inline ::int32_t ZoneCloseRequest::zone_id() const {
+  // @@protoc_insertion_point(field_get:sunlight.api.ZoneCloseRequest.zone_id)
+  return _internal_zone_id();
+}
+inline void ZoneCloseRequest::set_zone_id(::int32_t value) {
+  _internal_set_zone_id(value);
+  // @@protoc_insertion_point(field_set:sunlight.api.ZoneCloseRequest.zone_id)
+}
+inline ::int32_t ZoneCloseRequest::_internal_zone_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.zone_id_;
+}
+inline void ZoneCloseRequest::_internal_set_zone_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.zone_id_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -2805,6 +3393,164 @@ inline ::sunlight::api::LogGetRequest* Request::_internal_mutable_log_get() {
 inline ::sunlight::api::LogGetRequest* Request::mutable_log_get() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::sunlight::api::LogGetRequest* _msg = _internal_mutable_log_get();
   // @@protoc_insertion_point(field_mutable:sunlight.api.Request.log_get)
+  return _msg;
+}
+
+// .sunlight.api.ZoneOpenRequest zone_open = 107;
+inline bool Request::has_zone_open() const {
+  return payload_case() == kZoneOpen;
+}
+inline bool Request::_internal_has_zone_open() const {
+  return payload_case() == kZoneOpen;
+}
+inline void Request::set_has_zone_open() {
+  _impl_._oneof_case_[0] = kZoneOpen;
+}
+inline void Request::clear_zone_open() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (payload_case() == kZoneOpen) {
+    if (GetArena() == nullptr) {
+      delete _impl_.payload_.zone_open_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.zone_open_);
+    }
+    clear_has_payload();
+  }
+}
+inline ::sunlight::api::ZoneOpenRequest* Request::release_zone_open() {
+  // @@protoc_insertion_point(field_release:sunlight.api.Request.zone_open)
+  if (payload_case() == kZoneOpen) {
+    clear_has_payload();
+    auto* temp = _impl_.payload_.zone_open_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.payload_.zone_open_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::sunlight::api::ZoneOpenRequest& Request::_internal_zone_open() const {
+  return payload_case() == kZoneOpen ? *_impl_.payload_.zone_open_ : reinterpret_cast<::sunlight::api::ZoneOpenRequest&>(::sunlight::api::_ZoneOpenRequest_default_instance_);
+}
+inline const ::sunlight::api::ZoneOpenRequest& Request::zone_open() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.Request.zone_open)
+  return _internal_zone_open();
+}
+inline ::sunlight::api::ZoneOpenRequest* Request::unsafe_arena_release_zone_open() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:sunlight.api.Request.zone_open)
+  if (payload_case() == kZoneOpen) {
+    clear_has_payload();
+    auto* temp = _impl_.payload_.zone_open_;
+    _impl_.payload_.zone_open_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Request::unsafe_arena_set_allocated_zone_open(::sunlight::api::ZoneOpenRequest* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_payload();
+  if (value) {
+    set_has_zone_open();
+    _impl_.payload_.zone_open_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sunlight.api.Request.zone_open)
+}
+inline ::sunlight::api::ZoneOpenRequest* Request::_internal_mutable_zone_open() {
+  if (payload_case() != kZoneOpen) {
+    clear_payload();
+    set_has_zone_open();
+    _impl_.payload_.zone_open_ =
+        ::google::protobuf::Message::DefaultConstruct<::sunlight::api::ZoneOpenRequest>(GetArena());
+  }
+  return _impl_.payload_.zone_open_;
+}
+inline ::sunlight::api::ZoneOpenRequest* Request::mutable_zone_open() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::sunlight::api::ZoneOpenRequest* _msg = _internal_mutable_zone_open();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.Request.zone_open)
+  return _msg;
+}
+
+// .sunlight.api.ZoneCloseRequest zone_close = 108;
+inline bool Request::has_zone_close() const {
+  return payload_case() == kZoneClose;
+}
+inline bool Request::_internal_has_zone_close() const {
+  return payload_case() == kZoneClose;
+}
+inline void Request::set_has_zone_close() {
+  _impl_._oneof_case_[0] = kZoneClose;
+}
+inline void Request::clear_zone_close() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (payload_case() == kZoneClose) {
+    if (GetArena() == nullptr) {
+      delete _impl_.payload_.zone_close_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.payload_.zone_close_);
+    }
+    clear_has_payload();
+  }
+}
+inline ::sunlight::api::ZoneCloseRequest* Request::release_zone_close() {
+  // @@protoc_insertion_point(field_release:sunlight.api.Request.zone_close)
+  if (payload_case() == kZoneClose) {
+    clear_has_payload();
+    auto* temp = _impl_.payload_.zone_close_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.payload_.zone_close_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::sunlight::api::ZoneCloseRequest& Request::_internal_zone_close() const {
+  return payload_case() == kZoneClose ? *_impl_.payload_.zone_close_ : reinterpret_cast<::sunlight::api::ZoneCloseRequest&>(::sunlight::api::_ZoneCloseRequest_default_instance_);
+}
+inline const ::sunlight::api::ZoneCloseRequest& Request::zone_close() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sunlight.api.Request.zone_close)
+  return _internal_zone_close();
+}
+inline ::sunlight::api::ZoneCloseRequest* Request::unsafe_arena_release_zone_close() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:sunlight.api.Request.zone_close)
+  if (payload_case() == kZoneClose) {
+    clear_has_payload();
+    auto* temp = _impl_.payload_.zone_close_;
+    _impl_.payload_.zone_close_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Request::unsafe_arena_set_allocated_zone_close(::sunlight::api::ZoneCloseRequest* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_payload();
+  if (value) {
+    set_has_zone_close();
+    _impl_.payload_.zone_close_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sunlight.api.Request.zone_close)
+}
+inline ::sunlight::api::ZoneCloseRequest* Request::_internal_mutable_zone_close() {
+  if (payload_case() != kZoneClose) {
+    clear_payload();
+    set_has_zone_close();
+    _impl_.payload_.zone_close_ =
+        ::google::protobuf::Message::DefaultConstruct<::sunlight::api::ZoneCloseRequest>(GetArena());
+  }
+  return _impl_.payload_.zone_close_;
+}
+inline ::sunlight::api::ZoneCloseRequest* Request::mutable_zone_close() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::sunlight::api::ZoneCloseRequest* _msg = _internal_mutable_zone_close();
+  // @@protoc_insertion_point(field_mutable:sunlight.api.Request.zone_close)
   return _msg;
 }
 

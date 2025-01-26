@@ -52,13 +52,27 @@ namespace sunlight
     void GameClient::Disconnect()
     {
         std::shared_lock lock(_connectionMutex);
-        for (const std::shared_ptr<ServerConnection>& connection : _connections)
+        for (std::shared_ptr<ServerConnection>& connection : _connections)
         {
             if (connection)
             {
                 connection->Stop();
+                connection = {};
             }
         }
+    }
+
+    void GameClient::Disconnect(ServerType type)
+    {
+        std::shared_ptr<ServerConnection> connection;
+
+        {
+            std::unique_lock lock(_connectionMutex);
+
+            connection = std::move(GetConnection(type));
+        }
+
+        connection->Stop();
     }
 
     auto GameClient::GetId() const -> game_client_id_type

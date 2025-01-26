@@ -192,6 +192,44 @@ namespace sunlight
         co_return;
     }
 
+    auto GeneratorControlService::OpenZone(int32_t worldId, int32_t zoneId, uint16_t port, std::string* errorMessage) -> Future<bool>
+    {
+        try
+        {
+            _serviceLocator.Get<WorldService>().StartZone(worldId, zoneId, port);
+
+            co_return true;
+        }
+        catch (const std::exception& e)
+        {
+            if (errorMessage)
+            {
+                *errorMessage = e.what();
+            }
+        }
+
+        co_return false;
+    }
+
+    auto GeneratorControlService::CloseZone(int32_t worldId, int32_t zoneId, std::string* errorMessage) -> Future<bool>
+    {
+        try
+        {
+            _serviceLocator.Get<WorldService>().StopZone(worldId, zoneId);
+
+            co_return true;
+        }
+        catch (const std::exception& e)
+        {
+            if (errorMessage)
+            {
+                *errorMessage = e.what();
+            }
+        }
+
+        co_return false;
+    }
+
     auto GeneratorControlService::GetName() const -> std::string_view
     {
         return "generator_control_service";

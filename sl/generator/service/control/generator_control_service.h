@@ -34,6 +34,9 @@ namespace sunlight
             std::optional<std::chrono::system_clock::time_point> start,
             std::optional<std::chrono::system_clock::time_point> last) -> Future<void>;
 
+        auto OpenZone(int32_t worldId, int32_t zoneId, uint16_t port, std::string* errorMessage) -> Future<bool>;
+        auto CloseZone(int32_t worldId, int32_t zoneId, std::string* errorMessage) -> Future<bool>;
+
         auto GetName() const -> std::string_view override;
 
     private:
